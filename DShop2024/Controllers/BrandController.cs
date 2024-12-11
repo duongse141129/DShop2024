@@ -4,28 +4,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
-	public class CategoryController : Controller
+	public class BrandController : Controller
 	{
 		private readonly DShopContext _dataContext;
 
-		public CategoryController( DShopContext context)
+		public BrandController(DShopContext context)
 		{
 			_dataContext = context;
 		}
 		public async Task<IActionResult> Index(string slug = "")
 		{
-			CategoryModel category = await _dataContext.Categories
+			BrandModel brand = await _dataContext.Brands
 										.Where(c => c.Status == 1)
 										.Where(c => c.Slug == slug)
 										.FirstOrDefaultAsync();
-			if (category == null)
+			if (brand == null)
 			{
 				return RedirectToAction("Index");
 			}
 
-			var productByCategory = await _dataContext.Products.Where(p => p.CategoryId == category.Id).ToListAsync();
-			productByCategory.OrderByDescending(c => c.Id);
-			return View(productByCategory);
+			var productByBrand = await _dataContext.Products.Where(p => p.BrandId == brand.Id).ToListAsync();
+			productByBrand.OrderByDescending(c => c.Id);
+			return View(productByBrand);
 
 		}
 	}
