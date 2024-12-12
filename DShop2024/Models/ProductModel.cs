@@ -15,7 +15,7 @@ namespace DShop2024.Models
 		public string Description { get; set; }
 		[Required]
 		[Range(0, int.MaxValue, ErrorMessage = "Price > {1}")]
-		public decimal? Price { get; set; }
+		public decimal Price { get; set; }
 		
 
 		public int BrandId { get; set; }

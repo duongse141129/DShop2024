@@ -6,16 +6,25 @@ using DShop2024.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
 builder.Services.AddDbContext<DShopContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb"));
 });
 
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+});
+
+
 var app = builder.Build();
 
+app.UseSession();
 
 
 // Configure the HTTP request pipeline.
