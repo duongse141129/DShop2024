@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -11,9 +12,15 @@ namespace DShop2024.Areas.Admin.Controllers
 		{
 			_dataContext = context;
 		}
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
-			return View();
+			var products = await _dataContext.Products.Where(p => p.Status ==1)
+															.Include(p => p.Category)
+															.Include(p => p.Brand)
+															.OrderByDescending(p => p.Id)
+															.ToListAsync();
+
+			return View(products);
 		}
 	}
 }
