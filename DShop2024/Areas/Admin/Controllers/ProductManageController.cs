@@ -75,5 +75,106 @@ namespace DShop2024.Areas.Admin.Controllers
 
             return View(product);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int Id)
+		{
+			ProductModel product = await _dataContext.Products.FindAsync(Id);
+            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+
+			return View(product);
+            
+		}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int Id, ProductModel product)
+        {
+            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+
+			var exited_product = await _dataContext.Products.FindAsync(Id);
+
+            if (ModelState.IsValid)
+            {
+                product.Slug = product.ProductName.ToLower().Replace(" ", "-");
+                var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
+                if (slug != null)
+                {
+                    ModelState.AddModelError("", "Can't same slug");
+                    return View(product);
+                }
+
+                if (product.ImageUpload != null)
+                {
+
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                    string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
+                    string filePath = Path.Combine(uploadsDir, imageName);
+
+                    string oldFilePath = Path.Combine(uploadsDir, exited_product.Image);
+					try
+					{
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+
+                    }
+                    catch(Exception ex) 
+					{
+						ModelState.AddModelError("", "An error occurred while deleting the product image");
+					}
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
+                    await product.ImageUpload.CopyToAsync(fs);
+                    fs.Close();
+                    exited_product.Image = imageName;
+
+                }
+                exited_product.ProductName = product.ProductName;
+				exited_product.Description = product.Description;
+				exited_product.Price = product.Price;
+				exited_product.CategoryId = product.CategoryId;
+				exited_product.BrandId = product.BrandId;
+
+
+                exited_product.Status = 1;
+                _dataContext.Update(exited_product);
+                await _dataContext.SaveChangesAsync();
+
+                TempData["success"] = "Update product success";
+                return RedirectToAction("Index");
+            }
+
+            return View(product);
+        }
+
+
+        public async Task<IActionResult> Delete(int Id)
+		{
+			ProductModel product = await _dataContext.Products.FindAsync(Id);
+			if(!string.Equals(product.Image, "noname.jpg"))
+			{
+                string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                string oldFilePath = Path.Combine(uploadsDir, product.Image);
+                try
+                {
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while deleting the product image");
+                }
+            }
+			_dataContext.Products.Remove(product);
+			await _dataContext.SaveChangesAsync();
+			TempData["success"] = "Remove product success";
+            return RedirectToAction("Index");
+
+        }
     }
 }
