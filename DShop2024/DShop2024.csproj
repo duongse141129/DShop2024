@@ -23,6 +23,14 @@
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Brand\Controllers\" />
+    <Folder Include="Areas\Brand\Data\" />
+    <Folder Include="Areas\Brand\Models\" />
+    <Folder Include="Areas\Brand\Views\" />
+    <Folder Include="Areas\Category\Controllers\" />
+    <Folder Include="Areas\Category\Data\" />
+    <Folder Include="Areas\Category\Models\" />
+    <Folder Include="Areas\Category\Views\" />
     <Folder Include="wwwroot\media\products\" />
   </ItemGroup>
 

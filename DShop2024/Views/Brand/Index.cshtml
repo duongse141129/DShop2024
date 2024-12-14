@@ -14,12 +14,14 @@
 				<div class="product-image-wrapper">
 					<div class="single-products">
 						<div class="productinfo text-center">
-							<img src="~/images/@item.Image" alt="@item.ProductName" width="100" />
-							<h2>$@item.Price</h2>
-							<p>@item.ProductName</p>
-							<p>Category: @item.Category.CategoryName</p>
-							<p>Brand: @item.Brand.BrandName</p>
-							<a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
+								<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100" />
+								<h2>$@item.Price</h2>
+								<p>@item.ProductName</p>
+								<p>Category: @item.Category.CategoryName</p>
+								<p>Brand: @item.Brand.BrandName</p>
+							</a>
+							<a class="btn btn-default add-to-cart" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a>
 						</div>
 
 					</div>

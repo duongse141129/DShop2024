@@ -11,17 +11,13 @@
 		<h2 class="title text-center">Features Items</h2>
 		@foreach (var item in Model)
 		{
-			
-		
-			
-		
 		<div class="col-sm-4">
 			<div class="product-image-wrapper">
 				<div class="single-products">
 				
 						<div class="productinfo text-center">
 							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
-								<img src="~/images/@item.Image" alt="@item.ProductName" width="100" />
+								<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100%" />
 								<h2>$@item.Price</h2>
 								<p>@item.ProductName</p>
 								<p>Category: @item.Category.CategoryName</p>
