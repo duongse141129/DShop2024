@@ -42,9 +42,14 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+
+
 app.MapControllerRoute(
     name: "Areas",
     pattern: "{area:exists}/{controller=ProductManage}/{action=Index}/{id?}");
+
+
+
 
 app.MapControllerRoute(
     name: "default",

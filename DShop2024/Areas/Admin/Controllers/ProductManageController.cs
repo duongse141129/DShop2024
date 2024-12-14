@@ -93,7 +93,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
-			var exited_product = await _dataContext.Products.FindAsync(Id);
+			var exitedProduct = await _dataContext.Products.FindAsync(Id);
 
             if (ModelState.IsValid)
             {
@@ -112,7 +112,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
                     string filePath = Path.Combine(uploadsDir, imageName);
 
-                    string oldFilePath = Path.Combine(uploadsDir, exited_product.Image);
+                    string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
 					try
 					{
                         if (System.IO.File.Exists(oldFilePath))
@@ -128,18 +128,19 @@ namespace DShop2024.Areas.Admin.Controllers
                     FileStream fs = new FileStream(filePath, FileMode.Create);
                     await product.ImageUpload.CopyToAsync(fs);
                     fs.Close();
-                    exited_product.Image = imageName;
+                    exitedProduct.Image = imageName;
 
                 }
-                exited_product.ProductName = product.ProductName;
-				exited_product.Description = product.Description;
-				exited_product.Price = product.Price;
-				exited_product.CategoryId = product.CategoryId;
-				exited_product.BrandId = product.BrandId;
+                exitedProduct.ProductName = product.ProductName;
+                exitedProduct.Slug = product.Slug;
+				exitedProduct.Description = product.Description;
+				exitedProduct.Price = product.Price;
+				exitedProduct.CategoryId = product.CategoryId;
+				exitedProduct.BrandId = product.BrandId;
 
 
-                exited_product.Status = 1;
-                _dataContext.Update(exited_product);
+                exitedProduct.Status = 1;
+                _dataContext.Update(exitedProduct);
                 await _dataContext.SaveChangesAsync();
 
                 TempData["success"] = "Update product success";

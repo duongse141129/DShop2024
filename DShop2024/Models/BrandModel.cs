@@ -12,7 +12,6 @@ namespace DShop2024.Models
 		public string BrandName { get; set; }
 
 		public string? Description { get; set; }
-		[Required]
 		public string Slug { get; set; }
 		public int Status { get; set; }
 	}
