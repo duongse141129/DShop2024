@@ -59,10 +59,10 @@ namespace DShop2024.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
 				brandModel.Slug = brandModel.BrandName.ToLower().Replace(" ", "-");
-				var slug = await _context.Products.FirstOrDefaultAsync(s => s.Slug == brandModel.Slug);
+				var slug = await _context.Brands.FirstOrDefaultAsync(s => s.Slug == brandModel.Slug);
 				if (slug != null)
 				{
-					ModelState.AddModelError("", "Can't same slug");
+					ModelState.AddModelError("", "This brand already exists.");
 					return View(brandModel);
 				}
                 brandModel.Status =1;
@@ -108,7 +108,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
 					brandModel.Slug = brandModel.BrandName.ToLower().Replace(" ", "-");
 					var slug = await _context.Brands.FirstOrDefaultAsync(s => s.Slug == brandModel.Slug);
-					if (slug != null)
+					if (slug != null && exitedBrand.BrandName.ToLower() != brandModel.BrandName.ToLower())
 					{
 						ModelState.AddModelError("", "Can't same slug");
 						return View(brandModel);

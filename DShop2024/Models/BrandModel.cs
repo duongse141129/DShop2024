@@ -8,7 +8,7 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
-		[Required, MinLength(4, ErrorMessage = "Name brand's can not null")]
+		[Required( ErrorMessage = "Name brand's can not null")]
 		public string BrandName { get; set; }
 
 		public string? Description { get; set; }
