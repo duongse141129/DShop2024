@@ -24,8 +24,9 @@ builder.Services.AddSession(options =>{
 
 var app = builder.Build();
 
-app.UseSession();
+app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
 
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
