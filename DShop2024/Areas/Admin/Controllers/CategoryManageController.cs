@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class CategoryManageController : Controller
+	[Authorize]
+	public class CategoryManageController : Controller
     {
         private readonly DShopContext _context;
 

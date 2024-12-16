@@ -1,4 +1,5 @@
 ﻿using DShop2024.Models;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,15 +16,27 @@ namespace DShop2024.Controllers
 			_signInManager = signInManager;
 		}
 
-		public IActionResult Index()
+		public IActionResult Login(string returnUrl)
 		{
-			return View();
+			var loginVM = new LoginViewModel { ReturnUrl = returnUrl };
+			return View(loginVM);
 		}
 
-		public async Task<IActionResult> Login()
+		[HttpPost]
+		public async Task<IActionResult> Login(LoginViewModel loginVM)
 		{
-			return View();
+			if (ModelState.IsValid)
+			{
+				Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.PasswordSignInAsync(loginVM.UserName, loginVM.Password, false, false);
+				if (result.Succeeded)
+				{
+					return Redirect(loginVM.ReturnUrl ?? "/");
+				}
+				ModelState.AddModelError("", "Invalid Username and Password");
+			}
+			return View(loginVM);
 		}
+
 		public IActionResult Create()
 		{
 			return View();
@@ -36,11 +49,11 @@ namespace DShop2024.Controllers
 			if (ModelState.IsValid)
 			{
 				AppUserModel userModel = new AppUserModel { UserName =user.UserName, Email =user.Email };
-				IdentityResult result = await _userManager.CreateAsync(userModel);
+				IdentityResult result = await _userManager.CreateAsync(userModel, user.Password);
 				if (result.Succeeded)
 				{
 					TempData["success"] = "Register account success";
-					return Redirect("/Account");
+					return Redirect("/Account/Login");
 				}
 				foreach(IdentityError error in result.Errors)
 				{
@@ -49,6 +62,12 @@ namespace DShop2024.Controllers
 
 			}
 			return View(user);
+		}
+
+		public async Task<IActionResult> Logout(string returnUrl = "/")
+		{
+			await _signInManager.SignOutAsync();	
+			return Redirect(returnUrl);
 		}
 	}
 }
