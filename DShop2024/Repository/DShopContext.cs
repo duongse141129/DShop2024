@@ -1,8 +1,9 @@
 ﻿using DShop2024.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 
-	public class DShopContext : DbContext
+	public class DShopContext : IdentityDbContext<AppUserModel>
 	{
 		public DShopContext()
 		{

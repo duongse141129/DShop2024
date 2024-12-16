@@ -1,0 +1,36 @@
+﻿@model UserModel
+@{
+    ViewData["title"] = "Login";
+}
+
+<section id="form">
+	<!--form-->
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12 col-sm-offset-1">
+				<div class="login-form">
+					<!--login form-->
+					<h2>Login to your account</h2>
+					<form  asp-action="Login" asp-controller="Account">
+						<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+						<div class="form-group">
+							<label asp-for="UserName" class="control-label"></label>
+							<input asp-for="UserName" class="form-control" />
+							<span asp-validation-for="UserName" class="text-danger"></span>
+						</div>
+						<div class="form-group">
+							<label asp-for="Password" class="control-label"></label>
+							<input asp-for="Password" class="form-control" />
+							<span asp-validation-for="Password" class="text-danger"></span>
+						</div>
+
+						<button  class="btn btn-default">Login</button>
+						<a asp-action="Create" asp-controller="Account">Register account</a>
+					</form>
+				</div><!--/login form-->
+			</div>
+
+
+		</div>
+	</div>
+</section><!--/form-->

@@ -3,6 +3,9 @@ using System;
 
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
+using DShop2024.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,28 @@ builder.Services.AddSession(options =>{
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddIdentity<AppUserModel, IdentityRole>()
+	.AddEntityFrameworkStores<DShopContext>().AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+	// Password settings.
+	options.Password.RequireDigit = true;
+	options.Password.RequireLowercase = true;
+	options.Password.RequireNonAlphanumeric = false;
+	options.Password.RequireUppercase = false;
+	options.Password.RequiredLength = 4;
+
+	// Lockout settings.
+	//options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+	//options.Lockout.MaxFailedAccessAttempts = 5;
+	//options.Lockout.AllowedForNewUsers = true;
+
+	// User settings.
+	//options.User.AllowedUserNameCharacters =
+	//"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+	options.User.RequireUniqueEmail = true;
+});
 
 var app = builder.Build();
 
@@ -40,6 +65,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
