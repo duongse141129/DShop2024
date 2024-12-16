@@ -54,9 +54,11 @@
 							</td>
 						</tr>
 						}
-						<tr rowspan="6">
+						<tr rowspan="5">
 							<td colspan="6">Grand Total: <p class="cart_total_price"> @Model.GrandTotal</p></td>
-							
+							<td>
+								<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="Index">Check Out </a>
+							</td>
 						</tr>
 						<td>
 							<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
