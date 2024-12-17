@@ -98,6 +98,7 @@
 									<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
 									<li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
 									<li><a asp-action="Logout" asp-controller="Account" asp-route-returnUrl="@Context.Request.Path"><i class="fa fa-lock"></i> Hi, @User.Identity.Name, Logout</a></li>
+									<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Products</a></li>
 								}
 								else
 								{

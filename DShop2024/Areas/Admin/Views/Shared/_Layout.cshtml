@@ -73,10 +73,12 @@
 								<li><a asp-controller="Home" asp-action="Index" class="active">Home</a></li>
 								
 								
-								<li><a asp-controller="ProductManage">Products</a></li>
+								<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Products</a></li>
 								<li><a asp-area="Admin" asp-controller="CategoryManage" asp-action="Index">Categories</a></li>
 								<li><a asp-area="Admin" asp-controller="BrandManage" asp-action="Index">Brands</a></li>
 								<li><a asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a></li>
+								<li><a asp-area="Admin" asp-controller="User" asp-action="Index">Users</a></li>
+								<li><a asp-area="Admin" asp-controller="Role" asp-action="Index">Roles</a></li>
 								
 							</ul>
 						</div>
