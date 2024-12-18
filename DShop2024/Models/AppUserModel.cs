@@ -17,7 +17,8 @@ namespace DShop2024.Models
 		[DataType(DataType.Date)]
 		public DateTime? BirthDate { get; set; }
 
+		public string RoleId { get; set; }
    
-        //public int Status { get; set; }
+        public int Status { get; set; }
     }
 }
