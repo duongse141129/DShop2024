@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
+    [Authorize(Roles ="ADMIN")]
     public class BrandManageController : Controller
     {
         private readonly DShopContext _context;
@@ -25,6 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             return View(await _context.Brands.Where(p => p.Status == 1).ToListAsync());
+
         }
 
         // GET: Admin/BrandManage/Details/5

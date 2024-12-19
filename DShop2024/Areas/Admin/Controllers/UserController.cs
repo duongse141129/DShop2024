@@ -14,17 +14,24 @@ namespace DShop2024.Areas.Admin.Controllers
         
 		private UserManager<AppUserModel> _userManager;
 		private RoleManager<IdentityRole> _roleManager;
+        private readonly DShopContext _context;
 
-		public UserController(UserManager<AppUserModel> userManager, RoleManager<IdentityRole> roleManager)
+        public UserController(UserManager<AppUserModel> userManager, RoleManager<IdentityRole> roleManager, DShopContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
 
-		}
+        }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _userManager.Users.OrderByDescending(u => u.Id).ToListAsync());
+            var userWithRoles = await (from u in _context.Users
+                                       join ur in _context.UserRoles on u.Id equals ur.UserId
+                                       join r in _context.Roles on ur.RoleId equals r.Id
+                                       select new {User = u, RoleName = r.Name}).ToListAsync();
+
+            return View(userWithRoles);
         }
 
 		[HttpGet]
@@ -46,6 +53,16 @@ namespace DShop2024.Areas.Admin.Controllers
                 var createUserResult = await _userManager.CreateAsync(user,user.PasswordHash);
                 if(createUserResult.Succeeded)
                 {
+                    var createUser = await _userManager.FindByEmailAsync(user.Email);
+                    var userId = createUser.Id;
+                    var role = _roleManager.FindByIdAsync(user.RoleId);
+                    var addToRoleResult = await _userManager.AddToRoleAsync(createUser, role.Result.Name);
+                    if (!addToRoleResult.Succeeded)
+                    {
+                        TempData["error"] = "Create user fail";
+                        return RedirectToAction("Index", "User");
+                    }
+
                     TempData["success"] = "Create user successful";
                     return RedirectToAction("Index", "User");
                 }

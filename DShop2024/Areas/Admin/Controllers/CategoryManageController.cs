@@ -22,9 +22,19 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
         // GET: Admin/CategoryManage
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pg =1)
         {
-            return View(await _context.Categories.Where(p => p.Status == 1).ToListAsync());
+            //return View(await _context.Categories.Where(p => p.Status == 1).ToListAsync());
+            List<CategoryModel> categories = await _context.Categories.ToListAsync();
+            int pageSize = 10;
+            if(pg<1) pg = 1;
+            int recsCount =categories.Count();
+            var pager = new Paginate(recsCount, pg, pageSize);
+            int recSkip = (pg - 1) * pageSize;
+
+            var data = categories.Skip(recSkip).Take(pager.PageSize).ToList();
+            ViewBag.Pager = pager;
+            return View(data);
         }
 
         // GET: Admin/CategoryManage/Details/5
