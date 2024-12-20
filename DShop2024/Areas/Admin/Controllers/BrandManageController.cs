@@ -169,8 +169,8 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 _context.Brands.Remove(brandModel);
             }
-
-            await _context.SaveChangesAsync();
+			TempData["success"] = "Delete successful";
+			await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
+
 namespace DShop2024.Controllers
 {
 	public class CheckOutController : Controller
@@ -12,12 +13,15 @@ namespace DShop2024.Controllers
 		private readonly DShopContext _dataContext;
 
 		private readonly UserManager<AppUserModel> _userManager;
+        private readonly IEmailSender _emailSender;
 
-		public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager)
+        public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender)
 		{
 			_dataContext = context;
 			_userManager = userManager;
-		}
+			_emailSender = emailSender;
+
+        }
 
 		[Authorize]
 		public async Task<IActionResult> CheckOut()
@@ -52,9 +56,13 @@ namespace DShop2024.Controllers
 				await _dataContext.SaveChangesAsync();
 			}
 			HttpContext.Session.Remove("Cart");
+
+			//var receiver = "dacclone577777@gmail.com";
+			//var subject = "Order successful";
+			//var message = "Thanks for order.";
+			//await _emailSender.SendEmailAsync(receiver, subject, message);
+
 			TempData["success"] = "CheckOut successful";
-
-
 			return RedirectToAction("Index", "Cart");
 		}
 	}

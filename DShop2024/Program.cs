@@ -14,7 +14,7 @@ builder.Services.AddDbContext<DShopContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb"));
 });
 
-
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
