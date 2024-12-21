@@ -19,14 +19,21 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> Details(int Id)
 		{
 			if(Id == null) return RedirectToAction("Index");
-			var product = await _dataContext.Products
+			var productById = await _dataContext.Products
 										.Where(p => p.Id == Id)
 										.Where(p => p.Status == 1)
 										.Include(p => p.Brand)
 										.Include(p => p.Category)
 										.FirstOrDefaultAsync();
-			
-			return View(product);
+
+			var relatedProducts = await _dataContext.Products
+									.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
+									.Take(3)
+									.ToListAsync();
+			ViewBag.relatedProducts = relatedProducts;
+
+
+			return View(productById);
 		}
 
 		public async Task<IActionResult> Search(string searchTerm)
