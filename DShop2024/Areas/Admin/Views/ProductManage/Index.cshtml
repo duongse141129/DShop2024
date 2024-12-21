@@ -4,7 +4,7 @@
 }
 <h4>List Product Admin</h4>
 <a asp-area="Admin" asp-action="Create" asp-controller="ProductManage">Add Product</a>
-<table class="table">
+<table class="table" id="myTable">
     <thead>
         <tr>
             <th scope="col">Stt</th>
@@ -36,10 +36,9 @@
                 <td>@item.Brand.BrandName</td>
                 <td>
                     <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Edit</a>
-                </td>
-                <td>
                     <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="ProductManage" asp-route-Id="@item.Id">Delete</a>
                 </td>
+
             </tr>
 
             
@@ -48,4 +47,6 @@
         }
         
     </tbody>
+    
 </table>
+
