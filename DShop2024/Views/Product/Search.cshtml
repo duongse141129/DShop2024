@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<ProductModel>
-
+@{
+	ViewData["Title"] = @ViewBag.Keyword;
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
 <div class="col-sm-3">
 	@Html.Partial("_SidebarPartial")
 </div>
@@ -7,7 +10,7 @@
 <div class="col-sm-9 padding-right">
 	<div class="features_items">
 		<!--features_items-->
-		<h2 class="title text-center">Features Items</h2>
+		<h2 class="title text-center">@ViewBag.Keyword</h2>
 		@foreach (var item in Model)
 		{
 			<div class="col-sm-4">
@@ -15,8 +18,8 @@
 					<div class="single-products">
 						<div class="productinfo text-center">
 							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
-								<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100" />
-								<h2>$@item.Price.ToString("#,##0 VND")</h2>
+								<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100%" />
+								<h2>$@item.Price</h2>
 								<p>@item.ProductName</p>
 								<p>Category: @item.Category.CategoryName</p>
 								<p>Brand: @item.Brand.BrandName</p>

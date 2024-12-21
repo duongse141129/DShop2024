@@ -29,14 +29,14 @@
 						
 						<tr>
 								<td class="cart_product">
-									<a href=""><img src="~/images/@item.Image" alt="" width="100"></a>
+									<a href=""><img src="~/media/products/@item.Image" alt="" width="100"></a>
 								</td>
 							<td class="cart_description">
 								<h4><a href="">@item.ProductName</a></h4>
 								
 							</td>
 							<td class="cart_price">
-								<p>$@item.Price</p>
+									<p>$@item.Price.ToString("#,##0 VND")</p>
 							</td>
 							<td class="cart_quantity">
 									<div class="cart_quantity_button">
@@ -47,7 +47,7 @@
 									</div>
 							</td>
 							<td class="cart_total">
-								<p class="cart_total_price">$@item.Total</p>
+									<p class="cart_total_price">$@item.Total.ToString("#,##0 VND")</p>
 							</td>
 							<td class="cart_delete">
 								<a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
@@ -55,7 +55,7 @@
 						</tr>
 						}
 						<tr rowspan="5">
-							<td colspan="6">Grand Total: <p class="cart_total_price"> @Model.GrandTotal</p></td>
+							<td colspan="6">Grand Total: <p class="cart_total_price"> @Model.GrandTotal.ToString("#,##0 VND")</p></td>
 							<td>
 								<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
 							</td>

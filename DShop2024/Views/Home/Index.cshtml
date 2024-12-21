@@ -18,7 +18,7 @@
 						<div class="productinfo text-center">
 							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
 								<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100%" />
-								<h2>$@item.Price</h2>
+								<h2>$@item.Price.ToString("#,##0 VND")</h2>
 								<p>@item.ProductName</p>
 								<p>Category: @item.Category.CategoryName</p>
 								<p>Brand: @item.Brand.BrandName</p>
