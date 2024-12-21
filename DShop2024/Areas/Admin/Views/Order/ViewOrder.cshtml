@@ -13,32 +13,50 @@
                     <div class="col"> <strong>Order Date :</strong> <br>@Model.CreatedDate</div>
                     <div class="col"> <strong>User Name:</strong> <br> @Model.User.UserName </div>
                     <div class="col"> <strong>Status:</strong> <br> @Model.Status </div>
-                    <div class="col"> <strong>Tracking #:</strong> <br> BD045903594059 </div>
                 </div>
             </article>
-            <div class="track">
-                <div class="step active"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
-                <div class="step active"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
-                <div class="step"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
-                <div class="step"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
-            </div>
             <hr>
-            <ul class="row">
-                @foreach (var item in Model.OrderDetails)
-                {
-                    
-                
-                <li class="col-md-4">
-                    <figure class="itemside mb-3">
-                            <div class="aside"><img src="~/media/products/@item.Product.Image" class="img-sm border"></div>
-                        <figcaption class="info align-self-center">
-                            <p class="title">@item.Product.ProductName <br> @item.Quantity</p> <span class="text-muted">@item.Price * @item.Quantity </span>
-                        </figcaption>
-                    </figure>
-                </li>
-                }
+			<table class="table table-condensed">
+				<thead>
+					<tr class="cart_menu">
+						<td class="image">Image</td>
+						<td class="image">Item Name</td>
+						<td class="price">Price</td>
+						<td class="quantity">Quantity</td>
+						<td class="total">SubTotal</td>
+					</tr>
+				</thead>
 
-            </ul>
+						@foreach (var item in Model.OrderDetails)
+						{
+
+
+							<tr>
+								<td class="cart_product">
+								<a href=""><img src="~/media/products/@item.Product.Image" alt="" width="100"></a>
+								</td>
+								<td >
+									<h4><a href="">@item.Product.ProductName</a></h4>
+								</td>
+								<td class="cart_price">
+									<p>$@item.Price</p>
+								</td>
+								<td class="cart_quantity">
+									<p>@item.Quantity</p>
+								</td>
+								<td class="cart_total">
+									<p class="cart_total_price">$@(item.Price* item.Quantity)</p>
+								</td>
+							</tr>
+						}
+						<tr rowspan="5">
+							<td colspan="6">Grand Total: <p class="cart_total_price"> @ViewBag.GrandTotal</p></td>
+						</tr>
+
+				
+			</table>
+
+
             <hr>
             <a asp-action="Index">Back to List Order</a>
         </div>

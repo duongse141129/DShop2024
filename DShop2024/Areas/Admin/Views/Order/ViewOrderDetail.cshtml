@@ -1,0 +1,75 @@
+﻿@model IEnumerable<OrderDetailModel>
+@{
+    ViewData["title"] = "Order Details";
+    decimal total = 0;
+    decimal subTotal = 0;
+
+}
+
+<h3>Order Details</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Order Code</th>
+            <th>UserName</th>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            subTotal = item.Quantity * item.Price;
+            total += subTotal;
+
+            <tr>
+                <input type="hidden" asp-for="@item.OrderId" class="getId"/>
+                <td>@item.Id</td>
+                <td>@item.Order.OrderCode</td>
+                <td>@item.Order.User.UserName</td>
+                <td>@item.Product.ProductName</td>
+                <td>@item.Price</td>
+                <td>@item.Quantity</td>
+                <td>@subTotal.ToString("C")</td>
+            </tr>
+        }
+        <tr>
+            <th colspan="5">Total:</th>
+            <td>@total.ToString("C")</td>
+            <td>
+                <select class="select-update-order">
+                    <option value="1"> New Order</option>
+                    <option value="2"> Processed</option>
+                </select>           
+            </td>
+        </tr>
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        $(document).ready(function (){
+            $('.select-update-order').change(function () {
+                var status = $(this).val();
+                var orderId = $('.getId').val();
+                
+                $ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdateOrder")",
+                    data: { orderId: orderId, status: status },
+                    success: function(result){
+                        if(result.success){
+                            Swal.fire("Update successful");
+                        }
+                        else{
+                            Swal.fire("Update failed" + result.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
