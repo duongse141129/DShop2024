@@ -19,5 +19,6 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<CategoryModel> Categories { get; set; }
 		public virtual DbSet<OrderModel> Orders { get; set; }
 		public virtual DbSet<OrderDetailModel> OrderDetails { get; set; }
+		public virtual DbSet<RatingModel> Ratings { get; set; }
 	}
 

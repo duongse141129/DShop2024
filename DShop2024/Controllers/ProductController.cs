@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DShop2024.Models;
+using DShop2024.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
@@ -24,6 +26,8 @@ namespace DShop2024.Controllers
 										.Where(p => p.Status == 1)
 										.Include(p => p.Brand)
 										.Include(p => p.Category)
+										.Include(p => p.Rating)
+										.ThenInclude(p => p.User)
 										.FirstOrDefaultAsync();
 
 			var relatedProducts = await _dataContext.Products
@@ -32,8 +36,13 @@ namespace DShop2024.Controllers
 									.ToListAsync();
 			ViewBag.relatedProducts = relatedProducts;
 
+			var viewModel = new ProductDetailViewModel
+			{
+				ProductDetail = productById,
+				Rating = productById.Rating
+			};
 
-			return View(productById);
+			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Search(string searchTerm)
@@ -48,5 +57,29 @@ namespace DShop2024.Controllers
 
 			return View(products);
 		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> CommentProduct(RatingModel rating)
+		{
+			if(ModelState.IsValid)
+			{
+				var ratingModel = new RatingModel
+				{
+					ProductId = rating.ProductId,
+					Comment = rating.Comment,
+					RatingDateTime = DateTime.Now,
+					Star = rating.Star
+				};
+				_dataContext.Ratings.Add(ratingModel);
+				await _dataContext.SaveChangesAsync();
+
+				TempData["success"] = "Feedback product successful";
+				return RedirectToAction(Request.Headers["Referer"]);
+			}
+			return RedirectToAction("Detail", new {Id = rating.ProductId});
+		}
+
+
 	}
 }
