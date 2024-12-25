@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize]
+	[Authorize(Roles ="ADMIN")]
 	public class ProductManageController : Controller
 	{
 		private readonly DShopContext _dataContext;

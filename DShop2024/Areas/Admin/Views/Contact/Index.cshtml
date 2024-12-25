@@ -1,0 +1,45 @@
+﻿@model IEnumerable<ContactModel>
+@{
+    ViewData["title"] = "Contact info";
+}
+<h4>Contact Admin</h4>
+
+<table class="table" id="myTable">
+    <thead>
+        <tr>
+ 
+            <th>Name</th>
+            <th>Description</th>
+            <th>Map</th>
+            <th>Logo</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Action</th>
+            <th></th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ShopName</td>
+                <td>@Html.Raw(item.Description)</td>
+                <td><iframe src="@item.Map" width="600" height="450" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></td>
+                <td>@item.ShopName</td>
+                <td><img src="~/media/Logo/@item.LogoImg" width="120" height="120" /></td>
+                <td>@item.Phone</td>
+                <td>@item.Email</td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Contact" asp-route-Id="@item.Id">Edit</a>                 
+                </td>
+            </tr>
+        }
+
+        @* <iframe src="" width="600" height="450" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> *@
+    </tbody>
+    
+   
+
+</table>
+
