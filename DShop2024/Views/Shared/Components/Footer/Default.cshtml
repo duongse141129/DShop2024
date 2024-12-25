@@ -1,16 +1,13 @@
 ﻿@model ContactModel
 
-<h4>Thông tin shop DShop2024</h4>
-
 <div class="row">
-	 <div class="col-sm-7">
-		 <div class="companyinfo">
+	<div class="col-sm-3">
+		<div class="companyinfo">
 			<h2><span>D</span>Shop2024</h2>
 			<p><img src="~/media/Logo/@Model.LogoImg" width="120" height="120" /></p>
 			<p>@Html.Raw(Model.Description)</p>
-		</div> 
-		<iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook&tabs=message&width=340&height=130&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="340" height="130" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-	</div> 
+		</div>
+	</div>
 	<div class="col-sm-5 col-md-5">
 
 		<iframe src="@Model.Map" width="400" height="350" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -21,6 +18,5 @@
 			<h4>Email: @Model.Email</h4>
 			<h4>Hotline: @Model.Phone</h4>
 		</div>
-		
-	</div> 
+	</div>
 </div>
