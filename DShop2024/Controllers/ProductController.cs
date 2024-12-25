@@ -2,6 +2,7 @@
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace DShop2024.Controllers
 {
@@ -35,6 +36,8 @@ namespace DShop2024.Controllers
 									.Take(3)
 									.ToListAsync();
 			ViewBag.relatedProducts = relatedProducts;
+
+
 
 			var viewModel = new ProductDetailViewModel
 			{

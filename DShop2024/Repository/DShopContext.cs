@@ -20,5 +20,6 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<OrderModel> Orders { get; set; }
 		public virtual DbSet<OrderDetailModel> OrderDetails { get; set; }
 		public virtual DbSet<RatingModel> Ratings { get; set; }
+		public virtual DbSet<BannerModel> Banners { get; set; }
 	}
 

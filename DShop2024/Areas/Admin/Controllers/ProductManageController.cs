@@ -149,7 +149,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(product);
+            return View(exitedProduct);
         }
 
 

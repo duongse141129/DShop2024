@@ -1,12 +1,13 @@
 ﻿@model ProductModel
 @{
-    ViewData["title"] = "Create Product";
+    ViewData["title"] = "Edit Product";
 }
 <h4>Edit Product </h4>
 
 <div class="col-md-9">
     <form asp-action="Edit" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id"/>
         <div class="form-group">
             <label>Product Name</label>
             <input asp-for="ProductName" class="form-control" />

@@ -22,6 +22,9 @@ namespace DShop2024.Controllers
                                         .Include(p => p.Brand)
                                         .Include(p => p.Category)
                                         .ToList();
+
+            var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
+            ViewBag.Banners = slider;
             return View(products);
         }
 
