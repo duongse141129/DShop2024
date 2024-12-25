@@ -8,7 +8,7 @@
 
 <h3>Order Details</h3>
 
-<table class="table">
+<table class="table" id="detail_order">
     <thead>
         <tr>
             <th>Id</th>
@@ -40,6 +40,10 @@
         <tr>
             <th colspan="5">Total:</th>
             <td>@total.ToString("C")</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td>
                 <select class="select-update-order">
                     <option value="1"> New Order</option>
@@ -50,6 +54,18 @@
     </tbody>
 </table>
 @section Scripts {
+    <script>
+        new DataTable('#detail_order', {
+            layout: {
+                topStart: {
+                    buttons: [ 'pdf', 'print']
+                }
+            }
+        });
+
+
+
+    </script>
     <script>
         $(document).ready(function (){
             $('.select-update-order').change(function () {
