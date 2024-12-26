@@ -22,5 +22,7 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<RatingModel> Ratings { get; set; }
 		public virtual DbSet<BannerModel> Banners { get; set; }
 		public virtual DbSet<ContactModel> Contacts { get; set; }
+		public virtual DbSet<WishListModel> WishLists { get; set; }
+		public virtual DbSet<CompareModel> Compares { get; set; }
 	}
 
