@@ -1,5 +1,6 @@
 ﻿using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,15 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _dataContext;
 		private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly UserManager<AppUserModel> _userManager;
 
-		public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment)
+        public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager)
 		{
 			_dataContext = context;
 			_webHostEnvironment = webHostEnvironment;
-		}
+            _userManager = userManager;
+
+        }
 		public async Task<IActionResult> Index()
 		{
 			var products = await _dataContext.Products.Where(p => p.Status ==1)
@@ -179,5 +183,44 @@ namespace DShop2024.Areas.Admin.Controllers
             return RedirectToAction("Index");
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AddQuantity(int Id)
+        {
+            var receivingStockList = await _dataContext.ReceivingStocks.Where(x => x.ProductId == Id).Include(r => r.User).ToListAsync();
+            ViewBag.receivingStockList = receivingStockList;
+            ViewBag.Id = Id;
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StoreProductQuantity(ReceivingStockModel receivingStock)
+        {
+            var product = await _dataContext.Products.FindAsync(receivingStock.ProductId);
+            if(product == null)
+            {
+                return NotFound();
+            }
+            product.Stock += receivingStock.Quantity;
+
+            var user = await _userManager.GetUserAsync(this.User);
+
+            receivingStock.Quantity = receivingStock.Quantity;
+            receivingStock.ProductId = receivingStock.ProductId;
+            receivingStock.DateReceive = DateTime.Now;
+            receivingStock.UserId = user.Id;
+            receivingStock.Status = 1;
+
+            _dataContext.ReceivingStocks.Add(receivingStock);
+            await _dataContext.SaveChangesAsync();
+            TempData["success"] = $"Add quantity product: {product.ProductName} successful";
+            return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
+
+
+
+        }
+
+
     }
 }

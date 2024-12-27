@@ -51,7 +51,13 @@ namespace DShop2024.Controllers
 					Price = item.Price,
 					Quantity = item.Quantity,
 					Status = 1
+
+					
 				};
+				var product = await _dataContext.Products.FindAsync(item.ProductId);
+				product.Stock -= item.Quantity;
+				_dataContext.Products.Update(product);
+
 				await _dataContext.OrderDetails.AddAsync(orderDetail);
 				await _dataContext.SaveChangesAsync();
 			}

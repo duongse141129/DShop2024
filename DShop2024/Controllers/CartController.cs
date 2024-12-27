@@ -40,20 +40,40 @@ namespace DShop2024.Controllers
 			}
 			else
 			{
-				cartItem.Quantity += 1;
+				if (product.Stock <= cartItem.Quantity)
+				{
+					TempData["error"] = $" Item {product.ProductName} only has {product.Stock} left";
+					
+				}
+				else
+				{
+					cartItem.Quantity += 1;
+					TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
+				}
+				
+				
 			}
 			HttpContext.Session.SetJson("Cart",cart);
 
-			TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
+			//TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
 		
 		}
 
-		public ActionResult Increase(int Id)
+		public async Task<ActionResult> Increase(int Id)
 		{
+			ProductModel product = await _dataContext.Products.FindAsync(Id);
+
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			if (cartItem.Quantity >= 1)
+			if (product.Stock <= cartItem.Quantity)
+			{
+				TempData["error"] = $" Item {product.ProductName} only has {product.Stock} left";
+				HttpContext.Session.SetJson("Cart", cart);
+				return RedirectToAction("Index");
+			}
+
+			if (cartItem.Quantity >= 1 && product.Stock > cartItem.Quantity)
 			{
 				++cartItem.Quantity;
 			}

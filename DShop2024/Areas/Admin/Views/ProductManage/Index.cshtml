@@ -11,6 +11,7 @@
             <th scope="col" >Image</th>
             <th scope="col">Product Name</th>
             <th scope="col">Description</th>
+            <th scope="col">Stock</th>    
             <th scope="col">Price</th>    
             <th scope="col">Slug</th>
             <th scope="col">Category</th>
@@ -31,6 +32,11 @@
                 <td>@item.ProductName</td>
                 <td>@item.Description</td>
                 <td>@item.Price</td>
+                <td>
+                    @item.Stock
+                    <br/>
+                    <a asp-action="AddQuantity" asp-controller="ProductManage" asp-route-Id="@item.Id">Add Quantity</a>
+                </td>
                 <td>@item.Slug</td>
                 <td>@item.Category.CategoryName</td>
                 <td>@item.Brand.BrandName</td>

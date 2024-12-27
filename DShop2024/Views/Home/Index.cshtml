@@ -29,7 +29,16 @@
 								<p>Brand: @item.Brand.BrandName</p>
 							</a>
 							@* @* <a class="btn btn-default add-to-cart" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a> *@
-							<button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
+							@if(item.Stock > 0)
+							{
+								<a class="btn btn-default add-to-cart" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+								@* <button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button> *@
+							}
+							else
+							{
+								<button class="btn btn-default add-to-cart" ><i class="fa fa-shopping-cart"></i>Out Of Order</button>
+							}
+
 						</div>
 					
 				</div>

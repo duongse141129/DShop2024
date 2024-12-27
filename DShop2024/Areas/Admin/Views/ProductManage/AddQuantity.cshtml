@@ -1,0 +1,87 @@
+﻿@model DShop2024.Models.ReceivingStockModel
+
+@{
+    ViewData["Title"] = "Add quantity product ";
+    var totalQuantity = 0;
+    var stt = 1;
+}
+
+<h1>Add quantity product </h1>
+
+
+<div class="row">
+    <div class="col-md-9">
+        <form asp-action="StoreProductQuantity" asp-controller="ProductManage" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" name="ProductId" value="@ViewBag.Id" />
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input min="1" value="1" asp-for="Quantity" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+ 
+            <div class="form-group">
+                <input type="submit" value="Add" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<h3>Receiving quantity product</h3>
+<table class="table" id="myTable">
+    <thead>
+        <tr>
+            <th>
+                Stt
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateReceive)
+            </th>
+            <th>
+                Name of person adding product quantity
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        @foreach (var item in ViewBag.receivingStockList)
+        {
+            
+            <tr>
+                <td>
+                    @stt
+                </td>
+                <td>
+                    @item.Quantity
+                </td>
+                <td>
+                    @item.DateReceive
+                </td>
+                <td>@item.User.UserName</td>
+            </tr>
+            totalQuantity += item.Quantity;
+            stt++;
+        }
+         
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><b>Total Quantities : @totalQuantity</b></td>
+        </tr>
+    </tbody>
+</table>
+
+
+<div>
+    <a asp-action="Index">Back to List Product</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

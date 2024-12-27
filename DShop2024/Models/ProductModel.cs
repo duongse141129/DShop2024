@@ -18,7 +18,7 @@ namespace DShop2024.Models
 		[Range(0, int.MaxValue, ErrorMessage = "Price > {1}")]
 		[Column(TypeName ="decimal(8,2)")]
 		public decimal Price { get; set; }
-
+		public int Stock {  get; set; }
 		[Required, Range(1, int.MaxValue, ErrorMessage ="Seclect a brand")]
 		public int BrandId { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a brand")]
