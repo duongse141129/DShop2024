@@ -5,6 +5,7 @@
 </div>
 
 <div class="col-sm-9 padding-right">
+	<partial name="_FilterProductsPartial" />
 	<div class="features_items">
 		<!--features_items-->
 		<h2 class="title text-center">Features Items</h2>
@@ -39,3 +40,55 @@
 
 
 </div>
+
+@section Scripts {
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+	<script>
+		$(document).ready(function () {
+			$(function () {
+				$("#slider-range").slider({
+					range: true,
+					step: 50000,
+					min: 100000,
+					max: 5000000,
+					values: [100000, 300000],
+					slide: function (event, ui) {
+						$("#amount").val(
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+							.format(ui.values[0])  
+							+ " - " +
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+							.format(ui.values[1]));
+					}
+				});
+				$("#amount").val(
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+					.format($("#slider-range").slider("values", 0))
+					 +
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+					.format($("#slider-range").slider("values", 1)));
+			});
+
+			$('.btn-locgia').on('click', function () {
+				var url = $(this).data("current_url");
+				if (url) {
+					window.location = url + "?startprice=" + $("#slider-range").slider("values", 0)
+						+ "&endprice=" + $("#slider-range").slider("values", 1);
+				}
+				return false;
+			});
+		});
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('#sort_by').on('change', function () {
+				var url = $(this).val();
+				if (url) {
+					window.location = url;
+				}
+				return false;
+			});
+		});
+	</script>
+}
