@@ -54,19 +54,75 @@
 							</td>
 						</tr>
 						}
-						<tr rowspan="5">
-							<td colspan="6">Grand Total: <p class="cart_total_price"> @Model.GrandTotal.ToString("#,##0 VND")</p></td>
+						<tr >
+							<td >Grand Total: <p class="cart_total_price"> @Model.GrandTotal.ToString("#,##0 VND")</p></td>
+
+							
 							<td>
-								<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
+								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
 							</td>
 						</tr>
-						<td>
-							<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
-						</td>
 						
+
+						<tr>
+
+							<td >
+								Shipping Costl:
+								<p class="cart_total_price"> @Model.ShippingCost.ToString("#,##0 VND")</p>
+								<p>
+									<a class="btn btn-danger" asp-action="DeleteShipping" asp-controller="Cart">Clear Shipping Cost</a>
+								</p>
+							</td>
+
+
+							<td>
+								<div class="form-group">
+									<label>Province or City</label>
+									<select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+										<option value="0">Tỉnh Thành</option>
+									</select>
+								</div>
+
+								<div class="form-group">
+									<label>District</label>
+									<select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+										<option value="0">Quận Huyện</option>
+									</select>
+								</div>
+
+								<div class="form-group">
+									<label>Ward</label>
+									<select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+										<option value="0">Phường Xã</option>
+									</select>
+								</div>
+
+								<button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button>
+							</td>
+
+							@if(Model.ShippingCost <= 0){
+								<td>
+									<a disabled="disabled" class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
+									<br/>
+									<span class="text text-danger">You must calculate shipping costs.</span>
+								</td>
+							}
+							else
+							{
+								<td>
+									<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
+								</td>
+							}
+
+						</tr>
+						
+						
+
+
 					}
 					else
 					{
+						
 						<tr>
 							<td colspan="5"><h4>Your Cart is empty</h4></td>
 						</tr>
@@ -77,3 +133,72 @@
 		</div>
 	</div>
 </section> <!--/#cart_items-->
+
+@section Scripts{
+	<script>
+		$(document).ready(function () {
+			$(".btn-add-shipping").click(function () {
+				var tinh = $('#tinh').find('option:selected').text();
+				var quan = $('#quan').find('option:selected').text();
+				var phuong = $('#phuong').find('option:selected').text();
+				var price = $('#price-shippng').val();
+				if (tinh == '' || quan == '' || phuong == '' || price == '') {
+					Swal.fire("Please input all value");
+				} else {
+					$.ajax({
+						type: "POST",
+						url: "@Url.Action("GetShipping", "Cart")",
+						data: { tinh: tinh, quan: quan, phuong: phuong },
+						success: function (result) {
+							if (result) {
+								location.reload();
+
+							}
+							
+						}
+					});
+				}
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			//Lấy tỉnh thành
+			$.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
+				if (data_tinh.error == 0) {
+					$.each(data_tinh.data, function (key_tinh, val_tinh) {
+						$("#tinh").append('<option value="' + val_tinh.id + '">' + val_tinh.full_name + '</option>');
+					});
+					$("#tinh").change(function (e) {
+						var idtinh = $(this).val();
+						//Lấy quận huyện
+						$.getJSON('https://esgoo.net/api-tinhthanh/2/' + idtinh + '.htm', function (data_quan) {
+							if (data_quan.error == 0) {
+								$("#quan").html('<option value="0">Quận Huyện</option>');
+								$("#phuong").html('<option value="0">Phường Xã</option>');
+								$.each(data_quan.data, function (key_quan, val_quan) {
+									$("#quan").append('<option value="' + val_quan.id + '">' + val_quan.full_name + '</option>');
+								});
+								//Lấy phường xã
+								$("#quan").change(function (e) {
+									var idquan = $(this).val();
+									$.getJSON('https://esgoo.net/api-tinhthanh/3/' + idquan + '.htm', function (data_phuong) {
+										if (data_phuong.error == 0) {
+											$("#phuong").html('<option value="0">Phường Xã</option>');
+											$.each(data_phuong.data, function (key_phuong, val_phuong) {
+												$("#phuong").append('<option value="' + val_phuong.id + '">' + val_phuong.full_name + '</option>');
+											});
+										}
+									});
+								});
+
+							}
+						});
+					});
+
+				}
+			});
+		});
+	</script>
+	        
+}

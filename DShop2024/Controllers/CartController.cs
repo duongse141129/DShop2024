@@ -2,6 +2,8 @@
 using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace DShop2024.Controllers
 {
@@ -16,9 +18,20 @@ namespace DShop2024.Controllers
 		public IActionResult Index()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+
+			var shippingPriceCookie = Request.Cookies["shipppingPrice"];
+			decimal shippingPrice = 0;
+			if(shippingPriceCookie != null)
+			{
+				var shippingPriceJson = shippingPriceCookie;
+				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceJson);
+			}
+			
+			
 			CartItemViewModel cartItemViewModel = new CartItemViewModel { 
 				CartItems = cartItems,
-				GrandTotal = cartItems.Sum( s => s.Quantity* s.Price)			
+				GrandTotal = cartItems.Sum( s => s.Quantity* s.Price),
+				ShippingCost = shippingPrice
 			};
 
 			return View(cartItemViewModel);
@@ -122,5 +135,49 @@ namespace DShop2024.Controllers
 			HttpContext.Session.Remove("Cart");
 			return RedirectToAction("Index");
 		}
-	}
+
+
+		public async Task<ActionResult> GetShipping(ShippingModel shippingModel, string tinh, string quan, string phuong)
+		{
+			// default 50k
+			decimal shipppingPrice = 50000;
+
+			var existingShipping = await _dataContext.Shippings
+										.FirstOrDefaultAsync(x => x.City == tinh && 
+															x.District == quan 
+															&& x.Ward == phuong);
+
+			if(existingShipping != null)
+			{
+				shipppingPrice = existingShipping.Price;
+			}
+
+			var shippingPriceJson = JsonConvert.SerializeObject(shipppingPrice);
+			try
+			{
+				var cookieOptionss = new CookieOptions
+				{
+					HttpOnly = true,
+					Expires = DateTime.UtcNow.AddMinutes(30),
+					Secure = true
+				};
+				Response.Cookies.Append("shipppingPrice", shippingPriceJson, cookieOptionss);
+			}
+			catch (Exception ex)
+			{
+
+				return Json(new { ex .Message});
+			}
+			return Json(new { shipppingPrice });
+		}
+
+        public ActionResult DeleteShipping()
+        {
+			Response.Cookies.Delete("shipppingPrice");
+            return RedirectToAction("Index");
+        }
+
+
+
+    }
 }

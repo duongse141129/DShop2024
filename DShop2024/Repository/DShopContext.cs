@@ -25,5 +25,6 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<WishListModel> WishLists { get; set; }
 		public virtual DbSet<CompareModel> Compares { get; set; }
 		public virtual DbSet<ReceivingStockModel> ReceivingStocks { get; set; }
+		public virtual DbSet<ShippingModel> Shippings { get; set; }
 	}
 

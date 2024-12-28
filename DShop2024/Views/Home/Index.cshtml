@@ -28,15 +28,14 @@
 								<p>Category: @item.Category.CategoryName</p>
 								<p>Brand: @item.Brand.BrandName</p>
 							</a>
-							@* @* <a class="btn btn-default add-to-cart" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a> *@
 							@if(item.Stock > 0)
 							{
-								<a class="btn btn-default add-to-cart" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+								<a class="btn btn-default" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a> 
 								@* <button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button> *@
 							}
 							else
 							{
-								<button class="btn btn-default add-to-cart" ><i class="fa fa-shopping-cart"></i>Out Of Order</button>
+								<button class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Out Of Order</button>
 							}
 
 						</div>
@@ -74,12 +73,12 @@
 
 				$.ajax({
 					type: "POST",
-					url: "@Url.Action("AddToCart", "Home")",
+					url: "@Url.Action("AddToCart", "Cart")",
 					data: { Id: Id },
 
 					success: function (result) {
 						if (result) {
-							Swal.fire("Add to wishlist successful");
+							Swal.fire("Add to cart successful");
 						}
 
 					}
