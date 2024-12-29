@@ -1,11 +1,11 @@
 ﻿@model IEnumerable<DShop2024.Models.OrderModel>
 
 @{
-    ViewData["Title"] = "Order Listed";
+    ViewData["Title"] = $"List History Order placed by {ViewBag.userEmail} ";
 }
 
 
-
+<h3>List History Order placed by @ViewBag.userEmail</h3>
 <table class="table">
     <thead>
         <tr>
@@ -14,9 +14,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.OrderCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User.UserName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.CreatedDate)
@@ -38,30 +35,28 @@
                     @Html.DisplayFor(modelItem => item.OrderCode)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.User.UserName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                    @item.CreatedDate.ToString("dd/MM/yyyy");
                 </td>
                 <td>
                     @if (item.Status == 1)
                     {
-                        <span class="text text-success">New Order</span>
+                        <span class="text text-success">Đơn hàng mới</span>
                     }
                     @if (item.Status == 2)
                     {
-                        <span class="text text-danger">Complete order</span>
+                        <span class="text text-danger">Đơn hàng thành công</span>
                     }
                     @if (item.Status == -1)
                     {
                         <span class="text text-danger">Cancel Order</span>
                     }
-     
                 </td>
                 <td>
-                    <a asp-action="ViewOrderDetail" asp-route-Id="@item.Id">ViewOrder</a>
-                    <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Order" asp-route-Id="@item.Id">Delete</a>
- 
+                    @if (item.Status != -1)
+                    {
+                        <a asp-action="CancelOrder" class="btn btn-warning btn-sm confirmDeletion" asp-controller="Account" asp-route-Id="@item.Id">Cancel</a>
+                    }
+                     
                 </td>
             </tr>
         }

@@ -2,6 +2,8 @@
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace DShop2024.Controllers
 {
@@ -9,12 +11,16 @@ namespace DShop2024.Controllers
 	{
 		private UserManager<AppUserModel> _userManager;
 		private SignInManager<AppUserModel> _signInManager;
+        private readonly DShopContext _dataContext;
 
-		public AccountController(UserManager<AppUserModel> userManager, SignInManager<AppUserModel> signInManager)
+        public AccountController(UserManager<AppUserModel> userManager,
+								SignInManager<AppUserModel> signInManager,
+								DShopContext context)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
-		}
+            _dataContext = context;
+        }
 
 		public IActionResult Login(string returnUrl)
 		{
@@ -42,7 +48,44 @@ namespace DShop2024.Controllers
 			return View();
 		}
 
-		[HttpPost]
+        public async Task<IActionResult> History()
+        {
+			if ((bool)!User.Identity?.IsAuthenticated)
+			{
+				return RedirectToAction("Login", "Account");
+			}
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+			var Orders = await _dataContext.Orders
+				.Where(od => od.User.Email == userEmail).OrderByDescending(od => od.Id).ToListAsync();
+
+			ViewBag.userEmail = userEmail;
+            return View(Orders);
+        }
+
+        public async Task<IActionResult> CancelOrder(int Id)
+        {
+            if ((bool)!User.Identity?.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+			try
+			{
+				var order = await _dataContext.Orders.FindAsync(Id);
+				order.Status = -1;
+				_dataContext.Orders.Update(order);
+				await _dataContext.SaveChangesAsync();
+			}
+			catch (Exception ex)
+			{
+				TempData["error"] = ex.Message;
+                return RedirectToAction("History");
+            }
+			return RedirectToAction("History");
+        }
+
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(UserModel user)
 		{
