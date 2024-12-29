@@ -12,6 +12,7 @@
 	<link href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css" rel="stylesheet">
 	<link href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" rel="stylesheet">
 
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
 	<link href="~/css/prettyPhoto.css" rel="stylesheet">
 	<link href="~/css/price-range.css" rel="stylesheet">
@@ -75,7 +76,7 @@
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-controller="Home" asp-action="Index" class="active">Home</a></li>
+								<li><a asp-controller="Home" asp-action="Index" >Home</a></li>
 								
 								
 								<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Products</a></li>
@@ -88,6 +89,7 @@
 								<li><a asp-area="Admin" asp-controller="Contact" asp-action="Index">Contact</a></li>
 								<li><a asp-area="Admin" asp-controller="Shipping" asp-action="Index">Shippings</a></li>
 								<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
+								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">Dashboard</a></li>
 	
 								
 							</ul>
@@ -137,6 +139,9 @@
 	<script src="~/js/main.js"></script>
 	<script src="~/custom/js/site.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 	<script>
 		$(function () {
 			var message = '@TempData["success"]';

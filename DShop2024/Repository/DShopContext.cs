@@ -27,5 +27,6 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<ReceivingStockModel> ReceivingStocks { get; set; }
 		public virtual DbSet<ShippingModel> Shippings { get; set; }
 		public virtual DbSet<CouponModel> Coupons { get; set; }
+		public virtual DbSet<StatisticalModel> Statisticals { get; set; }
 	}
 
