@@ -1,0 +1,131 @@
+﻿@model DShop2024.Models.CouponModel
+
+@{
+    ViewData["Title"] = "Create Coupon";
+}
+
+<h1>Create Coupon</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-9">
+        <form asp-action="Create" asp-controller="Coupon" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="CouponName" class="control-label"></label>
+                <input asp-for="CouponName" class="form-control" />
+                <span asp-validation-for="CouponName" class="text-danger"></span>
+            </div>
+          
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateStart" class="control-label"></label>
+                <input asp-for="DateStart" class="form-control" />
+                <span asp-validation-for="DateStart" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateExpired" class="control-label"></label>
+                <input asp-for="DateExpired" class="form-control" />
+                <span asp-validation-for="DateExpired" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input asp-for="Quantity" value="1" min="1" type="number" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control">
+                    <option value="1"> Enable</option>
+                    <option value="-1"> Disable</option>
+                </select>
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+
+    <p>
+        <a class="btn btn-primary" asp-action="Create">Create New</a>
+    </p>
+
+    <h5>List coupon</h5>
+    <table class="table" id="myTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Date Start</th>
+                <th>Date Expired</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.listCoupon)
+            {
+                <tr>
+                    <td>@item.CouponName</td>
+                    <td>@item.Description</td>
+                    <td>@item.DateStart.ToString("dd-MM-yyyy")</td>
+                    <td>@item.DateExpired.ToString("dd-MM-yyyy")</td>
+                    <td>@item.Quantity</td>
+                    <td>
+                        @if(item.Status == 1)
+                        {
+                            <select asp-for="Status" class="form-control">
+                                <option selected value="1"> Enable</option>
+                                <option value="-1"> Disable</option>
+                            </select>
+                        }
+                        @if (item.Status == -1)
+                        {
+                            <select asp-for="Status" class="form-control">
+                                <option  value="1"> Enable</option>
+                                <option  selected value="-1"> Disable</option>
+                            </select>
+                        }
+                    </td>
+                    <td>
+                        @if (item.DateExpired.Day < DateTime.Now.Day && item.DateExpired < DateTime.Now)
+                        {
+                            <span class="text text-danger" >Expired</span>
+                        }
+                        else
+                        {
+                            TimeSpan remaingTime = item.DateExpired - DateTime.Now;
+                            int daysRemaining = remaingTime.Days;
+                            @if(daysRemaining == 0)
+                            {
+                                <span class="text text-danger">Today</span>
+                            }
+                            else
+                            {
+                                <span class="text text-success">@daysRemaining days left</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

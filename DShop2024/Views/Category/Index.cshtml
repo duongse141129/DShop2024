@@ -65,7 +65,7 @@
 				$("#amount").val(
 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
 					.format($("#slider-range").slider("values", 0))
-					 +
+					 + " - " +
 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
 					.format($("#slider-range").slider("values", 1)));
 			});

@@ -62,8 +62,7 @@ namespace DShop2024.Controllers
 				}
 			}
 
-			await productByCategory.ToListAsync();
-			return View(productByCategory);
+			return View(await productByCategory.ToListAsync());
 
 		}
 	}

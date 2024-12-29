@@ -99,6 +99,13 @@
 
 								<button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button>
 							</td>
+							<td>
+								<form>
+									Coupon code:<input type="text" class="form-control coupon-value"/>
+									<span class="text text-success">@Model.CouponCode</span> <br/>
+									<input type="button" value="Apply" class="btn btn-sm btn-primary btn-apply-coupon"/>
+								</form>
+							</td>
 
 							@if(Model.ShippingCost <= 0){
 								<td>
@@ -109,6 +116,7 @@
 							}
 							else
 							{
+
 								<td>
 									<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
 								</td>
@@ -135,6 +143,25 @@
 </section> <!--/#cart_items-->
 
 @section Scripts{
+	<script>
+		$(".btn-apply-coupon").click(function () {
+			var couponValue = $(".coupon-value").val();
+			$.ajax({
+				type: "POST",
+				url: "@Url.Action("GetCoupon", "Cart")",
+				data: { couponValue: couponValue },
+				success: function (result) {
+					if (result.success) {
+						Swal.fire(result.message);
+						location.reload();
+					} else {
+						Swal.fire(result.message);
+					}
+				}
+			});
+		});
+
+	</script>
 	<script>
 		$(document).ready(function () {
 			$(".btn-add-shipping").click(function () {

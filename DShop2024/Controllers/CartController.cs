@@ -21,6 +21,9 @@ namespace DShop2024.Controllers
 
 			var shippingPriceCookie = Request.Cookies["shipppingPrice"];
 			decimal shippingPrice = 0;
+
+			var couponCode = Request.Cookies["CouponTitle"];
+
 			if(shippingPriceCookie != null)
 			{
 				var shippingPriceJson = shippingPriceCookie;
@@ -31,8 +34,9 @@ namespace DShop2024.Controllers
 			CartItemViewModel cartItemViewModel = new CartItemViewModel { 
 				CartItems = cartItems,
 				GrandTotal = cartItems.Sum( s => s.Quantity* s.Price),
-				ShippingCost = shippingPrice
-			};
+				ShippingCost = shippingPrice,
+                CouponCode = couponCode
+            };
 
 			return View(cartItemViewModel);
 		}
@@ -177,7 +181,51 @@ namespace DShop2024.Controllers
             return RedirectToAction("Index");
         }
 
+		[HttpPost]
+		public async Task<ActionResult> GetCoupon(CouponModel couponModel, string couponValue)
+		{
+			var validCoupon = await _dataContext.Coupons
+									.FirstOrDefaultAsync(x => x.CouponName == couponValue && x.Quantity >=1);
+			string couponTitle = validCoupon.CouponName + " | " + validCoupon?.Description;
+			
+			if(validCoupon != null)
+			{
+				TimeSpan remainingTime = validCoupon.DateExpired - DateTime.Now;
+				int daysRemaining = remainingTime.Days;
+				if(daysRemaining <= 0)
+				{
+					try
+					{
+						var cookieOptions = new CookieOptions
+						{
+							HttpOnly = true,
+							Expires= DateTime.UtcNow.AddMinutes(30),
+							Secure = true,
+							SameSite = SameSiteMode.Strict, // kiểm tra tương thích trình duyệt
+						};
+
+						Response.Cookies.Append("CouponTitle", couponTitle, cookieOptions);
+						return Ok( new {success = true, message = "Apply coupon successfully"});
+					}
+					catch (Exception ex)
+					{
+
+						return Ok(new { success = false, message = "Apply coupon fail: "+ ex.Message });
+					}
+				}
+				
+				else
+				{
+					return Ok(new { success = false, message = "Coupon has expried" });
+				}
+			}
+
+			return Ok(new { success = false, message = "Coupon hasn't existed" });
+
+		}
 
 
-    }
+
+
+	}
 }

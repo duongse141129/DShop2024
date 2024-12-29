@@ -9,12 +9,12 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
-		[Required, MinLength(4, ErrorMessage = "Name product's can not null")]
+		[Required, MinLength(4, ErrorMessage = "Product name can not null and must > 4 characters")]
 		public string ProductName { get; set; }
 		public string Slug { get; set; }
 		public string Image { get; set; }
 		public string? Description { get; set; }
-		[Required(ErrorMessage = "Price product's can not null ")]
+		[Required(ErrorMessage = "Product price can not null ")]
 		[Range(0, int.MaxValue, ErrorMessage = "Price > {1}")]
 		[Column(TypeName ="decimal(8,2)")]
 		public decimal Price { get; set; }
