@@ -120,6 +120,15 @@
 								<td>
 									<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
 								</td>
+								<td>
+									<form method="POST" asp-action="CreatePaymentUrl" asp-controller="Payment">
+										<input type="hidden" name="Amount" value="@Model.GrandTotal" />
+										@* <input type="hidden" name="OrderId" value="@Guid.NewGuid().ToString()" /> *@
+										<input type="hidden" name="OrderInfo" value="Payment momo for order in DShop2024" />
+										<input type="hidden" name="FullName" value="@User.Identity.Name" />
+										<button class="btn btn-danger" name="PayUrl" type="submit">Pay with Momo</button>
+									</form>
+								</td>
 							}
 
 						</tr>

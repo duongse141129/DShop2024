@@ -18,6 +18,8 @@ namespace DShop2024.Areas.Admin.Controllers
             _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
+
+        [Route("Index")]
         public IActionResult Index()
         {
             var countProduct = _context.Products.Count();
@@ -27,7 +29,8 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.CountProduct = countProduct;   
             ViewBag.CountOrder = countOrder;   
             ViewBag.CountCategory = countCategory;   
-            ViewBag.CountUser = countUser;   
+            ViewBag.CountUser = countUser;
+
             return View();
         }
 

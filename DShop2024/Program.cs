@@ -6,8 +6,13 @@ using DShop2024.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using DShop2024.Models;
+using DShop2024.Services.Momo;
+using DShop2024.Models.Momo;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMomoService, MomoService>();
 
 builder.Services.AddDbContext<DShopContext>(options =>
 {
@@ -23,6 +28,8 @@ builder.Services.AddSession(options =>{
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.IsEssential = true;
 });
+
+
 
 builder.Services.AddIdentity<AppUserModel, IdentityRole>()
 	.AddEntityFrameworkStores<DShopContext>().AddDefaultTokenProviders();

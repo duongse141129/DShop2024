@@ -31,5 +31,119 @@
         //         }
         //     });
         // });
+
+
+
+
+
+        $('.filter-select').on('change', function () {
+                var days = $(this).val();
+                var endDate = new Date();
+                var startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+                $.ajax({
+                    url: "@Url.Action("GetChartDataBySelect", "Dashboard")",
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        startDate: startDate.toISOString().split('T')[0],
+                        endDate: endDate.toISOString().split('T')[0],
+                    },
+                    success: function (data) {
+                        if (data) {
+                            ChartMorris.setData(data.map(function (item) {
+                                return {
+                                    date = item.date,
+                                    sold = item.sold,
+                                    quantity = item.quantity,
+                                    revenua = item.revenua,
+                                    profit = item.profit
+                                };
+                            }));
+                        }
+                        else {
+                            console.warn("No data received for Morris chart update");
+                            ChartMorris.setData([]);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching data:", error);
+                    }
+
+                });
+            });
+
+            $("#filterButton").click(function () {
+                var fromDate = $("#date_from").val();
+                var toDate = $("#date_to").val();
+
+                $.ajax({
+                    url: "@Url.Action("FilterData", "Dashboard")",
+                    data: { fromDate: fromDate, toDate: toDate },
+                    type: "POST",
+                    success: function (data) {
+                        if (data) {
+                            ChartMorris.setData(date.map(function (item) {
+                                return {
+                                    date = item.date,
+                                    sold = item.sold,
+                                    quantity = item.quantity,
+                                    revenua = item.revenua,
+                                    profit = item.profit
+                                }
+                            }));
+                        } else {
+                            console.warn("No data received for Morris chart update");
+                            ChartMorris.setData([]);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching data:", error);
+                    }
+                });
+            });
+
+
+
+                $(document).ready(function () {
+
+            var ChartMorris = new Morris.Line({
+                element: "myfirstchart",
+                data: [],
+                xkey: 'date',
+
+                ykeys: ['sold', 'quantity', 'revenua', 'profit'],
+                labels: ["sold", "quantity", "revenua", "profit"]
+            });
+
+
+
+
+            $.ajax({
+                url: "@Url.Action("GetChartData", "Dashboard")",
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        ChartMorris.setData(data.map(function (item) {
+                            return {
+                                date = item.date,
+                                sold = item.sold,
+                                quantity = item.quantity,
+                                revenua = item.revenua,
+                                profit = item.profit
+                            };
+                        }));
+                    }
+                    else
+                    {
+                        console.warn("No data received for Morris chart update");
+                        ChartMorris.setData([]);
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+        });
 *@
 

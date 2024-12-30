@@ -4,93 +4,107 @@
     ViewData["title"] = "Dashboard";
 }
 
-<h4>Dashboard</h4>
 
-<div class="row">
-    <div class="col-md-3">
-        <p>Product</p>
-        @ViewBag.CountProduct
-    </div> 
-    <div class="col-md-3">
-        <p>Order</p>
-        @ViewBag.CountOrder
-    </div>
-    <div class="col-md-3">
-        <p>Category</p>
-        @ViewBag.CountCategory
-    </div>
-    <div class="col-md-3">
-        <p>User</p>
-        @ViewBag.CountUser
-    </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3">
-                <h4>Filter data</h4>
-                <select class="filter-select">
-                    <option value="30">Filter data</option>
-                    <option value="7">7 days</option>
-                    <option value="30">1 month</option>
-                    <option value="90">3 month ago</option>
-                    <option value="365">1 year</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <label>From</label>
-        <input type="date" class="form-control"  id="date_from" asp-for="@Model.DateCreate"/>
-        <label>To</label>
-        <input type="date" class="form-control" id="date_to" asp-for="@Model.DateCreate" />
-        <button id="filterButton" class="btn btn-primary">Filter</button>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width">
+    <title>Index</title>
+</head>
+<body>
 
     <div class="row">
-        <p>DShop2024 Chart</p>
-        <div id="myfirstchart" style="height: 250px;"></div>
-    </div>
+        <div class="col-md-3">
+            <p>Product</p>
+            @ViewBag.CountProduct
+        </div>
+        <div class="col-md-3">
+            <p>Order</p>
+            @ViewBag.CountOrder
+        </div>
+        <div class="col-md-3">
+            <p>Category</p>
+            @ViewBag.CountCategory
+        </div>
+        <div class="col-md-3">
+            <p>User</p>
+            @ViewBag.CountUser
+        </div>
 
-    
-</div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <h4>Filter data</h4>
+                    <select class="filter-select">
+                        <option value="30">Filter data</option>
+                        <option value="7">7 days</option>
+                        <option value="30">1 month</option>
+                        <option value="90">3 month ago</option>
+                        <option value="365">1 year</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>From</label>
+                    <input type="date" class="form-control" id="date_from" asp-for="@Model.DateCreate" />
+                    <label>To</label>
+                    <input type="date" class="form-control" id="date_to" asp-for="@Model.DateCreate" />
+                    <button id="filterButton" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <p>DShop2024 Chart</p>
+            <div id="myfirstchart" style="height: 250px;"></div>
+        </div>
+
+
+    </div>
+</body>
+</html>
+
 
 @section Scripts{
     <script>
-        $(document).ready(function () {
+
+
+
+
+        $ (document).ready(function (){
+
             var ChartMorris = new Morris.Line({
-                element: "myfirstchart",
+                element: 'myfirstchart',
                 data: [],
                 xkey: 'date',
                 ykeys: ['sold', 'quantity', 'revenua', 'profit'],
-                labels: ["Số lượng bán ra", "Đơn hàng", "Doanh thu", "Lợi nhuận"]
-            });
-
-
+                labels: ["sold luong ban ra", "don hang", "doanh thu", "loi nhuan"],
+            }); 
 
             $.ajax({
                 url: "@Url.Action("GetChartData", "Dashboard")",
-                type: 'POST',
+                type:"POST",
                 dataType: "json",
                 success: function (data) {
-                    if (data) {
+                    if(data){
                         ChartMorris.setData(data.map(function (item) {
-                            return {
-                                date = item.date,
-                                sold = item.sold,
-                                quantity = item.quantity,
-                                revenua = item.revenua,
-                                profit = item.profit
-                            };
+                            return{
+                                date: item.date,
+                                sold: item.sold,
+                                quantity: item.quantity,
+                                revenua: item.revenua,
+                                profit: item.profit
+                            }
                         }));
                     }
-                    else {
-                        console.warn("No data received for Morris chart update");
+                    else{
+                        console.warn("No data received form-control Morris Chart update");
                         ChartMorris.setData([]);
                     }
                 },
-                error: function (error) {
-                    console.error("Error fetching data:", error);
+                error: function(error){
+                    console.error("error fetching data:",error);
                 }
             });
 
@@ -162,7 +176,8 @@
 
         });
 
-
+        
+        
 
 
     </script>
