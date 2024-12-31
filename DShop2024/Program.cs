@@ -8,11 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using DShop2024.Models;
 using DShop2024.Services.Momo;
 using DShop2024.Models.Momo;
+using DShop2024.Services.Vnpay;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 builder.Services.AddScoped<IMomoService, MomoService>();
+
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 builder.Services.AddDbContext<DShopContext>(options =>
 {

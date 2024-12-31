@@ -1,6 +1,7 @@
 ﻿using DShop2024.Models;
 using DShop2024.Repository;
 using DShop2024.Services.Momo;
+using DShop2024.Services.Vnpay;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,13 +17,14 @@ namespace DShop2024.Controllers
 		private readonly UserManager<AppUserModel> _userManager;
 		private readonly IEmailSender _emailSender;
 		private readonly IMomoService _momoService;
-
-		public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender, IMomoService momoService )
+		private readonly IVnPayService _vnPayService;
+		public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
 		{
 			_dataContext = context;
 			_userManager = userManager;
 			_emailSender = emailSender;
 			_momoService = momoService;
+			_vnPayService = vnPayService;
 
 		}
 
@@ -105,6 +107,14 @@ namespace DShop2024.Controllers
 
 			}
 			return View(response);
+		}
+
+		[HttpGet]
+		public IActionResult PaymentCallbackVnpay()
+		{
+			var response = _vnPayService.PaymentExecute(Request.Query);
+
+			return Json(response);
 		}
 	}
 }

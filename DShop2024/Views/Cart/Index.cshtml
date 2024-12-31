@@ -128,6 +128,13 @@
 										<input type="hidden" name="FullName" value="@User.Identity.Name" />
 										<button class="btn btn-danger" name="PayUrl" type="submit">Pay with Momo</button>
 									</form>
+									<form method="POST" asp-action="CreatePaymentUrlVnpay" asp-controller="Payment">
+										<input type="hidden" name="Name" value="@User.Identity.Name" />
+										<input type="hidden" name="Amount" value="@Model.GrandTotal" />
+										<input type="hidden" name="OrderDescription" value="Thanh toan qua Vnpay tai DShop2024" />
+										<input type="hidden" name="OrderType" value="other" />
+										<button class="btn btn-success" type="submit">Pay with VNpay</button>
+									</form>
 								</td>
 							}
 
