@@ -1,6 +1,5 @@
 using System.Configuration;
 using System;
-
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +8,15 @@ using DShop2024.Models;
 using DShop2024.Services.Momo;
 using DShop2024.Models.Momo;
 using DShop2024.Services.Vnpay;
+using static Org.BouncyCastle.Math.EC.ECCurve;
+using DShop2024.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOptions();
+var mailsetting = builder.Configuration.GetSection("MailSettings");
+builder.Services.Configure<MailSettings>(mailsetting);
+builder.Services.AddSingleton<IEmailSender, SendMailService>();
 
 builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
 builder.Services.AddScoped<IMomoService, MomoService>();
@@ -22,7 +28,9 @@ builder.Services.AddDbContext<DShopContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb"));
 });
 
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+//builder.Services.AddDefaultIdentity<AppUserModel>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DShopContext>();
+
+//builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -34,8 +42,13 @@ builder.Services.AddSession(options =>{
 
 
 
+//builder.Services.AddIdentity<AppUserModel, IdentityRole>()
+//	.AddEntityFrameworkStores<DShopContext>().AddDefaultTokenProviders();
+
+// Dang ky Identity
 builder.Services.AddIdentity<AppUserModel, IdentityRole>()
-	.AddEntityFrameworkStores<DShopContext>().AddDefaultTokenProviders();
+        .AddEntityFrameworkStores<DShopContext>()
+        .AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -55,7 +68,23 @@ builder.Services.Configure<IdentityOptions>(options =>
 	//options.User.AllowedUserNameCharacters =
 	//"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 	options.User.RequireUniqueEmail = true;
+	options.SignIn.RequireConfirmedEmail = true;
+	options.SignIn.RequireConfirmedAccount = true;
 });
+
+
+
+builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            var gconfig = builder.Configuration.GetSection("Authentication:Google");
+            options.ClientId = gconfig["ClientId"];
+            options.ClientSecret = gconfig["ClientSecret"];
+			// localhost:7213/signin-google
+			options.CallbackPath = "/login-google";
+        });
+
+builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>();
 
 var app = builder.Build();
 
@@ -97,9 +126,6 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-
-
 
 //Seed data
 //var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DShopContext>();

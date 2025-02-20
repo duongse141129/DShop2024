@@ -1,184 +1,124 @@
-﻿@model DShop2024.Models.StatisticalModel
-
-@{
-    ViewData["title"] = "Dashboard";
+﻿﻿@{
+    ViewData["Title"] = "Dashboard";
 }
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta name="viewport" content="width=device-width">
-    <title>Index</title>
-</head>
-<body>
-
-    <div class="row">
-        <div class="col-md-3">
-            <p>Product</p>
-            @ViewBag.CountProduct
+<div class="row">
+    <div class="container-fluid">
+        <div class="col-md-12">
+            <h5>Thống kê số lượng</h5>
+            <ul>
+                <li>Tổng đơn hàng : @ViewBag.CountProduct</li>
+                <li>Tổng sản phẩm : @ViewBag.CountProduct</li>
+                <li>Tổng danh mục sản phẩm : @ViewBag.CountCategory</li>
+                <li>Tổng khách hàng : @ViewBag.CountUser</li>
+            </ul>
         </div>
-        <div class="col-md-3">
-            <p>Order</p>
-            @ViewBag.CountOrder
-        </div>
-        <div class="col-md-3">
-            <p>Category</p>
-            @ViewBag.CountCategory
-        </div>
-        <div class="col-md-3">
-            <p>User</p>
-            @ViewBag.CountUser
-        </div>
+        <div class="col-md-12">
 
-        <div class="container">
+            <h5>Thống kê bán hàng</h5>
             <div class="row">
-                <div class="col-md-3">
-                    <h4>Filter data</h4>
-                    <select class="filter-select">
-                        <option value="30">Filter data</option>
-                        <option value="7">7 days</option>
-                        <option value="30">1 month</option>
-                        <option value="90">3 month ago</option>
-                        <option value="365">1 year</option>
-                    </select>
+                <div class="col-md-4">
+                    <p>Lọc theo ngày tháng</p>
+                    <form>
+                        Ngày:
+
+                        <input type="text" class="form-control" id="datepicker">
+                        <button type="button" class="btn btn-primary btn-filter-date">Lọc theo ngày</button>
+                    </form>
                 </div>
-                <div class="col-md-3">
-                    <label>From</label>
-                    <input type="date" class="form-control" id="date_from" asp-for="@Model.DateCreate" />
-                    <label>To</label>
-                    <input type="date" class="form-control" id="date_to" asp-for="@Model.DateCreate" />
-                    <button id="filterButton" class="btn btn-primary">Filter</button>
+                <div class="col-md-4">
+                    <p>Lọc theo</p>
+                    <p>
+                        <select class="form-control filter-date">
+                            <option value="last_month">Tháng trước</option>
+                            <option value="this_month">Tháng này</option>
+                            <option value="all_year">Cả năm</option>
+                        </select>
+                    </p>
                 </div>
             </div>
+
+            <div id="myfirstchart" style="height: 350px"></div>
         </div>
-
-
-
-        <div class="row">
-            <p>DShop2024 Chart</p>
-            <div id="myfirstchart" style="height: 250px;"></div>
-        </div>
-
-
     </div>
-</body>
-</html>
+</div>
+@section Scripts {
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
 
-@section Scripts{
     <script>
-
-
-
-
-        $ (document).ready(function (){
-
-            var ChartMorris = new Morris.Line({
+        $(document).ready(function () {
+            var chartData = [];
+            var chart = new Morris.Line({
                 element: 'myfirstchart',
                 data: [],
-                xkey: 'date',
-                ykeys: ['sold', 'quantity', 'revenua', 'profit'],
-                labels: ["sold luong ban ra", "don hang", "doanh thu", "loi nhuan"],
-            }); 
-
+                xkey: "date",
+                ykeys: ["Sold", "Revenue"],
+                labels: ['don hang', 'Doanh thu'],
+                parseTime: false,
+            });
+            //filter all data chart
             $.ajax({
+                type: "POST",
                 url: "@Url.Action("GetChartData", "Dashboard")",
-                type:"POST",
-                dataType: "json",
                 success: function (data) {
-                    if(data){
-                        ChartMorris.setData(data.map(function (item) {
-                            return{
-                                date: item.date,
-                                sold: item.sold,
-                                quantity: item.quantity,
-                                revenua: item.revenua,
-                                profit: item.profit
-                            }
-                        }));
-                    }
-                    else{
-                        console.warn("No data received form-control Morris Chart update");
-                        ChartMorris.setData([]);
-                    }
-                },
-                error: function(error){
-                    console.error("error fetching data:",error);
+                    chartData = data;
+                    chart.setData(data);
+                  
                 }
             });
 
-            $('.filter-select').on('change', function () {
-                var days = $(this).val();
-                var endDate = new Date();
-                var startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
-                $.ajax({
-                    url: "@Url.Action("GetChartDataBySelect", "Dashboard")",
-                    type: 'POST',
-                    dataType: "json",
-                    data: {
-                        startDate: startDate.toISOString().split('T')[0],
-                        endDate: endDate.toISOString().split('T')[0],
-                    },
-                    success: function (data) {
-                        if (data) {
-                            ChartMorris.setData(data.map(function (item) {
-                                return {
-                                    date = item.date,
-                                    sold = item.sold,
-                                    quantity = item.quantity,
-                                    revenua = item.revenua,
-                                    profit = item.profit
-                                };
-                            }));
-                        }
-                        else {
-                            console.warn("No data received for Morris chart update");
-                            ChartMorris.setData([]);
-                        }
-                    },
-                    error: function (error) {
-                        console.error("Error fetching data:", error);
-                    }
+            // //submit filter date in chart
+            // $(".filter-date").change(function () {
+            //     var filterdate = $(this).val();
+            //     // alert(filterdate);
 
-                });
-            });
+            //     $.ajax({
+            //         type: "POST",
+            //         url: "@Url.Action("SelectFilterDate", "Dashboard")",
+            //         data: { filterdate: filterdate },
+            //         success: function (data) {
+            //             chart.setData(data);
+            //         }
+            //     });
+            // })
 
-            $("#filterButton").click(function () {
-                var fromDate = $("#date_from").val();
-                var toDate = $("#date_to").val();
-
-                $.ajax({
-                    url: "@Url.Action("FilterData", "Dashboard")",
-                    data: { fromDate: fromDate, toDate: toDate },
-                    type: "POST",
-                    success: function (data) {
-                        if (data) {
-                            ChartMorris.setData(date.map(function (item) {
-                                return {
-                                    date = item.date,
-                                    sold = item.sold,
-                                    quantity = item.quantity,
-                                    revenua = item.revenua,
-                                    profit = item.profit
-                                }
-                            }));
-                        } else {
-                            console.warn("No data received for Morris chart update");
-                            ChartMorris.setData([]);
-                        }
-                    },
-                    error: function (error) {
-                        console.error("Error fetching data:", error);
-                    }
-                });
-            });
-
+            // //select option filter data
+            // $(".btn-filter-date").click(function () {
+            //     var filterdate = $("#datepicker").val();
+            //     $.ajax({
+            //         type: "POST",
+            //         url: "@Url.Action("SubmitFilterDate", "Dashboard")",
+            //         data: { filterdate: filterdate },
+            //         success: function (data) {
+            //             chart.setData(data);
+            //         }
+            //     });
+            // })
         });
 
-        
-        
+    </script>
+    <script>
+        $(function () {
+            $("#datepicker").datepicker({
+                dateFormat: 'yy-mm-dd', onSelect: function (datetext) {
+                    var d = new Date(); // for now
 
+                    var h = d.getHours();
+                    h = (h < 10) ? ("0" + h) : h;
 
+                    var m = d.getMinutes();
+                    m = (m < 10) ? ("0" + m) : m;
+
+                    var s = d.getSeconds();
+                    s = (s < 10) ? ("0" + s) : s;
+
+                    datetext = datetext + " " + h + ":" + m + ":" + s;
+
+                    $('#datepicker').val(datetext);
+                }
+            });
+        });
     </script>
 }

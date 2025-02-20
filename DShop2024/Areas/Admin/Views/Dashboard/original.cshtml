@@ -1,0 +1,183 @@
+﻿@model DShop2024.Models.StatisticalModel
+
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width">
+    <title>Index</title>
+</head>
+<body>
+
+    <div class="row">
+        <div class="col-md-3">
+            <p>Product</p>
+            @ViewBag.CountProduct
+        </div>
+        <div class="col-md-3">
+            <p>Order</p>
+            @ViewBag.CountOrder
+        </div>
+        <div class="col-md-3">
+            <p>Category</p>
+            @ViewBag.CountCategory
+        </div>
+        <div class="col-md-3">
+            <p>User</p>
+            @ViewBag.CountUser
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <h4>Filter data</h4>
+                    <select class="filter-select">
+                        <option value="30">Filter data</option>
+                        <option value="7">7 days</option>
+                        <option value="30">1 month</option>
+                        <option value="90">3 month ago</option>
+                        <option value="365">1 year</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>From</label>
+                    <input type="date" class="form-control" id="date_from" asp-for="@Model.DateCreate" />
+                    <label>To</label>
+                    <input type="date" class="form-control" id="date_to" asp-for="@Model.DateCreate" />
+                    <button id="filterButton" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row">
+            <p>DShop2024 Chart</p>
+            <div id="myfirstchart" style="height: 250px;"></div>
+        </div>
+
+
+    </div>
+</body>
+</html>
+
+
+@section Scripts {
+    <script>
+
+
+
+
+        $(document).ready(function () {
+
+            var ChartMorris = new Morris.Line({
+                element: 'myfirstchart',
+                data: [],
+                xkey: 'date',
+                ykeys: ['sold', 'quantity', 'revenua', 'profit'],
+                labels: ["sold luong ban ra", "don hang", "doanh thu", "loi nhuan"],
+            });
+
+            $.ajax({
+                url: "@Url.Action("GetChartData", "Dashboard")",
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        ChartMorris.setData(data.map(function (item) {
+                            return {
+                                date: item.date,
+                                sold: item.sold,
+                                quantity: item.quantity,
+                                revenua: item.revenua,
+                                profit: item.profit
+                            }
+                        }));
+                    }
+                    else {
+                        console.warn("No data received form-control Morris Chart update");
+                        ChartMorris.setData([]);
+                    }
+                },
+                error: function (error) {
+                    console.error("error fetching data:", error);
+                }
+            });
+
+            $('.filter-select').on('change', function () {
+                var days = $(this).val();
+                var endDate = new Date();
+                var startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+                $.ajax({
+                    url: "@Url.Action("GetChartDataBySelect", "Dashboard")",
+                    type: 'POST',
+                    dataType: "json",
+                    data: {
+                        startDate: startDate.toISOString().split('T')[0],
+                        endDate: endDate.toISOString().split('T')[0],
+                    },
+                    success: function (data) {
+                        if (data) {
+                            ChartMorris.setData(data.map(function (item) {
+                                return {
+                                    date = item.date,
+                                    sold = item.sold,
+                                    quantity = item.quantity,
+                                    revenua = item.revenua,
+                                    profit = item.profit
+                                };
+                            }));
+                        }
+                        else {
+                            console.warn("No data received for Morris chart update");
+                            ChartMorris.setData([]);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching data:", error);
+                    }
+
+                });
+            });
+
+            $("#filterButton").click(function () {
+                var fromDate = $("#date_from").val();
+                var toDate = $("#date_to").val();
+
+                $.ajax({
+                    url: "@Url.Action("FilterData", "Dashboard")",
+                    data: { fromDate: fromDate, toDate: toDate },
+                    type: "POST",
+                    success: function (data) {
+                        if (data) {
+                            ChartMorris.setData(date.map(function (item) {
+                                return {
+                                    date = item.date,
+                                    sold = item.sold,
+                                    quantity = item.quantity,
+                                    revenua = item.revenua,
+                                    profit = item.profit
+                                }
+                            }));
+                        } else {
+                            console.warn("No data received for Morris chart update");
+                            ChartMorris.setData([]);
+                        }
+                    },
+                    error: function (error) {
+                        console.error("Error fetching data:", error);
+                    }
+                });
+            });
+
+        });
+
+
+
+
+
+    </script>
+}

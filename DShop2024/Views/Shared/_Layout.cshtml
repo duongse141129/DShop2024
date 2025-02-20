@@ -95,8 +95,9 @@
 							<ul class="nav navbar-nav">
 								
 								<li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+								
 
-								@if(User.Identity?.IsAuthenticated ?? false)
+								@* @if(User.Identity?.IsAuthenticated ?? false)
 								{
 									<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
 									<li><a asp-action="WishList" asp-controller="Home"><i class="fa fa-star"></i> Wishlist</a></li>
@@ -109,7 +110,14 @@
 								else
 								{
 									<li><a asp-action="Login" asp-controller="Account" asp-route-returnUrl="@Context.Request.Path"><i class="fa fa-lock"></i>Login</a></li>
-								}
+								} *@
+								<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
+								<li><a asp-action="WishList" asp-controller="Home"><i class="fa fa-star"></i> Wishlist</a></li>
+								<li><a asp-action="Compare" asp-controller="Home"><i class="fa fa-star"></i> Compare</a></li>
+								<li><a asp-action="History" asp-controller="Account"><i class="fa fa-star"></i> Account</a></li>
+								<li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
+								<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Products</a></li>
+								<li><partial name="_LoginPartial" /></li>
 
 							</ul>
 						</div>
@@ -142,6 +150,8 @@
 										<li><a asp-action="CheckOut" asp-controller="Cart">Checkout</a></li>
 										<li><a asp-action="Index" asp-controller="Cart">Cart</a></li>
 										<li><a asp-action="Index" asp-controller="login">Login</a></li>
+					
+										
 									</ul>
 								</li>
 								<li class="dropdown">
