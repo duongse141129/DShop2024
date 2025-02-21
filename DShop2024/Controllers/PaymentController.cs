@@ -3,6 +3,7 @@ using DShop2024.Models.Vnpay;
 using DShop2024.Services.Momo;
 using DShop2024.Services.Vnpay;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.X9;
 
 namespace DShop2024.Controllers
 {
@@ -18,15 +19,15 @@ namespace DShop2024.Controllers
 
 
 		[HttpPost]
-		public async Task<IActionResult> CreatePaymentUrl(OrderInfoModel model)
+		public async Task<IActionResult> CreatePaymentMomo(OrderInfoModel model)
 		{
 			var response = await _momoService.CreatePaymentAsync(model);
 			return Redirect(response.PayUrl);
-
 		}
 
+
 		[HttpGet]
-		public IActionResult PaymentCallback()
+		public IActionResult PaymentCallBack()
 		{
 			var response = _momoService.PaymentExecuteAsync(HttpContext.Request.Query);
 			return View(response);

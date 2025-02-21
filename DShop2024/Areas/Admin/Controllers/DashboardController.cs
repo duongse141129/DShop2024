@@ -35,7 +35,6 @@ namespace DShop2024.Areas.Admin.Controllers
             return View();
         }
 
-
         //[HttpPost]
         //[Route("SubmitFilterDate")]
         //public IActionResult SubmitFilterDate(string filterdate)
@@ -44,8 +43,8 @@ namespace DShop2024.Areas.Admin.Controllers
         //    var chartData = _dataContext.Orders
         //   .Where(o => o.CreatedDate.ToString("yyyy-MM-dd") == dateselect) // Optional: Filter by date
         //  .Join(_dataContext.OrderDetails,
-        //      o => o.OrderCode,
-        //      od => od.OrderCode,
+        //      o => o.Id,
+        //      od => od.OrderId,
         //      (o, od) => new StatisticalModel
         //      {
         //          date = o.CreatedDate,
@@ -81,8 +80,8 @@ namespace DShop2024.Areas.Admin.Controllers
         //       .Where(o => o.CreatedDate > first && o.CreatedDate < today)
 
         //       .Join(_dataContext.OrderDetails,
-        //         o => o.OrderCode,
-        //         od => od.OrderCode,
+        //         o => o.Id,
+        //         od => od.OrderId,
         //         (o, od) => new StatisticalModel
         //         {
         //             date = o.CreatedDate,
@@ -103,118 +102,34 @@ namespace DShop2024.Areas.Admin.Controllers
         //    return Json(chartData);
         //}
 
-
         [HttpPost]
         [Route("GetChartData")]
-        public IActionResult GetChartData()
+        public async Task<IActionResult> GetChartData()
         {
-
-          //  var chartData = _dataContext.Orders
-          //.Join(_dataContext.OrderDetails,
-          //    o => o.Id,
-          //    od => od.OrderId,
-          //    (o, od) => new StatisticalModel
-          //    {
-          //        DateCreate = o.CreatedDate,
-          //        Revenue = Convert.ToInt32(od.Quantity * od.Price), // Calculate revenue based on order details
-          //        Sold = 1 // Assuming each order detail represents one order
-          //    })
-          //.GroupBy(s => s.DateCreate)
-          //.Select(group => new StatisticalModel
-          //{
-          //    DateCreate = group.Key,
-          //    Revenue = group.Sum(s => s.Revenue),
-          //    Sold = group.Count()
-          //})
-          //.ToList();
-
-            var chartData = _dataContext.Statisticals.Select(group => new StatisticalViewModel
-            {
-                date = group.DateCreate.ToShortDateString(),
-                Revenue = group.Revenue.ToString(),
-                Sold = group.Sold.ToString()
-            }).ToList();
-
-            //var json = JsonConvert.SerializeObject(chartData); 
+            var chartData = await _dataContext.Orders
+              .Join(_dataContext.OrderDetails,
+                  o => o.Id,
+                  od => od.OrderId,
+                  (o, od) => new StatisticalModel
+                  {
+                      date = o.CreatedDate,
+                      revenue = od.Quantity * od.Price, // Calculate revenue based on order details
+                      orders = 1 // Assuming each order detail represents one order
+                  })
+              .GroupBy(s => s.date.Month)
+              .Select(group => new StatisticalViewModel
+              {
+                  date = group.Key,
+                  revenue = group.Sum(s => s.revenue),
+                  orders = group.Count()
+              })
+              .OrderBy(s => s.date)
+              .ToListAsync();
 
             var x = Json(chartData);
-
             return x;
         }
 
 
-        //[Route("Index")]
-        //public IActionResult Index()
-        //{
-        //    var countProduct = _context.Products.Count();
-        //    var countOrder = _context.Orders.Count();
-        //    var countCategory = _context.Categories.Count();
-        //    var countUser = _context.Users.Count();
-        //    ViewBag.CountProduct = countProduct;   
-        //    ViewBag.CountOrder = countOrder;   
-        //    ViewBag.CountCategory = countCategory;   
-        //    ViewBag.CountUser = countUser;
-
-        //    return View();
-        //}
-
-        //[HttpPost]
-        //[Route("GetChartData")]
-        //public IActionResult GetChartData()
-        //{
-        //    var data = _context.Statisticals.Select(s => new {
-        //                                 date = s.DateCreate.ToString("yyyy-MM-dd"),
-        //                                 sold = s.Sold,
-        //                                 quantity = s.Quantity,
-        //                                 revenua = s.Revenue,
-        //                                 profit = s.Profit     
-        //                                }).ToList();
-        //    return Json(data);
-        //}
-
-        //[HttpPost]
-        //[Route("GetChartDataBySelect")]
-        //public IActionResult GetChartDataBySelect(DateTime startDate, DateTime endDate)
-        //{
-        //    var data =  _context.Statisticals.
-        //        Where(s => s.DateCreate >= startDate && s.DateCreate <= endDate)
-        //        .Select(s => new
-        //        {
-        //            date = s.DateCreate.ToString("yyyy-MM-dd"),
-        //            sold = s.Sold,
-        //            quantity = s.Quantity,
-        //            revenua = s.Revenue,
-        //            profit = s.Profit
-        //        }).ToList();
-
-        //    return Json(data);
-        //}
-
-        //[HttpPost]
-        //[Route("FilterData")]
-        //public IActionResult FilterData(DateTime? fromDate, DateTime? toDate)
-        //{
-        //    var query = _context.Statisticals.AsQueryable();
-
-        //    if (fromDate.HasValue)
-        //    {
-        //        query = query.Where(s => s.DateCreate >= fromDate);
-        //    }
-        //    if(toDate.HasValue)
-        //    {
-        //        query = query.Where(s => s.DateCreate >= toDate);
-        //    }
-
-        //    var data = query.Select(s => new
-        //    {
-        //        date = s.DateCreate.ToString("yyyy-MM-dd"),
-        //        sold = s.Sold,
-        //        quantity = s.Quantity,
-        //        revenua = s.Revenue,
-        //        profit = s.Profit
-        //    }).ToList();
-
-        //    return Json(data);
-        //}
     }
 }

@@ -21,7 +21,7 @@
                     <form>
                         Ngày:
 
-                        <input type="text" class="form-control" id="datepicker">
+                        <input type="date" class="form-control" id="datepicker">
                         <button type="button" class="btn btn-primary btn-filter-date">Lọc theo ngày</button>
                     </form>
                 </div>
@@ -52,50 +52,50 @@
             var chartData = [];
             var chart = new Morris.Line({
                 element: 'myfirstchart',
-                data: [],
-                xkey: "date",
-                ykeys: ["Sold", "Revenue"],
-                labels: ['don hang', 'Doanh thu'],
                 parseTime: false,
+                data: chartData,
+                xkey: 'date',
+
+                ykeys: ['revenue', 'orders'],
+
+                labels: ['Doanh thu', 'Đơn hàng']
             });
             //filter all data chart
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartData", "Dashboard")",
                 success: function (data) {
-                    chartData = data;
                     chart.setData(data);
-                  
                 }
             });
 
-            // //submit filter date in chart
-            // $(".filter-date").change(function () {
-            //     var filterdate = $(this).val();
-            //     // alert(filterdate);
+            //submit filter date in chart
+            $(".filter-date").change(function () {
+                var filterdate = $(this).val();
+                // alert(filterdate);
 
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "@Url.Action("SelectFilterDate", "Dashboard")",
-            //         data: { filterdate: filterdate },
-            //         success: function (data) {
-            //             chart.setData(data);
-            //         }
-            //     });
-            // })
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SelectFilterDate", "Dashboard")",
+                    data: { filterdate: filterdate },
+                    success: function (data) {
+                        chart.setData(data);
+                    }
+                });
+            })
 
-            // //select option filter data
-            // $(".btn-filter-date").click(function () {
-            //     var filterdate = $("#datepicker").val();
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "@Url.Action("SubmitFilterDate", "Dashboard")",
-            //         data: { filterdate: filterdate },
-            //         success: function (data) {
-            //             chart.setData(data);
-            //         }
-            //     });
-            // })
+            //select option filter data
+            $(".btn-filter-date").click(function () {
+                var filterdate = $("#datepicker").val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SubmitFilterDate", "Dashboard")",
+                    data: { filterdate: filterdate },
+                    success: function (data) {
+                        chart.setData(data);
+                    }
+                });
+            })          
         });
 
     </script>
