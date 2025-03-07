@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUserModel> UserManager
+@model IEnumerable<DShop2024.ViewModels.MessageViewModel>
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<div class="container">
+    <form asp-controller="Chat" asp-action="SendMessage" method="post">
+        <div class="row p-1">
+            <div class="col-1">User</div>
+            <div class="col-5">
+                <input name="userInput" type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled />
+                <input name="receiver" type="hidden"  value="@ViewBag.receiver"  />
+            </div>
+        </div>
+        <div class="row p-1">
+            <div class="col-1">Message</div>
+            <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput" maxlength="300" /></div>
+        </div>
+        <div class="row p-1">
+            <div class="col-6 text-end">
+                <input type="submit" id="sendButton" value="Send Message" />
+            </div>
+        </div>
+    </form>
+    <div class="row p-1">
+        <div class="col-6">
+            <hr />
+        </div>
+    </div>
+
+    <div class="row p-1">
+        <div class="col-6">
+
+            <ul id="messagesList">
+                @foreach (var item in Model)
+                {
+                    <li>[@item.RoleName][@item.UserName]: @item.ContentMessage</li>
+                }
+
+            </ul>
+        </div>
+    </div>
+</div>
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/chat.js"></script> 

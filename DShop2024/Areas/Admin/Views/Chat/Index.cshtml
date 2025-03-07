@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["title"] = "List Chatting User ";
+}
+
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>User Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userWithRoles in Model)
+        {
+            <tr>
+                <td>@userWithRoles.User.UserName</td>
+
+                <td>
+                    @userWithRoles.RoleName
+                </td>
+                <td>
+                    <a class="btn btn-success btn-sm" asp-action="ChatWithCustomer" asp-controller="Chat" asp-route-customerId="@userWithRoles.User.Id">Chat</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

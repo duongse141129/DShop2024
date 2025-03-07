@@ -10,6 +10,8 @@ using DShop2024.Models.Momo;
 using DShop2024.Services.Vnpay;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using DShop2024.Services;
+using DShop2024.Hubs;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -86,6 +88,8 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
@@ -130,5 +134,6 @@ app.MapControllerRoute(
 //Seed data
 //var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DShopContext>();
 //SeedData.SeedingData(context);
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
