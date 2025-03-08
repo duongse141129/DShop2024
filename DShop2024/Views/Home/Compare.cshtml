@@ -1,37 +1,115 @@
-﻿@{
+﻿@model IEnumerable<DShop2024.Models.ProductModel>
+@{
     ViewData["Title"] = "Compare Product";
 }
+
+@if(Model.Count() == 0)
+{
+    <h4>List compare is empty</h4>
+}
+else
+{
+    
+
+
 <h4>List Compare Product </h4>
-<table class="table" id="myTable">
+<a asp-action="DeleteAllCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" >Clear all</a>
+<table class="table table-striped">
     <thead>
         <tr>
-         
-            <th scope="col">Image</th>
-            <th scope="col">Product Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Price</th>
-            <th scope="col">Action</th>
-
+            <th></th>
+            @foreach (var item in Model)
+            {
+                <th scope="col">
+                    @item.ProductName
+                    <img src="~/media/products/@item.Image" width="120" height="100" />
+                </th>
+            }         
         </tr>
     </thead>
     <tbody>
-    
-        @foreach (var compareProduct in Model)
-        {
-            <tr>
-        
-                <td><img src="~/media/products/@compareProduct.Product.Image" width="120" height="100" /></td>
-                <td>@compareProduct.Product.ProductName</td>
-                <td>@Html.Raw(compareProduct.Product.Description)</td>
-                <td>@compareProduct.Product.Price.ToString("#,##0 VND")</td>
+        <tr>
+            <td>Price</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Price.ToString("#,##0 VND")</td>
+            }
+        </tr>
+        <tr>
+            <td>Capacity (L)</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Capacity</td>
+            }
+        </tr>
+        <tr>
+            <td>Dimension (CM)</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Dimension</td>
+            }
+        </tr>
+        <tr>
+            <td>Weight (KG)</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Weight</td>
+            }
+        </tr>
+        <tr>
+            <td>Material</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Material</td>
+            }
+        </tr>
+        <tr>
+            <td>Compartment</td>
+            @foreach (var item in Model)
+            {
+                <td>@item.Compartment</td>
+            }
+        </tr>
+        <tr>
+            <td>Water Resistance</td>
+            @foreach (var item in Model)
+            {
+                @if (item.WaterResistance)
+                {
+                    <td>Yes</td>
+                }              
+                else{
+                    <td>No</td>         
+                }
+            }
+        </tr>
+        <tr>
+            <td>USB Charging Port</td>
+            @foreach (var item in Model)
+            {
+                @if (item.USBChargingPort)
+                {
+                    <td>Yes</td>
+                }
+                else
+                {
+                    <td>No</td>
+                }
+            }
+        </tr>
+        <tr>
+            <td>Remove</td>
+            @foreach (var item in Model)
+            {
                 <td>
-
-                    <a asp-action="DeleteCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@compareProduct.Compare.Id">Delete</a>
+                    <a asp-action="DeleteCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@item.Id">Delete</a>
                 </td>
-            </tr>
-        }
+            }
+        </tr>
+       
 
     </tbody>
 
 </table>
 
+}

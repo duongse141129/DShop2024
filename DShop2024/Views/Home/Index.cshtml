@@ -117,10 +117,13 @@
 					type: "POST",
 					url: "@Url.Action("AddToCompare", "Home")",
 					data: { Id: Id },
-
 					success: function (result) {
 						if (result) {
+							
 							Swal.fire("Add to compare successful");
+						}
+						else {
+							Swal.fire("Add to compare fail duplicate or maximum 5 product");
 						}
 
 					}

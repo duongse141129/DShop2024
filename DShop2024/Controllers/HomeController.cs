@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Linq;
 
 namespace DShop2024.Controllers
 {
@@ -83,7 +84,22 @@ namespace DShop2024.Controllers
 		{
 			var user = await _userManager.GetUserAsync(User);
 
-			CompareModel compare = new CompareModel
+            var countConpare = await (_dataContext.Compares.Where(co => co.UserId == user.Id)).CountAsync();
+            if(countConpare == 5)
+            {
+                TempData["error"] = "Maximum 5 product";
+				return NoContent();
+			}
+
+            var chechExit = await (_dataContext.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
+            if(chechExit != null)
+            {                
+                TempData["error"] = "Product is exit in your list compare";
+                return NoContent();
+			}
+
+
+            CompareModel compare = new CompareModel
 			{
 				ProductId = Id,
 				UserId = user.Id
@@ -114,21 +130,42 @@ namespace DShop2024.Controllers
 
 		public async Task<IActionResult> Compare()
 		{
-			var compareProduct = await (from c in _dataContext.Compares
-										 join p in _dataContext.Products on c.ProductId equals p.Id
-										 join u in _dataContext.Users on c.UserId equals u.Id
-										 select new { User = u, Product = p, Compare = c }).ToListAsync();
-			return View(compareProduct);
+            var user = await _userManager.GetUserAsync(this.User);
+            List<ProductModel> compareProduct = await (from p in _dataContext.Products
+                                        join co in _dataContext.Compares on p.Id equals co.ProductId
+                                        where  co.UserId == user.Id 
+                                        select p).ToListAsync();
+            return View(compareProduct);
 		}
 
         public async Task<IActionResult> DeleteCompare(int Id)
         {
-            CompareModel compare = await _dataContext.Compares.FindAsync(Id);
+            var user = await _userManager.GetUserAsync(this.User);
+            CompareModel compare = await _dataContext.Compares.Where( co => co.ProductId == Id )
+                                                                .Where(co => co.UserId == user.Id)
+                                                                .FirstOrDefaultAsync();
+                                                                        ;
             
             _dataContext.Compares.Remove(compare);
             await _dataContext.SaveChangesAsync();
 
             TempData["success"] = "Remove compare success";
+            return RedirectToAction("Compare");
+        }
+
+        public async Task<IActionResult> DeleteAllCompare()
+        {
+            var user = await _userManager.GetUserAsync(this.User);
+            List<CompareModel> compareProduct = await (from co in _dataContext.Compares
+                                                       where co.UserId == user.Id
+                                                       select co).ToListAsync();
+            foreach (var compare in compareProduct)
+            {
+                _dataContext.Compares.Remove(compare);
+                await _dataContext.SaveChangesAsync();
+            }
+
+            TempData["success"] = "Clear all compare success";
             return RedirectToAction("Compare");
         }
 

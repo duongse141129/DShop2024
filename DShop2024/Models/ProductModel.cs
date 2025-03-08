@@ -28,7 +28,29 @@ namespace DShop2024.Models
 		public RatingModel Rating { get; set; }
 		public int Status { get; set; }
 
-		[NotMapped]
+        [Required(ErrorMessage = "Original Price is required ")]
+        [Range(0, int.MaxValue, ErrorMessage = "Original Price > {1}")]
+        public decimal OriginalPrice { get; set; }
+
+        [Required(ErrorMessage = "Capacity is required ")]
+        [Range(0, int.MaxValue, ErrorMessage = "Capacity > {1}")]
+        public int Capacity { get; set; }
+        [Required, MaxLength(300, ErrorMessage = "Dimension is required ")]
+        public string Dimension { get; set; }
+
+        [Required(ErrorMessage = "Weight is required  ")]
+        [Range(0, int.MaxValue, ErrorMessage = "Weight > {1}")]
+        public decimal Weight { get; set; }
+        [Required, MaxLength(300, ErrorMessage = "Material is required ")]
+        public string Material { get; set; }
+        [Required(ErrorMessage = "Compartment is required")]
+        [Range(0, int.MaxValue, ErrorMessage = "Compartment > {1}")]
+        public int Compartment { get; set; }
+        public bool WaterResistance { get; set; }
+        public bool USBChargingPort { get; set; }
+
+
+        [NotMapped]
 		[FileExtension]
 		public IFormFile? ImageUpload { get; set; }
 	}
