@@ -24,21 +24,21 @@ namespace DShop2024.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rating", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Rating_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Rating_Product_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Product",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Rating", x => x.Id);
+                table.ForeignKey(
+                    name: "FK_Rating_AspNetUsers_UserId",
+                    column: x => x.UserId,
+                    principalTable: "AspNetUsers",
+                    principalColumn: "Id");
+                table.ForeignKey(
+                    name: "FK_Rating_Product_ProductId",
+                    column: x => x.ProductId,
+                    principalTable: "Product",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Cascade);
+            });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rating_ProductId",
@@ -60,3 +60,26 @@ namespace DShop2024.Migrations
         }
     }
 }
+
+
+//constraints: table =>
+//{
+//table.PrimaryKey("PK_Rating", x => x.Id);
+//table.ForeignKey(
+//	name: "FK_Rating_AspNetUsers_UserId",
+//	column: x => x.UserId,
+//	principalTable: "AspNetUsers",
+//	principalColumn: "Id");
+//table.ForeignKey(
+//	name: "FK_Rating_Product_ProductId",
+//	column: x => x.ProductId,
+//	principalTable: "Product",
+//	principalColumn: "Id",
+//	onDelete: ReferentialAction.Cascade);
+//});
+
+//migrationBuilder.CreateIndex(
+//	name: "IX_Rating_ProductId",
+//	table: "Rating",
+//	column: "ProductId",
+//	unique: true);

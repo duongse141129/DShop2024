@@ -1,5 +1,6 @@
 ﻿using DShop2024.Models;
 using DShop2024.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -9,19 +10,24 @@ namespace DShop2024.Controllers
 	public class ProductController : Controller
 	{
 		private readonly DShopContext _dataContext;
+		private readonly UserManager<AppUserModel> _userManager;
 
-		public ProductController(DShopContext context)
+		public ProductController(DShopContext context, UserManager<AppUserModel> userManager)
 		{
 			_dataContext = context;
+			_userManager = userManager;
 		}
 		public IActionResult Index()
 		{
 			return View();
 		}
 
-		public async Task<IActionResult> Details(int Id)
+		public async Task<IActionResult> Details(int? Id)
 		{
-			if(Id == null) return RedirectToAction("Index");
+			if (Id == null)
+			{
+				return NotFound();
+			}
 			var productById = await _dataContext.Products
 										.Where(p => p.Id == Id)
 										.Where(p => p.Status == 1)
@@ -37,12 +43,36 @@ namespace DShop2024.Controllers
 									.ToListAsync();
 			ViewBag.relatedProducts = relatedProducts;
 
+			var user = await _userManager.GetUserAsync(this.User);
+			var listRating = await _dataContext.Ratings
+									.Where(p => p.ProductId == Id)
+									.Where(r => r.Status == 1)
+									.Include(c => c.User)
+									.ToListAsync();
 
+			var pointAvarge = listRating.Average(p => p.Star);
+
+			RatingModel feedback = listRating.Where(u => u.UserId == user.Id).FirstOrDefault();
+
+			listRating.Remove(feedback);
+
+			bool checkUserOrder = false;
+			var checkOrder = await (from o in _dataContext.Orders
+											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+											where o.UserId == user.Id && od.ProductId == productById.Id
+											select o).FirstOrDefaultAsync();
+			if(checkOrder != null)
+			{
+				checkUserOrder = true;
+			}	
 
 			var viewModel = new ProductDetailViewModel
 			{
 				ProductDetail = productById,
-				Rating = productById.Rating
+				Point = pointAvarge,
+				listRating = listRating,
+				IsOrder = checkUserOrder,
+				Feedback = feedback
 			};
 
 			return View(viewModel);
@@ -67,20 +97,25 @@ namespace DShop2024.Controllers
 		{
 			if(ModelState.IsValid)
 			{
+				var user = await _userManager.GetUserAsync(this.User);
 				var ratingModel = new RatingModel
 				{
 					ProductId = rating.ProductId,
 					Comment = rating.Comment,
 					RatingDateTime = DateTime.Now,
-					Star = rating.Star
+					Star = rating.Star,
+					UserId = user.Id,
+					Status = 1
 				};
 				_dataContext.Ratings.Add(ratingModel);
 				await _dataContext.SaveChangesAsync();
 
-				TempData["success"] = "Feedback product successful";
-				return RedirectToAction(Request.Headers["Referer"]);
+				TempData["success"] = "Feedback product successfully";
+				return RedirectToAction("Details", new { Id = rating.ProductId });
 			}
-			return RedirectToAction("Detail", new {Id = rating.ProductId});
+
+			return RedirectToAction("Details", new { Id = rating.ProductId });
+
 		}
 
 

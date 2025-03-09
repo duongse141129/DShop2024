@@ -14,16 +14,22 @@ namespace DShop2024.Models
 		public string? Comment { get; set; }
 		public int Star { get; set; }
 		public DateTime? RatingDateTime { get; set; }
+
 		public int ProductId { get; set; }
+
 		public string UserId { get; set; }
 		public int Status { get; set; }
 
+
+
 		[ForeignKey("ProductId")]
 		public virtual ProductModel Product { get; set; }
+
 
 		[ForeignKey("UserId")]
 		public virtual AppUserModel User { get; set; }
 
 
 	}
+
 }

@@ -53,5 +53,6 @@ namespace DShop2024.Models
         [NotMapped]
 		[FileExtension]
 		public IFormFile? ImageUpload { get; set; }
+
 	}
 }
