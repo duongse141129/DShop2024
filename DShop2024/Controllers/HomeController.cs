@@ -60,7 +60,12 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> AddToWishList(int Id)
 		{
 			var user = await _userManager.GetUserAsync(User);
-
+			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
+			if (chechExit != null)
+			{
+				TempData["error"] = "Product is exit in your list wishlist";
+				return NoContent();
+			}
 			WishListModel wishList = new WishListModel 
             { 
                 ProductId = Id,
@@ -76,8 +81,8 @@ namespace DShop2024.Controllers
             catch (Exception)
             {
 
-                return StatusCode(500, "Add to wishlist fail");
-            }
+				return NoContent();
+			}
 		}
 
 		public async Task<IActionResult> AddToCompare(int Id)
@@ -121,10 +126,12 @@ namespace DShop2024.Controllers
 
 		public async Task<IActionResult> WishList()
 		{
-            var wishListProduct = await (from w in _dataContext.WishLists
+			var user = await _userManager.GetUserAsync(this.User);
+			var wishListProduct = await (from w in _dataContext.WishLists
                                          join p in _dataContext.Products on w.ProductId equals p.Id
                                          join u in _dataContext.Users on w.UserId equals u.Id
-                                         select new { User = u, Product = p, WishList = w }).ToListAsync();
+										 where w.UserId == user.Id
+										 select new { User = u, Product = p, WishList = w }).ToListAsync();
             return View(wishListProduct);
 		}
 
