@@ -18,7 +18,7 @@ namespace DShop2024.Controllers
 		}
 
 
-		[HttpPost]
+	
 		public async Task<IActionResult> CreatePaymentMomo(OrderInfoModel model)
 		{
 			var response = await _momoService.CreatePaymentAsync(model);
@@ -34,7 +34,7 @@ namespace DShop2024.Controllers
 		}
 
 
-		[HttpPost]
+	
 		public IActionResult CreatePaymentUrlVnpay(PaymentInformationModel model)
 		{
 			var url = _vnPayService.CreatePaymentUrl(model, HttpContext);

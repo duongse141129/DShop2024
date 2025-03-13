@@ -68,46 +68,70 @@
 
 							<td >
 								Shipping Costl:
-								<p class="cart_total_price"> @Model.ShippingCost.ToString("#,##0 VND")</p>
-								<p>
-									<a class="btn btn-danger" asp-action="DeleteShipping" asp-controller="Cart">Clear Shipping Cost</a>
-								</p>
-							</td>
+								<p class="cart_total_price"> @Model.InfoDelivery.ShippingCost.ToString("#,##0 VND")</p>
 
 
-							<td>
+								<form asp-action="GetShipping" asp-controller="Cart" method="post" enctype="multipart/form-data">
+								<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+													
+								 <div class="form-group">
+									<label >Province or City</label>
+										<select asp-for="@Model.InfoDelivery.tinh" class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+											<option value="">Tỉnh Thành</option>
+										</select>
+										<span asp-validation-for="@Model.InfoDelivery.tinh" data-valmsg-for="tinh" class="text-danger"></span>
+								</div>  
+
 								<div class="form-group">
-									<label>Province or City</label>
-									<select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
-										<option value="0">Tỉnh Thành</option>
-									</select>
-								</div>
-
-								<div class="form-group">
-									<label>District</label>
-									<select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
-										<option value="0">Quận Huyện</option>
-									</select>
+										<label>District</label>
+										<select asp-for="@Model.InfoDelivery.quan" class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+											<option value="">Quận Huyện</option>
+										</select>
+										<span asp-validation-for="@Model.InfoDelivery.quan" data-valmsg-for="tinh" class="text-danger"></span>
 								</div>
 
 								<div class="form-group">
 									<label>Ward</label>
-									<select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
-										<option value="0">Phường Xã</option>
-									</select>
+										<select asp-for="@Model.InfoDelivery.phuong" class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+											<option value="">Phường Xã</option>
+										</select>
+										<span asp-validation-for="@Model.InfoDelivery.phuong" data-valmsg-for="tinh" class="text-danger"></span>
 								</div>
-
-								<button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.Street" class="control-label"></label>
+										<input asp-for="@Model.InfoDelivery.Street" name="Street" class="form-control" />
+										<span asp-validation-for="@Model.InfoDelivery.Street" data-valmsg-for="Street" class="text-danger"></span>
+									</div>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.PhoneDelivery" name="PhoneDelivery" class="control-label"></label>
+										<input asp-for="@Model.InfoDelivery.PhoneDelivery" name="PhoneDelivery" id="PhoneDelivery" class="form-control" />
+										<span asp-validation-for="@Model.InfoDelivery.PhoneDelivery" data-valmsg-for="PhoneDelivery" class="text-danger"></span>
+									</div>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.Consignee" name="Consignee" class="control-label"></label>
+										<input asp-for="@Model.InfoDelivery.Consignee" name="Consignee" class="form-control" />
+										<span asp-validation-for="@Model.InfoDelivery.Consignee" data-valmsg-for="Consignee" class="text-danger"></span>
+									</div>
+									<div class="form-group">
+										<input type="submit" value="Shipping cost" class="btn btn-primary" />
+									</div>
+	
+																												
+								@* <button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button> *@
+								</form>
 							</td>
 							<td>
 								<form>
-									Coupon code:<input type="text" class="form-control coupon-value"/>
-									<span class="text text-success">@Model.CouponCode</span> <br/>
-									<input type="button" value="Apply" class="btn btn-sm btn-primary btn-apply-coupon"/>
+									Coupon code:<input type="text" class="form-control coupon-value" />
+									<span class="text text-success">@Model.CouponApply.CouponCode - @Model.CouponApply.Description</span> <br />
+									<input type="button" value="Apply" class="btn btn-sm btn-primary btn-apply-coupon" />
 								</form>
+							
 							</td>
 
-							@if(Model.ShippingCost <= 0){
+							
+
+							@if(Model.InfoDelivery.ShippingCost <= 0){
 								<td>
 									<a disabled="disabled" class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
 									<br/>
@@ -116,32 +140,47 @@
 							}
 							else
 							{
+								<td>
+								<div class="col-sm-20">
+									<div class="total_area">
+										<ul>
+											<li>Cart Sub Total<span>@Model.GrandTotal.ToString("#,##0 VND")</span></li>
+											<li>- Eco Tax <span>@Model.CouponApply.Value.ToString("#,##0 VND")</span></li>
+											<li>+ Shipping Cost <span>@Model.InfoDelivery.ShippingCost.ToString("#,##0 VND")</span></li>
+											<li>Total <span></span>@(Model.GrandTotal + Model.InfoDelivery.ShippingCost - Model.CouponApply.Value) VND</li>
+										</ul>
+						
+									</div>
+										<form method="POST" asp-action="CheckOut" asp-controller="CheckOut">
+											<button type="submit" value="COD" name="payment" class="btn btn-primary">Thanh toán COD</button>
+											<br />
+										 	<button type="submit" value="MOMO" name="payment" class="btn btn-primary">Pay with Momo 1</button>
+											<br />
+											<button type="submit" value="VNPAY" name="payment" class="btn btn-primary">Pay with Vnpay 1</button> 
+										</form>
 
-								<td>
-									<a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
-								</td>
-								<td>
-									@* <form method="POST" asp-action="CreatePaymentUrl" asp-controller="Payment">
-										<input type="hidden" name="Amount" value="@Model.GrandTotal" />
-										<input type="hidden" name="OrderId" value="@Guid.NewGuid().ToString()" /> 
-										<input type="hidden" name="OrderInfo" value="Payment momo for order in DShop2024" />
-										<input type="hidden" name="FullName" value="@User.Identity.Name" />
-										<button class="btn btn-danger" name="PayUrl" type="submit">Pay with Momo</button>
-									</form> *@
+
+
+
+
+										@* <a class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut" >Check Out </a> 
+									
 									<form method="POST" asp-action="CreatePaymentMomo" asp-controller="Payment">
 										<input type="hidden" name="FullName" value="@User.Identity.Name" />
 										<input type="hidden" name="Amount" value="@Convert.ToInt32(Model.GrandTotal)" />
-										<input type="hidden" name="OrderInfo" value="Thanh toán qua Momo Payment tại HieuTanStore" />
+										<input type="hidden" name="OrderInfo" value="Thanh toán qua Momo Payment tại DShop2024" />
 
 										<button class="btn btn-danger" name="PayUrl" type="submit">Pay with MoMo</button>
 									</form>
+									<br/>
 									<form method="POST" asp-action="CreatePaymentUrlVnpay" asp-controller="Payment">
 										<input type="hidden" name="Name" value="@User.Identity.Name" />
 										<input type="hidden" name="Amount" value="@Model.GrandTotal" />
 										<input type="hidden" name="OrderDescription" value="Thanh toan qua Vnpay tai DShop2024" />
 										<input type="hidden" name="OrderType" value="other" />
 										<button class="btn btn-success" type="submit">Pay with VNpay</button>
-									</form>
+								</form> *@
+									</div>
 								</td>
 							}
 
@@ -164,8 +203,17 @@
 		</div>
 	</div>
 </section> <!--/#cart_items-->
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.scrollUp.min.js"></script>
+<script src="js/jquery.prettyPhoto.js"></script>
+<script src="js/main.js"></script>
 
 @section Scripts{
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+		
 	<script>
 		$(".btn-apply-coupon").click(function () {
 			var couponValue = $(".coupon-value").val();
@@ -175,8 +223,8 @@
 				data: { couponValue: couponValue },
 				success: function (result) {
 					if (result.success) {
-						Swal.fire(result.message);
 						location.reload();
+						Swal.fire(result.message);
 					} else {
 						Swal.fire(result.message);
 					}
@@ -185,7 +233,7 @@
 		});
 
 	</script>
-	<script>
+@* 	<script>
 		$(document).ready(function () {
 			$(".btn-add-shipping").click(function () {
 				var tinh = $('#tinh').find('option:selected').text();
@@ -201,16 +249,17 @@
 						data: { tinh: tinh, quan: quan, phuong: phuong },
 						success: function (result) {
 							if (result) {
+								Swal.fire(result.message.text);
 								location.reload();
 
-							}
+							} 
 							
 						}
 					});
 				}
 			});
 		});
-	</script>
+	</script>  *@
 	<script>
 		$(document).ready(function () {
 			//Lấy tỉnh thành

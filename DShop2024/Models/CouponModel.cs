@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DShop2024.Models
@@ -8,9 +9,14 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
+		[Required, MaxLength(100, ErrorMessage = "Coupon code can not null")]
+		public string CouponCode { get; set; }
 
 		[Required( ErrorMessage = "Coupon name can not null")]
 		public string CouponName { get; set; }
+		[Required(ErrorMessage = "Value can not null ")]
+		[Range(0, int.MaxValue, ErrorMessage = "Value > {1}")]
+		public decimal Value { get; set; }
 		public string? Description { get; set; }
 		public DateTime DateStart { get; set; }
 		public DateTime DateExpired{ get; set; }

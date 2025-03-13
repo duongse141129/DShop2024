@@ -3,7 +3,7 @@ using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+
 
 namespace DShop2024.Controllers
 {
@@ -19,24 +19,24 @@ namespace DShop2024.Controllers
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
 
-			var shippingPriceCookie = Request.Cookies["shipppingPrice"];
+			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery") ?? new InformationDelivery();
+
+			CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>("CouponCustomerApply") ?? new CouponModel();
+
 			decimal shippingPrice = 0;
-
-			var couponCode = Request.Cookies["CouponTitle"];
-
-			if(shippingPriceCookie != null)
+			
+			if (info.ShippingCost != 0)
 			{
-				var shippingPriceJson = shippingPriceCookie;
-				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceJson);
+				shippingPrice = info.ShippingCost;
 			}
-			
-			
+			//var couponCode = Request.Cookies["CouponTitle"];
+
 			CartItemViewModel cartItemViewModel = new CartItemViewModel { 
 				CartItems = cartItems,
 				GrandTotal = cartItems.Sum( s => s.Quantity* s.Price),
-				ShippingCost = shippingPrice,
-                CouponCode = couponCode
-            };
+				CouponApply = coupoun,
+				InfoDelivery= info
+			};
 
 			return View(cartItemViewModel);
 		}
@@ -72,7 +72,7 @@ namespace DShop2024.Controllers
 			}
 			HttpContext.Session.SetJson("Cart",cart);
 
-			//TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
+			TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
 		
 		}
@@ -141,77 +141,52 @@ namespace DShop2024.Controllers
 		}
 
 
-		public async Task<ActionResult> GetShipping(ShippingModel shippingModel, string tinh, string quan, string phuong)
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<ActionResult> GetShipping(InformationDelivery informationDelivery)
 		{
-			// default 50k
-			decimal shipppingPrice = 50000;
-
-			var existingShipping = await _dataContext.Shippings
-										.FirstOrDefaultAsync(x => x.City == tinh && 
-															x.District == quan 
-															&& x.Ward == phuong);
-
-			if(existingShipping != null)
+			decimal shipppingPrice = 50000;			
+			if(ModelState.IsValid)
 			{
-				shipppingPrice = existingShipping.Price;
-			}
+				var existingShipping = await _dataContext.Shippings
+											.FirstOrDefaultAsync(x => x.City == informationDelivery.tinh &&
+																x.District == informationDelivery.quan
+																&& x.Ward == informationDelivery.phuong);
 
-			var shippingPriceJson = JsonConvert.SerializeObject(shipppingPrice);
-			try
-			{
-				var cookieOptionss = new CookieOptions
+				if (existingShipping != null)
 				{
-					HttpOnly = true,
-					Expires = DateTime.UtcNow.AddMinutes(30),
-					Secure = true
-				};
-				Response.Cookies.Append("shipppingPrice", shippingPriceJson, cookieOptionss);
-			}
-			catch (Exception ex)
-			{
+					shipppingPrice = existingShipping.Price;
+				}
 
-				return Json(new { ex .Message});
+				informationDelivery.ShippingCost = shipppingPrice;
+				HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
+				return RedirectToAction("Index");
 			}
-			return Json(new { shipppingPrice });
+			return RedirectToAction("Index");
 		}
 
-        public ActionResult DeleteShipping()
-        {
-			Response.Cookies.Delete("shipppingPrice");
-            return RedirectToAction("Index");
-        }
 
 		[HttpPost]
-		public async Task<ActionResult> GetCoupon(CouponModel couponModel, string couponValue)
+		public async Task<ActionResult> GetCoupon( string couponValue)
 		{
+			if(couponValue == null)
+			{
+				return Ok(new { success = false, message = "Please enter your coupon code to apply coupon" });
+			}
+			
 			var validCoupon = await _dataContext.Coupons
-									.FirstOrDefaultAsync(x => x.CouponName == couponValue && x.Quantity >=1);
-			string couponTitle = validCoupon.CouponName + " | " + validCoupon?.Description;
+									.FirstOrDefaultAsync(x => x.CouponCode == couponValue && x.Quantity >=1);
+			
 			
 			if(validCoupon != null)
 			{
 				TimeSpan remainingTime = validCoupon.DateExpired - DateTime.Now;
 				int daysRemaining = remainingTime.Days;
-				if(daysRemaining <= 0)
+				if(daysRemaining >= 0)
 				{
-					try
-					{
-						var cookieOptions = new CookieOptions
-						{
-							HttpOnly = true,
-							Expires= DateTime.UtcNow.AddMinutes(30),
-							Secure = true,
-							SameSite = SameSiteMode.Strict, // kiểm tra tương thích trình duyệt
-						};
 
-						Response.Cookies.Append("CouponTitle", couponTitle, cookieOptions);
-						return Ok( new {success = true, message = "Apply coupon successfully"});
-					}
-					catch (Exception ex)
-					{
-
-						return Ok(new { success = false, message = "Apply coupon fail: "+ ex.Message });
-					}
+					HttpContext.Session.SetJson("CouponCustomerApply", validCoupon);
+					return Ok(new { success = true, message = "Apply coupon successfully" });
 				}
 				
 				else
@@ -219,7 +194,6 @@ namespace DShop2024.Controllers
 					return Ok(new { success = false, message = "Coupon has expried" });
 				}
 			}
-
 			return Ok(new { success = false, message = "Coupon hasn't existed" });
 
 		}
