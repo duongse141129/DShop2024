@@ -14,15 +14,67 @@
             <span asp-validation-for="ProductName" class="text-danger" />
         </div>
         <div class="form-group">
-            <label>Price</label>
-            <input asp-for="Price" class="form-control" />
-            <span asp-validation-for="Price" class="text-danger" />
-        </div>
-        <div class="form-group">
             <label>Description</label>
             <textarea asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger" />
         </div>
+        <div class="form-group">
+            <label>Price (VND)</label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger" />
+        </div>
+
+        <div class="form-group">
+            <label>Original Price (VND)</label>
+            <input asp-for="OriginalPrice" class="form-control" />
+            <span asp-validation-for="OriginalPrice" class="text-danger" />
+        </div>
+
+        <div class="form-group">
+            <label>Capacity (L)</label>
+            <input asp-for="Capacity" class="form-control"  />
+            <span asp-validation-for="Capacity" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Weight (KG)</label>
+            <input asp-for="Weight" class="form-control" />
+            <span asp-validation-for="Weight" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Compartment</label>
+            <input asp-for="Compartment" class="form-control" />
+            <span asp-validation-for="Compartment" class="text-danger" />
+        </div>
+
+        <div class="form-group">
+            <label>Dimension (CM)</label>
+            <input asp-for="Dimension" class="form-control" />
+            <span asp-validation-for="Dimension" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Material</label>
+            <input asp-for="Material" class="form-control" />
+            <span asp-validation-for="Material" class="text-danger" />
+        </div>
+
+
+        <div class="form-group">
+            <label>Water Resistance</label>
+            <input type="checkbox" asp-for="WaterResistance" class="form-control" />
+            <span asp-validation-for="WaterResistance" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>USB Chargin gPort</label>
+            <input type="checkbox" asp-for="USBChargingPort" class="form-control" />
+           
+            <span asp-validation-for="USBChargingPort" class="text-danger" />
+        </div>
+
+
+
+
+
+
         <div class="form-group">
             <label>Category</label>
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">

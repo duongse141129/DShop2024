@@ -13,16 +13,68 @@
             <span asp-validation-for="ProductName"  class="text-danger"/>
         </div>
         <div class="form-group">
-            <label>Price</label>
-            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
-            <span id="price-convert"></span>
-            <span asp-validation-for="Price"  class="text-danger"/>
-        </div>
-        <div class="form-group">
             <label>Description</label>
             <textarea asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger" />
         </div>
+        <div class="form-group">
+            <label>Price (VND)</label>
+            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span id="price-convert"></span>
+            <span asp-validation-for="Price"  class="text-danger"/>
+        </div>
+
+
+        <div class="form-group">
+            <label>Original Price (VND)</label>
+            <input asp-for="OriginalPrice" pattern="[0-9.,]+" class="form-control typing-originalPrice" />
+            <span id="originalPrice-convert"></span>
+            <span asp-validation-for="OriginalPrice" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Capacity (L)</label>
+            <input asp-for="Capacity" class="form-control" />
+            <span asp-validation-for="Capacity" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Weight (KG)</label>
+            <input asp-for="Weight" class="form-control" />
+            <span asp-validation-for="Weight" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Compartment</label>
+            <input asp-for="Compartment" class="form-control" />
+            <span asp-validation-for="Compartment" class="text-danger" />
+        </div>
+
+        <div class="form-group">
+            <label>Dimension (CM)</label>
+            <input asp-for="Dimension" class="form-control" />
+            <span asp-validation-for="Dimension" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Material</label>
+            <input asp-for="Material" class="form-control" />
+            <span asp-validation-for="Material" class="text-danger" />
+        </div>
+
+      
+        <div class="form-group">
+            <label>Water Resistance</label>
+            <input asp-for="WaterResistance" class="form-control" />
+            <span asp-validation-for="WaterResistance" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>USB Chargin gPort</label>
+            <input asp-for="USBChargingPort" class="form-control" />
+            <span asp-validation-for="USBChargingPort" class="text-danger" />
+        </div>
+       
+
+
+
+
+
         <div class="form-group">
             <label>Category</label>
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
@@ -70,6 +122,13 @@
             $("#price-convert").html(
                 new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' }).format(currency_input)
             );
+            
          });
+        $(".typing-originalPrice").on("keyup", function () {
+            var currency_input = $(this).val();
+            $("#originalPrice-convert").html(
+                new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' }).format(currency_input)
+            );
+        });
     </script>
 }

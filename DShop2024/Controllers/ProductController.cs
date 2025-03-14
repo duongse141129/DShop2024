@@ -3,6 +3,7 @@ using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Security.Cryptography;
 
 namespace DShop2024.Controllers
@@ -28,6 +29,7 @@ namespace DShop2024.Controllers
 			{
 				return NotFound();
 			}
+
 			var productById = await _dataContext.Products
 										.Where(p => p.Id == Id)
 										.Where(p => p.Status == 1)
@@ -43,6 +45,35 @@ namespace DShop2024.Controllers
 									.ToListAsync();
 			ViewBag.relatedProducts = relatedProducts;
 
+
+			// kiếm template
+			//var rvproduct = Request.Cookies["RecentlyViewedProducts"];
+			//List<ProductModel> recentlyViewedProducts;
+			//if(rvproduct == null)
+			//{
+			//	recentlyViewedProducts = new List<ProductModel>();
+			//}
+			//else
+			//{
+			//	recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductModel>>(rvproduct);
+			//}
+			
+			//if (!recentlyViewedProducts.Contains(productById))
+			//{
+			//	recentlyViewedProducts.Add(productById);
+			//}		
+			//var recentProducts = JsonConvert.SerializeObject(recentlyViewedProducts.Take(10));
+			//var cookieOptionss = new CookieOptions
+			//{
+			//	HttpOnly = true,
+			//	Expires = DateTime.UtcNow.AddMinutes(30),
+			//	Secure = true,
+			//	SameSite = SameSiteMode.Strict,
+			//};
+			//Response.Cookies.Append("RecentlyViewedProducts", recentProducts, cookieOptionss);
+			//ViewBag.recentlyViewedProducts = recentlyViewedProducts;
+
+
 			var user = await _userManager.GetUserAsync(this.User);
 			var listRating = await _dataContext.Ratings
 									.Where(p => p.ProductId == Id)
@@ -50,7 +81,12 @@ namespace DShop2024.Controllers
 									.Include(c => c.User)
 									.ToListAsync();
 
-			var pointAvarge = listRating.Average(p => p.Star);
+			var pointAvarge = 0.0;
+			if(listRating.Count >0)
+			{
+                pointAvarge = listRating.Average(p => p.Star);
+
+            }
 
 			RatingModel feedback = listRating.Where(u => u.UserId == user.Id).FirstOrDefault();
 
@@ -59,7 +95,7 @@ namespace DShop2024.Controllers
 			bool checkUserOrder = false;
 			var checkOrder = await (from o in _dataContext.Orders
 											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
-											where o.UserId == user.Id && od.ProductId == productById.Id
+											where o.UserId == user.Id && od.ProductId == productById.Id && o.Status == 4
 											select o).FirstOrDefaultAsync();
 			if(checkOrder != null)
 			{

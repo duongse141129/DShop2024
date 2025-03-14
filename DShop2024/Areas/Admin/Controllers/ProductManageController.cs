@@ -24,7 +24,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 		public async Task<IActionResult> Index()
 		{
-			var products = await _dataContext.Products.Where(p => p.Status ==1)
+			var products = await _dataContext.Products.Where(p => p.Status != 0)
 															.Include(p => p.Category)
 															.Include(p => p.Brand)
 															.OrderByDescending(p => p.Id)
@@ -51,32 +51,46 @@ namespace DShop2024.Areas.Admin.Controllers
 
 			if(ModelState.IsValid)
 			{
-				product.Slug = product.ProductName.ToLower().Replace(" ", "-");
-				var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
-				if(slug != null)
-				{
-					ModelState.AddModelError("", "Can't same slug");
-					return View(product);
-				}
+                try
+                {
+                    if(product.OriginalPrice > product.Price)
+                    {
+                        ModelState.AddModelError("", "original price must <=  price");
+                        return View(product);
+                    }
 
-				if(product.ImageUpload != null)
-				{
-					string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-					string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;	
-					string filePath = Path.Combine(uploadsDir, imageName);
+                    product.Slug = product.ProductName.ToLower().Replace(" ", "-");
+                    var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
+                    if (slug != null)
+                    {
+                        ModelState.AddModelError("", "Can't same slug. Product Name is exited");
+                        return View(product);
+                    }
 
-					FileStream fs = new FileStream(filePath, FileMode.Create);
-					await product.ImageUpload.CopyToAsync(fs);
-					fs.Close();
-					product.Image = imageName;
+                    if (product.ImageUpload != null)
+                    {
+                        string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                        string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
+                        string filePath = Path.Combine(uploadsDir, imageName);
 
-				}
-				product.Status = 1;
-				await _dataContext.Products.AddAsync(product);
-				await _dataContext.SaveChangesAsync();
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                        await product.ImageUpload.CopyToAsync(fs);
+                        fs.Close();
+                        product.Image = imageName;
 
-				TempData["success"] = "Add product success";
-				return RedirectToAction("Index");
+                    }
+                    product.Status = 1;
+                    await _dataContext.Products.AddAsync(product);
+                    await _dataContext.SaveChangesAsync();
+
+                    TempData["success"] = "Add product success";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while deleting the product image " + ex.Message);
+                }
+				
 			}
 
             return View(product);
@@ -103,54 +117,76 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                product.Slug = product.ProductName.ToLower().Replace(" ", "-");
-                var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
-                if (slug != null)
+                try
                 {
-                    ModelState.AddModelError("", "Can't same slug");
-                    return View(product);
-                }
+                    if (product.OriginalPrice > product.Price)
+                    {
+                        ModelState.AddModelError("", "original price must <=  price");
+                        return View(product);
+                    }
 
-                if (product.ImageUpload != null)
-                {
+                    product.Slug = product.ProductName.ToLower().Replace(" ", "-");
+                    var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
+                    if (slug != null && product.Slug != exitedProduct.Slug)
+                    {
+                        ModelState.AddModelError("", "Can't same slug");
+                        return View(product);
+                    }
 
-                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-                    string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
-                    string filePath = Path.Combine(uploadsDir, imageName);
+                    if (product.ImageUpload != null)
+                    {
 
-                    string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
-					try
-					{
-                        if (System.IO.File.Exists(oldFilePath))
+                        string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                        string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
+                        string filePath = Path.Combine(uploadsDir, imageName);
+
+                        string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
+                        try
                         {
-                            System.IO.File.Delete(oldFilePath);
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+
                         }
+                        catch (Exception ex)
+                        {
+                            ModelState.AddModelError("", "An error occurred while deleting the product image");
+                        }
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                        await product.ImageUpload.CopyToAsync(fs);
+                        fs.Close();
+                        exitedProduct.Image = imageName;
 
                     }
-                    catch(Exception ex) 
-					{
-						ModelState.AddModelError("", "An error occurred while deleting the product image");
-					}
-                    FileStream fs = new FileStream(filePath, FileMode.Create);
-                    await product.ImageUpload.CopyToAsync(fs);
-                    fs.Close();
-                    exitedProduct.Image = imageName;
+                    exitedProduct.ProductName = product.ProductName;
+                    exitedProduct.Description = product.Description;
+                    exitedProduct.Price = product.Price;
+                    exitedProduct.CategoryId = product.CategoryId;
+                    exitedProduct.BrandId = product.BrandId;
 
+                    exitedProduct.OriginalPrice = product.OriginalPrice;
+                    exitedProduct.Capacity = product.Capacity;
+                    exitedProduct.Weight = product.Weight;
+                    exitedProduct.Compartment = product.Compartment;
+                    exitedProduct.Dimension = product.Dimension;
+                    exitedProduct.Material = product.Material;
+                    exitedProduct.WaterResistance = product.WaterResistance;
+                    exitedProduct.USBChargingPort = product.USBChargingPort;
+
+
+                    exitedProduct.Status = 1;
+                    _dataContext.Update(exitedProduct);
+                    await _dataContext.SaveChangesAsync();
+
+                    TempData["success"] = "Update product success";
+                    return RedirectToAction("Index");
                 }
-                exitedProduct.ProductName = product.ProductName;
-                exitedProduct.Slug = product.Slug;
-				exitedProduct.Description = product.Description;
-				exitedProduct.Price = product.Price;
-				exitedProduct.CategoryId = product.CategoryId;
-				exitedProduct.BrandId = product.BrandId;
-
-
-                exitedProduct.Status = 1;
-                _dataContext.Update(exitedProduct);
-                await _dataContext.SaveChangesAsync();
-
-                TempData["success"] = "Update product success";
-                return RedirectToAction("Index");
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while deleting the product image " + ex.Message);
+                }
+               
             }
 
             return View(exitedProduct);
@@ -182,6 +218,35 @@ namespace DShop2024.Areas.Admin.Controllers
 			TempData["success"] = "Remove product success";
             return RedirectToAction("Index");
 
+        }
+
+
+        public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
+        {
+            if(IdProductsToDelete.Count == 0)
+            {
+                TempData["success"] = "Select list product to delete mutiple" ;
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                foreach (int idProduct in IdProductsToDelete)
+                {
+                    var product = await _dataContext.Products.FindAsync(idProduct);
+                    product.Status = 0;
+                    _dataContext.Products.Update(product);
+                    await _dataContext.SaveChangesAsync();
+                }
+                TempData["success"] = "Delete Multiple product success";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+
+                TempData["error"] = "Delete Multiple product fail "+ ex.Message;
+                return RedirectToAction("Index");
+            }
+           
         }
 
         [HttpGet]

@@ -3,16 +3,20 @@
     ViewData["title"] = "Manage Product";
 }
 <h4>List Product Admin</h4>
-<a asp-area="Admin" asp-action="Create" asp-controller="ProductManage">Add Product</a>
-<table class="table" id="myTable">
+<a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
+<br/>
+<form asp-action="DeleteMultiple" asp-controller="ProductManage">
+    <input type="submit" class="btn btn-danger btn-sm confirmDeletion" value="Delete multiple products" onclick="return confirm('Are you sure you want to delete these products?');" />
+<table class="table table-striped" id="myTable">
     <thead>
         <tr>
+            <th></th>
             <th scope="col">Stt</th>
             <th scope="col" >Image</th>
             <th scope="col">Product Name</th>
-            <th scope="col">Description</th>
+            <th scope="col">Original Price</th>
+            <th scope="col">Price</th>
             <th scope="col">Stock</th>    
-            <th scope="col">Price</th>    
             <th scope="col">Slug</th>
             <th scope="col">Category</th>
             <th scope="col">Brand</th>
@@ -27,10 +31,11 @@
         @foreach (var item in Model)
         {
             <tr>
+                <th> <input type="checkbox" name="IdProductsToDelete" value="@item.Id" /> </th>
                 <th scope="row">@i</th>
                 <td><img src="~/media/products/@item.Image" width="120" height="100" /></td>
                 <td>@item.ProductName</td>
-                <td>@item.Description</td>
+                <td>@item.OriginalPrice</td>
                 <td>@item.Price</td>
                 <td>
                     @item.Stock
@@ -55,4 +60,4 @@
     </tbody>
     
 </table>
-
+</form>

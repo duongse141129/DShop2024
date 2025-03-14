@@ -15,7 +15,7 @@ namespace DShop2024.Models
 		public string Image { get; set; }
 		public string? Description { get; set; }
 		[Required(ErrorMessage = "Product price can not null ")]
-		[Range(0, int.MaxValue, ErrorMessage = "Price > {1}")]
+		[Range(1000, int.MaxValue, ErrorMessage = "Price > {1}")]
 		[Column(TypeName ="decimal(8,2)")]
 		public decimal Price { get; set; }
 		public int Stock {  get; set; }
@@ -29,22 +29,22 @@ namespace DShop2024.Models
 		public int Status { get; set; }
 
         [Required(ErrorMessage = "Original Price is required ")]
-        [Range(0, int.MaxValue, ErrorMessage = "Original Price > {1}")]
+        [Range(1000, int.MaxValue, ErrorMessage = "Original Price > {1}")]
         public decimal OriginalPrice { get; set; }
 
         [Required(ErrorMessage = "Capacity is required ")]
-        [Range(0, int.MaxValue, ErrorMessage = "Capacity > {1}")]
+        [Range(1, int.MaxValue, ErrorMessage = "Capacity must > {1}")]
         public int Capacity { get; set; }
         [Required, MaxLength(300, ErrorMessage = "Dimension is required ")]
         public string Dimension { get; set; }
 
         [Required(ErrorMessage = "Weight is required  ")]
-        [Range(0, int.MaxValue, ErrorMessage = "Weight > {1}")]
+        [Range(0.1, int.MaxValue, ErrorMessage = "Weight must > {1}")]
         public decimal Weight { get; set; }
         [Required, MaxLength(300, ErrorMessage = "Material is required ")]
         public string Material { get; set; }
         [Required(ErrorMessage = "Compartment is required")]
-        [Range(0, int.MaxValue, ErrorMessage = "Compartment > {1}")]
+        [Range(1, int.MaxValue, ErrorMessage = "Compartment must >= {1}")]
         public int Compartment { get; set; }
         public bool WaterResistance { get; set; }
         public bool USBChargingPort { get; set; }
@@ -52,7 +52,7 @@ namespace DShop2024.Models
 
         [NotMapped]
 		[FileExtension]
-		public IFormFile? ImageUpload { get; set; }
+        public IFormFile? ImageUpload { get; set; }
 
 	}
 }
