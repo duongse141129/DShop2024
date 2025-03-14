@@ -19,7 +19,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var order = await _context.Orders.Where(p => p.Status != 0).Include(u => u.User).OrderByDescending(o => o.Id).ToListAsync();
+            var order = await _context.Orders.Where(p => p.Status != -1).Include(u => u.User).OrderByDescending(o => o.Id).ToListAsync();
             return View(order);
         }
 
@@ -30,29 +30,71 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
-                decimal total = 0;
-                foreach (var o in order.OrderDetails)
-                {
-                    total += o.Price * o.Quantity;
-                }
 
-                ViewBag.GrandTotal = total;
-	
+	        
 				return View(order);
             }
         }
-		public async Task<IActionResult> ViewOrderDetail(int Id)
-		{
-			{
-				List<OrderDetailModel> orderDetails = await _context.OrderDetails.Include(p => p.Product)
-                                                                                    .Include(od => od.Order)
-                                                                                    .ThenInclude(u  => u.User)
-                                                                                    .Where(od => od.OrderId == Id)
-                                                                                    .ToListAsync();
+ 
+        public async Task<IActionResult> UpdateStatusOrder(int orderId)
+        {
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == orderId);
 
-				return View(orderDetails);
-			}
-		}
+                if (order == null)
+                {
+                    return NotFound();
+                }
+                try
+                {
+                    if(order.Status != 4)
+                    {
+                        order.Status += 1;
+                    }                    
+                    _context.Orders.Update(order);
+                    await _context.SaveChangesAsync();
+                    TempData["success"] = "Update Status order successful";
+                    return RedirectToAction("ViewOrder", "Order", new {order.Id});
+
+                }
+                catch (Exception ex)
+                {
+                    TempData["error"] = "Update status order fail " + ex.Message;
+                    return RedirectToAction("ViewOrder", "Order", new { order.Id });
+                }
+
+            }
+        }
+
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == orderId);
+
+                if (order == null)
+                {
+                    return NotFound();
+                }
+                try
+                {
+                    order.Status = 0;
+                    _context.Orders.Update(order);
+                    await _context.SaveChangesAsync();
+                    TempData["success"] = "Cancle order successful";
+                    return RedirectToAction("ViewOrder", "Order", new { order.Id });
+
+                }
+                catch (Exception ex)
+                {
+                    TempData["error"] = "Cancle order fail " + ex.Message;
+                    return RedirectToAction("ViewOrder", "Order", new { order.Id });
+                }
+
+            }
+        }
+
+
+
 
         [HttpPost]
         [Route("UpdateOrder")]
@@ -80,15 +122,6 @@ namespace DShop2024.Areas.Admin.Controllers
 			}
 		}
 
-		public async Task<IActionResult> Delete(int Id)
-        {
-            {
-                OrderModel order = await _context.Orders.FindAsync(Id);
-                _context.Orders.Remove(order);
-                await _context.SaveChangesAsync();
-                TempData["success"] = "Remove product success";
-                return RedirectToAction("Index");
-            }
-        }
+		
     }
 }

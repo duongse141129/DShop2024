@@ -1,64 +1,130 @@
 ﻿@model DShop2024.Models.OrderModel
 
 @{
-    ViewData["title"] = "Order Detail";
+    ViewData["title"] = "Invoice";
 }
-<div class="container">
-    <article class="card">
-        <header class="card-header"> My Orders / Tracking </header>
-        <div class="card-body">
-            <h6>Order ID: @Model.OrderCode </h6>
-            <article class="card">
-                <div class="card-body row">
-                    <div class="col"> <strong>Order Date :</strong> <br>@Model.CreatedDate</div>
-                    <div class="col"> <strong>User Name:</strong> <br> @Model.User.UserName </div>
-                    <div class="col"> <strong>Status:</strong> <br> @Model.Status </div>
+
+<hr>
+<section class="py-3 py-md-5 ">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
+                <div class="row gy-3 mb-3">
+                    <div class="col-6">
+                        <h2 class="text-uppercase text-endx m-0">Invoice: @Model.OrderCode</h2>
+                    </div>
+                    <div class="col-6">
+                        @if(Model.Status == 0)
+                        {
+                            <h4>Invoice has been cancelled</h4>
+                        }
+                        else
+                        {
+                            <div class="track">
+                                <div class="step @(Model.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
+                                <div class="step @(Model.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
+                                <div class="step @(Model.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
+                                <div class="step @(Model.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
+                            </div>
+                        }
+                        
+                        <hr>
+                    </div>
+                    <div class="col-12">
+        
+                        <address>
+                            <strong>@Model.CreatedDate.ToLongDateString()</strong><br>
+                            @Model.CreatedDate.ToLongTimeString()<br>
+                            Payment method: @Model.PaymentMethod<br>
+                          
+                        </address>
+                    </div>
                 </div>
-            </article>
-            <hr>
-			<table class="table table-condensed">
-				<thead>
-					<tr class="cart_menu">
-						<td class="image">Image</td>
-						<td class="image">Item Name</td>
-						<td class="price">Price</td>
-						<td class="quantity">Quantity</td>
-						<td class="total">SubTotal</td>
-					</tr>
-				</thead>
-
-						@foreach (var item in Model.OrderDetails)
-						{
-
-
-							<tr>
-								<td class="cart_product">
-								<a href=""><img src="~/media/products/@item.Product.Image" alt="" width="100"></a>
-								</td>
-								<td >
-									<h4><a href="">@item.Product.ProductName</a></h4>
-								</td>
-								<td class="cart_price">
-									<p>$@item.Price</p>
-								</td>
-								<td class="cart_quantity">
-									<p>@item.Quantity</p>
-								</td>
-								<td class="cart_total">
-									<p class="cart_total_price">$@(item.Price* item.Quantity)</p>
-								</td>
-							</tr>
-						}
-						<tr rowspan="5">
-							<td colspan="6">Grand Total: <p class="cart_total_price"> @ViewBag.GrandTotal</p></td>
-						</tr>
-
-				
-			</table>
-
-
-            <hr>
-            <a asp-action="Index">Back to List Order</a>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6 col-md-8">
+                        <h4>Bill To</h4>
+                        <address>
+                            <strong>@Model.User.UserName</strong><br>
+                            Email: @Model.User.Email<br>
+                            Consignee: @Model.Consignee<br>
+                            Address: @Model.AddressDelivery<br>
+                            Phone: @Model.PhoneDelivery
+                        </address>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="text-uppercase">Stt</th>
+                                        <th scope="col" class="text-uppercase">ProductId</th>
+                                        <th scope="col" class="text-uppercase">Product Name</th>
+                                        <th scope="col" class="text-uppercase">Quantity</th>
+                                        <th scope="col" class="text-uppercase text-end">Unit Price</th>
+                                        <th scope="col" class="text-uppercase text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    @{ int i = 1;}
+                                    @foreach (var item in Model.OrderDetails)
+                                    {
+                                        <tr>
+                                            <th scope="row">@i</th>
+                                            <td>@item.ProductId</td>
+                                            <td>
+                                                <p>@item.Product.ProductName</p>
+                                                
+                                                <img src="~/media/products/@item.Product.Image" width="120" height="100" />
+                                            </td>
+                                            <td>@item.Quantity</td>
+                                            <td class="text-end">@item.Price</td>
+                 
+                                            <td class="text-end">@(item.Quantity * item.Price)</td>
+                                        </tr>
+                                        i++;
+                                    }
+                                    
+                                    <tr>
+                                        <td colspan="3" class="text-end">Subtotal</td>
+                                        <td class="text-end">@Model.TotalPrice</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end">coupon</td>
+                                        <td class="text-end">- @Model.ValueCoupon</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end">Shipping Cost</td>
+                                        <td class="text-end">+ @Model.ShippingCost</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
+                                        <td class="text-end">@(Model.TotalPrice + Model.ShippingCost - Model.ValueCoupon)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @if (Model.Status != 4 && Model.Status != 0)
+                {
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <a asp-action="UpdateStatusOrder" class="btn btn-primary mb-3" asp-controller="Order" asp-route-orderId="@Model.Id">Update status</a>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-12 text-end">
+                            <a asp-action="CancelOrder" class="btn btn-danger mb-3 confirmDeletion" asp-controller="Order" asp-route-orderId="@Model.Id">Cancel invoice</a>
+                        </div>
+                    </div>
+                }             
+             
+            </div>
         </div>
-    </article>
-</div>
+        </div>
+</section>
+<hr>
+<a asp-action="Index">Back to List Order</a>

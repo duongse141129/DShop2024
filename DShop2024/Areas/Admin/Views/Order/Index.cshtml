@@ -44,24 +44,31 @@
                     @Html.DisplayFor(modelItem => item.CreatedDate)
                 </td>
                 <td>
+                    @if (item.Status == 0)
+                    {
+                        <span class="text text-danger">Cancle</span>
+                    }
                     @if (item.Status == 1)
                     {
-                        <span class="text text-success">New Order</span>
+                        <span class="text text-primary">New</span>
                     }
                     @if (item.Status == 2)
                     {
-                        <span class="text text-danger">Complete order</span>
+                        <span class="text text-primary">Accepted</span>
                     }
-                    @if (item.Status == -1)
+                    @if (item.Status == 3)
                     {
-                        <span class="text text-danger">Cancel Order</span>
+                        <span class="text text-primary">Delivery</span>
+                    }
+                    @if (item.Status == 4)
+                    {
+                        <span class="text text-success">Complete</span>
                     }
      
                 </td>
                 <td>
-                    <a asp-action="ViewOrderDetail" asp-route-Id="@item.Id">ViewOrder</a>
-                    <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Order" asp-route-Id="@item.Id">Delete</a>
- 
+                    <a asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
+                    <a asp-action="CancelOrder" class="btn btn-danger mb-3 confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel invoice</a>
                 </td>
             </tr>
         }

@@ -1,0 +1,125 @@
+﻿@model IEnumerable<DShop2024.Models.OrderModel>
+
+@{
+    ViewData["title"] = "History shopping";
+}
+
+
+@foreach (var item in Model)
+{
+ 
+    <hr>
+    <section class="py-3 py-md-5 ">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
+                    <div class="row gy-3 mb-3">
+                        <div class="col-6">
+                            <h2 class="text-uppercase text-endx m-0">Invoice: @item.OrderCode</h2>
+                        </div>
+                        <div class="col-6">
+                            @if (item.Status == 0)
+                            {
+                                <h4>Invoice has been cancelled</h4>
+                            }
+                            else
+                            {
+                                <div class="track">
+                                    <div class="step @(item.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
+                                    <div class="step @(item.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
+                                    <div class="step @(item.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
+                                    <div class="step @(item.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
+                                </div>
+                            }
+
+                            <hr>
+                        </div>
+                        <div class="col-12">
+
+                            <address>
+                                <strong>@item.CreatedDate.ToLongDateString()</strong><br>
+                                @item.CreatedDate.ToLongTimeString()<br>
+                                Payment method: @item.PaymentMethod<br>
+
+                            </address>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6 col-md-8">
+                            <h4>Bill To</h4>
+                            <address>
+                                <strong>@item.User.UserName</strong><br>
+                                Email: @item.User.Email<br>
+                                Consignee: @item.Consignee<br>
+                                Address: @item.AddressDelivery<br>
+                                Phone: @item.PhoneDelivery
+                            </address>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="text-uppercase">Stt</th>
+                                            <th scope="col" class="text-uppercase">ProductId</th>
+                                            <th scope="col" class="text-uppercase">Product Name</th>
+                                            <th scope="col" class="text-uppercase">Quantity</th>
+                                            <th scope="col" class="text-uppercase text-end">Unit Price</th>
+                                            <th scope="col" class="text-uppercase text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider">
+                                        @{
+                                            int i = 1;
+                                        }
+                                        @foreach (var od in item.OrderDetails)
+                                        {
+                                            <tr>
+                                                <th scope="row">@i</th>
+                                                <td>@od.ProductId</td>
+                                                <td>
+                                                    <p>@od.Product.ProductName</p>
+
+                                                    <img src="~/media/products/@od.Product.Image" width="120" height="100" />
+                                                </td>
+                                                <td>@od.Quantity</td>
+                                                <td class="text-end">@od.Price</td>
+                                                @{
+                                                    var x = od.Quantity * od.Price;
+                                                }
+                                                <td class="text-end">@(od.Quantity * od.Price)</td>
+                                            </tr>
+                                            i++;
+                                        }
+
+                                        <tr>
+                                            <td colspan="3" class="text-end">Subtotal</td>
+                                            <td class="text-end">@item.TotalPrice</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-end">coupon</td>
+                                            <td class="text-end">- @item.ValueCoupon</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="text-end">Shipping Cost</td>
+                                            <td class="text-end">+ @item.ShippingCost</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
+                                            <td class="text-end">@(item.TotalPrice + item.ShippingCost - item.ValueCoupon)</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>     
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <hr>
+}
+
