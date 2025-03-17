@@ -17,7 +17,10 @@ namespace DShop2024.Models
 
 		public int Status { get; set; }
 
-		[ForeignKey("OrderId")]
+        public decimal OriginalPrice { get; set; }
+
+
+        [ForeignKey("OrderId")]
 		public virtual OrderModel Order { get; set; }
 
 		[ForeignKey("ProductId")]

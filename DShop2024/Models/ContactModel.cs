@@ -7,26 +7,18 @@ namespace DShop2024.Models
     [Table("Contact")]
     public class ContactModel
     {
+
         [Key]
         public int Id { get; set; }
+        public DateTime DateSent { get; set; }
+        [Required(ErrorMessage = "Enter your subject")]
+        public string Subject { get; set; }
+        [Required(ErrorMessage = "Enter your message")]
+        public string Message { get; set; }
+        public string UserId { get; set; }
+        public int Status { get; set; }
 
-        [Required(ErrorMessage = "Enter your name shop")]
-        public string ShopName { get; set; }
-
-        [Required( ErrorMessage = "Enter your local address")]
-        public string Map { get; set; }
-        [Required(ErrorMessage = "Enter your hotline")]
-        public string Phone { get; set; }
-        [Required(ErrorMessage = "Enter your email address")]
-        public string Email { get; set; }
-        [Required(ErrorMessage = "Enter your description")]
-        public string Description { get; set; }
-
-        public string LogoImg { get; set; }
-
-
-        [NotMapped]
-        [FileExtension]
-        public IFormFile? ImageUpload { get; set; }
+        [ForeignKey("UserId")]
+        public virtual AppUserModel User { get; set; }
     }
 }

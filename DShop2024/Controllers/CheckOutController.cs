@@ -173,7 +173,7 @@ namespace DShop2024.Controllers
 				//var message = "Thanks for order.";
 				//await _emailSender.SendEmailAsync(receiver, subject, message);
 
-				TempData["success"] = "CheckOut successful 11111111111111111111111111111111111111111111111111111111111111";
+				TempData["success"] = "Checkout successful. Thank you for shopping at the DShop2024. ";
 				return RedirectToAction("Index", "Home");
 			}
 			catch (Exception ex)

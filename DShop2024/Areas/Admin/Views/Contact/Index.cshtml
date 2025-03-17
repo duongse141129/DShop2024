@@ -1,20 +1,18 @@
 ﻿@model IEnumerable<ContactModel>
 @{
-    ViewData["title"] = "Contact info";
+    ViewData["title"] = "List contact";
 }
 <h4>Contact Admin</h4>
 
-<table class="table" id="myTable">
+<table class="table table-striped" id="myTable">
     <thead>
         <tr>
  
-            <th>Name</th>
-            <th>Description</th>
-            <th>Map</th>
-            <th>Logo</th>
-            <th>Phone</th>
+            <th>User Name</th>
             <th>Email</th>
-            <th>Action</th>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Message</th>
             <th></th>
 
         </tr>
@@ -23,23 +21,18 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.ShopName</td>
-                <td>@Html.Raw(item.Description)</td>
-                <td><iframe src="@item.Map" width="600" height="450" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></td>
-                <td>@item.ShopName</td>
-                <td><img src="~/media/Logo/@item.LogoImg" width="120" height="120" /></td>
-                <td>@item.Phone</td>
-                <td>@item.Email</td>
+                <td>@item.User.UserName</td>
+                <td>@item.User.Email</td>
+                <td>@item.DateSent.ToShortDateString()</td>
+                <td>@item.Subject</td>
+                <td>@item.Message</td>
                 <td>
-                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Contact" asp-route-Id="@item.Id">Edit</a>                 
+                    <a asp-action="Reply" class="btn btn-primary btn-sm" asp-controller="Contact" asp-route-Id="@item.Id">Reply</a>
+                    <a asp-action="Remove" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Contact" asp-route-Id="@item.Id">Remove</a>
                 </td>
+
             </tr>
         }
-
-        @* <iframe src="" width="600" height="450" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> *@
     </tbody>
-    
-   
-
 </table>
 

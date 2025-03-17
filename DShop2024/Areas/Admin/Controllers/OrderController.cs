@@ -77,6 +77,20 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 try
                 {
+
+                    var listOrderDetail = await _context.OrderDetails.Where(d => d.OrderId == orderId).ToListAsync();
+                    if(listOrderDetail.Count > 0)
+                    {
+						foreach (var item in listOrderDetail)
+						{
+                            var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                            product.Stock += item.Quantity;
+                            _context.Products.Update(product);
+                            await _context.SaveChangesAsync();
+						}
+					}
+
+
                     order.Status = 0;
                     _context.Orders.Update(order);
                     await _context.SaveChangesAsync();

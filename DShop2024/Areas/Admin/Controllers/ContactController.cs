@@ -13,16 +13,20 @@ namespace DShop2024.Areas.Admin.Controllers
     {
         private readonly DShopContext _dataContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailSender _emailSender;
 
-        public ContactController(DShopContext context, IWebHostEnvironment webHostEnvironment)
+        public ContactController(DShopContext context, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _dataContext = context;
             _webHostEnvironment = webHostEnvironment;
+            _emailSender = emailSender;
 
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var contacts = _dataContext.Contacts.ToList();
+            var contacts = await _dataContext.Contacts.Where(c => c.Status != 0)
+                                                        .Include(u => u.User).OrderBy(d => d.DateSent)
+                                                        .ToListAsync();
             return View(contacts);
         }
 
@@ -35,45 +39,78 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int Id, ContactModel contact)
+        [HttpGet]
+        public async Task<IActionResult> Reply(int? id)
         {
-
-            var exitedContact = await _dataContext.Contacts.FindAsync(Id);
-
-            if (ModelState.IsValid)
+            if (id == null)
             {
-                
-
-                if (contact.ImageUpload != null)
-                {
-
-                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/Logo");
-                    string imageName = Guid.NewGuid().ToString() + "_" + contact.ImageUpload.FileName;
-                    string filePath = Path.Combine(uploadsDir, imageName);
-
-                    
-                    FileStream fs = new FileStream(filePath, FileMode.Create);
-                    await contact.ImageUpload.CopyToAsync(fs);
-                    fs.Close();
-                    exitedContact.LogoImg = imageName;
-
-                }
-                exitedContact.ShopName = contact.ShopName;
-                exitedContact.Description = contact.Description;
-                exitedContact.Map = contact.Map;
-                exitedContact.Phone = contact.Phone;
-                exitedContact.Email = contact.Email;
-                
-                _dataContext.Update(exitedContact);
-                await _dataContext.SaveChangesAsync();
-
-                TempData["success"] = "Update contact success";
-                return RedirectToAction("Index");
+                return NotFound();
             }
 
-            return View(exitedContact);
+            var contactModel = await _dataContext.Contacts
+                .Include(u => u.User)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (contactModel == null)
+            {
+                return NotFound();
+            }
+
+            return View(contactModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Reply(int IdContact, string replyMessage)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(replyMessage))
+                {
+                    TempData["error"] = "Message can't null";
+                    return RedirectToAction("Reply", "Contact", new { id = IdContact });
+                }
+
+                var contactModel = await _dataContext.Contacts
+               .Include(u => u.User)
+               .FirstOrDefaultAsync(m => m.Id == IdContact);
+                await _emailSender.SendEmailAsync(contactModel.User.Email, contactModel.Subject, replyMessage);
+
+                TempData["success"] = "Send gmail contact successful ";
+                return RedirectToAction("Reply", "Contact", new { id = IdContact });
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Send gmail contact fail " + ex.Message;
+                return RedirectToAction("Reply", "Contact", new { id = IdContact });
+            }
+          
+        }
+
+
+
+
+        public async Task<IActionResult> Remove(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var contactModel = await _dataContext.Contacts.FindAsync(id);
+                if (contactModel != null)
+                {
+                    _dataContext.Contacts.Remove(contactModel);
+                }
+                TempData["success"] = "Delete contact successful";
+                await _dataContext.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["success"] = "Remove contact fail "+ ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

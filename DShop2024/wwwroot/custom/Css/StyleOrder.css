@@ -71,3 +71,9 @@ table.tbody  {
         margin-top: 7px
     }
 
+
+#graphBrand.svg{
+
+    width : 360px;
+    height: 360px;
+}

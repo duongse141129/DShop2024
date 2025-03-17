@@ -51,11 +51,23 @@ namespace DShop2024.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public async Task<IActionResult> Contact()
-        {
-            var contact = await _dataContext.Contacts.FirstOrDefaultAsync();
-            return View(contact);
-        }
+        //public async Task<IActionResult> Contact()
+        //{
+        //    var contact = await _dataContext.Contacts.FirstOrDefaultAsync();
+        //    return View(contact);
+        //}
+        //public async Task<IActionResult> Contact()
+        //{
+        //    var contact = await _dataContext.InformationShops.FirstOrDefaultAsync();
+        //    return View(contact);
+        //}
+
+		public async Task<IActionResult> InformationShop()
+		{
+			var informationShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+			return View(informationShop);
+		}
+
 
 		public async Task<IActionResult> AddToWishList(int Id)
 		{

@@ -49,10 +49,15 @@ namespace DShop2024.Models
         public bool WaterResistance { get; set; }
         public bool USBChargingPort { get; set; }
 
+      
+        public decimal? LaptopPocket { get; set; }
+
 
         [NotMapped]
 		[FileExtension]
         public IFormFile? ImageUpload { get; set; }
 
-	}
+        public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }
+
+    }
 }

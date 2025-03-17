@@ -14,10 +14,10 @@ namespace DShop2024.Repository.Components
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var contact = await _dataContext.Contacts               
+            var informationShop = await _dataContext.InformationShops               
                                 .FirstOrDefaultAsync();
 
-            return View(contact);
+            return View(informationShop);
 
         }
     }

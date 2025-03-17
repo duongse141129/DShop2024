@@ -9,6 +9,7 @@
                 <li>Tổng đơn hàng : @ViewBag.CountProduct</li>
                 <li>Tổng sản phẩm : @ViewBag.CountProduct</li>
                 <li>Tổng danh mục sản phẩm : @ViewBag.CountCategory</li>
+                <li>Tổng nhãn hàng sản phẩm : @ViewBag.Brand</li>
                 <li>Tổng khách hàng : @ViewBag.CountUser</li>
             </ul>
         </div>
@@ -31,13 +32,54 @@
                         <select class="form-control filter-date">
                             <option value="last_month">Tháng trước</option>
                             <option value="this_month">Tháng này</option>
-                            <option value="all_year">Cả năm</option>
+                            <option value="all_year">Năm nay</option>
+                            <option value="last_year">Năm trước</option>
                         </select>
                     </p>
                 </div>
             </div>
+            <div id="myfirstchart" style="height: 350px;"></div>
+            <div class="row">
+                <h1>Donut Chart Brand </h1>
+                <div id="graphBrand" style="width: 350px;"> </div>
+                <h1>Donut Chart Categories</h1>
+                <div id="graphCategories" style="width: 350px;"> </div>
 
-            <div id="myfirstchart" style="height: 350px"></div>
+                <div class="col-md-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">First</th>
+                                <th scope="col">Last</th>
+                                <th scope="col">Handle</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>mdo</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                                <td>Thornton</td>
+                                <td>fat</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">3</th>
+                                <td>Larry</td>
+                                <td>the Bird</td>
+                                <td>twitter</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+           
+           
         </div>
     </div>
 </div>
@@ -48,6 +90,7 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
 
     <script>
+
         $(document).ready(function () {
             var chartData = [];
             var chart = new Morris.Line({
@@ -96,6 +139,76 @@
                     }
                 });
             })          
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            var chartData = [];
+            var chartB = new Morris.Donut({
+                element: 'graphBrand',
+                data: [0, 0],
+                backgroundColor: '#ccc',
+                labelColor: '#060',
+                colors: ['Silver', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Teal', 'Aqua'],
+                formatter: function (x) { return x + "%" }
+            }).on('click', function (i, row) {
+                console.log(i, row);
+            });
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartBrand", "Dashboard")",
+                success: function (data) {
+                    chartB.setData(data);
+                }
+            });
+
+            // /*Ajax Request to load the Data*/
+            // $.ajax({
+            //     type: "GET",
+            //     dataType: 'json',
+            //     url: "@Url.Action("GetChartBrand2", "Dashboard")",
+            // }).done(function (data) {
+            //         /*On successful Ajax load, set the Chart with Data*/
+            //         chart.setData(data);
+            //         chart.setLabels("Test", "Test Data");
+            //     })
+            //     .fail(function () {
+            //         alert("unable to load data");
+            //     });
+
+        });
+
+        // });
+        // Morris.Donut({
+        //     element: 'graphBrand',
+        //     data: [
+        //         { value: 70, label: 'msi' },
+        //         { value: 15, label: 'acer' },
+        //         { value: 10, label: 'mark' },
+        //         { value: 5, label: 'asus' }
+        //     ],
+        //     colors: ['red', 'blue', 'yellow', 'green'],
+        //     resize: true,
+        //     formatter: function (x) { return x + "%" }
+        // }).on('click', function (i, row) {
+        //     console.log(i, row);
+        // });
+
+        Morris.Donut({
+            element: 'graphCategories',
+            data: [
+                { value: 70, label: 'office' },
+                { value: 15, label: 'handshake' },
+                { value: 10, label: 'gaming' },
+                { value: 5, label: 'travel' }
+            ],
+            colors: ['Silver', 'Gray', 'Maroon', 'Navy'],
+            resize: true,
+            formatter: function (x) { return x + "%" }
+        }).on('click', function (i, row) {
+            console.log(i, row);
         });
 
     </script>
