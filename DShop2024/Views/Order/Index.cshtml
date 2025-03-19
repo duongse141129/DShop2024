@@ -96,7 +96,7 @@
 
                                         <tr>
                                             <td colspan="3" class="text-end">Subtotal</td>
-                                            <td class="text-end">@item.TotalPrice</td>
+                                            <td class="text-end">@item.OrderDetails.Sum(od => od.Quantity * od.Price)</td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="text-end">coupon</td>
@@ -108,7 +108,7 @@
                                         </tr>
                                         <tr>
                                             <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
-                                            <td class="text-end">@(item.TotalPrice + item.ShippingCost - item.ValueCoupon)</td>
+                                            <td class="text-end">@item.TotalPrice</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -36,203 +36,185 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.Brand = count_brand;
             ViewBag.CountUser = count_user;
 
-
-            var bestSaleProduct = await _dataContext.Products
-            .Where(p => p.Status != 0 && _dataContext.OrderDetails.Any(od => od.Status != 0 && od.Order.Status != 0))
-            .GroupBy(p => p.ProductName)
-            .Select(g => new
-            {
-                ProductName = g.Key,
-                QuantitySold = g.SelectMany(p => p.OrderDetails)
-            .Where(o => o.Status != 0 && o.Order.Status != 0 )
-            .Sum(od => od.Quantity)
-            })
-            .OrderByDescending(g => g.QuantitySold)
-            .Take(5)
-            .ToListAsync();
-
-            //var bestSaleProduct = await (from p in _dataContext.Products
-            //                             join od in _dataContext.OrderDetails on p.Id equals od.ProductId
-            //                             join o in _dataContext.Orders on od.OrderId equals o.Id
-            //                             where o.Status != 0 && od.Status != 0 && o.Status != 0
-            //                             group od by od.Quantity into g 
-            //                             select new { ProductName = p.ProductName, QuantitySold = g.Sum() }
-            //                           ).ToListAsync();
-                                       
-
-
-
-            var productsSoldByBrand = _dataContext.Brands
-                            .Where(b => b.Status != 0)
-                            .Join(_dataContext.Products.Where(p => p.Status != 0),
-                            b => b.Id,
-                            p => p.BrandId,
-                            (b, p) => new { b, p })
+            var bestSaleProducts = await _dataContext.Products
+                            .Where(p => p.Status != 0)
                             .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
-                            bp => bp.p.Id,
+                            p => p.Id,
                             od => od.ProductId,
-                            (bp, od) => new { bp.b, bp.p, od })
+                            (p, od) => new { p, od })
                             .Join(_dataContext.Orders.Where(o => o.Status != 0),
-                            bpo => bpo.od.OrderId,
+                            pod => pod.od.OrderId,
                             o => o.Id,
-                            (bpo, o) => new { bpo.b, bpo.od })
-                            .GroupBy(x => x.b.BrandName)
+                            (pod, o) => new { pod.p, pod.od, o })
+                            .GroupBy(x => new
+                            {
+                                x.p.Id,
+                                x.p.ProductName,
+                                x.p.Image,
+                                x.p.OriginalPrice,
+                                x.p.Price
+                            })
                             .Select(g => new
                             {
-                                BrandName = g.Key,
+                                g.Key.Id,
+                                g.Key.ProductName,
+                                g.Key.Image,
+                                g.Key.OriginalPrice,
+                                g.Key.Price,
                                 QuantitySold = g.Sum(x => x.od.Quantity)
                             })
-                            .ToList();
-
-            var productsSoldByCategory = _dataContext.Categories
-                         .Where(c => c.Status != 0)
-                         .Join(_dataContext.Products.Where(p => p.Status != 0),
-                         b => b.Id,
-                         p => p.CategoryId,
-                         (b, p) => new { b, p })
-                         .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
-                         bp => bp.p.Id,
-                         od => od.ProductId,
-                         (bp, od) => new { bp.b, bp.p, od })
-                         .Join(_dataContext.Orders.Where(o => o.Status != 0),
-                         bpo => bpo.od.OrderId,
-                         o => o.Id,
-                         (bpo, o) => new { bpo.b, bpo.od })
-                         .GroupBy(x => x.b.CategoryName)
-                         .Select(g => new
-                         {
-                             BrandName = g.Key,
-                             QuantitySold = g.Sum(x => x.od.Quantity)
-                         })
-                         .ToList();
-
+                            .OrderByDescending(x => x.QuantitySold)
+                            .Take(5)
+                            .ToListAsync();
+            ViewBag.bestSaleProducts = bestSaleProducts;
             return View();
         }
 
+        //[HttpPost]
+        //[Route("SubmitFilterDate")]
+        //public IActionResult SubmitFilterDate(string filterdate)
+        //{
+        //    var dateselect = DateTime.Parse(filterdate).ToString("yyyy-MM-dd");
+        //    var chartData = _dataContext.Orders
+        //   .Where(o => o.CreatedDate.ToString("yyyy-MM-dd") == dateselect) // Optional: Filter by date
+        //  .Join(_dataContext.OrderDetails,
+        //      o => o.Id,
+        //      od => od.OrderId,
+        //      (o, od) => new StatisticalModel
+        //      {
+        //          date = o.CreatedDate,
+        //          revenue = od.Quantity * od.Price, // Calculate revenue based on order details
+        //          orders = 1 // Assuming each order detail represents one order
+        //      })
+        //  .GroupBy(s => s.date)
+        //  .Select(group => new StatisticalModel
+        //  {
+        //      date = group.Key,
+        //      revenue = group.Sum(s => s.revenue),
+        //      orders = group.Count()
+        //  })
+        //  .ToList();
+
+        //    return Json(chartData);
+        //}
+
         [HttpPost]
         [Route("SubmitFilterDate")]
-        public IActionResult SubmitFilterDate(string filterdate)
+        public async Task<IActionResult> SubmitFilterDate(string dateStart, string dateEnd)
         {
-            var dateselect = DateTime.Parse(filterdate).ToString("yyyy-MM-dd");
-            var chartData = _dataContext.Orders
-           .Where(o => o.CreatedDate.ToString("yyyy-MM-dd") == dateselect) // Optional: Filter by date
-          .Join(_dataContext.OrderDetails,
-              o => o.Id,
-              od => od.OrderId,
-              (o, od) => new StatisticalModel
-              {
-                  date = o.CreatedDate,
-                  revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                  orders = 1 // Assuming each order detail represents one order
-              })
-          .GroupBy(s => s.date)
-          .Select(group => new StatisticalModel
-          {
-              date = group.Key,
-              revenue = group.Sum(s => s.revenue),
-              orders = group.Count()
-          })
-          .ToList();
+            DateTime dateStartSelect = DateTime.Parse(dateStart);
+            DateTime dateEndSelect = DateTime.Parse(dateEnd);
+            if(dateEndSelect < dateStartSelect)
+            {
+                return null;
+            }
 
-            return Json(chartData);
+
+            var chartDataRangeDay = await _dataContext.Orders
+                            .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
+                            .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
+                            .GroupBy(x => x.o.CreatedDate.Date)
+                            .Select(g => new StatisticalViewModel
+                            {
+                                date = g.Key.ToShortDateString(),
+                                revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
+                                profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
+                                orders = g.Select(x => x.o.Id).Distinct().Count(),
+                                quantitysold = g.Sum(x => x.od.Quantity)
+                            })
+                            .ToListAsync();
+
+
+
+            return Json(chartDataRangeDay);
         }
 
         [HttpPost]
         [Route("SelectFilterDate")]
         public async Task<IActionResult> SelectFilterDate(string filterdate)
         {
-            var chartData = new List<StatisticalModel>();
-            // Initialize as empty list
+            var chartData = new List<StatisticalViewModel>();
             var today = DateTime.Today;
-            var month = new DateTime(today.Year, today.Month, 1);
-            var first = month.AddMonths(-1);
-            var last = month.AddDays(-1);
+            //var month = new DateTime(today.Year, today.Month, 1);
+            var month = DateTime.Today.Month;
+            var year = DateTime.Today.Year;
+            //var first = month.AddMonths(-1);
+            //var last = month.AddDays(-1);
 
 
             if (filterdate == "last_month")
             {
-                chartData = _dataContext.Orders
-               .Where(o => o.CreatedDate > first && o.CreatedDate < today)
-
-               .Join(_dataContext.OrderDetails,
-                 o => o.Id,
-                 od => od.OrderId,
-                 (o, od) => new StatisticalModel
-                 {
-                     date = o.CreatedDate,
-                     revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                     orders = 1 // Assuming each order detail represents one order
-                 })
-                 .GroupBy(s => s.date.Date)
-                 .Select(group => new StatisticalModel
-                 {
-                     date = group.Key.Date,
-                     revenue = group.Sum(s => s.revenue),
-                     orders = group.Count()
-                 })
-                 .ToList();
+                chartData = await getDataByMonth(month-1, year);
+                return Json(chartData);
             }
             if (filterdate == "this_month")
             {
-                var yearNow = DateTime.Now.Year;
-                var monthNow = DateTime.Now.Month;
-
-                var chartDataTM = await _dataContext.Orders
-               .Where(o => o.CreatedDate.Month > monthNow-1 && o.CreatedDate.Month <= monthNow && o.CreatedDate.Year == yearNow)
-               .Join(_dataContext.OrderDetails,
-                 o => o.Id,
-                 od => od.OrderId,
-                 (o, od) => new StatisticalModel
-                 {
-                     date = o.CreatedDate,
-                     revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                     orders = 1 // Assuming each order detail represents one order
-                 })
-                 .GroupBy(s => s.date.Day)
-                 .Select(group => new StatisticalViewModel
-                 {
-                     date = group.Key,
-                     revenue = group.Sum(s => s.revenue),
-                     orders = group.Count()
-                 })
-                 .ToListAsync();
-
-                var x = Json(chartDataTM);
-                return x;
+                chartData = await getDataByMonth(month, year);
+                return Json(chartData);
             }
             if (filterdate == "last_year")
             {
-                var yearNow = DateTime.Now.Year;
-
-                var chartDataLS = await _dataContext.Orders
-                        .Where (o => o.CreatedDate.Year == yearNow -1)
-                     .Join(_dataContext.OrderDetails,
-                         o => o.Id,
-                         od => od.OrderId,
-                         (o, od) => new StatisticalModel
-                         {
-                             date = o.CreatedDate,
-                             revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                             orders = 1 // Assuming each order detail represents one order
-                         })
-                     .GroupBy(s => s.date.Month)
-                     .Select(group => new StatisticalViewModel
-                     {
-                         date = group.Key,
-                         revenue = group.Sum(s => s.revenue),
-                         orders = group.Count()
-                     })
-                     .OrderBy(s => s.date)
-                     .ToListAsync();
-
-                        var x = Json(chartDataLS);
-                        return x;
+                chartData = await getDataByYear(year-1);
+                return Json(chartData);
             }
-            //if (filterdate == "all_year")
-            //{
-            //    var yearNow = DateTime.Today.Year;
-            //    var chartDataTY = await _dataContext.Orders
-            //         .Where(o => o.CreatedDate.Year == yearNow && o.Status != 0 )
+
+            if (filterdate == "this_year")
+            {
+                chartData = await getDataByYear(year);
+                return Json(chartData);
+              
+            }
+            return Json(chartData);
+        }
+     
+
+
+        [Route("getDataByMonth")]
+        public async Task<List<StatisticalViewModel>> getDataByMonth(int month, int year)
+        {
+            var chartDataYear = await _dataContext.Orders
+                .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
+                .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
+                .GroupBy(x => x.o.CreatedDate.Day)
+                .Select(g => new StatisticalViewModel
+                {
+                    date = g.Key.ToString(),
+                    revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
+                    profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
+                    orders = g.Select(x => x.o.Id).Distinct().Count(),
+                    quantitysold = g.Sum(x => x.od.Quantity)
+                })
+                .ToListAsync();
+            return chartDataYear;
+        }
+
+        [Route("getDataByYear")]
+        public async Task<List<StatisticalViewModel>> getDataByYear(int year)
+        {
+            var chartDataYear= await _dataContext.Orders
+                .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
+                .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
+                .GroupBy(x => x.o.CreatedDate.Month)
+                .Select(g => new StatisticalViewModel
+                {
+                    date = g.Key.ToString(),
+                    revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
+                    profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
+                    orders = g.Select(x => x.o.Id).Distinct().Count(),
+                    quantitysold = g.Sum(x => x.od.Quantity)
+                })
+                .ToListAsync();
+            return chartDataYear;
+        }
+
+        [HttpPost]
+        [Route("GetChartData")]
+        public async Task<IActionResult> GetChartData()
+        {
+            var year = DateTime.Today.Year;
+            var chartData = await getDataByYear(year);
+            return Json(chartData);
+            //var chartData = await _dataContext.Orders
             //  .Join(_dataContext.OrderDetails,
             //      o => o.Id,
             //      od => od.OrderId,
@@ -240,117 +222,115 @@ namespace DShop2024.Areas.Admin.Controllers
             //      {
             //          date = o.CreatedDate,
             //          revenue = od.Quantity * od.Price, // Calculate revenue based on order details
+            //          orders = 1 // Assuming each order detail represents one order
             //      })
             //  .GroupBy(s => s.date.Month)
             //  .Select(group => new StatisticalViewModel
             //  {
-            //      date = group.Key,
-            //      revenue = group.Sum(s => s.revenue)
+            //      date = group.Key.ToString(),
+            //      revenue = group.Sum(s => s.revenue),
+            //      orders = group.Count()
             //  })
             //  .OrderBy(s => s.date)
             //  .ToListAsync();
 
-            //    var x = Json(chartDataTY);
-            //    return x;
-            //}
-
-            if (filterdate == "all_year")
-            {
-                var yearNow = DateTime.Today.Year;
-
-                var chartDataAY = _dataContext.Orders
-               .Where(o => o.CreatedDate.Year == yearNow && o.Status != 0) // Optional: Filter by date
-              .Join(_dataContext.OrderDetails,
-                  o => o.Id,
-                  od => od.OrderId,
-                  (o, od) => new StatisticalModel
-                  {
-                      date = o.CreatedDate,
-                      revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                      orders = o.Id // Assuming each order detail represents one order
-                  })
-              .GroupBy(s => s.date.Month)
-              .Select(group => new StatisticalViewModel
-              {
-                  date = group.Key,
-                  revenue = group.Sum(s => s.revenue),
-                  orders = group.Count()
-              })
-              .Distinct()
-              .ToList();
-
-                //foreach (var item in chartDataAY)
-                //{
-                //    item.orders = await _dataContext.Orders
-                //        .Where(o => o.Status != 0 && o.CreatedDate.Year == yearNow 
-                //        && o.CreatedDate.Month == item.date)
-                //        .CountAsync();
-                //}
-
-                var x = Json(chartDataAY);
-                return x;
-              
-            }
-
-
-            return Json(chartData);
+            //var x = Json(chartData);
+            //return x;
         }
 
-        [HttpPost]
-        [Route("GetChartData")]
-        public async Task<IActionResult> GetChartData()
-        {
-            var chartData = await _dataContext.Orders
-              .Join(_dataContext.OrderDetails,
-                  o => o.Id,
-                  od => od.OrderId,
-                  (o, od) => new StatisticalModel
-                  {
-                      date = o.CreatedDate,
-                      revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-                      orders = 1 // Assuming each order detail represents one order
-                  })
-              .GroupBy(s => s.date.Month)
-              .Select(group => new StatisticalViewModel
-              {
-                  date = group.Key,
-                  revenue = group.Sum(s => s.revenue),
-                  orders = group.Count()
-              })
-              .OrderBy(s => s.date)
-              .ToListAsync();
 
-            var x = Json(chartData);
-            return x;
-        }
 
         [HttpPost]
         [Route("GetChartBrand")]
         public async Task<IActionResult> GetChartBrand()
         {
-            
-            var chartDataBrand = await _dataContext.Brands.Where(c => c.Status != 0).ToListAsync();
-            List<NameAndValuecs> nav = new List<NameAndValuecs>
+
+            var productsSoldByBrand = await _dataContext.Brands
+                       .Where(b => b.Status != 0)
+                       .Join(_dataContext.Products.Where(p => p.Status != 0),
+                       b => b.Id,
+                       p => p.BrandId,
+                       (b, p) => new { b, p })
+                       .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+                       bp => bp.p.Id,
+                       od => od.ProductId,
+                       (bp, od) => new { bp.b, bp.p, od })
+                       .Join(_dataContext.Orders.Where(o => o.Status != 0),
+                       bpo => bpo.od.OrderId,
+                       o => o.Id,
+                       (bpo, o) => new { bpo.b, bpo.od })
+                       .GroupBy(x => x.b.BrandName)
+                       .Select(g => new NameAndValueVM
+                       {
+                           label = g.Key,
+                           value = g.Sum(x => x.od.Quantity)
+                       })
+                       .ToListAsync();
+
+            var sum = productsSoldByBrand.Sum(n => n.value);
+            //foreach (var item in productsSoldByBrand)
+            //{
+            //    item.value = item.value * 100 / sum;
+            //}
+            int s = 0;
+            for (int i = 0; i < productsSoldByBrand.Count; i++)
             {
-                new NameAndValuecs{label = "asd", value= 50},
-                new NameAndValuecs{label = "gfh", value= 35},
-                new NameAndValuecs{label = "rty", value= 55},
-                new NameAndValuecs{label = "khhjkh", value= 10},
-                new NameAndValuecs{label = "ghj", value= 30},
-                new NameAndValuecs{label = "werew", value= 2},
-            };
-            var x = Json(nav);
-            return x;
+                if (i == productsSoldByBrand.Count - 1)
+                {
+                    productsSoldByBrand[i].value = 100 - s;
+                }
+                else
+                {
+                    int v = productsSoldByBrand[i].value * 100 / sum;
+                    productsSoldByBrand[i].value = v;
+                    s += v;
+                }
+            }
+            return Json(productsSoldByBrand);
         }
 
 
         [HttpPost]
-        [Route("GetChartcategories")]
-        public async Task<IActionResult> GetChartcategories()
+        [Route("GetChartCategories")]
+        public async Task<IActionResult> GetChartCategories()
         {
-            var chartData = await _dataContext.Categories.Where(c => c.Status != 0).ToListAsync();
-            var x = Json(chartData);
-            return x;
+            var productsSoldByCategory = await _dataContext.Categories
+                                 .Where(c => c.Status != 0)
+                                 .Join(_dataContext.Products.Where(p => p.Status != 0),
+                                 b => b.Id,
+                                 p => p.CategoryId,
+                                 (b, p) => new { b, p })
+                                 .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+                                 bp => bp.p.Id,
+                                 od => od.ProductId,
+                                 (bp, od) => new { bp.b, bp.p, od })
+                                 .Join(_dataContext.Orders.Where(o => o.Status != 0),
+                                 bpo => bpo.od.OrderId,
+                                 o => o.Id,
+                                 (bpo, o) => new { bpo.b, bpo.od })
+                                 .GroupBy(x => x.b.CategoryName)
+                                 .Select(g => new NameAndValueVM
+                                 {
+                                     label = g.Key,
+                                     value = g.Sum(x => x.od.Quantity)
+                                 })
+                                 .ToListAsync();
+            var sum = productsSoldByCategory.Sum(n => n.value);
+            int s = 0;
+            for (int i = 0; i < productsSoldByCategory.Count; i++)
+            {
+                if (i == productsSoldByCategory.Count - 1)
+                {
+                    productsSoldByCategory[i].value = 100 - s;
+                }
+                else
+                {
+                    int v = productsSoldByCategory[i].value * 100 / sum;
+                    productsSoldByCategory[i].value = v;
+                    s += v;
+                }
+            }
+            return Json(productsSoldByCategory);
         }
 
 

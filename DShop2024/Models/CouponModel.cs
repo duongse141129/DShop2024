@@ -23,8 +23,12 @@ namespace DShop2024.Models
 		public int Quantity { get; set; }
 		public int Status { get; set; }
 
+		public int PromotionId { get; set; }
+
+		[ForeignKey("PromotionId")]
+		public virtual PromotionModel Promotion { get; set; }
 
 
-		
+
 	}
 }

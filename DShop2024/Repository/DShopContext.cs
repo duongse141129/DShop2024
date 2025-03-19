@@ -30,5 +30,9 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<StatisticalModel> Statisticals { get; set; }
 		public virtual DbSet<MessageModel> Messages { get; set; }
 		public virtual DbSet<InformationShopModel> InformationShops { get; set; }
+		public virtual DbSet<CouponRedemptionModel> CouponRedemptions { get; set; }
+		public virtual DbSet<OrderCouponsModel> OrderCouponss { get; set; }
+		public virtual DbSet<CategoryCouponModel> CategoryCoupons { get; set; }
+		public virtual DbSet<PromotionModel> Promotions { get; set; }
 	}
 

@@ -21,8 +21,11 @@
                     <p>Lọc theo ngày tháng</p>
                     <form>
                         Ngày:
-
-                        <input type="date" class="form-control" id="datepicker">
+                 @*        <input type="date"  class="form-control" id="datepicker"> *@
+                        <label>From: </label>
+                        <input type="date" name="dateStart" class="form-control" id="dateStart">
+                        <label>To: </label>
+                        <input type="date" name="dateEnd" class="form-control" id="dateEnd">
                         <button type="button" class="btn btn-primary btn-filter-date">Lọc theo ngày</button>
                     </form>
                 </div>
@@ -32,7 +35,7 @@
                         <select class="form-control filter-date">
                             <option value="last_month">Tháng trước</option>
                             <option value="this_month">Tháng này</option>
-                            <option value="all_year">Năm nay</option>
+                            <option selected value="this_year">Năm nay</option>
                             <option value="last_year">Năm trước</option>
                         </select>
                     </p>
@@ -40,45 +43,45 @@
             </div>
             <div id="myfirstchart" style="height: 350px;"></div>
             <div class="row">
-                <h1>Donut Chart Brand </h1>
+                <h1>Donut Chart of the number of products sold by brand </h1>
                 <div id="graphBrand" style="width: 350px;"> </div>
-                <h1>Donut Chart Categories</h1>
+                <h1>Donut Chart of the number of products sold by category</h1>
                 <div id="graphCategories" style="width: 350px;"> </div>
 
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">First</th>
-                                <th scope="col">Last</th>
-                                <th scope="col">Handle</th>
+                                <th scope="col">Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Original Price</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity Sold</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>mdo</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>Jacob</td>
-                                <td>Thornton</td>
-                                <td>fat</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>Larry</td>
-                                <td>the Bird</td>
-                                <td>twitter</td>
-                            </tr>
+                            @foreach (var item in ViewBag.bestSaleProducts)
+                            {
+                                <tr>
+                                    <th>@item.Id</th>
+                                    <th>
+                                        <img src="~/media/products/@item.Image" width="120" height="100" />
+                                        @item.ProductName
+                                    </th>
+                                    <th>@item.OriginalPrice</th>
+                                    <th>@item.Price</th>
+                                    <th>@item.QuantitySold</th>
+                                </tr>
+                            }
+   
+                        
                         </tbody>
                     </table>
                 </div>
             </div>
-           
+
+            <h1>Area charts behaving like line charts</h1>
+            <div id="graphArenaT"></div>
            
         </div>
     </div>
@@ -99,9 +102,9 @@
                 data: chartData,
                 xkey: 'date',
 
-                ykeys: ['revenue', 'orders'],
+                ykeys: ['revenue', 'profit', 'orders', 'quantitysold'],
 
-                labels: ['Doanh thu', 'Đơn hàng']
+                labels: ['Doanh thu','lợi nhuận' ,'Đơn hàng', 'Số lượng bán ra']
             });
             //filter all data chart
             $.ajax({
@@ -128,17 +131,37 @@
             })
 
             //select option filter data
+            // $(".btn-filter-date").click(function () {
+            //     var filterdate = $("#datepicker").val();
+            //     $.ajax({
+            //         type: "POST",
+            //         url: "@Url.Action("SubmitFilterDate", "Dashboard")",
+            //         data: { filterdate: filterdate },
+            //         success: function (data) {
+            //             chart.setData(data);
+            //         }
+            //     });
+            // })
+
             $(".btn-filter-date").click(function () {
-                var filterdate = $("#datepicker").val();
+                var dateStart = $("#dateStart").val();
+                var dateEnd = $("#dateEnd").val();
                 $.ajax({
                     type: "POST",
                     url: "@Url.Action("SubmitFilterDate", "Dashboard")",
-                    data: { filterdate: filterdate },
+                    data: { dateStart: dateStart, dateEnd: dateEnd },
                     success: function (data) {
                         chart.setData(data);
+                        // if (data != null) {
+                        //     chart.setData(data);
+                        // } else {
+                        //     Swal.fire("Date start must <= date end");
+                        // }
+                        
                     }
                 });
-            })          
+            })
+
         });
 
     </script>
@@ -150,7 +173,7 @@
                 data: [0, 0],
                 backgroundColor: '#ccc',
                 labelColor: '#060',
-                colors: ['Silver', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Teal', 'Aqua'],
+                colors: ['Maroon', 'Navy', 'Yellow', 'Olive', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Teal', 'Aqua', 'Silver', 'Gray'],
                 formatter: function (x) { return x + "%" }
             }).on('click', function (i, row) {
                 console.log(i, row);
@@ -163,75 +186,64 @@
                     chartB.setData(data);
                 }
             });
-
-            // /*Ajax Request to load the Data*/
-            // $.ajax({
-            //     type: "GET",
-            //     dataType: 'json',
-            //     url: "@Url.Action("GetChartBrand2", "Dashboard")",
-            // }).done(function (data) {
-            //         /*On successful Ajax load, set the Chart with Data*/
-            //         chart.setData(data);
-            //         chart.setLabels("Test", "Test Data");
-            //     })
-            //     .fail(function () {
-            //         alert("unable to load data");
-            //     });
-
         });
 
-        // });
-        // Morris.Donut({
-        //     element: 'graphBrand',
-        //     data: [
-        //         { value: 70, label: 'msi' },
-        //         { value: 15, label: 'acer' },
-        //         { value: 10, label: 'mark' },
-        //         { value: 5, label: 'asus' }
-        //     ],
-        //     colors: ['red', 'blue', 'yellow', 'green'],
-        //     resize: true,
-        //     formatter: function (x) { return x + "%" }
-        // }).on('click', function (i, row) {
-        //     console.log(i, row);
-        // });
-
-        Morris.Donut({
-            element: 'graphCategories',
-            data: [
-                { value: 70, label: 'office' },
-                { value: 15, label: 'handshake' },
-                { value: 10, label: 'gaming' },
-                { value: 5, label: 'travel' }
-            ],
-            colors: ['Silver', 'Gray', 'Maroon', 'Navy'],
-            resize: true,
-            formatter: function (x) { return x + "%" }
-        }).on('click', function (i, row) {
-            console.log(i, row);
-        });
-
-    </script>
-    <script>
-        $(function () {
-            $("#datepicker").datepicker({
-                dateFormat: 'yy-mm-dd', onSelect: function (datetext) {
-                    var d = new Date(); // for now
-
-                    var h = d.getHours();
-                    h = (h < 10) ? ("0" + h) : h;
-
-                    var m = d.getMinutes();
-                    m = (m < 10) ? ("0" + m) : m;
-
-                    var s = d.getSeconds();
-                    s = (s < 10) ? ("0" + s) : s;
-
-                    datetext = datetext + " " + h + ":" + m + ":" + s;
-
-                    $('#datepicker').val(datetext);
+        $(document).ready(function () {
+            var chartData = [];
+            var chartB = new Morris.Donut({
+                element: 'graphCategories',
+                data: [0, 0],
+                backgroundColor: '#ccc',
+                labelColor: '#060',
+                colors: ['Yellow', 'Olive', 'Red', 'Maroon','Fuchsia', 'Purple', 'Teal', 'Aqua', 'Silver', 'Gray', 'Maroon', 'Navy'],
+                formatter: function (x) { return x + "%" }
+            }).on('click', function (i, row) {
+                console.log(i, row);
+            });
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartCategories", "Dashboard")",
+                success: function (data) {
+                    chartB.setData(data);
                 }
             });
+
         });
+        Morris.Area({
+            element: 'graphArenaT',
+            behaveLikeLine: true,
+            data: [
+                { x: '2011 Q1', y: 3, z: 3 },
+                { x: '2011 Q2', y: 2, z: 1 },
+                { x: '2011 Q3', y: 2, z: 4 },
+                { x: '2011 Q4', y: 3, z: 3 }
+            ],
+            xkey: 'x',
+            ykeys: ['y', 'z'],
+            labels: ['Y', 'Z']
+        });
+    </script>
+    <script>
+        // $(function () {
+        //     $("#datepicker").datepicker({
+        //         dateFormat: 'yy-mm-dd', onSelect: function (datetext) {
+        //             var d = new Date(); // for now
+
+        //             var h = d.getHours();
+        //             h = (h < 10) ? ("0" + h) : h;
+
+        //             var m = d.getMinutes();
+        //             m = (m < 10) ? ("0" + m) : m;
+
+        //             var s = d.getSeconds();
+        //             s = (s < 10) ? ("0" + s) : s;
+
+        //             datetext = datetext + " " + h + ":" + m + ":" + s;
+
+        //             $('#datepicker').val(datetext);
+        //         }
+        //     });
+        // });
     </script>
 }

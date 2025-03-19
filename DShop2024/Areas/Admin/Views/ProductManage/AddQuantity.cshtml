@@ -16,7 +16,7 @@
             <input type="hidden" name="ProductId" value="@ViewBag.Id" />
             <div class="form-group">
                 <label asp-for="Quantity" class="control-label"></label>
-                <input min="1" value="1" asp-for="Quantity" class="form-control" />
+                <input min="1" value="1" step="1" asp-for="Quantity" class="form-control" />
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
  

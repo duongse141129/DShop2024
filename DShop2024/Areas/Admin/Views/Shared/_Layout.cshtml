@@ -91,9 +91,11 @@
 								<li><a asp-area="Admin" asp-controller="Information" asp-action="Index">Information Shop</a></li>
 								<li><a asp-area="Admin" asp-controller="Shipping" asp-action="Index">Shippings</a></li>
 								<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
+								<li><a asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a></li>
 								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">Dashboard</a></li>
 								<li><a asp-area="Admin" asp-controller="Chat" asp-action="Index" >Chat</a></li>
 								<li><a asp-area="Admin" asp-controller="Contact" asp-action="Index">Contact</a></li>
+								
 	
 								
 							</ul>
@@ -151,6 +153,10 @@
 			var message = '@TempData["success"]';
 			if (message != '') {
 				Swal.fire(message);
+			}
+			var messageFail = '@TempData["error"]';
+			if (messageFail != '') {
+				Swal.fire(messageFail);
 			}
 		});
 	</script>

@@ -25,6 +25,7 @@ namespace DShop2024.Controllers
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
                                                   .Where(o => o.UserId == user.Id)
+                                                  .OrderBy(o => o.CreatedDate)
                                                   .ToListAsync();
             return View(orders);
         }

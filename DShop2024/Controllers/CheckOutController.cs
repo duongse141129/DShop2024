@@ -65,8 +65,9 @@ namespace DShop2024.Controllers
 
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
-			CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>("CouponCustomerApply");
-			var user = await _userManager.GetUserAsync(this.User);
+			//CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>("CouponCustomerApply");
+            List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+            var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)
 			{
 				TempData["error"] = "Cart is empty";
@@ -77,13 +78,35 @@ namespace DShop2024.Controllers
 				TempData["error"] = "Infomation delivery is null";
 				return RedirectToAction("Index", "Cart");
 			}
-			if (coupoun == null)
+			if (coupouns == null)
 			{
-				coupoun = new CouponModel();
+                coupouns = new List<CouponModel>();
+			}
+			foreach (var coupon in coupouns)
+			{
+				var cp = await _dataContext.Coupons.FindAsync(coupon.Id);
+				if(cp != null )
+				{
+					if(cp.Status == 0)
+					{
+						coupouns.Remove(coupon);
+						HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+						TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
+						return RedirectToAction("Index", "Cart");
+					}
+					int quantityCoupon = cp.Quantity;
+					if (quantityCoupon <= 0)
+					{
+						coupouns.Remove(coupon);
+						HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+						TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
+						return RedirectToAction("Index", "Cart");
+					}
+				}
 			}
 
 			var totalPrice = cartItems.Sum(s => s.Quantity * s.Price);
-			int amount = Convert.ToInt32(totalPrice + info.ShippingCost - coupoun.Value);
+			int amount = Convert.ToInt32(totalPrice + info.ShippingCost - coupouns.Sum(c => c.Value) );
 			if (payment == "MOMO")
 			{
 				OrderInfoModel momoPayment = new OrderInfoModel { 
@@ -122,7 +145,7 @@ namespace DShop2024.Controllers
 
 				List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
 				InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
-				CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>("CouponCustomerApply");
+				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
 				var user = await _userManager.GetUserAsync(this.User);
 
 				var order = new OrderModel();
@@ -135,11 +158,16 @@ namespace DShop2024.Controllers
 				order.ShippingCost = info.ShippingCost;
 				order.PhoneDelivery = info.PhoneDelivery;
 				order.AddressDelivery = $" {info.Street} - {info.phuong} - {info.quan} - {info.tinh} ";
-				order.TotalPrice = cartItems.Sum(s => s.Quantity * s.Price);
-				if (coupoun != null)
+				if (coupouns != null)
 				{
-					order.ValueCoupon = coupoun.Value;
+					order.ValueCoupon = coupouns.Sum(c => c.Value);
 				}
+				var grandTotal = cartItems.Sum(s => s.Quantity * s.Price) + info.ShippingCost - coupouns.Sum(c => c.Value);
+				if (grandTotal < 0)
+				{
+					grandTotal = 0;
+				}
+				order.TotalPrice = grandTotal;
 				await _dataContext.Orders.AddAsync(order);
 				await _dataContext.SaveChangesAsync();
 
@@ -152,6 +180,7 @@ namespace DShop2024.Controllers
 						ProductId = item.ProductId,
 						Price = item.Price,
 						Quantity = item.Quantity,
+						OriginalPrice = item.OriginalPrice,
 						Status = 1
 
 
@@ -163,6 +192,21 @@ namespace DShop2024.Controllers
 					await _dataContext.OrderDetails.AddAsync(orderDetail);
 					await _dataContext.SaveChangesAsync();
 				}
+
+				foreach (var item in coupouns)
+				{
+					CouponRedemptionModel couponRedemption = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
+					couponRedemption.status = 2;
+					CouponModel couponModel = await _dataContext.Coupons.FindAsync(item.Id);
+					couponModel.Quantity -= 1;
+					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, status = 1 };
+
+					_dataContext.Coupons.Update(couponModel);
+					_dataContext.CouponRedemptions.Update(couponRedemption);
+					await _dataContext.OrderCouponss.AddAsync(orderCoupons);
+					await _dataContext.SaveChangesAsync();
+				}
+				
 
 				HttpContext.Session.Remove("Cart");
 				HttpContext.Session.Remove("InfoCustomerDelivery");

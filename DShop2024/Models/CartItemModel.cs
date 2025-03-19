@@ -6,6 +6,7 @@
 		public string ProductName { get; set; }
 		public int Quantity { get; set; }
 		public decimal Price { get; set; }
+		public decimal OriginalPrice { get; set; }
 		public decimal Total { 
 			get { return Quantity*Price; } 
 		
@@ -21,6 +22,7 @@
 			ProductId = product.Id;
 			ProductName = product.ProductName;
 			Price = product.Price;
+            OriginalPrice = product.OriginalPrice;
 			Quantity = 1;
 			Image = product.Image;
 		}

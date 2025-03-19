@@ -7,7 +7,9 @@ namespace DShop2024.ViewModels
         [Key]
         public int Id { get; set; }
         public decimal revenue { get; set; }
+        public decimal profit { get; set; }
         public int orders { get; set; }
-        public int date { get; set; }
+        public string date { get; set; }
+        public int quantitysold { get; set; }
     }
 }

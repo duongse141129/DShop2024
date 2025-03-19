@@ -123,7 +123,11 @@
 							<td>
 								<form>
 									Coupon code:<input type="text" class="form-control coupon-value" />
-									<span class="text text-success">@Model.CouponApply.CouponCode - @Model.CouponApply.Description</span> <br />
+									@foreach (var item in @Model.CouponsApply)
+									{
+										<span class="text text-success">@item.CouponCode - @item.Description</span> <br/>
+									}
+									@* <span class="text text-success">@Model.CouponApply.CouponCode - @Model.CouponApply.Description</span> <br /> *@
 									<input type="button" value="Apply" class="btn btn-sm btn-primary btn-apply-coupon" />
 								</form>
 							
@@ -144,10 +148,10 @@
 								<div class="col-sm-20">
 									<div class="total_area">
 										<ul>
-											<li>Cart Sub Total<span>@Model.GrandTotal.ToString("#,##0 VND")</span></li>
-											<li>- Eco Tax <span>@Model.CouponApply.Value.ToString("#,##0 VND")</span></li>
-											<li>+ Shipping Cost <span>@Model.InfoDelivery.ShippingCost.ToString("#,##0 VND")</span></li>
-											<li>Total <span></span>@(Model.GrandTotal + Model.InfoDelivery.ShippingCost - Model.CouponApply.Value) VND</li>
+												<li>Cart Sub Total<span>@Model.SumPriceItemsCart.ToString("#,##0 VND")</span></li>
+												<li>Shipping Cost <span>+ @Model.InfoDelivery.ShippingCost.ToString("#,##0 VND")</span></li>
+												<li>Coupon value <span>- @Model.SumCouponValue.ToString("#,##0 VND")</span></li>
+												<li>Grand Total Price <span></span>@Model.GrandTotal.ToString("#,##0 VND")</li>
 										</ul>
 						
 									</div>
