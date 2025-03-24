@@ -71,6 +71,21 @@ else
             }
         </tr>
         <tr>
+            <td>Pocket Laptop (INCH)</td>
+            @foreach (var item in Model)
+            {
+                    @if(item.LaptopPocket!= null)
+                    {
+                        <td>@item.LaptopPocket</td>
+                    }
+                    else
+                    {
+                        <td>No</td>
+                    }
+            }
+         </tr>
+
+         <tr>
             <td>Water Resistance</td>
             @foreach (var item in Model)
             {
@@ -96,7 +111,9 @@ else
                     <td>No</td>
                 }
             }
-        </tr>
+        </tr> 
+
+    
         <tr>
             <td>Remove</td>
             @foreach (var item in Model)

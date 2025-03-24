@@ -5,7 +5,8 @@
 {
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<h4 class="panel-title"><a asp-action="Index" asp-controller="Category" asp-route-slug="@item.Slug">@item.CategoryName</a></h4>
+			@* <h4 class="panel-title"><a asp-action="Index" asp-controller="Category" asp-route-slug="@item.Slug">@item.CategoryName</a></h4> *@
+			<h4 class="panel-title"><a asp-action="Index" asp-controller="Home" asp-route-CategorySlug="@item.Slug">@item.CategoryName</a></h4>
 		</div>
 	</div>
 }

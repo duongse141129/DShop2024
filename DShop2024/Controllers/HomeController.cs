@@ -1,11 +1,15 @@
+using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Diagnostics;
 using System.Linq;
+using static Azure.Core.HttpHeader;
 
 namespace DShop2024.Controllers
 {
@@ -23,16 +27,112 @@ namespace DShop2024.Controllers
 
 		}
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string CategorySlug = "", string BrandSlug = "",
+												int pg = 1, string searchName = "" ,
+											string sortBy = "", string startprice = "", string endPrice = "",
+                                            string laptopPocket = "" , string waterResistance = "", string USBChargingPort = "")
         {
-            var products = _dataContext.Products.Where(p => p.Status == 1)
-                                        .Include(p => p.Brand)
-                                        .Include(p => p.Category)
-                                        .ToList();
+            //var products = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0)                                      
+            //                            .Include(p => p.Brand)
+            //                            .Include(p => p.Category)
+            //                            .ToList();
 
-            var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
+            IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
+                                                    .Include(p => p.Brand)
+                                                    .Include(p => p.Category);
+			var count = await listProduct.CountAsync();
+            if(count > 0)
+            {
+				if (!String.IsNullOrEmpty(CategorySlug))
+				{
+					listProduct = listProduct.Where(c => c.Category.Slug == CategorySlug);
+				}
+				if (!String.IsNullOrEmpty(BrandSlug))
+				{
+					listProduct = listProduct.Where(c => c.Brand.Slug == BrandSlug);
+				}
+				if (!String.IsNullOrEmpty(searchName))
+				{
+					listProduct = listProduct.Where(c => c.ProductName.Contains(searchName));
+				}
+				if (!String.IsNullOrEmpty(laptopPocket))
+				{
+					decimal laptopPocketValue;
+					decimal.TryParse(laptopPocket, out laptopPocketValue);
+					listProduct = listProduct.Where(c => c.LaptopPocket >= laptopPocketValue);
+				}
+				if (!String.IsNullOrEmpty(waterResistance))
+				{				
+					listProduct = listProduct.Where(c => c.WaterResistance == true);
+				}
+				if (!String.IsNullOrEmpty(USBChargingPort))
+				{
+					listProduct = listProduct.Where(c => c.USBChargingPort == true);
+				}
+
+
+				if (sortBy == "priceIncrease")
+				{
+					listProduct = listProduct.OrderBy(p => p.Price);
+				}
+				else if (sortBy == "priceDecrease")
+				{
+					listProduct = listProduct.OrderByDescending(p => p.Price);
+				}
+				else if (sortBy == "newest")
+				{
+					listProduct = listProduct.OrderByDescending(p => p.Id);
+				}
+				else if (sortBy == "oldest")
+				{
+					listProduct = listProduct.OrderBy(p => p.Id);
+				}
+				else if (startprice != "" && endPrice != "")
+				{
+					decimal startPriceValue;
+					decimal endPriceValue;
+					if (decimal.TryParse(startprice, out startPriceValue) && decimal.TryParse(endPrice, out endPriceValue))
+					{
+						listProduct = listProduct.Where(p => p.Price >= startPriceValue && p.Price <= endPriceValue);
+					}
+					else
+					{
+						listProduct = listProduct.OrderByDescending(p => p.Id);
+					}
+				}
+				else
+				{
+					listProduct = listProduct.OrderByDescending(p => p.Id);
+				}
+
+			}
+			var filterSortBy = Enum.GetValues(typeof(Product.SortBy))
+						.Cast<Product.SortBy>()
+						.Select(v => v.ToString())
+						.ToList();
+			ViewBag.sortBy = new SelectList(filterSortBy, sortBy);
+
+			ViewBag.searchName = searchName;
+			ViewBag.startprice = startprice;
+			ViewBag.endPrice = endPrice;
+			ViewBag.laptopPocket = laptopPocket;
+			ViewBag.waterResistance = waterResistance;
+			ViewBag.USBChargingPort = USBChargingPort;
+			
+
+			int pageSize = 20;
+			if (pg < 1) pg = 1;
+			int recsCount = listProduct.Count();
+			var pager = new Paginate(recsCount, pg, pageSize);
+			int recSkip = (pg - 1) * pageSize;
+
+			listProduct = listProduct.Skip(recSkip).Take(pager.PageSize);
+			
+			await listProduct.ToListAsync();
+			var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
             ViewBag.Banners = slider;
-            return View(products);
+			ViewBag.Pager = pager;
+			return View(listProduct);
         }
 
         public IActionResult Privacy()

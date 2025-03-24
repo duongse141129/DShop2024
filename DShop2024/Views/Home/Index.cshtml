@@ -1,16 +1,80 @@
 ﻿@model IEnumerable<ProductModel>
-
+@{
+	Paginate pager = new Paginate();
+	int pageNo = 0;
+	if (ViewBag.Pager != null)
+	{
+		pager = ViewBag.Pager;
+		pageNo = pager.CurrentPage;
+	}
+}
 @* <div class="col-sm-3">
 	@Html.Partial("_SidebarPartial")
 	
 </div> *@
 
-<partial name="_SliderPartial" />
+<partial name="_SliderPartial" /> 
 <div class="col-sm-3">
 	<partial name="_SidebarPartial" />
 </div> 
 
 <div class="col-sm-9 padding-right">
+	<div class="container">
+		<form asp-action="Index" asp-controller="Home">
+		<div class="row">
+			<div class="col-md-2">
+				<div class="search_box pull-right">
+						<input type="text" placeholder="Search" name="searchName" value="@( ViewBag.searchName!= "" ? ViewBag.searchName  : "" )" />
+						<button class="btn btn-warning btn-locgia" type="submit">Search</button>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<p>Radio laptop pocket(INCH)</p>
+					<input type="radio" id="Nonelaptop" name="laptopPocket" value="" @(ViewBag.laptopPocket == "" ? "checked" : "") />
+					<label for="Nonelaptop">None</label>
+					<input type="radio" id="laptop14" name="laptopPocket" value="14" @(ViewBag.laptopPocket == "14" ? "checked" : "") />
+					<label for="laptop14">14</label>
+					<input type="radio" id="laptop15" name="laptopPocket" value="15.6" @(ViewBag.laptopPocket == "15.6" ? "checked" : "") />
+					<label for="laptop15">15.6</label><br>
+					<input type="radio" id="laptop17" name="laptopPocket" value="17.3" @(ViewBag.laptopPocket == "17.3" ? "checked" : "") />
+					<label for="laptop17">17.3</label><br>
+			</div>
+			<div class="col-md-2">
+					
+					<input id="waterResistance" type="checkbox" name="waterResistance" @(ViewBag.waterResistance != "" ? "checked" : "") />
+					<label for="waterResistance">WaterResistance</label><br>
+					
+					<input id="USBChargingPort" type="checkbox" name="USBChargingPort" @(ViewBag.USBChargingPort != "" ? "checked" : "") />
+					<label for="USBChargingPort">USBChargingPort</label><br>
+			</div>
+
+	
+			<div class="col-md-2">
+				
+				<h5>Sort by</h5>
+					<select class="form-control" name="sortBy" asp-items="ViewBag.sortBy">
+						<option>------</option>
+					</select>
+			</div>
+
+		</div>
+		<div class="row">
+				<div class="col-md-5">
+					<h5>Filter by price</h5>
+					<input type="hidden" name="startprice" id="startprice">
+					<input type="hidden" name="endPrice" id="endPrice">
+					<p>
+						<input type="text" name="amount" id="amount" readonly="" style="border:0; color:#f6931f; font-weight:bold;" width="400">
+					</p>
+
+					<div id="slider-range"></div>
+					<button type="submit" name="locgia" class="btn btn-danger btn-locgia">Filter</button>
+
+				</div>
+		</div>
+		</form>
+	</div>
+
 	<div class="features_items">
 		<!--features_items-->
 		<h2 class="title text-center">Features Items</h2>
@@ -60,12 +124,75 @@
 			</div>
 		</div>
 		}
-
 	</div><!--features_items-->
-	
+	<partial name="_PagingPartial" model="@pager" />
 </div>
 
+
 @section Scripts {
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+	<script>
+		// $(document).ready(function () {
+		// 	$(function () {
+		// 		$("#slider-range").slider({
+		// 			range: true,
+		// 			step: 50000,
+		// 			min: 100000,
+		// 			max: 5000000,
+		// 			values: [100000, 300000],
+		// 			slide: function (event, ui) {
+		// 				$("#amount").val(
+		// 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+		// 						.format(ui.values[0])
+		// 					+ " - " +
+		// 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+		// 						.format(ui.values[1]));
+		// 			}
+		// 		});
+		// 		$("#amount").val(
+		// 			new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+		// 				.format($("#slider-range").slider("values", 0))
+		// 			+ " - " +
+		// 			new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+		// 				.format($("#slider-range").slider("values", 1)));
+		// 	});
+		// });
+
+		$(document).ready(function () {
+			$(function () {
+				$("#slider-range").slider({
+					range: true,
+					step: 50000,
+					min: 100000,
+					max: 5000000,
+					// values: [100000, 300000],
+					values: [@(ViewBag.startprice != "" ? ViewBag.startprice : 100000) , @(ViewBag.endPrice != "" ? ViewBag.endPrice : 300000)],
+					slide: function (event, ui) {
+						$("#amount").val(
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[0])
+							+ " - " +
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[1]));
+					}
+				});
+				$("#amount").val(
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 0))
+					+ " - " +
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 1)));
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+
+			$('.btn-locgia').on('click', function () {
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+		});
+	</script>
 	<script>
 		$(document).ready(function () {
 			$('.add-to-cart').click(function () {
