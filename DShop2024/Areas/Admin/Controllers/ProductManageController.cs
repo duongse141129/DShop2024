@@ -1,9 +1,14 @@
-﻿using DShop2024.Models;
+﻿using AutoMapper;
+using DShop2024.Areas.Admin.Models.Product;
+using DShop2024.EnumData;
+using DShop2024.Models;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using static DShop2024.EnumData.Product;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -14,23 +19,22 @@ namespace DShop2024.Areas.Admin.Controllers
 		private readonly DShopContext _dataContext;
 		private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<AppUserModel> _userManager;
+        private readonly IMapper _mapper;
 
-        public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager)
+        public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager, IMapper mapper)
 		{
 			_dataContext = context;
 			_webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
-
+            _mapper = mapper;
         }
 		public async Task<IActionResult> Index()
 		{
-			var products = await _dataContext.Products.Where(p => p.Status != 0)
-															.Include(p => p.Category)
-															.Include(p => p.Brand)
-															.OrderByDescending(p => p.Id)
-															.ToListAsync();
-
-			return View(products);
+            var products =  await _dataContext.Products.Where(p => p.Status != 0)
+                                                            .Include(p => p.Category)
+                                                            .Include(p => p.Brand)
+                                                            .OrderByDescending(p => p.Id).ToListAsync();
+            return View(products);
 		}
 
 		[HttpGet]
@@ -38,13 +42,12 @@ namespace DShop2024.Areas.Admin.Controllers
 		{
 			ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
 			ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName");
-
 			return View();
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductModel product)
+        public async Task<IActionResult> Create(CreateProductRequest product)
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
@@ -80,7 +83,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
                     }
                     product.Status = 1;
-                    await _dataContext.Products.AddAsync(product);
+                    ProductModel productModel = _mapper.Map<ProductModel>(product);
+                    await _dataContext.Products.AddAsync(productModel);
                     await _dataContext.SaveChangesAsync();
 
                     TempData["success"] = "Add product success";
@@ -103,12 +107,16 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
-			return View(product);
+            List<string> strings = new List<string> { "", "14.00", "15.60", "17.30" };
+            ViewBag.laptopPocket = new SelectList(strings, product.LaptopPocket.ToString());
+
+            UpdateProductRequest updateProduct = _mapper.Map<UpdateProductRequest>(product);
+            return View(updateProduct);
             
 		}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int Id, ProductModel product)
+        public async Task<IActionResult> Edit(int Id, UpdateProductRequest product)
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
@@ -159,23 +167,8 @@ namespace DShop2024.Areas.Admin.Controllers
                         exitedProduct.Image = imageName;
 
                     }
-                    exitedProduct.ProductName = product.ProductName;
-                    exitedProduct.Description = product.Description;
-                    exitedProduct.Price = product.Price;
-                    exitedProduct.CategoryId = product.CategoryId;
-                    exitedProduct.BrandId = product.BrandId;
 
-                    exitedProduct.OriginalPrice = product.OriginalPrice;
-                    exitedProduct.Capacity = product.Capacity;
-                    exitedProduct.Weight = product.Weight;
-                    exitedProduct.Compartment = product.Compartment;
-                    exitedProduct.Dimension = product.Dimension;
-                    exitedProduct.Material = product.Material;
-                    exitedProduct.WaterResistance = product.WaterResistance;
-                    exitedProduct.USBChargingPort = product.USBChargingPort;
-
-
-                    exitedProduct.Status = 1;
+                    exitedProduct = _mapper.Map(product, exitedProduct);      
                     _dataContext.Update(exitedProduct);
                     await _dataContext.SaveChangesAsync();
 
@@ -286,6 +279,44 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
+		public async Task<IActionResult> Detail(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-    }
+			var productModel = await _dataContext.Products.Include( b => b.Brand).Include( c => c.Category)
+				.FirstOrDefaultAsync(m => m.Id == id);
+			if (productModel == null)
+			{
+				return NotFound();
+			}
+
+
+			var listRating = await _dataContext.Ratings
+						.Where(p => p.ProductId == id)
+						.Where(r => r.Status == 1)
+						.Include(c => c.User)
+						.ToListAsync();
+			var pointAvarge = 0.0;
+			if (listRating.Count > 0)
+			{
+				pointAvarge = listRating.Average(p => p.Star);
+
+			}
+
+			var viewModel = new ProductDetailViewModel
+			{
+				ProductDetail = productModel,
+				Point = pointAvarge,
+				listRating = listRating
+			};
+
+
+			return View(viewModel);
+		}
+
+
+	}
 }

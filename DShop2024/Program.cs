@@ -11,6 +11,7 @@ using DShop2024.Services.Vnpay;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 using DShop2024.Services;
 using DShop2024.Hubs;
+using DShop2024.AutoMapper;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,6 +90,8 @@ builder.Services.AddAuthentication()
 builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>();
 
 builder.Services.AddSignalR();
+
+builder.Services.AddAutoMapper(typeof(ProductMapper));
 
 var app = builder.Build();
 
