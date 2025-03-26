@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using MailKit.Security;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +25,7 @@ public interface IEmailSender
     Task SendEmailAsync(string email, string subject, string message);
     Task SendSmsAsync(string number, string message);
     Task SendEmailOrder(OrderModel order, InformationShopModel infoShop);
+	Task SendEmailContact(ContactModel contact, InformationShopModel infoShop);
 }
 
 public class SendMailService : IEmailSender
@@ -131,8 +134,6 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{CouponValue}}", order.ValueCoupon.ToString("#,##0 VND"));
         path = path.Replace("{{GrandTotal}}", order.TotalPrice.ToString("#,##0 VND"));
 
-        //var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
@@ -140,4 +141,30 @@ public class SendMailService : IEmailSender
 
         await SendEmailAsync(order.User.Email, "Order DShop2024", path);
     }
+
+
+	public async Task SendEmailContact(ContactModel contact, InformationShopModel infoShop)
+	{
+		string webRootPath = _webHostEnvironment.WebRootPath;
+
+		string path = "";
+		path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendContact.html"));
+		path = path.Replace("{{Customer}}", contact.User.UserName);
+		path = path.Replace("{{TimeSend}}", contact.DateSent.ToShortTimeString());
+		path = path.Replace("{{DateSend}}", contact.DateSent.ToShortDateString());
+		path = path.Replace("{{Subject}}", contact.Subject);
+		path = path.Replace("{{Message}}", contact.Message);
+		path = path.Replace("{{Respondent}}", contact.Respondent.UserName);
+		path = path.Replace("{{TimeRespone}}", contact.DateRespone.ToShortTimeString());
+		path = path.Replace("{{DateRespone}}", contact.DateRespone.ToShortDateString());
+		path = path.Replace("{{ReplyMEssage}}", contact.ReplyMessage);
+
+
+		path = path.Replace("{{ShopName}}", infoShop.ShopName);
+		path = path.Replace("{{EmailShop}}", infoShop.Email);
+		path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+
+
+		await SendEmailAsync(contact.User.Email, contact.Subject, path);
+	}
 }

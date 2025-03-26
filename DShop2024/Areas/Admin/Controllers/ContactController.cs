@@ -1,6 +1,7 @@
 ﻿using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,20 +13,23 @@ namespace DShop2024.Areas.Admin.Controllers
     public class ContactController : Controller
     {
         private readonly DShopContext _dataContext;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IEmailSender _emailSender;
+		private readonly IEmailSender _emailSender;
+		private readonly UserManager<AppUserModel> _userManager;
 
-        public ContactController(DShopContext context, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
+		public ContactController(DShopContext context, IEmailSender emailSender, UserManager<AppUserModel> userManager)
         {
             _dataContext = context;
-            _webHostEnvironment = webHostEnvironment;
             _emailSender = emailSender;
+            _userManager = userManager;
 
-        }
+
+		}
         public async Task<IActionResult> Index()
         {
             var contacts = await _dataContext.Contacts.Where(c => c.Status != 0)
-                                                        .Include(u => u.User).OrderBy(d => d.DateSent)
+                                                        .Include(u => u.User)
+                                                        .Include(r => r.Respondent)
+                                                        .OrderByDescending(d => d.DateSent)
                                                         .ToListAsync();
             return View(contacts);
         }
@@ -68,14 +72,23 @@ namespace DShop2024.Areas.Admin.Controllers
                     TempData["error"] = "Message can't null";
                     return RedirectToAction("Reply", "Contact", new { id = IdContact });
                 }
-
+                var user = await _userManager.GetUserAsync(this.User);
+    
                 var contactModel = await _dataContext.Contacts
                .Include(u => u.User)
                .FirstOrDefaultAsync(m => m.Id == IdContact);
-                await _emailSender.SendEmailAsync(contactModel.User.Email, contactModel.Subject, replyMessage);
+				contactModel.ReplyMessage = replyMessage;
+                contactModel.DateRespone = DateTime.Now;
+                contactModel.RespondentId = user.Id;
+                _dataContext.Update(contactModel);
+                await _dataContext.SaveChangesAsync();
+				//await _emailSender.SendEmailAsync(contactModel.User.Email, contactModel.Subject, replyMessage);
+
+                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+				await _emailSender.SendEmailContact(contactModel, infoShop);
 
                 TempData["success"] = "Send gmail contact successful ";
-                return RedirectToAction("Reply", "Contact", new { id = IdContact });
+                return RedirectToAction("Index", "Contact");
             }
             catch (Exception ex)
             {

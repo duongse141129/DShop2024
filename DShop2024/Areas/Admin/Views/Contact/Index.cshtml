@@ -4,35 +4,69 @@
 }
 <h4>Contact Admin</h4>
 
-<table class="table table-striped" id="myTable">
-    <thead>
-        <tr>
- 
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Date</th>
-            <th>Subject</th>
-            <th>Message</th>
-            <th></th>
 
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.User.UserName</td>
-                <td>@item.User.Email</td>
-                <td>@item.DateSent.ToShortDateString()</td>
-                <td>@item.Subject</td>
-                <td>@item.Message</td>
-                <td>
-                    <a asp-action="Reply" class="btn btn-primary btn-sm" asp-controller="Contact" asp-route-Id="@item.Id">Reply</a>
-                    <a asp-action="Remove" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Contact" asp-route-Id="@item.Id">Remove</a>
-                </td>
 
-            </tr>
-        }
-    </tbody>
-</table>
+
+
+
+
+<div class="response-area">
+	<h2>Contacts</h2>
+	<ul class="media-list">
+		@foreach (var item in Model)
+		{
+			<li class="media">
+				<a class="pull-left" href="#">
+					<img class="media-object" src="~/media/avatar/imagesdefault.png" alt="">
+				</a>
+				<div class="media-body">
+					<ul class="sinlge-post-meta">
+						<li><i class="fa fa-user"></i>@item.User.UserName</li>
+						<li><i class="fa fa-clock-o"></i>@item.DateSent.ToShortTimeString()</li>
+						<li><i class="fa fa-calendar"></i>@item.DateSent.ToShortDateString()</li>
+					</ul>
+					<p><strong>Subject: @item.Subject</strong></p>
+					<p>@item.Message</p>
+					@if (item.ReplyMessage == null && item.RespondentId == null)
+					{
+						<a class="btn btn-primary" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
+					}
+					<a class="btn btn-danger" asp-action="Remove" asp-controller="Contact" asp-route-id="@item.Id">Remove</a>
+				</div>
+			</li>
+			@if(item.ReplyMessage != null && item.RespondentId != null)
+			{
+				<li class="media second-media">
+					<a class="pull-left" href="#">
+						<img class="media-object" src="~/media/avatar/imagesdefault.png" alt="">
+					</a>
+					<div class="media-body">
+						<ul class="sinlge-post-meta">
+							<li><i class="fa fa-user"></i>@item.Respondent.UserName</li>
+							<li><i class="fa fa-clock-o"></i>@item.DateRespone.ToShortTimeString()</li>
+							<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortTimeString()</li>
+						</ul>
+						<p>@item.ReplyMessage</p>
+					</div>
+				</li>
+			}
+		}
+		
+		
+
+	</ul>
+</div><
+
+
+
+
+
+
+
+
+
+
+
+
+
 

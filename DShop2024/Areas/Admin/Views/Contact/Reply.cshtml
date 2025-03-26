@@ -3,27 +3,35 @@
 @{
     ViewData["Title"] = "Reply email";
 }
+<h1>Replay email contact</h1>
 
-<h1>Send email</h1>
+<div class="replay-box">
+	<div class="row">
+		<div class="col-sm-4">
+			<h2>Leave a replay</h2>
+			<h4>@Model.User.UserName</h4>
+			<p>@Model.User.Email</p>
+			<p>@Model.DateSent</p>
+			<p>@Model.Subject</p>
+			<p>@Model.Message</p>
+		</div>
+		<div class="col-sm-8">
+			<form asp-action="Reply" method="post" asp-controller="Contact">
+				<input type="hidden" name="IdContact" value="@Model.Id" />
+				<div class="text-area">
+					<div class="blank-arrow">
+						<label>Reaply Message</label>
+					</div>
+					<span>*</span>
+					<textarea name="replyMessage" rows="11"></textarea>
+				<input class="btn btn-primary" type="submit" value="REPLY"  />
+				</div>
+			</form>
+		</div>
+	</div>
+</div><!--/Repaly Box-->
 
 <div>
-    <hr />
-    <div class="row">
-
-       <h4>@Model.User.UserName</h4>
-        <p>@Model.User.Email</p>
-        <p>@Model.DateSent</p>
-        <p>@Model.Subject</p>
-        <p>@Model.Message</p>
-
-        <form asp-action="Reply" asp-controller="Contact" method="post" >
-            <input type="hidden" value="@Model.Id" name="IdContact"/>
-            <textarea name="replyMessage" ></textarea>
-            <input type="submit" value="Reply" />
-        </form>
-    </div>
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
+	<a asp-action="Index">Back to List</a>
 </div>
 

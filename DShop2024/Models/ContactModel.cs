@@ -18,10 +18,15 @@ namespace DShop2024.Models
         public string UserId { get; set; }
         public int Status { get; set; }
 
+        public string RespondentId { get; set; }
+		public DateTime DateRespone { get; set; }
 
 		public string ReplyMessage { get; set; }
 
 		[ForeignKey("UserId")]
         public virtual AppUserModel User { get; set; }
+
+        [ForeignKey("RespondentId")]
+        public virtual AppUserModel Respondent { get; set; }
     }
 }
