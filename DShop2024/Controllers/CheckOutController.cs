@@ -20,7 +20,7 @@ namespace DShop2024.Controllers
 		private readonly IEmailSender _emailSender;
 		private readonly IMomoService _momoService;
 		private readonly IVnPayService _vnPayService;
-		public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
+        public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
 		{
 			_dataContext = context;
 			_userManager = userManager;
@@ -77,10 +77,6 @@ namespace DShop2024.Controllers
 			{
 				TempData["error"] = "Infomation delivery is null";
 				return RedirectToAction("Index", "Cart");
-			}
-			if (coupouns == null)
-			{
-                coupouns = new List<CouponModel>();
 			}
 			foreach (var coupon in coupouns)
 			{
@@ -206,16 +202,21 @@ namespace DShop2024.Controllers
 					await _dataContext.OrderCouponss.AddAsync(orderCoupons);
 					await _dataContext.SaveChangesAsync();
 				}
+
+				var orderSendGmail = await _dataContext.Orders
+													.Include(u => u.User)
+													.Include(od => od.OrderDetails)
+													.ThenInclude(p => p.Product)
+													.Where(o => o.Id == order.Id)
+													.FirstOrDefaultAsync();
+                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                await _emailSender.SendEmailOrder(order, infoShop);
 				
 
 				HttpContext.Session.Remove("Cart");
 				HttpContext.Session.Remove("InfoCustomerDelivery");
 				HttpContext.Session.Remove("CouponCustomerApply");
 
-				//var receiver = "dacclone577777@gmail.com";
-				//var subject = "Order successful";
-				//var message = "Thanks for order.";
-				//await _emailSender.SendEmailAsync(receiver, subject, message);
 
 				TempData["success"] = "Checkout successful. Thank you for shopping at the DShop2024. ";
 				return RedirectToAction("Index", "Home");

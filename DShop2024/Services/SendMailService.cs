@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DShop2024.Models;
 using MailKit.Security;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -19,6 +22,7 @@ public interface IEmailSender
 {
     Task SendEmailAsync(string email, string subject, string message);
     Task SendSmsAsync(string number, string message);
+    Task SendEmailOrder(OrderModel order, InformationShopModel infoShop);
 }
 
 public class SendMailService : IEmailSender
@@ -29,12 +33,16 @@ public class SendMailService : IEmailSender
 
     private readonly ILogger<SendMailService> logger;
 
+    private readonly IWebHostEnvironment _webHostEnvironment;
+
+
 
     // mailSetting được Inject qua dịch vụ hệ thống
     // Có inject Logger để xuất log
-    public SendMailService(IOptions<MailSettings> _mailSettings, ILogger<SendMailService> _logger)
+    public SendMailService(IOptions<MailSettings> _mailSettings, ILogger<SendMailService> _logger, IWebHostEnvironment webHostEnvironment)
     {
         mailSettings = _mailSettings.Value;
+        _webHostEnvironment = webHostEnvironment;
         logger = _logger;
         logger.LogInformation("Create SendMailService");
     }
@@ -90,5 +98,46 @@ public class SendMailService : IEmailSender
         var emailsavefile = string.Format(@"smssave/{0}-{1}.txt", number, Guid.NewGuid());
         System.IO.File.WriteAllTextAsync(emailsavefile, message);
         return Task.FromResult(0);
+    }
+
+
+    public async Task SendEmailOrder(OrderModel order, InformationShopModel infoShop)
+    {
+        string webRootPath = _webHostEnvironment.WebRootPath;
+
+        var strProduct = "";
+        foreach (var item in order.OrderDetails)
+        {
+            strProduct += "<tr>";
+            strProduct += "<td>" + item.Product.ProductName + "</td>";
+            strProduct += "<td>" + item.Quantity + "</td>";
+            strProduct += "<td>" + (item.Price * item.Quantity).ToString("#,##0 VND") + "</td>";
+            strProduct += "</tr>";
+
+        }
+        string path = "";
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendOrder.html"));
+        path = path.Replace("{{OrderCode}}", order.OrderCode);
+        path = path.Replace("{{Products}}", strProduct);
+        path = path.Replace("{{CustomerName}}", order.Consignee);
+        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod);
+        path = path.Replace("{{Phone}}", order.PhoneDelivery);
+        path = path.Replace("{{Mail}}", order.User.Email);
+        path = path.Replace("{{AddressDelivery}}", order.AddressDelivery);
+        path = path.Replace("{{DateOrder}}", order.CreatedDate.ToShortDateString());
+        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod);
+        path = path.Replace("{{Subtotal}}", order.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND"));
+        path = path.Replace("{{ShippingCost}}", order.ShippingCost.ToString("#,##0 VND"));
+        path = path.Replace("{{CouponValue}}", order.ValueCoupon.ToString("#,##0 VND"));
+        path = path.Replace("{{GrandTotal}}", order.TotalPrice.ToString("#,##0 VND"));
+
+        //var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+
+        path = path.Replace("{{ShopName}}", infoShop.ShopName);
+        path = path.Replace("{{EmailShop}}", infoShop.Email);
+        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+
+
+        await SendEmailAsync(order.User.Email, "Order DShop2024", path);
     }
 }
