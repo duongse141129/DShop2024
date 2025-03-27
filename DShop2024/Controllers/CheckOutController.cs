@@ -210,7 +210,7 @@ namespace DShop2024.Controllers
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
                 var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-                await _emailSender.SendEmailOrder(order, infoShop);
+                //await _emailSender.SendEmailOrder(order, infoShop);
 				
 
 				HttpContext.Session.Remove("Cart");

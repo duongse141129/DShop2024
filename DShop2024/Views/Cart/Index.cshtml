@@ -55,7 +55,7 @@
 						</tr>
 						}
 						<tr >
-							<td >Grand Total: <p class="cart_total_price"> @Model.GrandTotal.ToString("#,##0 VND")</p></td>
+							<td>Sub total: <p class="cart_total_price"> @Model.SumPriceItemsCart.ToString("#,##0 VND")</p></td>
 
 							
 							<td>
@@ -135,7 +135,7 @@
 
 							
 
-							@if(Model.InfoDelivery.ShippingCost <= 0){
+							@if(String.IsNullOrEmpty(Model.InfoDelivery.Street)){
 								<td>
 									<a disabled="disabled" class="btn btn-primary btn-sm" asp-controller="CheckOut" asp-action="CheckOut">Check Out </a>
 									<br/>
@@ -220,11 +220,11 @@
 		
 	<script>
 		$(".btn-apply-coupon").click(function () {
-			var couponValue = $(".coupon-value").val();
+			var couponCode = $(".coupon-value").val();
 			$.ajax({
 				type: "POST",
 				url: "@Url.Action("GetCoupon", "Cart")",
-				data: { couponValue: couponValue },
+				data: { couponCode: couponCode },
 				success: function (result) {
 					if (result.success) {
 						location.reload();

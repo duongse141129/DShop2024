@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -166,7 +167,21 @@ namespace DShop2024.Controllers
 					shipppingPrice = existingShipping.Price;
 				}
 
-				informationDelivery.ShippingCost = shipppingPrice;
+                List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+				if(coupouns.Count > 0)
+				{
+					foreach (var item in coupouns)
+					{
+						if (item.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING) || item.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
+						{
+                            informationDelivery.ShippingCost = 0;
+                            HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
+                            return RedirectToAction("Index");
+                        }
+					}
+				}
+
+                informationDelivery.ShippingCost = shipppingPrice;
 				HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
 				return RedirectToAction("Index");
 			}
@@ -175,16 +190,17 @@ namespace DShop2024.Controllers
 
 
 		[HttpPost]
-		public async Task<ActionResult> GetCoupon( string couponValue)
+		public async Task<ActionResult> GetCoupon( string couponCode)
 		{
-			if(couponValue == null)
+			if(couponCode == null)
 			{
 				return Ok(new { success = false, message = "Please enter your coupon code to apply coupon" });
 			}
             
 
             var validCoupon = await _dataContext.Coupons
-									.FirstOrDefaultAsync(x => x.CouponCode == couponValue && x.Quantity >=1 && x.Status != 0);
+									.Include(p => p.Promotion)
+									.FirstOrDefaultAsync(x => x.CouponCode == couponCode && x.Quantity >=1 && x.Status != 0);
 			
 			
 			if(validCoupon != null)
@@ -210,7 +226,7 @@ namespace DShop2024.Controllers
 					}
 					if (CheckUsed != null && CheckUsed.status == 2 )
 					{
-						return Ok(new { success = false, message = "You have used this coupon" });
+						return Ok(new { success = false, message = "You have already used this coupon" });
 					}
 
 					List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
@@ -218,27 +234,64 @@ namespace DShop2024.Controllers
 					{
 						foreach (var item in coupouns)
 						{
-							if (item.CouponCode == couponValue)
+							if (item.CouponCode == couponCode)
 							{
 								return Ok(new { success = false, message = "You have actived a coupon in this order" });
 							}
 						}
 					}
+					
+					if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
+					{
+						validCoupon.Value = validCoupon.Value;
+                    }
+                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
+                    {
+                        List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
+						if(cartItems.Count > 0 )
+						{
+                            decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
+							var val = validCoupon.Value * subtotal / 100000;
+							var CellVal = Math.Ceiling(val);
+							validCoupon.Value = CellVal*1000;
+                        }
+                    }
+
+                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING))
+                    {
+                        InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
+                        if(info != null)
+						{
+							info.ShippingCost = 0;
+                            HttpContext.Session.SetJson("InfoCustomerDelivery", info);
+							validCoupon.Value = 0;
+                        }
+                    }
+
+					if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
+					{
+						var codeCustomer = validCoupon.CouponCode.Split('_')[1];
+						var codeCustomer2 = validCoupon.CouponCode.Split('_')[0];
+						if (user.UserName.ToUpper().Equals(codeCustomer))
+						{
+							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
+							if (info != null)
+							{
+								info.ShippingCost = 0;
+								HttpContext.Session.SetJson("InfoCustomerDelivery", info);
+								validCoupon.Value = 0;
+							}
+						}
+						else
+						{
+							return Ok(new { success = false, message = "This coupon code does not belong to you." });
+						}					
+					}
+
 
 					coupouns.Add(validCoupon);
 					HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
 					return Ok(new { success = true, message = "Apply coupon successfully" });
-
-					//if (coupouns == null)
-					//{
-					//	coupouns = new List<CouponModel>();
-					//	coupouns.Add(validCoupon);
-					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-					//	return Ok(new { success = true, message = "Apply coupon successfully" });
-					//}
-					//coupouns.Add(validCoupon);
-					//HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-					//return Ok(new { success = true, message = "Apply coupon successfully" });
 
 				}
 				return Ok(new { success = false, message = "Coupon has expried" });
