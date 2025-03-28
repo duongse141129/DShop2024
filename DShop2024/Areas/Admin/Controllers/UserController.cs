@@ -26,13 +26,17 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userWithRoles = await (from u in _context.Users
-                                       join ur in _context.UserRoles on u.Id equals ur.UserId
-                                       join r in _context.Roles on ur.RoleId equals r.Id
-                                       select new {User = u, RoleName = r.Name}).ToListAsync();
+			//var userWithRoles = await (from u in _context.Users
+			//                           join ur in _context.UserRoles on u.Id equals ur.UserId
+			//                           join r in _context.Roles on ur.RoleId equals r.Id
+			//                           select new {User = u, RoleName = r.Name}).ToListAsync();
+			//return View(userWithRoles);
 
-            return View(userWithRoles);
-        }
+			var listUser = await _context.Users.ToListAsync();
+			return View(listUser);
+
+
+		}
 
 		[HttpGet]
 		public async Task<IActionResult> Create()

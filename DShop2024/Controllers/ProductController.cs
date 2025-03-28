@@ -46,7 +46,6 @@ namespace DShop2024.Controllers
 			ViewBag.relatedProducts = relatedProducts;
 
 
-			// kiếm template
 			//var rvproduct = Request.Cookies["RecentlyViewedProducts"];
 			//List<ProductModel> recentlyViewedProducts;
 			//if(rvproduct == null)

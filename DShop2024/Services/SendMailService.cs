@@ -26,6 +26,8 @@ public interface IEmailSender
     Task SendSmsAsync(string number, string message);
     Task SendEmailOrder(OrderModel order, InformationShopModel infoShop);
 	Task SendEmailContact(ContactModel contact, InformationShopModel infoShop);
+    Task SendEmailCouponForNewCustomer(AppUserModel userModel, CouponModel couponModel, InformationShopModel infoShop);
+    Task SendEmailOTPconfirm(AppUserModel userModel, string otp, InformationShopModel infoShop);
 }
 
 public class SendMailService : IEmailSender
@@ -167,4 +169,39 @@ public class SendMailService : IEmailSender
 
 		await SendEmailAsync(contact.User.Email, contact.Subject, path);
 	}
+
+    public async Task SendEmailOTPconfirm(AppUserModel userModel,string otp ,InformationShopModel infoShop)
+    {
+        string webRootPath = _webHostEnvironment.WebRootPath;
+
+        string path = "";
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\otp22.html"));
+        path = path.Replace("{{UserName}}", userModel.UserName);
+        path = path.Replace("{{OTPcode}}", otp);
+
+        path = path.Replace("{{ShopName}}", infoShop.ShopName);
+        path = path.Replace("{{EmailShop}}", infoShop.Email);
+        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+
+        await SendEmailAsync(userModel.Email, "confirm email for register", path);
+    }
+
+    public async Task SendEmailCouponForNewCustomer(AppUserModel userModel,CouponModel couponModel, InformationShopModel infoShop)
+    {
+        string webRootPath = _webHostEnvironment.WebRootPath;
+
+        string path = "";
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCoupon.html"));
+        path = path.Replace("{{UserName}}", userModel.UserName);
+        path = path.Replace("{{CouponName}}", couponModel.CouponName);
+        path = path.Replace("{{Description}}", couponModel.Description);
+        path = path.Replace("{{CouponCode}}", couponModel.CouponCode);
+        path = path.Replace("{{DateExpire}}", couponModel.DateExpired.ToShortDateString());
+
+        path = path.Replace("{{ShopName}}", infoShop.ShopName);
+        path = path.Replace("{{EmailShop}}", infoShop.Email);
+        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+
+        await SendEmailAsync(userModel.Email, "Promotion for new customers", path);
+    }
 }

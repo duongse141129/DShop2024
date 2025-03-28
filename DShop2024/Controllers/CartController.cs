@@ -271,7 +271,6 @@ namespace DShop2024.Controllers
 					if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
 					{
 						var codeCustomer = validCoupon.CouponCode.Split('_')[1];
-						var codeCustomer2 = validCoupon.CouponCode.Split('_')[0];
 						if (user.UserName.ToUpper().Equals(codeCustomer))
 						{
 							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");

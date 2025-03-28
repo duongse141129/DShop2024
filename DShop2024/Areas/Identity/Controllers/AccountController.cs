@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using App.Areas.Identity.Models.AccountViewModels;
 using App.Utilities;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Identity.Controllers
 {
@@ -22,17 +24,20 @@ namespace DShop2024.Areas.Identity.Controllers
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<AccountController> _logger;
+        private readonly DShopContext _dataContext;
 
         public AccountController(
             UserManager<AppUserModel> userManager,
             SignInManager<AppUserModel> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            DShopContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _dataContext = context;
         }
 
         // GET: /Account/Login
@@ -128,28 +133,78 @@ namespace DShop2024.Areas.Identity.Controllers
                 {
                     _logger.LogInformation("Đã tạo user mới.");
 
-                    // Phát sinh token để xác nhận email
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    //// Phát sinh token để xác nhận email
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-					// https://localhost:7213/confirm-email?userId=fdsfds&code=xyz&returnUrl=
-					var callbackUrl = Url.ActionLink(
-                        action: nameof(ConfirmEmail),
-                        values: 
-                            new { area = "Identity", 
-                                  userId = user.Id, 
-                                  code = code},
-                        protocol: Request.Scheme);
+                    //// https://localhost:7213/confirm-email?userId=fdsfds&code=xyz&returnUrl=
+                    //var callbackUrl = Url.ActionLink(
+                    //                   action: nameof(ConfirmEmail),
+                    //                   values:
+                    //                       new
+                    //                       {
+                    //                           area = "Identity",
+                    //                           userId = user.Id,
+                    //                           code = code
+                    //                       },
+                    //                   protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(model.Email, 
-                        "Xác nhận địa chỉ email",
-                        @$"Bạn đã đăng ký tài khoản trên RazorWeb, 
-                           hãy <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a> 
-                           để kích hoạt tài khoản.");
+                    //await _emailSender.SendEmailAsync(model.Email,
+                    //    "Xác nhận địa chỉ email",
+                    //    @$"Bạn đã đăng ký tài khoản trên RazorWeb, 
+					               //       hãy <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a> 
+					               //       để kích hoạt tài khoản.");
+
+
+
+
+
+                    //var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+                    //if (promotion != null)
+                    //{
+                    //    promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
+                    //    await _dataContext.Promotions.AddAsync(promotion);
+                    //    await _dataContext.SaveChangesAsync();
+                    //}
+                    //CouponModel couponModel = new CouponModel 
+                    //{ 
+                    //    CouponName = "Promotion for new customer",
+                    //    CouponCode = "NEWCUSTOMER_"+user.UserName.ToUpper(),
+                    //    Value = 50000,
+                    //    DateStart = DateTime.Today,
+                    //    DateExpired = DateTime.Today.AddDays(7),
+                    //    Quantity = 1,
+                    //    Status = 1,
+                    //    Description = "Free shipping for new customers' first order",
+                    //    PromotionId = promotion.Id
+                    //};
+                    //await _dataContext.Coupons.AddAsync(couponModel);
+                    //await _dataContext.SaveChangesAsync();
+
+                    //var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                    //await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+
+
+                    var rand = new Random();
+                    int codeConfirmEmail = rand.Next(100000, 999999);
+
+                    var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+
+                    var cookieOptionss = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Expires = DateTime.UtcNow.AddMinutes(10),
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                    };
+                    Response.Cookies.Append(DShopConst.OTP_CONFIRM_EMAIL + user.UserName, codeConfirmEmail.ToString(), cookieOptionss);
+                    await _emailSender.SendEmailOTPconfirm(user, codeConfirmEmail.ToString(), infoShop);
+
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return LocalRedirect(Url.Action(nameof(RegisterConfirmation)));
+                        //return LocalRedirect(Url.Action(nameof(RegisterConfirmation)));
+                        return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
                     }
                     else
                     {
@@ -169,10 +224,76 @@ namespace DShop2024.Areas.Identity.Controllers
         // GET: /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult RegisterConfirmation()
+        public async Task<IActionResult> RegisterConfirmation(string? userId)
         {
-            return View();
-        }       
+            if (userId == null)
+            {
+                return NotFound();
+            }
+            var user = await _dataContext.Users.FindAsync(userId);
+           
+            return View(user);
+        }
+
+
+        public async Task<IActionResult> SendOtpConfirmEmail(string? userId)
+        {
+            if (userId == null)
+            {
+                return NotFound();
+            }
+            var user = await _dataContext.Users.FindAsync(userId);
+
+            var rand = new Random();
+            int codeConfirmEmail = rand.Next(100000, 999999);
+
+            var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+
+            var cookieOptionss = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddMinutes(10),
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+            };
+            Response.Cookies.Append(DShopConst.OTP_CONFIRM_EMAIL + user.UserName, codeConfirmEmail.ToString(), cookieOptionss);
+            await _emailSender.SendEmailOTPconfirm(user, codeConfirmEmail.ToString(), infoShop);
+
+            return View(user);
+        }
+
+        // GET: /Account/ConfirmEmailByCode
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmEmailByOTP(string userId, string codeConfirmEmail)
+        {
+            if (userId == null || codeConfirmEmail == null)
+            {
+                return View("ErrorConfirmEmail");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View("ErrorConfirmEmail");
+            }
+
+            var otpConfirm = Request.Cookies[DShopConst.OTP_CONFIRM_EMAIL + user.UserName];
+            if (codeConfirmEmail.Equals(otpConfirm))
+            {
+                user.EmailConfirmed = true;
+                _dataContext.Update(user);
+                await _dataContext.SaveChangesAsync();
+                TempData["success"] = "Confirm email successful";
+                return View();
+            }
+            TempData["error"] = "Code is invalid";
+            return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
+
+            //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            //var result = await _userManager.ConfirmEmailAsync(user, code);
+            //return View(result.Succeeded ? "ConfirmEmail" : "ErrorConfirmEmail");
+        }
 
         // GET: /Account/ConfirmEmail
         [HttpGet]

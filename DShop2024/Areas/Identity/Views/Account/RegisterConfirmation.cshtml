@@ -1,8 +1,16 @@
+@model AppUserModel
+
 @{
-    ViewData["Title"] = "Thông báo";
+    ViewData["Title"] = "Register confirm";
 }
 
 <h1>@ViewData["Title"]</h1>
-<p>
-    Hãy kiểm tra hòm thư để biết cách xác thực tài khoản
-</p>
+
+
+
+<form asp-asp-area="Identity" asp-controller="Account" asp-action="ConfirmEmailByOTP" method="post">
+    <input  type="hidden" name="userId" value="@Model.Id" />
+    <input type="text" name="codeConfirmEmail" value="" />
+    <input type="submit" value="Confirm"/>
+    <a asp-area="Identity" asp-controller="Account" asp-action="SendOtpConfirmEmail" asp-route-userId="@Model.Id">SendOTP again</a>
+</form>

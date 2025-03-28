@@ -1,0 +1,45 @@
+﻿<style>
+    .coupon {
+        border: 5px dotted #bbb; /* Dotted border */
+        width: 80%;
+        border-radius: 15px; /* Rounded border */
+        margin: 0 auto; /* Center the coupon */
+        max-width: 600px;
+    }
+
+    .container {
+        padding: 2px 16px;
+        background-color: #f1f1f1;
+    }
+
+    .promo {
+        background: #ccc;
+        padding: 3px;
+    }
+
+    .expire {
+        color: red;
+    }
+</style>
+
+<h2>Dear {{UserName}}</h2>
+<h4>Thank you for registering an account at the {{ShopName}}. We send you a discount code.</h4>
+<div class="coupon">
+    <div class="container">
+        <h3>{{CouponName}}</h3>
+    </div>
+    <div class="container" style="background-color:white">
+        <h2><b>{{Description}}</b></h2>
+        <!--<p>{{Value}}</p>-->
+    </div>
+    <div class="container">
+        <p>Use Promo Code: <span class="promo">{{CouponCode}}</span></p>
+        <p class="expire">Expires: {{DateExpire}}</p>
+    </div>
+</div>
+<div class="contact-info">
+    <p>Thanks and best regards</p>
+    <h4>{{ShopName}}</h4>
+    <p>{{EmailShop}}</p>
+    <p>{{HotlineShop}}</p>
+</div>
