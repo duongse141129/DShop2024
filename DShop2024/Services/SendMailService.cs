@@ -3,10 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using DShop2024.EnumData;
 using DShop2024.Models;
-using MailKit.Security;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
