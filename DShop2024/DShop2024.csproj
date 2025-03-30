@@ -38,4 +38,11 @@
     <Folder Include="wwwroot\media\products\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\media\Email\otpEmail.html">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

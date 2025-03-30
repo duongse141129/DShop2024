@@ -24,6 +24,7 @@ public interface IEmailSender
 	Task SendEmailContact(ContactModel contact, InformationShopModel infoShop);
     Task SendEmailCouponForNewCustomer(AppUserModel userModel, CouponModel couponModel, InformationShopModel infoShop);
     Task SendEmailOTPconfirm(AppUserModel userModel, string otp, InformationShopModel infoShop);
+    Task SendEmailOTP(AppUserModel userModel, string otp, string typeService, InformationShopModel infoShop);
 }
 
 public class SendMailService : IEmailSender
@@ -199,5 +200,35 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
 
         await SendEmailAsync(userModel.Email, "Promotion for new customers", path);
+    }
+
+    public async Task SendEmailOTP(AppUserModel userModel, string otp,string typeService, InformationShopModel infoShop)
+    {
+        string webRootPath = _webHostEnvironment.WebRootPath;
+
+        string title = "", subject = "";
+        if(typeService == DShopConst.OTP_CONFIRM_EMAIL)
+        {
+            title = "Please enter this confirmation code in the window where you started creating your account:";
+            subject = "confirm email for register";
+        }
+        if(typeService == DShopConst.OTP_RESET_PASSWORD)
+        {
+            title = "Please enter this confirmation code in the window where you want to reset password your account:";
+            subject =  "confirm email for reset password";
+        }
+
+        string path = "";
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\otpEmail.html"));
+        path = path.Replace("{{UserName}}", userModel.UserName);
+        path = path.Replace("{{OTPcode}}", otp);
+
+        path = path.Replace("{{Title}}", title);
+        
+        path = path.Replace("{{ShopName}}", infoShop.ShopName);
+        path = path.Replace("{{EmailShop}}", infoShop.Email);
+        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+
+        await SendEmailAsync(userModel.Email, subject, path);
     }
 }

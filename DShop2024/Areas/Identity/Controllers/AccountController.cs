@@ -32,7 +32,8 @@ namespace DShop2024.Areas.Identity.Controllers
             SignInManager<AppUserModel> signInManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            DShopContext context)
+            DShopContext context
+            )
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -187,7 +188,8 @@ namespace DShop2024.Areas.Identity.Controllers
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToAction("SendOtpConfirmEmail", "Account", new { userId = user.Id });
+
+                        return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_CONFIRM_EMAIL });
                     }
                     else
                     {
@@ -213,38 +215,12 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 return NotFound();
             }
-            var user = await _dataContext.Users.FindAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId);
            
             return View(user);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> SendOtpConfirmEmail(string? userId)
-        {
-            if (userId == null)
-            {
-                return NotFound();
-            }
-            var user = await _dataContext.Users.FindAsync(userId);
 
-            var rand = new Random();
-            int codeConfirmEmail = rand.Next(100000, 999999);
-
-            var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-
-            var cookieOptionss = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddMinutes(10),
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-            };
-            Response.Cookies.Append(DShopConst.OTP_CONFIRM_EMAIL + user.UserName, codeConfirmEmail.ToString(), cookieOptionss);
-            await _emailSender.SendEmailOTPconfirm(user, codeConfirmEmail.ToString(), infoShop);
-
-            return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
-        }
 
         // GET: /Account/ConfirmEmailByCode
         [HttpPost]
@@ -265,9 +241,11 @@ namespace DShop2024.Areas.Identity.Controllers
             var otpConfirm = Request.Cookies[DShopConst.OTP_CONFIRM_EMAIL + user.UserName];
             if (codeConfirmEmail.Equals(otpConfirm))
             {
+                
                 user.EmailConfirmed = true;
                 _dataContext.Update(user);
                 await _dataContext.SaveChangesAsync();
+         
                 TempData["success"] = "Confirm email successful";
                 return View();
             }
@@ -506,30 +484,29 @@ namespace DShop2024.Areas.Identity.Controllers
                 //    "Reset Password",
                 //    $"Hãy bấm <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>vào đây</a> để đặt lại mật khẩu.");
 
-
-                return RedirectToAction("SendOtpResetPassword", "Account" ,new { email = user.Email});
+                return RedirectToAction("SendOtp", "Account" ,new { email = user.Email, typeService = DShopConst.OTP_RESET_PASSWORD });
    
-
-
             }
             return View(model);
         }
 
+
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> SendOtpResetPassword(string? email)
+        public async Task<IActionResult> SendOtp(string? email, string typeService)
         {
             if (email == null)
             {
-                return NotFound();
+                return View("NotFoundEmail");
             }
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _userManager.FindByEmailAsync (email);
+            if (user == null)
+            {
+                return View("NotFoundEmail");
+            }
 
             var rand = new Random();
-            int codeResetPassword = rand.Next(100000, 999999);
-
-            var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-
+            int codeEmail = rand.Next(100000, 999999);
             var cookieOptionss = new CookieOptions
             {
                 HttpOnly = true,
@@ -537,40 +514,23 @@ namespace DShop2024.Areas.Identity.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
             };
-            Response.Cookies.Append(DShopConst.OTP_RESET_PASSWORD + user.UserName, codeResetPassword.ToString(), cookieOptionss);
-            await _emailSender.SendEmailOTPconfirm(user, codeResetPassword.ToString(), infoShop);
 
-            return RedirectToAction("ForgotPasswordConfirmation", "Account", new { email = user.Email });
+            var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+            await _emailSender.SendEmailOTP(user, codeEmail.ToString(), typeService, infoShop);
+
+            if (typeService == DShopConst.OTP_CONFIRM_EMAIL)
+            {
+                Response.Cookies.Append(DShopConst.OTP_CONFIRM_EMAIL + user.UserName, codeEmail.ToString(), cookieOptionss);
+                return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
+            }
+            if(typeService == DShopConst.OTP_RESET_PASSWORD)
+            {
+                Response.Cookies.Append(DShopConst.OTP_RESET_PASSWORD + user.UserName, codeEmail.ToString(), cookieOptionss);
+                return RedirectToAction("ForgotPasswordConfirmation", "Account", new { email = user.Email });
+            }           
+         
+            return View("NotFoundEmail");
         }
-
-        //// GET: /Account/ConfirmEmailByCode
-        //[HttpPost]
-        //[AllowAnonymous]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> ConfirmEmailByOTP(string userId, string codeConfirmEmail)
-        //{
-        //    if (userId == null || codeConfirmEmail == null)
-        //    {
-        //        return View("ErrorConfirmEmail");
-        //    }
-        //    var user = await _userManager.FindByIdAsync(userId);
-        //    if (user == null)
-        //    {
-        //        return View("ErrorConfirmEmail");
-        //    }
-
-        //    var otpConfirm = Request.Cookies[DShopConst.OTP_CONFIRM_EMAIL + user.UserName];
-        //    if (codeConfirmEmail.Equals(otpConfirm))
-        //    {
-        //        user.EmailConfirmed = true;
-        //        _dataContext.Update(user);
-        //        await _dataContext.SaveChangesAsync();
-        //        TempData["success"] = "Confirm email successful";
-        //        return View();
-        //    }
-        //    TempData["error"] = "Code is invalid";
-        //    return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
-        //}
 
         //
         // GET: /Account/ForgotPasswordConfirmation
@@ -582,7 +542,7 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 return View("NotFoundEmail");
             }
-            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _userManager.FindByEmailAsync(email);
             if(user == null) {
                 return View("NotFoundEmail");
             }
@@ -614,6 +574,16 @@ namespace DShop2024.Areas.Identity.Controllers
             TempData["error"] = "Code is invalid";
             return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
         }
+
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ConfirmEmailAgain()
+        {
+            return View();
+        }
+
 
         //
         // GET: /Account/ResetPassword
