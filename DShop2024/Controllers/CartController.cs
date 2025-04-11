@@ -5,6 +5,8 @@ using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IO;
 
 
 namespace DShop2024.Controllers
@@ -150,42 +152,45 @@ namespace DShop2024.Controllers
 		}
 
 
+
+
 		[HttpPost]
-		[ValidateAntiForgeryToken]
+		[Route("GetShipping")]
 		public async Task<ActionResult> GetShipping(InformationDelivery informationDelivery)
 		{
-			decimal shipppingPrice = 50000;			
-			if(ModelState.IsValid)
+
+			decimal shipppingPrice = 50000;
+			if (ModelState.IsValid)
 			{
+
 				var existingShipping = await _dataContext.Shippings
-											.FirstOrDefaultAsync(x => x.City == informationDelivery.tinh &&
-																x.District == informationDelivery.quan
-																&& x.Ward == informationDelivery.phuong);
+											.FirstOrDefaultAsync(x => x.Province == informationDelivery.tinh);
 
 				if (existingShipping != null)
 				{
 					shipppingPrice = existingShipping.Price;
 				}
 
-                List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
-				if(coupouns.Count > 0)
+				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+				if (coupouns.Count > 0)
 				{
 					foreach (var item in coupouns)
 					{
 						if (item.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING) || item.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
 						{
-                            informationDelivery.ShippingCost = 0;
-                            HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
-                            return RedirectToAction("Index");
-                        }
+							informationDelivery.ShippingCost = 0;
+							HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
+							return Ok(new { success = true, message = "Get shipping successful" });
+							
+						}
 					}
 				}
 
-                informationDelivery.ShippingCost = shipppingPrice;
+				informationDelivery.ShippingCost = shipppingPrice;
 				HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
-				return RedirectToAction("Index");
+				return Ok(new { success = true, message = "Get shipping successful" });
 			}
-			return RedirectToAction("Index");
+			return Ok(new { success = false, message = "Get shipping fail. Please fill all inputs." });
 		}
 
 

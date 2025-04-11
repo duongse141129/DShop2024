@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.Models.Vnpay;
 using DShop2024.Repository;
 using DShop2024.Services.Momo;
@@ -80,24 +81,60 @@ namespace DShop2024.Controllers
 			}
 			foreach (var coupon in coupouns)
 			{
-				var cp = await _dataContext.Coupons.FindAsync(coupon.Id);
+				var cp = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == coupon.Id);
 				if(cp != null )
 				{
-					if(cp.Status == 0)
-					{
-						coupouns.Remove(coupon);
-						HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-						TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
-						return RedirectToAction("Index", "Cart");
-					}
-					int quantityCoupon = cp.Quantity;
-					if (quantityCoupon <= 0)
-					{
-						coupouns.Remove(coupon);
-						HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-						TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
-						return RedirectToAction("Index", "Cart");
-					}
+                    int quantityCoupon = cp.Quantity;
+                    var dateNow = DateTime.Today.Date;
+                    if (cp.Status == 0 || cp.Quantity <= 0 || dateNow > cp.DateExpired.Date)
+                    {
+						if(cp.Status == 0)
+						{
+                            TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
+                        }
+                        if (cp.Quantity <= 0)
+                        {
+                            TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
+                        }
+                        if (dateNow > cp.DateExpired.Date)
+                        {
+                            TempData["error"] = $"Coupon {coupon.CouponCode} was expired. Do you still want to checkout?";
+                        }
+
+                        coupouns.Remove(coupon);
+                        HttpContext.Session.SetJson("CouponCustomerApply", coupouns);     
+						
+						if(cp.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING || cp.Promotion.CategoryCouponName == DShopConst.NEW_CUSTOMER)
+						{
+							return RedirectToAction("GetShipping", "Cart", new { informationDelivery = info });
+						}
+
+                        return RedirectToAction("Index", "Cart");
+                    }
+
+					//if (cp.Status == 0)
+					//{
+					//	coupouns.Remove(coupon);
+					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+					//	TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
+					//	return RedirectToAction("Index", "Cart");
+					//}
+					//int quantityCoupon = cp.Quantity;
+					//if (quantityCoupon <= 0)
+					//{
+					//	coupouns.Remove(coupon);
+					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+					//	TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
+					//	return RedirectToAction("Index", "Cart");
+					//}
+					//var dateNow = DateTime.Today.Date;
+					//if (dateNow > cp.DateExpired.Date)
+					//{
+					//	coupouns.Remove(coupon);
+					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+					//	TempData["error"] = $"Coupon {coupon.CouponCode} was expired. Do you still want to checkout?";
+					//	return RedirectToAction("Index", "Cart");
+					//}
 				}
 			}
 
@@ -193,9 +230,15 @@ namespace DShop2024.Controllers
 				{
 					CouponRedemptionModel couponRedemption = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
 					couponRedemption.status = 2;
-					CouponModel couponModel = await _dataContext.Coupons.FindAsync(item.Id);
-					couponModel.Quantity -= 1;
+                    //CouponModel couponModel = await _dataContext.Coupons.FindAsync(item.Id);
+                    CouponModel couponModel = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
+                    couponModel.Quantity -= 1;
 					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, status = 1 };
+
+					if(couponModel.Promotion.CategoryCouponName == DShopConst.NEW_CUSTOMER)
+					{
+						couponModel.Status = 0;
+					}
 
 					_dataContext.Coupons.Update(couponModel);
 					_dataContext.CouponRedemptions.Update(couponRedemption);

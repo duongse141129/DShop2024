@@ -1,4 +1,6 @@
-using System;
+
+
+using DShop2024.Repository.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -26,5 +28,20 @@ namespace App.Areas.Identity.Models.ManageViewModels
           [Column(TypeName = "nvarchar")]
           [StringLength(100)]
           public string Occupation { get; set; }
+
+        public bool? Gender { get; set; }
+
+
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(500)]
+        public string? Avatar { get; set; }
+
+        public string loginType { get; set; }
+
+        [NotMapped]
+        [FileExtension]
+        public IFormFile? AvatarUpload { get; set; }
+
     }
 }

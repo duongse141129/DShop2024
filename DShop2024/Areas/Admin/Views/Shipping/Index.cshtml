@@ -22,23 +22,10 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>District</label>
-                <select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
-                    <option value="0">Quận Huyện</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Ward</label>
-                <select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
-                    <option value="0">Phường Xã</option>
-                </select>
-            </div>
 
             <div class="form-group">
                 <label>Price </label>
-                <input asp-for="Price" id="price-shippng" class="form-control" />
+                <input asp-for="Price" id="price-shippng" min="10000" max="50000" step="1000" type="number" class="form-control" />
                 
             </div>
 
@@ -55,8 +42,6 @@
     <thead>
         <tr>
             <th>Province or City</th>
-            <th>District</th>
-            <th>Ward</th>
             <th>Price</th>
             <th></th>
            
@@ -66,9 +51,7 @@
         @foreach (var item in ViewBag.Shippings)
         {
             <tr>
-                <td>@item.City</td>
-                <td>@item.District</td>
-                <td>@item.Ward</td>
+                <td>@item.Province</td>
                 <td>@item.Price.ToString("#,##0 VND")</td>
 
                 <td>
@@ -81,9 +64,6 @@
 </table>
 
 
-<div>
-    <a class="BackToIndex" asp-action="Index">Back to List Shipping</a>
-</div>
 
 
 
@@ -95,20 +75,21 @@
         $(document).ready(function () {
             $(".btn-add-shipping").click(function () {
                 var tinh = $('#tinh').find('option:selected').text();
-                var quan = $('#quan').find('option:selected').text();
-                var phuong = $('#phuong').find('option:selected').text();
                 var price = $('#price-shippng').val();
-                if (tinh == '' || quan == '' || phuong == '' || price == '') {
+                if (tinh == 'Tỉnh Thành'  || price == '') {
                     Swal.fire("Please input all value");
-                } else {
+                } else if (price < 10000 || price > 50000) {
+                    Swal.fire(" Price from 10000 to 50000");
+                }
+                else {
                     $.ajax({
                         type: "POST",
                         url: "@Url.Action("StoreShipping", "Shipping")",
-                        data: { tinh: tinh, quan: quan, phuong: phuong, price: price },
+                        data: { tinh: tinh, price: price },
                         success: function (result) {
                             if (result.success) {
-                                Swal.fire("Add shipping successful");
                                 location.reload();
+                                Swal.fire("Add shipping successful");                            
                             }
                             else if (result.duplicate) {
                                 Swal.fire("Duplicate data");

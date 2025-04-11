@@ -70,11 +70,11 @@
 								Shipping Costl:
 								<p class="cart_total_price"> @Model.InfoDelivery.ShippingCost.ToString("#,##0 VND")</p>
 
-
+@* 
 								<form asp-action="GetShipping" asp-controller="Cart" method="post" enctype="multipart/form-data">
 								<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 													
-								 <div class="form-group">
+								<div class="form-group">
 									<label >Province or City</label>
 										<select asp-for="@Model.InfoDelivery.tinh" class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
 											<option value="">Tỉnh Thành</option>
@@ -117,8 +117,60 @@
 									</div>
 	
 																												
-								@* <button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button> *@
-								</form>
+								     <button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button> 
+								</form> *@
+
+
+								
+									<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+									<div class="form-group">
+										<label>Province or City</label>
+										<select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+											<option value="">Tỉnh Thành</option>
+										</select>
+										
+									</div>
+
+									<div class="form-group">
+										<label>District</label>
+										<select  class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+											<option value="">Quận Huyện</option>
+										</select>
+										
+									</div>
+
+									<div class="form-group">
+										<label>Ward</label>
+										<select  class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+											<option value="">Phường Xã</option>
+										</select>
+										
+									</div>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.Street" class="control-label"></label>
+										<input name="Street" id="Street" class="form-control" />
+										
+									</div>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.PhoneDelivery" name="PhoneDelivery" class="control-label"></label>
+										<input name="PhoneDelivery" id="PhoneDelivery" class="form-control" />
+										
+									</div>
+									<div class="form-group">
+										<label asp-for="@Model.InfoDelivery.Consignee" name="Consignee" class="control-label"></label>
+										<input name="Consignee" id="Consignee" class="form-control" />
+										
+									</div>
+									<div class="form-group">
+										<input type="submit" value="Shipping cost" class="btn btn-primary" />
+									</div>
+
+
+									<button type="button" class="btn btn-default btn-add-shipping">Shipping cost</button>
+								
+
+
 							</td>
 							<td>
 								<form>
@@ -146,6 +198,12 @@
 							{
 								<td>
 								<div class="col-sm-20">
+									<div >
+											<p>Consignee: @Model.InfoDelivery.Consignee</p>
+											<p>Phone Delivery: @Model.InfoDelivery.PhoneDelivery</p>
+											<p>Address Delivery: @Model.InfoDelivery.Street - @Model.InfoDelivery.phuong - @Model.InfoDelivery.quan - @Model.InfoDelivery.tinh</p>
+									</div>
+
 									<div class="total_area">
 										<ul>
 												<li>Cart Sub Total<span>@Model.SumPriceItemsCart.ToString("#,##0 VND")</span></li>
@@ -237,33 +295,38 @@
 		});
 
 	</script>
-@* 	<script>
+ 	<script>
 		$(document).ready(function () {
 			$(".btn-add-shipping").click(function () {
 				var tinh = $('#tinh').find('option:selected').text();
 				var quan = $('#quan').find('option:selected').text();
 				var phuong = $('#phuong').find('option:selected').text();
-				var price = $('#price-shippng').val();
-				if (tinh == '' || quan == '' || phuong == '' || price == '') {
+				var street = $('#Street').val();
+				var phonedelevery = $('#PhoneDelivery').val();
+				var consignee = $('#Consignee').val();
+				// var price = $('#price-shippng').val();
+				if (tinh == 'Tỉnh Thành' || quan == 'Quận Huyện' || phuong == 'Phường Xã' || street == '' || phonedelevery == '' || consignee == '') {
 					Swal.fire("Please input all value");
 				} else {
 					$.ajax({
 						type: "POST",
 						url: "@Url.Action("GetShipping", "Cart")",
-						data: { tinh: tinh, quan: quan, phuong: phuong },
+						data: { tinh: tinh, quan: quan, phuong: phuong, street: street, PhoneDelivery: phonedelevery, consignee: consignee },
 						success: function (result) {
-							if (result) {
-								Swal.fire(result.message.text);
+							if (result.success) {							
 								location.reload();
+								Swal.fire(result.message.text);
 
-							} 
+							} else {
+								Swal.fire(result.message.text);
+							}
 							
 						}
 					});
 				}
 			});
 		});
-	</script>  *@
+	</script>  
 	<script>
 		$(document).ready(function () {
 			//Lấy tỉnh thành

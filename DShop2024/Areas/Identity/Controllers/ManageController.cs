@@ -1,7 +1,9 @@
 using App.Areas.Identity.Models.ManageViewModels;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,16 +19,19 @@ namespace DShop2024.Areas.Identity.Controllers
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ManageController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ManageController(
         UserManager<AppUserModel> userManager,
         SignInManager<AppUserModel> signInManager,
         IEmailSender emailSender,
+        IWebHostEnvironment webHostEnvironment,
         ILogger<ManageController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _webHostEnvironment = webHostEnvironment;
             _logger = logger;
         }
         [TempData]
@@ -107,7 +112,9 @@ namespace DShop2024.Areas.Identity.Controllers
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(3, "User changed their password successfully.");
-                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
+                    //return RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
+                    //return RedirectToAction(nameof(EditProfileAsync));
+                    return RedirectToAction("EditProfile", "Manage");
                 }
                 ModelState.AddModelError(result);
                 return View(model);
@@ -378,21 +385,64 @@ namespace DShop2024.Areas.Identity.Controllers
                 UserName = user.UserName,
                 UserEmail = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                Occupation = user.Occupation,
+                Avatar = user.Avatar,
+                Gender = user.sex,
+                loginType = user.loginType,
             };
             return View(model);
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfileAsync(EditExtraProfileModel model)
         {
-            var user = await GetCurrentUserAsync();
+            try
+            {
+                var user = await GetCurrentUserAsync();
 
-            user.HomeAdress = model.HomeAdress;
-            user.BirthDate = model.BirthDate;
-            user.Occupation = model.Occupation;
-            await _userManager.UpdateAsync(user);
+                user.HomeAdress = model.HomeAdress;
+                user.BirthDate = model.BirthDate;
+                user.Occupation = model.Occupation;
+                user.sex = model.Gender;
 
-            await _signInManager.RefreshSignInAsync(user);
-            return RedirectToAction(nameof(Index), "Manage");
+                if (model.AvatarUpload != null)
+                {
+
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/avatar");
+                    string imageName = Guid.NewGuid().ToString() + "_" + model.AvatarUpload.FileName;
+                    string filePath = Path.Combine(uploadsDir, imageName);
+
+                    string oldFilePath = Path.Combine(uploadsDir, user.Avatar);
+                    try
+                    {
+                        if (System.IO.File.Exists(oldFilePath) && user.Avatar != UserEnumData.IMAGE_DEFAULT)
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", "An error occurred while deleting the product image" + ex.Message );
+                    }
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
+                    await model.AvatarUpload.CopyToAsync(fs);
+                    fs.Close();
+                    user.Avatar = imageName;
+
+                }
+
+                await _userManager.UpdateAsync(user);
+                TempData["success"] = "Edit profile successful" ;
+                await _signInManager.RefreshSignInAsync(user);
+                return RedirectToAction("EditProfile", "Manage");
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Edit profile fail "+ ex.Message;
+                return RedirectToAction("EditProfile", "Manage");
+            }
 
         }
 

@@ -27,24 +27,25 @@ namespace DShop2024.Areas.Admin.Controllers
 
         [HttpPost]
         [Route("StoreShipping")]
-        public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, string quan, string phuong, decimal price)
+        public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, decimal price)
         {
-            shippingModel.City = tinh;
-            shippingModel.District = quan;
-            shippingModel.Ward = phuong;
+   
+            
             shippingModel.Price = price;
-            shippingModel.Status = 1;
+            shippingModel.Status = 1;         
 
             try
             {
-                var existingShipping = await _context.Shippings.AnyAsync(x => x.City == tinh && x.District == quan && x.Ward == phuong);
+                var existingShipping = await _context.Shippings.FirstOrDefaultAsync(x => x.Province == tinh );
 
-                if(existingShipping)
+                if(existingShipping != null)
                 {
                     return Ok(new { duplicate = true, message = "Duplicate data" });
                 }
+                shippingModel.Province = tinh;
                 _context.Shippings.Add(shippingModel);
                 await _context.SaveChangesAsync();
+
                 return Ok(new {success = true, message = "Add shipping successful" });
             }
             catch (Exception)
