@@ -12,6 +12,7 @@ using static Org.BouncyCastle.Math.EC.ECCurve;
 using DShop2024.Services;
 using DShop2024.Hubs;
 using DShop2024.AutoMapper;
+using Microsoft.Extensions.FileProviders;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,6 +110,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// /contents/1.jpg => Uploads/1.jpg
+app.UseStaticFiles(new StaticFileOptions()
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Uploads")
+    ),
+    RequestPath = "/contents"
+});
 
 app.UseRouting();
 

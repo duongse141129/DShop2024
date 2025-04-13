@@ -9,6 +9,21 @@
         "dist/browser/signalr.js",
         "dist/browser/signalr.min.js"
       ]
+    },
+    {
+      "provider": "cdnjs",
+      "library": "jqueryui@1.12.1",
+      "destination": "wwwroot/lib/jqueryui/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "elfinder@2.1.57",
+      "destination": "wwwroot/lib/elfinder/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "summernote@0.8.18",
+      "destination": "wwwroot/lib/summernote/"
     }
   ]
 }
