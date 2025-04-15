@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Drawing.Printing;
 using System.Security.Cryptography;
+using static DShop2024.EnumData.Product;
 
 namespace DShop2024.Controllers
 {
@@ -23,94 +25,155 @@ namespace DShop2024.Controllers
 			return View();
 		}
 
-		public async Task<IActionResult> Details(int? Id)
+		public async Task<IActionResult> Details(int? Id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
-			if (Id == null)
+			try
 			{
-				return NotFound();
+				if (Id == null)
+				{
+					return NotFound();
+				}
+
+				var productById = await _dataContext.Products
+							.Where(p => p.Id == Id)
+							.Where(p => p.Status == 1)
+							.Include(p => p.Brand)
+							.Include(p => p.Category)
+							.Include(p => p.Rating)
+							.ThenInclude(p => p.User)
+							.FirstOrDefaultAsync();
+
+				var relatedProducts = await _dataContext.Products
+										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
+										.Take(3)
+										.ToListAsync();
+				ViewBag.relatedProducts = relatedProducts;
+
+
+				var rvproduct = Request.Cookies["RecentlyViewedProducts"];
+				List<ProductModel> recentlyViewedProducts;
+				if (rvproduct == null)
+				{
+					recentlyViewedProducts = new List<ProductModel>();
+				}
+				else
+				{
+
+					recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductModel>>(rvproduct);
+				}
+
+
+				var checkAdd = recentlyViewedProducts.Any(p => p.Id == productById.Id);
+				if (!checkAdd)
+				{
+					recentlyViewedProducts.Add(productById);
+					if (recentlyViewedProducts.Count > 3)
+					{
+						recentlyViewedProducts.RemoveAt(0);
+					}
+				}
+				var recentProducts = JsonConvert.SerializeObject(recentlyViewedProducts, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore });
+				var cookieOptionss = new CookieOptions
+				{
+					HttpOnly = true,
+					Expires = DateTime.UtcNow.AddMinutes(1),
+					Secure = true,
+					SameSite = SameSiteMode.Strict,
+				};
+				Response.Cookies.Append("RecentlyViewedProducts", recentProducts, cookieOptionss);
+				ViewBag.recentlyViewedProducts = recentlyViewedProducts;
+
+
+				var user = await _userManager.GetUserAsync(this.User);
+				IQueryable<RatingModel> listRating = _dataContext.Ratings
+										.Where(p => p.ProductId == Id)
+										.Where(r => r.Status == 1)
+										.Include(c => c.User);
+
+
+				var pointAvarge = 0.0;
+				bool checkUserOrder = false;
+				RatingModel feedback = new RatingModel();
+				List<RatingModel> ratings = new List<RatingModel>();
+
+				var count = await listRating.CountAsync();
+				if (count > 0)
+				{
+					pointAvarge = listRating.Average(p => p.Star);
+
+
+					if (user != null)
+					{
+						feedback = listRating.Where(u => u.UserId == user.Id).FirstOrDefault();
+
+						//listRating.Remove(feedback);
+
+						var checkOrder = await (from o in _dataContext.Orders
+												join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+												where o.UserId == user.Id && od.ProductId == productById.Id && o.Status == 4
+												select o).FirstOrDefaultAsync();
+						if (checkOrder != null)
+						{
+							checkUserOrder = true;
+						}
+					}
+
+
+					int totalRating = listRating.Count();
+					if (pagesSize <= 0)
+						pagesSize = 5;
+					int countPages = (int)Math.Ceiling((double)totalRating / 5);
+
+					if (currentPage > countPages)
+						currentPage = countPages;
+					if (currentPage < 1)
+						currentPage = 1;
+
+					var pagingModel = new PagingModel()
+					{
+						countpages = countPages,
+						currentpage = currentPage,
+						generateUrl = (pageNumber) => Url.Action("Details", new
+						{
+							p = pageNumber,
+							pagesSize = pagesSize,
+							Id = Id
+						})
+					};
+
+					ratings = await listRating.Where(r => r.Id != feedback.Id)
+								.Skip((currentPage - 1) * pagesSize)
+								.Take(pagesSize).ToListAsync();
+
+					ViewBag.pagingModel = pagingModel;
+
+
+
+
+
+
+				}
+
+
+
+				var viewModel = new ProductDetailViewModel
+				{
+					ProductDetail = productById,
+					Point = pointAvarge,
+					listRating = ratings,
+					IsOrder = checkUserOrder,
+					Feedback = feedback
+				};
+
+				return View(viewModel);
+			}
+			catch (Exception ex)
+			{
+
+				TempData["error"] = "fail dou to " + ex.Message;
+				return View();
 			}
 
-			var productById = await _dataContext.Products
-										.Where(p => p.Id == Id)
-										.Where(p => p.Status == 1)
-										.Include(p => p.Brand)
-										.Include(p => p.Category)
-										.Include(p => p.Rating)
-										.ThenInclude(p => p.User)
-										.FirstOrDefaultAsync();
-
-			var relatedProducts = await _dataContext.Products
-									.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
-									.Take(3)
-									.ToListAsync();
-			ViewBag.relatedProducts = relatedProducts;
-
-
-			//var rvproduct = Request.Cookies["RecentlyViewedProducts"];
-			//List<ProductModel> recentlyViewedProducts;
-			//if(rvproduct == null)
-			//{
-			//	recentlyViewedProducts = new List<ProductModel>();
-			//}
-			//else
-			//{
-			//	recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductModel>>(rvproduct);
-			//}
-			
-			//if (!recentlyViewedProducts.Contains(productById))
-			//{
-			//	recentlyViewedProducts.Add(productById);
-			//}		
-			//var recentProducts = JsonConvert.SerializeObject(recentlyViewedProducts.Take(10));
-			//var cookieOptionss = new CookieOptions
-			//{
-			//	HttpOnly = true,
-			//	Expires = DateTime.UtcNow.AddMinutes(30),
-			//	Secure = true,
-			//	SameSite = SameSiteMode.Strict,
-			//};
-			//Response.Cookies.Append("RecentlyViewedProducts", recentProducts, cookieOptionss);
-			//ViewBag.recentlyViewedProducts = recentlyViewedProducts;
-
-
-			var user = await _userManager.GetUserAsync(this.User);
-			var listRating = await _dataContext.Ratings
-									.Where(p => p.ProductId == Id)
-									.Where(r => r.Status == 1)
-									.Include(c => c.User)
-									.ToListAsync();
-
-			var pointAvarge = 0.0;
-			if(listRating.Count >0)
-			{
-                pointAvarge = listRating.Average(p => p.Star);
-
-            }
-
-			RatingModel feedback = listRating.Where(u => u.UserId == user.Id).FirstOrDefault();
-
-			listRating.Remove(feedback);
-
-			bool checkUserOrder = false;
-			var checkOrder = await (from o in _dataContext.Orders
-											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
-											where o.UserId == user.Id && od.ProductId == productById.Id && o.Status == 4
-											select o).FirstOrDefaultAsync();
-			if(checkOrder != null)
-			{
-				checkUserOrder = true;
-			}	
-
-			var viewModel = new ProductDetailViewModel
-			{
-				ProductDetail = productById,
-				Point = pointAvarge,
-				listRating = listRating,
-				IsOrder = checkUserOrder,
-				Feedback = feedback
-			};
-
-			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Search(string searchTerm)

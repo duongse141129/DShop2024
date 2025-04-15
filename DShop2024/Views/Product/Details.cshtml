@@ -49,7 +49,7 @@
 					
 				
 					<span>
-						<span>US $@Model.ProductDetail.Price.ToString("#,##0 VND")</span>
+						<span>@Model.ProductDetail.Price.ToString("#,##0 VND")</span>
 						<label>Quantity:</label>
 						<input type="text" value="1" />
 						@if (Model.ProductDetail.Stock > 0)
@@ -70,6 +70,25 @@
 					</span>
 					<p><b>Availability:</b> In Stock</p>
 					<p><b>Condition:</b> New</p>
+					<p><b>Dimension (CM): </b>@Model.ProductDetail.Dimension</p>
+					<p><b>Capacity (L): </b> @Model.ProductDetail.Capacity</p>
+					<p><b>Weight (KG): </b> @Model.ProductDetail.Weight</p>
+					<p><b>Material: </b> @Model.ProductDetail.Material</p>
+					<p><b>Compartment: </b> @Model.ProductDetail.Compartment</p>
+					@if(Model.ProductDetail.LaptopPocket != null)
+					{
+						<p><b>Laptop Pocket: </b> @Model.ProductDetail.LaptopPocket</p>
+					}
+					
+					@if (Model.ProductDetail.WaterResistance == true)
+					{
+						<p><b>Water Resistance</b></p>
+					}
+					@if (Model.ProductDetail.USBChargingPort == true)
+					{
+						<p><b>USB Charging Port</b> </p>
+					}
+
 					<p><b>Brand:</b>@Model.ProductDetail.Brand.BrandName </p>
 					<p><b>Category:</b>@Model.ProductDetail.Category.CategoryName </p>
 					<a href=""><img src="images/product-details/share.png" class="share img-responsive" alt="" /></a>
@@ -89,208 +108,125 @@
 			</div>
 			<div class="tab-content">
 				<div class="tab-pane fade active in" id="details">
-					@Model.ProductDetail.Description
+					
+					@Html.Raw(@Model.ProductDetail.Description);
 				</div>
 
 				<div class="tab-pane fade" id="companyprofile">
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery1.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery3.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery2.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery4.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
+					<h4>@Model.ProductDetail.Brand.BrandName</h4>
+					<p>@Html.Raw(@Model.ProductDetail.Brand.Description);</p>
+			
 				</div>
 
 				<div class="tab-pane fade" id="tag">
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery1.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery2.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery3.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery4.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
+					<h4>@Model.ProductDetail.Category.CategoryName</h4>
+					<p>@Html.Raw(@Model.ProductDetail.Category.Description);</p>
 				</div>
 
-				<div class="tab-pane fade" id="reviews">
-					<div class="col-sm-12">
-						<ul>
-							<li><a href=""><i class="fa fa-user"></i>EUGEN</a></li>
-							<li><a href=""><i class="fa fa-clock-o"></i>12:41 PM</a></li>
-							<li><a href=""><i class="fa fa-calendar-o"></i>31 DEC 2014</a></li>
-						</ul>
-						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-						
-
-						
-							 @* <form autocomplete="off" asp-action="CommentProduct" asp-controller="Product" method="post">
-								<span>
-									<input type="hidden" asp-for="@Model.Rating.ProductId"/>
-									<input name="Star" type="hidden" value="4" />
-									<input asp-for="@Model.Rating.User.UserName" type="text" onchange="false" value="@Model.Rating.User.UserName" placeholder="Your Name" />
-									<span asp-validation-for="@Model.Rating.User.UserName" class="text-danger" ></span>
-
-									<input asp-for="@Model.Rating.User.Email" type="email" onchange="false" value="@Model.Rating.User.Email" placeholder="Email Address" />
-									<span asp-validation-for="@Model.Rating.User.Email" class="text-danger"></span>
-								</span>
-								<textarea asp-for="@Model.Rating.Comment" ></textarea>
-								<span asp-validation-for="@Model.Rating.Comment" class="text-danger"></span>
-								<b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
-								<button type="button" class="btn btn-default pull-right">
-									Submit
-								</button>
-							</form>   *@
-
-						<h4>Point: @Model.Point</h4>
-						<h4>List feedback</h4>
-						@foreach (var item in Model.listRating)
-						{
-							<div class="col-sm-12">
-								<ul>
-									<li><a href=""><i class="fa fa-user"></i>@item.User.UserName</a></li>
-									<li><a href=""><i class="fa fa-clock-o"></i>@item.RatingDateTime</a></li>
-									<li><a href=""><i class="fa fa-calendar-o"></i>31 DEC 2014</a></li>
-								</ul>
-								<p>@item.Star</p>
-								<p>@item.Comment</p>
-							</div>
-							<br/>
-						}
-						<h4>Yor feekback</h4>
-						@if (Model.IsOrder)
-						{
-							
-							if (Model.Feedback != null)
-							{
-								<p><b>Your Review</b></p>
-
-								<div class="col-sm-12">
-									<ul>
-										<li><a href=""><i class="fa fa-user"></i>@Model.Feedback.User.UserName</a></li>
-										<li><a href=""><i class="fa fa-clock-o"></i>@Model.Feedback.RatingDateTime</a></li>
-										<li><a href=""><i class="fa fa-calendar-o"></i>31 DEC 2014</a></li>
-									</ul>
-									<p>@Model.Feedback.Star</p>
-									<p>@Model.Feedback.Comment</p>
-								</div>
-								<br />
-				
 	
-							}
-							else
-							{
-								<p><b>Write Your Review</b></p>
-								<form autocomplete="off" asp-controller="Product" asp-action="CommentProduct" method="post">
-									<span>
-										<input type="hidden" name="ProductId" asp-for="@Model.Feedback.ProductId" value="@Model.ProductDetail.Id" />
-										<input name="Star" asp-for="@Model.Feedback.Star" type="number" min="1" max="5" step="1" value="5" />
-									</span>
-									<textarea asp-for="@Model.Feedback.Comment" name="Comment" placeholder="Enter your review"></textarea>
-									<span asp-validation-for="@Model.Feedback.Comment" class="text-danger" ></span>
-									<b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
-									<button type="submit" class="btn btn-default pull-right">
-									Submit
-									</button>
-								</form>   
-
-							}
-						}
-						else
-						{
-							<p>You have not purchased this product yet. </p>
-						}
-
-
-
-
-
-					</div>
-				</div>
 
 			</div>
 		</div><!--/category-tab-->
+
+		<hr/>
+		<h2 class="title text-center">Review product</h2>
+			<div class="container border border-primary" id="reviews">
+				<div class="col-sm-12">
+
+				<h4>Average Point: @Model.Point</h4>
+				<h4>List feedback</h4>
+					@foreach (var item in Model.listRating)
+					{
+						<div class="response-area">
+							<ul class="media-list">
+								<li class="media">
+									<a class="pull-left" href="#">
+										<img class="media-object" src="~/media/avatar/@item.User.Avatar" alt="">
+									</a>
+									<div class="media-body">
+										<ul class="sinlge-post-meta">
+											<li><i class="fa fa-user"></i>@item.User.UserName</li>
+											<li><i class="fa fa-clock-o"></i>@item.RatingDateTime?.ToShortTimeString()</li>
+											<li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
+										</ul>
+										<p>@item.Star</p>
+										<p>@item.Comment</p>
+									</div>
+								</li>
+							</ul>
+						</div><!--/Response-area-->
+						<br />
+					}
+				@if (ViewBag.pagingmodel != null)
+				{
+					<partial name="_PagingXTL" model="@ViewBag.pagingmodel" />
+				}
+			
+					<h4>Your feekback</h4>
+					@if (Model.IsOrder)
+					{
+
+						if (Model.Feedback.Id != 0)
+						{
+							<p><b>Your Review</b></p>
+
+							<div class="response-area">
+								<ul class="media-list">
+									<li class="media">
+										<a class="pull-left" href="#">
+										<img class="media-object" src="~/media/avatar/@Model.Feedback.User.Avatar" alt="">
+										</a>
+										<div class="media-body">
+											<ul class="sinlge-post-meta">
+												<li><i class="fa fa-user"></i>@Model.Feedback.User.UserName</li>
+												<li><i class="fa fa-clock-o"></i>@Model.Feedback.RatingDateTime?.ToShortTimeString()</li>
+												<li><i class="fa fa-calendar"></i>@Model.Feedback.RatingDateTime?.ToShortDateString()</li>
+											</ul>
+											<p>@Model.Feedback.Star</p>
+											<p>@Model.Feedback.Comment</p>
+										</div>
+									</li>
+								</ul>
+							</div>
+
+							<br /> 
+
+
+						}
+						else
+						{
+
+
+							<p><b>Write Your Review</b></p>
+							<form autocomplete="off" asp-controller="Product" asp-action="CommentProduct" method="post">
+								<span>
+									<input type="hidden" name="ProductId" asp-for="@Model.Feedback.ProductId" value="@Model.ProductDetail.Id" />
+									<input name="Star" asp-for="@Model.Feedback.Star" type="number" min="1" max="5" step="1" value="5" />
+								</span>
+								<textarea asp-for="@Model.Feedback.Comment" name="Comment" placeholder="Enter your review"></textarea>
+								<span asp-validation-for="@Model.Feedback.Comment" class="text-danger"></span>
+								<b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
+								<button type="submit" class="btn btn-default pull-right">
+									Submit
+								</button>
+							</form> 
+
+						}
+					}
+					else
+					{
+						<p>You have not purchased this product yet. </p>
+					}
+
+
+
+
+
+				</div>
+			</div>
+	
+		
+
 
 		<div class="recommended_items">
 			<!--recommended_items-->
@@ -332,12 +268,15 @@
 			</div>
 		</div><!--/recommended_items-->
 
+		
+
+
 		<br/>
+		<hr/>
 		<br/>
-		<br/>
-	@* 	<div class="recommended_items">
+	 	<div class="recommended_items">
 			<!--Products you recently viewed-->
-			<h2 class="title text-center">Products you recently viewed</h2>
+			<h2 class="title text-center">Recently viewed products </h2>
 
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
 				<div class="carousel-inner">
@@ -373,7 +312,7 @@
 				</div>
 
 			</div>
-		</div><!--Products you recently viewed end--> *@
+		</div><!--Products you recently viewed end--> 
 
 	</div>
 </div>

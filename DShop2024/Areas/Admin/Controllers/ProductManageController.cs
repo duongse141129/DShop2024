@@ -279,7 +279,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-		public async Task<IActionResult> Detail(int? id)
+		public async Task<IActionResult> Detail(int? id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
 			if (id == null)
 			{
@@ -294,15 +294,46 @@ namespace DShop2024.Areas.Admin.Controllers
 			}
 
 
-			var listRating = await _dataContext.Ratings
+			var listRating =  _dataContext.Ratings
 						.Where(p => p.ProductId == id)
 						.Where(r => r.Status == 1)
-						.Include(c => c.User)
-						.ToListAsync();
+						.Include(c => c.User);
 			var pointAvarge = 0.0;
-			if (listRating.Count > 0)
+            List<RatingModel> ratings = new List<RatingModel>();
+
+            var count = await listRating.CountAsync();
+			if (count > 0)
 			{
 				pointAvarge = listRating.Average(p => p.Star);
+
+
+				int totalRating = listRating.Count();
+				if (pagesSize <= 0)
+					pagesSize = 5;
+				int countPages = (int)Math.Ceiling((double)totalRating / 5);
+
+				if (currentPage > countPages)
+					currentPage = countPages;
+				if (currentPage < 1)
+					currentPage = 1;
+
+				var pagingModel = new PagingModel()
+				{
+					countpages = countPages,
+					currentpage = currentPage,
+					generateUrl = (pageNumber) => Url.Action("Detail", new
+					{
+						p = pageNumber,
+						pagesSize = pagesSize,
+						id = id
+					})
+				};
+
+				ratings = await listRating
+							.Skip((currentPage - 1) * pagesSize)
+							.Take(pagesSize).ToListAsync();
+
+				ViewBag.pagingModel = pagingModel;
 
 			}
 
@@ -310,7 +341,7 @@ namespace DShop2024.Areas.Admin.Controllers
 			{
 				ProductDetail = productModel,
 				Point = pointAvarge,
-				listRating = listRating
+				listRating = ratings
 			};
 
 
