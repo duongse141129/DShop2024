@@ -20,6 +20,7 @@
 	<link href="~/css/main.css" rel="stylesheet">
 	<link href="~/css/responsive.css" rel="stylesheet">
 	<link href="~/custom/Css/StyleOrder.css" rel="stylesheet">
+	<link href="~/custom/Css/site.css" rel="stylesheet">
 
 	
 	<!--[if lt IE 9]>
@@ -31,17 +32,6 @@
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-
-	<script src="~/js/jquery.js"></script>
-	<script src="~/js/bootstrap.min.js"></script>
-	<script src="~/js/jquery.scrollUp.min.js"></script>
-
-	<script src="~/js/price-range.js"></script>
-	<script src="~/js/jquery.prettyPhoto.js"></script>
-
-
-	<script src="~/js/main.js"></script>
-	<script src="~/custom/js/site.js"></script>
 
 
 </head><!--/head-->
@@ -107,7 +97,11 @@
 								<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
 								<li><a asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a></li>
 								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">Dashboard</a></li>
-								<li><a asp-area="Admin" asp-controller="Chat" asp-action="Index" >Chat</a></li>
+								<li><a asp-area="Admin" asp-controller="Chat" asp-action="Index" >
+										Chat
+										<span class="badge badge-light spanNoti" id="spanNoti">*</span>
+									</a>
+								</li>
 								<li><a asp-area="Admin" asp-controller="Contact" asp-action="Index">Contact</a></li>
 
 								<li>
@@ -126,6 +120,11 @@
 							</ul>
 						</div>
 					</div>
+
+					<div id="spanuserUUUUU2" >
+						
+					</div>
+
 					<div class="col-sm-3">
 						<div class="search_box pull-right">
 							<input type="text" placeholder="Search" />
@@ -174,6 +173,10 @@
 
 	<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
 	<script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+	<script src="~/js/chatnoti.js"></script>
+
+
 	<script>
 		$(function () {
 			var message = '@TempData["success"]';
@@ -197,6 +200,9 @@
 		});
 	</script>
 
+		
+	
 	@await RenderSectionAsync("Scripts",required:false)
 </body>
 </html>
+

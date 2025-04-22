@@ -1,5 +1,7 @@
-﻿using DShop2024.Hubs;
+﻿using DShop2024.EnumData;
+using DShop2024.Hubs;
 using DShop2024.Models;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -22,18 +24,33 @@ namespace DShop2024.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(this.User);
-            List<MessageModel> messages = await _context.Messages.
-                                        Where(u => u.UserId == user.Id || u.Receiver == user.Id)
-                                        .OrderBy(p => p.Timestamp)
-                                        .ToListAsync();
-			return View(messages);
+
+            List<MessageViewModel> messages = await (from m in _context.Messages
+                                                     join u in _context.Users on m.UserId equals u.Id
+                                                     join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                     join r in _context.Roles on ur.RoleId equals r.Id
+                                                     where m.UserId == user.Id || m.ReceiverId == user.Id
+                                                     orderby m.Timestamp 
+                                                     select new MessageViewModel
+                                                     {
+                                                         UserName = u.UserName,
+                                                         RoleName = r.Name,
+                                                         ContentMessage = m.ContentMessage,
+                                                         Timestamp = m.Timestamp.ToString("MM/dd/yyyy HH:mm:ss"),
+
+                                                     })
+                                         .ToListAsync();
+
+ 
+            return View(messages);
 		}
 
+
+
         [HttpPost]
-        public async Task<IActionResult> SendMessage( string messageInput)
+        public async Task<IActionResult> SendMessage(string messageInput)
         {
             var user = await _userManager.GetUserAsync(this.User);
-            //var messageInput = Request.Form["messageInput"];
             if (!String.IsNullOrEmpty(messageInput))
             {
                 MessageModel model = new MessageModel
@@ -41,16 +58,24 @@ namespace DShop2024.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now,
                     UserId = user.Id,
-                    Receiver = "DShop2024"
                 };
                 await _context.Messages.AddAsync(model);
                 await _context.SaveChangesAsync();
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, model.ContentMessage);
-                return RedirectToAction("Index");
+
+                MessageViewModel modelVM = new MessageViewModel
+                {
+                    ContentMessage = messageInput,
+                    Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
+                    UserName = user.UserName,
+                    RoleName = RoleName.Customer
+                };
+
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
+                return Ok(new { success = true, Message = "Send message successful" });
+                
             }
             TempData["error"] = "Messages are empty";
-            return RedirectToAction("Index");
-
+            return Ok(new { success = false, Message = "Send message fail" });
         }
     }
 }

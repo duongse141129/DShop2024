@@ -7,24 +7,54 @@
 <table class="table">
     <thead>
         <tr>
-            <th>User Name</th>
             <th>User Role</th>
-            <th></th>
+            <th>User Name</th>       
+            <th>
+               @*  <a >
+                    Chat
+                    <span class="badge badge-light" id="spanuser_dAcclone896">*</span>
+                </a> *@
+            </th>
         </tr>
     </thead>
     <tbody>
+
+
+
+
+
         @foreach (var userWithRoles in Model)
         {
             <tr>
-                <td>@userWithRoles.User.UserName</td>
+                
 
                 <td>
                     @userWithRoles.RoleName
                 </td>
                 <td>
-                    <a class="btn btn-success btn-sm" asp-action="ChatWithCustomer" asp-controller="Chat" asp-route-customerId="@userWithRoles.User.Id">Chat</a>
+                    @userWithRoles.User.UserName
+                  
+                </td>
+                <td>
+                    <a id="chat_@userWithRoles.User.UserName" class="btn btn-success btn-sm sendMessageButton" asp-action="ChatWithCustomer" asp-controller="Chat" asp-route-customerId="@userWithRoles.User.Id">
+                        Chat
+                        <span class="badge badge-light spancustomer" id="spanuser_@userWithRoles.User.UserName">New message</span>
+                    </a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chatnoti.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.sendMessageButton').click(function () {
+                $(".spancustomer").hide();
+            });
+        });
+
+    </script>
+}

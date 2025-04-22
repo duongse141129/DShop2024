@@ -6,12 +6,12 @@
 }
 
 <div class="container">
-    <form asp-controller="Chat" asp-action="SendMessage" method="post">
+
         <div class="row p-1">
             <div class="col-1">User</div>
             <div class="col-5">
                 <input name="userInput" type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled />
-                <input name="receiver" type="hidden"  value="@ViewBag.receiver"  />
+                <input name="receiver" id="receiver" type="hidden" value="@ViewBag.receiver" />
             </div>
         </div>
         <div class="row p-1">
@@ -20,28 +20,58 @@
         </div>
         <div class="row p-1">
             <div class="col-6 text-end">
-                <input type="submit" id="sendButton" value="Send Message" />
+                <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
             </div>
         </div>
-    </form>
-    <div class="row p-1">
-        <div class="col-6">
-            <hr />
-        </div>
-    </div>
+
+    <hr />
 
     <div class="row p-1">
-        <div class="col-6">
+        <div class="col-3">
 
-            <ul id="messagesList">
+            <ul id="messagesList_@ViewBag.receiverName">
                 @foreach (var item in Model)
                 {
-                    <li>[@item.RoleName][@item.UserName]: @item.ContentMessage</li>
+                    <li>
+                        <span> @item.Timestamp</span>
+                        <p>[@item.RoleName][@item.UserName]: @item.ContentMessage</p>
+                    </li>
+                   
                 }
 
             </ul>
         </div>
     </div>
 </div>
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/chat.js"></script> 
+
+
+@section Scripts {
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/chat.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.sendMessageButton').click(function () {
+                //var messageInput = $(this).data("userInput");
+                var messageInput = $('#messageInput').val();
+                var receiver = $('#receiver').val();
+                //var reciver = $(this).data("receiver");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SendMessage", "Chat")",
+                    data: { receiver: receiver, messageInput: messageInput },
+
+                    success: function (result) {
+                        if (result.success) {
+                            
+                        }
+                        else {
+                           
+                        }
+
+                    }
+                });
+            });
+        });
+    </script>
+}

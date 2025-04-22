@@ -325,8 +325,8 @@ namespace DShop2024.Controllers
 			return View(informationShop);
 		}
 
-
-		public async Task<IActionResult> AddToWishList(int Id)
+        [HttpPost]
+        public async Task<IActionResult> AddToWishList(int Id)
 		{
 			var user = await _userManager.GetUserAsync(User);
 			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
@@ -354,7 +354,8 @@ namespace DShop2024.Controllers
 			}
 		}
 
-		public async Task<IActionResult> AddToCompare(int Id)
+        [HttpPost]
+        public async Task<IActionResult> AddToCompare(int Id)
 		{
 			var user = await _userManager.GetUserAsync(User);
 

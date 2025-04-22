@@ -2,4 +2,10 @@
     width: 100%;
     max-height: 400px !important;
 }
+#spanNoti {
+    display: none;
+}
 
+.spancustomer {
+    display: none;
+}

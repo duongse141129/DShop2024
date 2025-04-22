@@ -1,4 +1,5 @@
-﻿using DShop2024.Hubs;
+﻿using DShop2024.EnumData;
+using DShop2024.Hubs;
 using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -29,7 +31,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var userWithRoles = await (from u in _context.Users
                                        join ur in _context.UserRoles on u.Id equals ur.UserId
                                        join r in _context.Roles on ur.RoleId equals r.Id
-                                       where r.Name == "CUSTOMER"
+                                       where r.Name == RoleName.Customer
                                        select new { User = u, RoleName = r.Name }).ToListAsync();
 
             return View(userWithRoles);
@@ -40,16 +42,20 @@ namespace DShop2024.Areas.Admin.Controllers
                                                      join u in _context.Users on m.UserId equals u.Id
                                                      join ur in _context.UserRoles on u.Id equals ur.UserId
                                                      join r in _context.Roles on ur.RoleId equals r.Id
-                                                     where m.UserId == customerId || m.Receiver == customerId
+                                                     where m.UserId == customerId || m.ReceiverId == customerId
+                                                     orderby m.Timestamp
                                                      select new MessageViewModel{ 
                                                          UserName = u.UserName, 
                                                          RoleName = r.Name, 
                                                          ContentMessage = m.ContentMessage,
-                                                         Timestamp = m.Timestamp.ToString(),
+                                                         Timestamp = m.Timestamp.ToString("MM/dd/yyyy HH:mm:ss"),
                                                      })
-                                                     .OrderBy(m => m.Timestamp)
+                                                
                                                      .ToListAsync();
+
+            var reciver = await _userManager.FindByIdAsync(customerId);
             ViewBag.receiver = customerId;
+            ViewBag.receiverName = reciver.UserName;
             return View(messages);
         }
 
@@ -57,7 +63,6 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> SendMessage(string receiver, string messageInput)
         {
             var user = await _userManager.GetUserAsync(this.User);
-            //var messageInput = Request.Form["messageInput"];
             if (!String.IsNullOrEmpty(messageInput))
             {
                 MessageModel model = new MessageModel
@@ -65,16 +70,28 @@ namespace DShop2024.Areas.Admin.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now,
                     UserId = user.Id,
-                    Receiver = receiver
+                    ReceiverId = receiver
                 };
                 await _context.Messages.AddAsync(model);
                 await _context.SaveChangesAsync();
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "DShop2024", model.ContentMessage);
-                return RedirectToAction("ChatWithCustomer", new { customerId =receiver});
+                var role = await _userManager.GetRolesAsync(user);
+
+                var reciver = await _userManager.FindByIdAsync(receiver);
+                MessageViewModel modelVM = new MessageViewModel
+                {
+                    ContentMessage = messageInput,
+                    Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
+                    UserName = user.UserName,
+                    RoleName = role.FirstOrDefault(),
+                    Receiver = reciver.UserName
+                };
+
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
+                return Ok(new { success = true, Message = "Send message successful" });
+
             }
             TempData["error"] = "Messages are empty";
-            return RedirectToAction("ChatWithCustomer");
-
+            return Ok(new { success = false, Message = "Send message fail" });
         }
     }
 }

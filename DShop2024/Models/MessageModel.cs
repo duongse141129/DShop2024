@@ -12,9 +12,12 @@ namespace DShop2024.Models
         public string ContentMessage { get; set; }
         public DateTime Timestamp { get; set; }
         public string UserId { get; set; }
-        public string Receiver { get; set; }
+        public string ReceiverId { get; set; }
 
         [ForeignKey("UserId")]
         public virtual AppUserModel User { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public virtual AppUserModel Receiver { get; set; }
     }
 }

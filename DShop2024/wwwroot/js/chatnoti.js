@@ -3,8 +3,6 @@
 var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
 
-//document.getElementById("sendMessageButton").disabled = true;
-
 var buttonSend = document.getElementById("sendMessageButton")
 if (buttonSend != null) {
     buttonSend.disabled = true;
@@ -17,19 +15,25 @@ connection.on("ReceiveMessage", function (user, message) {
     //userName
     //roleName
     //receiver
-    var li = document.createElement("li");
-    var span = document.createElement("span");
-    var p = document.createElement("p");
 
     if (user == message["userName"] && message["receiver"] == null) {
-        var idmessage = `messagesList_${message["userName"]}`;
-        document.getElementById(idmessage).appendChild(li);
-        li.appendChild(span);
-        li.appendChild(p);
-        span.textContent = `${message["timestamp"]}`;
-        p.textContent = `[${message["roleName"]}][${user}] : ${message["contentMessage"]}`;
 
+        var spanIdU = `spanuser_${message["userName"]}`;
+        var spannoti = `spanNoti`;
 
+        var divideuser = document.getElementById(spanIdU);
+        divideuser.style.display = "block";
+
+        var dividenoti = document.getElementById(spannoti);
+        dividenoti.style.display = "block";
+        //if (divideuser.style.display == "none") {
+        //    console.log("2a");
+        //    divideuser.style.display = "block";
+        //} else {
+        //    console.log("2b" + divideuser.style.display);
+        //    divideuser.style.display = "block";
+        //}
+    
     } else if (user == message["userName"] && message["receiver"] != "") {
         var idmessage = `messagesList_${message["receiver"]}`;
         document.getElementById(idmessage).appendChild(li);

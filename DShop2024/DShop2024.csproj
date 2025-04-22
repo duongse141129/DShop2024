@@ -41,6 +41,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wwwroot\js\chatnoti.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="wwwroot\media\Email\otpEmail.html">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
