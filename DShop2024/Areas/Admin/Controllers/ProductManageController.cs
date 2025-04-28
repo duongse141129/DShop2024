@@ -42,7 +42,10 @@ namespace DShop2024.Areas.Admin.Controllers
 		{
 			ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
 			ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName");
-			return View();
+
+            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, "");
+
+            return View();
 		}
 
 		[HttpPost]
@@ -51,8 +54,9 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, product.LaptopPocket);
 
-			if(ModelState.IsValid)
+            if (ModelState.IsValid)
 			{
                 try
                 {
@@ -107,8 +111,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
-            List<string> strings = new List<string> { "", "14.00", "15.60", "17.30" };
-            ViewBag.laptopPocket = new SelectList(strings, product.LaptopPocket.ToString());
+            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, product.LaptopPocket.ToString());
 
             UpdateProductRequest updateProduct = _mapper.Map<UpdateProductRequest>(product);
             return View(updateProduct);
@@ -274,8 +277,6 @@ namespace DShop2024.Areas.Admin.Controllers
             await _dataContext.SaveChangesAsync();
             TempData["success"] = $"Add quantity product: {product.ProductName} successful";
             return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
-
-
 
         }
 

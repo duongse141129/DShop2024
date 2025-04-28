@@ -31,11 +31,10 @@
 									<tbody>
 										<tr>
 											<td valign="top" style="padding:48px 48px 32px">
-												<div
-													style="color:#ff6800;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left">
+												<div style="color:#ff6800;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;font-size:14px;line-height:150%;text-align:left">
 
 													<p style="margin:0 0 16px">Dear {{CustomerName}},</p>
-													<p style="margin:0 0 16px">												
+													<p style="margin:0 0 16px">
 														Your order has been received. Your order details are shown below for your reference.
 													</p>
 
@@ -46,18 +45,21 @@
 
 													<div style="margin-bottom:40px">
 														<table cellspacing="0" cellpadding="6" border="1"
-															style="color:#636363;border:1px solid #e5e5e5;vertical-align:middle;width:100%;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif">
+															   style="color:#636363;border:1px solid #e5e5e5;vertical-align:middle;width:100%;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif">
 															<thead>
 																<tr>
 																	<th scope="col"
 																		style="color:#636363;border:1px solid #e5e5e5;vertical-align:middle;padding:12px;text-align:left">
-																		Sản phẩm</th>
+																		Sản phẩm
+																	</th>
 																	<th scope="col"
 																		style="color:#636363;border:1px solid #e5e5e5;vertical-align:middle;padding:12px;text-align:left">
-																		Số lượng</th>
+																		Số lượng
+																	</th>
 																	<th scope="col"
 																		style="color:#636363;border:1px solid #e5e5e5;vertical-align:middle;padding:12px;text-align:left">
-																		Giá</th>
+																		Giá
+																	</th>
 																</tr>
 															</thead>
 															<tbody>
@@ -116,36 +118,34 @@
 
 
 													<table cellspacing="0" cellpadding="0" border="0"
-														style="width:100%;vertical-align:top;margin-bottom:40px;padding:0">
+														   style="width:100%;vertical-align:top;margin-bottom:40px;padding:0">
 														<tbody>
 															<tr>
 																<td valign="top" width="50%"
 																	style="text-align:left;font-family:'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif;border:0;padding:0">
-																	<h2
-																		style="color: #ff6800; display: block; font-family: 'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif; font-size: 18px; font-weight: bold; line-height: 130%; margin: 0 0 18px; text-align: left">
-																		Shipping info</h2>
+																	<h2 style="color: #ff6800; display: block; font-family: 'Helvetica Neue',Helvetica,Roboto,Arial,sans-serif; font-size: 18px; font-weight: bold; line-height: 130%; margin: 0 0 18px; text-align: left">
+																		Shipping info
+																	</h2>
 
-																	<address
-																		style="padding:12px;color:#636363;border:1px solid #e5e5e5">
+																	<address style="padding:12px;color:#636363;border:1px solid #e5e5e5">
 																		Consignee: {{CustomerName}}<br>Address delivery: {{AddressDelivery}} <br>Phone: <a href="tel:{{Phone}}"
-																			style="color:#96588a;font-weight:normal;text-decoration:underline"
-																			target="_blank"> {{Phone}}</a> <br>Email: <a
-																			href="mailto:{{Mail}}"
-																			target="_blank"> {{Mail}}</a>
+																																		 style="color:#96588a;font-weight:normal;text-decoration:underline"
+																																		 target="_blank"> {{Phone}}</a> <br>Email: <a href="mailto:{{Mail}}"
+																																													  target="_blank"> {{Mail}}</a>
 																	</address>
 																</td>
 															</tr>
 														</tbody>
 													</table>
 													<p style="margin:0 0 16px">We are in the process of completing your order.</p>
-				
+
+													<div class="contact-info">
 														<p>Thanks and best regards</p>
 														<h4>{{ShopName}}</h4>
 														<p>{{EmailShop}}</p>
 														<p>{{HotlineShop}}</p>
-			
-													
-													
+														<img src=cid:{{Logo}} height="100" width="180" />
+													</div>
 												</div>
 											</td>
 										</tr>

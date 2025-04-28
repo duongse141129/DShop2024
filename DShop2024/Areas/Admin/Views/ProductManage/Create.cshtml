@@ -18,13 +18,6 @@
             <textarea rows="15" asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger" />
         </div>
-        <div class="form-group">
-            <label>Price (VND)</label>
-            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
-            <span id="price-convert"></span>
-            <span asp-validation-for="Price"  class="text-danger"/>
-        </div>
-
 
         <div class="form-group">
             <label>Original Price (VND)</label>
@@ -32,6 +25,13 @@
             <span id="originalPrice-convert"></span>
             <span asp-validation-for="OriginalPrice" class="text-danger" />
         </div>
+        <div class="form-group">
+            <label>Price (VND)</label>
+            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span id="price-convert"></span>
+            <span asp-validation-for="Price"  class="text-danger"/>
+        </div>
+
         <div class="form-group">
             <label>Capacity (L)</label>
             <input asp-for="Capacity" class="form-control" />
@@ -60,11 +60,7 @@
         </div>
         <div class="form-group">
             <label>Laptop pocket (INCH)</label>
-            <select asp-for="LaptopPocket" class="form-control" name="LaptopPocket" >
-                <option value="" selected>None</option>
-                <option value="14">14</option>
-                <option value="15.6">15.6</option>
-                <option value="17.3">17.3</option>
+            <select asp-for="LaptopPocket" class="form-control" name="LaptopPocket" asp-items="ViewBag.laptopPocket">
             </select>
         </div>
 

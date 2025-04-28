@@ -238,17 +238,6 @@ namespace DShop2024.Controllers
             ViewBag.waterResistance = waterResistance;
             ViewBag.USBChargingPort = USBChargingPort;
 
-
-            //int pageSize = 6;
-            //if (pg < 1) pg = 1;
-            //int recsCount = listProduct.Count();
-            //var pager = new Paginate(recsCount, pg, pageSize);
-            //int recSkip = (pg - 1) * pageSize;
-
-            //listProduct = listProduct.Skip(recSkip).Take(pager.PageSize);
-            //await listProduct.ToListAsync();
-            //ViewBag.Pager = pager;
-
             var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
             ViewBag.Banners = slider;
 

@@ -1,10 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Web;
+using Azure.Core;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using MimeKit.Encodings;
+using MimeKit.Utils;
 
 public class MailSettings
 {
@@ -19,6 +24,7 @@ public class MailSettings
 public interface IEmailSender
 {
     Task SendEmailAsync(string email, string subject, string message);
+    Task SendEmailTemplateAsync(string email, string subject, BodyBuilder builder);
     Task SendSmsAsync(string number, string message);
     Task SendEmailOrder(OrderModel order, InformationShopModel infoShop);
 	Task SendEmailContact(ContactModel contact, InformationShopModel infoShop);
@@ -50,18 +56,16 @@ public class SendMailService : IEmailSender
     }
 
 
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+    public async Task SendEmailTemplateAsync(string email, string subject, BodyBuilder builder)
     {
         var message = new MimeMessage();
+        //var message = new MailMessage();
         message.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
         message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
         message.To.Add(MailboxAddress.Parse(email));
         message.Subject = subject;
 
-
-        var builder = new BodyBuilder();
-        builder.HtmlBody = htmlMessage;
-        message.Body = builder.ToMessageBody();
+		message.Body = builder.ToMessageBody();
 
         // dùng SmtpClient của MailKit
         using var smtp = new MailKit.Net.Smtp.SmtpClient();
@@ -93,7 +97,54 @@ public class SendMailService : IEmailSender
 
     }
 
-    public Task SendSmsAsync(string number, string message)
+	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+	{
+		var message = new MimeMessage();
+		//var message = new MailMessage();
+		message.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
+		message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
+		message.To.Add(MailboxAddress.Parse(email));
+		message.Subject = subject;
+
+
+		var builder = new BodyBuilder();
+		builder.HtmlBody = htmlMessage;
+
+		message.Body = builder.ToMessageBody();
+
+
+
+		// dùng SmtpClient của MailKit
+		using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+		try
+		{
+			//smtp.Connect (mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
+			//smtp.Authenticate (mailSettings.Mail, mailSettings.Password);
+			await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
+			await smtp.AuthenticateAsync(mailSettings.Mail, "rzskdmicavdwmjyo");
+			await smtp.SendAsync(message);
+		}
+
+		catch (Exception ex)
+		{
+			// Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
+			System.IO.Directory.CreateDirectory("mailssave");
+			var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
+			await message.WriteToAsync(emailsavefile);
+
+			logger.LogInformation("Lỗi gửi mail, lưu tại - " + emailsavefile);
+			logger.LogError(ex.Message);
+		}
+
+		smtp.Disconnect(true);
+
+		logger.LogInformation("send mail to " + email);
+
+
+	}
+
+	public Task SendSmsAsync(string number, string message)
     {
         // Cài đặt dịch vụ gửi SMS tại đây
         System.IO.Directory.CreateDirectory("smssave");
@@ -107,7 +158,12 @@ public class SendMailService : IEmailSender
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 
-        var strProduct = "";
+		var builder = new BodyBuilder();
+		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+		var image = builder.LinkedResources.Add(pathLogo);
+		image.ContentId = MimeUtils.GenerateMessageId();
+
+		var strProduct = "";
         foreach (var item in order.OrderDetails)
         {
             strProduct += "<tr>";
@@ -136,15 +192,22 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+		path = path.Replace("{{Logo}}", image.ContentId);
 
+		builder.HtmlBody = path;
 
-        await SendEmailAsync(order.User.Email, "Order DShop2024", path);
+		await SendEmailTemplateAsync(order.User.Email, "Order DShop2024", builder);
     }
 
 
 	public async Task SendEmailContact(ContactModel contact, InformationShopModel infoShop)
 	{
 		string webRootPath = _webHostEnvironment.WebRootPath;
+
+		var builder = new BodyBuilder();
+		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+        var image = builder.LinkedResources.Add(pathLogo);
+        image.ContentId = MimeUtils.GenerateMessageId();
 
 		string path = "";
 		path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendContact.html"));
@@ -158,20 +221,26 @@ public class SendMailService : IEmailSender
 		path = path.Replace("{{DateRespone}}", contact.DateRespone.ToShortDateString());
 		path = path.Replace("{{ReplyMEssage}}", contact.ReplyMessage);
 
-
 		path = path.Replace("{{ShopName}}", infoShop.ShopName);
 		path = path.Replace("{{EmailShop}}", infoShop.Email);
 		path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+		path = path.Replace("{{Logo}}", image.ContentId);
 
+		builder.HtmlBody = path;
 
-		await SendEmailAsync(contact.User.Email, contact.Subject, path);
+		await SendEmailTemplateAsync(contact.User.Email, contact.Subject, builder);
 	}
 
     public async Task SendEmailOTPconfirm(AppUserModel userModel,string otp ,InformationShopModel infoShop)
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 
-        string path = "";
+		var builder = new BodyBuilder();
+		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+		var image = builder.LinkedResources.Add(pathLogo);
+		image.ContentId = MimeUtils.GenerateMessageId();
+
+		string path = "";
         path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\otp22.html"));
         path = path.Replace("{{UserName}}", userModel.UserName);
         path = path.Replace("{{OTPcode}}", otp);
@@ -179,15 +248,23 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+		path = path.Replace("{{Logo}}", image.ContentId);
 
-        await SendEmailAsync(userModel.Email, "confirm email for register", path);
+		builder.HtmlBody = path;
+
+		await SendEmailTemplateAsync(userModel.Email, "confirm email for register", builder);
     }
 
     public async Task SendEmailCouponForNewCustomer(AppUserModel userModel,CouponModel couponModel, InformationShopModel infoShop)
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 
-        string path = "";
+		var builder = new BodyBuilder();
+		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+		var image = builder.LinkedResources.Add(pathLogo);
+		image.ContentId = MimeUtils.GenerateMessageId();
+
+		string path = "";
         path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCoupon.html"));
         path = path.Replace("{{UserName}}", userModel.UserName);
         path = path.Replace("{{CouponName}}", couponModel.CouponName);
@@ -198,15 +275,23 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+		path = path.Replace("{{Logo}}", image.ContentId);
 
-        await SendEmailAsync(userModel.Email, "Promotion for new customers", path);
+		builder.HtmlBody = path;
+
+		await SendEmailTemplateAsync(userModel.Email, "Promotion for new customers", builder);
     }
 
     public async Task SendEmailOTP(AppUserModel userModel, string otp,string typeService, InformationShopModel infoShop)
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 
-        string title = "", subject = "";
+		var builder = new BodyBuilder();
+		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+		var image = builder.LinkedResources.Add(pathLogo);
+		image.ContentId = MimeUtils.GenerateMessageId();
+
+		string title = "", subject = "";
         if(typeService == DShopConst.OTP_CONFIRM_EMAIL)
         {
             title = "Please enter this confirmation code in the window where you started creating your account:";
@@ -228,7 +313,10 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);
         path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+		path = path.Replace("{{Logo}}", image.ContentId);
 
-        await SendEmailAsync(userModel.Email, subject, path);
+		builder.HtmlBody = path;
+
+		await SendEmailTemplateAsync(userModel.Email, subject, builder);
     }
 }

@@ -154,37 +154,37 @@ namespace DShop2024.Areas.Identity.Controllers
                     //await _emailSender.SendEmailAsync(model.Email,
                     //    "Xác nhận địa chỉ email",
                     //    @$"Bạn đã đăng ký tài khoản trên RazorWeb, 
-					               //       hãy <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a> 
-					               //       để kích hoạt tài khoản.");
+                    //       hãy <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a> 
+                    //       để kích hoạt tài khoản.");
 
 
 
 
 
-                    //var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
-                    //if (promotion != null)
-                    //{
-                    //    promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
-                    //    await _dataContext.Promotions.AddAsync(promotion);
-                    //    await _dataContext.SaveChangesAsync();
-                    //}
-                    //CouponModel couponModel = new CouponModel 
-                    //{ 
-                    //    CouponName = "Promotion for new customer",
-                    //    CouponCode = "NEWCUSTOMER_"+user.UserName.ToUpper(),
-                    //    Value = 50000,
-                    //    DateStart = DateTime.Today,
-                    //    DateExpired = DateTime.Today.AddDays(7),
-                    //    Quantity = 1,
-                    //    Status = 1,
-                    //    Description = "Free shipping for new customers' first order",
-                    //    PromotionId = promotion.Id
-                    //};
-                    //await _dataContext.Coupons.AddAsync(couponModel);
-                    //await _dataContext.SaveChangesAsync();
+                    var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+                    if (promotion == null)
+                    {
+                        promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
+                        await _dataContext.Promotions.AddAsync(promotion);
+                        await _dataContext.SaveChangesAsync();
+                    }
+                    CouponModel couponModel = new CouponModel
+                    {
+                        CouponName = "Promotion for new customer",
+                        CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
+                        Value = 50000,
+                        DateStart = DateTime.Today,
+                        DateExpired = DateTime.Today.AddDays(7),
+                        Quantity = 1,
+                        Status = 1,
+                        Description = "Free shipping for new customers' first order",
+                        PromotionId = promotion.Id
+                    };
+                    await _dataContext.Coupons.AddAsync(couponModel);
+                    await _dataContext.SaveChangesAsync();
 
-                    //var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-                    //await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+                    var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                    await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

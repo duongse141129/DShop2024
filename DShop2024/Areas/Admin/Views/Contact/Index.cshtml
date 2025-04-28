@@ -17,7 +17,7 @@
 		{
 			<li class="media">
 				<a class="pull-left" href="#">
-					<img class="media-object" src="~/media/avatar/imagesdefault.png" alt="">
+					<img class="media-object" src="~/media/avatar/@item.User.Avatar" alt="">
 				</a>
 				<div class="media-body">
 					<ul class="sinlge-post-meta">
@@ -31,14 +31,14 @@
 					{
 						<a class="btn btn-primary" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
 					}
-					<a class="btn btn-danger" asp-action="Remove" asp-controller="Contact" asp-route-id="@item.Id">Remove</a>
+					<a class="btn btn-danger confirmDeletion" asp-action="Remove" asp-controller="Contact" asp-route-id="@item.Id">Remove</a>
 				</div>
 			</li>
 			@if(item.ReplyMessage != null && item.RespondentId != null)
 			{
 				<li class="media second-media">
 					<a class="pull-left" href="#">
-						<img class="media-object" src="~/media/avatar/imagesdefault.png" alt="">
+						<img class="media-object" src="~/media/avatar/@item.Respondent.Avatar" alt="">
 					</a>
 					<div class="media-body">
 						<ul class="sinlge-post-meta">

@@ -86,6 +86,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
 				await _emailSender.SendEmailContact(contactModel, infoShop);
+	
 
                 TempData["success"] = "Send gmail contact successful ";
                 return RedirectToAction("Index", "Contact");
