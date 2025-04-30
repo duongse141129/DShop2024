@@ -2,7 +2,7 @@
 {
 	public class Order
 	{
-		enum StatusOrder
+		public enum StatusOrder
 		{
 			Cancel,
 			New,
@@ -11,5 +11,14 @@
 			Complete
 
 		}
-	}
+        public enum SpanStatusOrder
+        {
+            danger,
+            primary,
+            info,
+            warning,
+            success
+
+        }
+    }
 }

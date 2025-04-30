@@ -13,7 +13,7 @@ using static DShop2024.EnumData.Product;
 namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize(Roles ="ADMIN")]
+	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
 	public class ProductManageController : Controller
 	{
 		private readonly DShopContext _dataContext;
@@ -37,6 +37,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(products);
 		}
 
+		[Authorize(Roles = RoleName.Administrator)]
 		[HttpGet]
 		public IActionResult Create()
 		{
@@ -48,6 +49,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View();
 		}
 
+		[Authorize(Roles = RoleName.Administrator)]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateProductRequest product)
@@ -104,7 +106,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(product);
         }
 
-        [HttpGet]
+		[Authorize(Roles = RoleName.Administrator)]
+		[HttpGet]
         public async Task<IActionResult> Edit(int Id)
 		{
 			ProductModel product = await _dataContext.Products.FindAsync(Id);
@@ -117,7 +120,9 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(updateProduct);
             
 		}
-        [HttpPost]
+
+		[Authorize(Roles = RoleName.Administrator)]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, UpdateProductRequest product)
         {
@@ -188,8 +193,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(exitedProduct);
         }
 
-
-        public async Task<IActionResult> Delete(int Id)
+		[Authorize(Roles = RoleName.Administrator)]
+		public async Task<IActionResult> Delete(int Id)
 		{
 			ProductModel product = await _dataContext.Products.FindAsync(Id);
 			if(!string.Equals(product.Image, "noname.jpg"))
@@ -216,8 +221,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-
-        public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
+		[Authorize(Roles = RoleName.Administrator)]
+		public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
         {
             if(IdProductsToDelete.Count == 0)
             {

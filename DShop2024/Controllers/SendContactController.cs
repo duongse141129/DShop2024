@@ -1,9 +1,11 @@
 ﻿using DShop2024.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DShop2024.Controllers
 {
+	[Authorize]
 	public class SendContactController : Controller
 	{
 		private readonly DShopContext _context;

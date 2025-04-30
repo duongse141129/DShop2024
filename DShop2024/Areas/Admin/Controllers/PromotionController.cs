@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
+using DShop2024.EnumData;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class PromotionController : Controller
+	[Authorize(Roles = RoleName.Administrator)]
+	public class PromotionController : Controller
     {
         private readonly DShopContext _context;
 

@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ProductModel>
+﻿@using DShop2024.EnumData
+@model IEnumerable<ProductModel>
 @{
 	// Paginate pager = new Paginate();
 	// int pageNo = 0;
@@ -28,16 +29,21 @@
 						<button class="btn btn-warning btn-locgia" type="submit">Search</button>
 				</div>
 			</div>
-			<div class="col-md-2">
+			<div class="col-2">
 				<p>Radio laptop pocket(INCH)</p>
-					<input type="radio" id="Nonelaptop" name="laptopPocket" value="" @(ViewBag.laptopPocket == "" ? "checked" : "") />
-					<label for="Nonelaptop">None</label>
-					<input type="radio" id="laptop14" name="laptopPocket" value="14" @(ViewBag.laptopPocket == "14" ? "checked" : "") />
-					<label for="laptop14">14</label>
-					<input type="radio" id="laptop15" name="laptopPocket" value="15.6" @(ViewBag.laptopPocket == "15.6" ? "checked" : "") />
-					<label for="laptop15">15.6</label><br>
-					<input type="radio" id="laptop17" name="laptopPocket" value="17.3" @(ViewBag.laptopPocket == "17.3" ? "checked" : "") />
-					<label for="laptop17">17.3</label><br>
+					@foreach (var item in ViewBag.laptopPocketTypes)
+					{
+						<input type="radio" id="@item" name="laptopPocket" value="@item" @(ViewBag.laptopPocket == item ? "checked" : "") />
+						@if(item == "")
+						{
+							<label for="@item">None</label>
+						}
+						else
+						{
+							<label for="@item">@item</label>
+						}
+						
+					}
 			</div>
 			<div class="col-md-2">
 					
@@ -109,7 +115,7 @@
 						
 					
 					<div class="choose">
-						@if (User.Identity?.IsAuthenticated ?? false)
+						@if (User.Identity?.IsAuthenticated ?? false )
 						{
 							<ul class="nav nav-pills nav-justified">
 								<li>

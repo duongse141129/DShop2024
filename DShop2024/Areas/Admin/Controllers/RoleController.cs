@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "ADMIN")]
+    [Authorize(Roles = RoleName.Administrator)]
     public class RoleController : Controller
     {
 

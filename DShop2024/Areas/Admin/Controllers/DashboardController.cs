@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.ViewModels;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
@@ -12,8 +13,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("Admin/Dashboard")]
-    [Authorize(Roles = "ADMIN")]
-    public class DashboardController : Controller
+	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+	public class DashboardController : Controller
     {
         private readonly DShopContext _dataContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -70,33 +71,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View();
         }
 
-        //[HttpPost]
-        //[Route("SubmitFilterDate")]
-        //public IActionResult SubmitFilterDate(string filterdate)
-        //{
-        //    var dateselect = DateTime.Parse(filterdate).ToString("yyyy-MM-dd");
-        //    var chartData = _dataContext.Orders
-        //   .Where(o => o.CreatedDate.ToString("yyyy-MM-dd") == dateselect) // Optional: Filter by date
-        //  .Join(_dataContext.OrderDetails,
-        //      o => o.Id,
-        //      od => od.OrderId,
-        //      (o, od) => new StatisticalModel
-        //      {
-        //          date = o.CreatedDate,
-        //          revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-        //          orders = 1 // Assuming each order detail represents one order
-        //      })
-        //  .GroupBy(s => s.date)
-        //  .Select(group => new StatisticalModel
-        //  {
-        //      date = group.Key,
-        //      revenue = group.Sum(s => s.revenue),
-        //      orders = group.Count()
-        //  })
-        //  .ToList();
 
-        //    return Json(chartData);
-        //}
 
         [HttpPost]
         [Route("SubmitFilterDate")]
@@ -106,7 +81,8 @@ namespace DShop2024.Areas.Admin.Controllers
             DateTime dateEndSelect = DateTime.Parse(dateEnd);
             if(dateEndSelect < dateStartSelect)
             {
-                return null;
+                TempData["error"] = "Date start must <= date end";
+                return NoContent();
             }
 
 
@@ -123,8 +99,6 @@ namespace DShop2024.Areas.Admin.Controllers
                                 quantitysold = g.Sum(x => x.od.Quantity)
                             })
                             .ToListAsync();
-
-
 
             return Json(chartDataRangeDay);
         }

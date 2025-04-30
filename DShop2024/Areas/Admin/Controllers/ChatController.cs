@@ -12,8 +12,8 @@ using NuGet.Protocol.Plugins;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
-    public class ChatController : Controller
+	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+	public class ChatController : Controller
     {
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;

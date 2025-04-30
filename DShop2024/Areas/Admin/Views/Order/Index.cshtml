@@ -10,7 +10,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.CreatedDate)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.OrderCode)
@@ -18,9 +18,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.User.UserName)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
+          
             <th>
                 @Html.DisplayNameFor(model => model.Status)
             </th>
@@ -32,7 +30,7 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Id)
+                    @Html.DisplayFor(modelItem => item.CreatedDate)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.OrderCode)
@@ -40,35 +38,13 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.User.UserName)
                 </td>
+ 
                 <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
-                </td>
-                <td>
-                    @if (item.Status == 0)
-                    {
-                        <span class="text text-danger">Cancle</span>
-                    }
-                    @if (item.Status == 1)
-                    {
-                        <span class="text text-primary">New</span>
-                    }
-                    @if (item.Status == 2)
-                    {
-                        <span class="text text-primary">Accepted</span>
-                    }
-                    @if (item.Status == 3)
-                    {
-                        <span class="text text-primary">Delivery</span>
-                    }
-                    @if (item.Status == 4)
-                    {
-                        <span class="text text-success">Complete</span>
-                    }
-     
+                    <span class="text text-@((Order.SpanStatusOrder)item.Status)"> @((Order.StatusOrder)item.Status) </span>
                 </td>
                 <td>
                     <a asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
-                    <a asp-action="CancelOrder" class="btn btn-danger mb-3 confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel invoice</a>
+                    <a asp-action="CancelOrder" class="btn btn-danger mb-3 confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel</a>
                 </td>
             </tr>
         }

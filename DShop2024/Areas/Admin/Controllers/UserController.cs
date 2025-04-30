@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
-    public class UserController : Controller
+	[Authorize(Roles = RoleName.Administrator)]
+	public class UserController : Controller
     {
         
 		private UserManager<AppUserModel> _userManager;
@@ -26,14 +27,14 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-			//var userWithRoles = await (from u in _context.Users
-			//                           join ur in _context.UserRoles on u.Id equals ur.UserId
-			//                           join r in _context.Roles on ur.RoleId equals r.Id
-			//                           select new {User = u, RoleName = r.Name}).ToListAsync();
-			//return View(userWithRoles);
+            var userWithRoles = await (from u in _context.Users
+                                       join ur in _context.UserRoles on u.Id equals ur.UserId
+                                       join r in _context.Roles on ur.RoleId equals r.Id
+                                       select new { User = u, RoleName = r.Name }).ToListAsync();
+            return View(userWithRoles);
 
-			var listUser = await _context.Users.ToListAsync();
-			return View(listUser);
+   //         var listUser = await _context.Users.ToListAsync();
+			//return View(listUser);
 
 
 		}

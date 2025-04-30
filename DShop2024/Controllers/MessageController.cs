@@ -2,6 +2,7 @@
 using DShop2024.Hubs;
 using DShop2024.Models;
 using DShop2024.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -9,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
-    public class MessageController : Controller
+	[Authorize]
+	public class MessageController : Controller
     {
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;

@@ -21,7 +21,6 @@
                     <p>Lọc theo ngày tháng</p>
                     <form>
                         Ngày:
-                 @*        <input type="date"  class="form-control" id="datepicker"> *@
                         <label>From: </label>
                         <input type="date" name="dateStart" class="form-control" id="dateStart">
                         <label>To: </label>
@@ -65,8 +64,14 @@
                                 <tr>
                                     <th>@item.Id</th>
                                     <th>
-                                        <img src="~/media/products/@item.Image" width="120" height="100" />
-                                        @item.ProductName
+                                        <div class="col-sm-5">
+                                            <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@item.Id">
+                                                @item.ProductName
+                                            </a>
+                                            <img src="~/media/products/@item.Image" width="120" height="100" />
+                                        </div>
+                                   
+                              
                                     </th>
                                     <th>@item.OriginalPrice</th>
                                     <th>@item.Price</th>
@@ -80,8 +85,7 @@
                 </div>
             </div>
 
-            <h1>Area charts behaving like line charts</h1>
-            <div id="graphArenaT"></div>
+
            
         </div>
     </div>
@@ -118,8 +122,6 @@
             //submit filter date in chart
             $(".filter-date").change(function () {
                 var filterdate = $(this).val();
-                // alert(filterdate);
-
                 $.ajax({
                     type: "POST",
                     url: "@Url.Action("SelectFilterDate", "Dashboard")",
@@ -130,19 +132,6 @@
                 });
             })
 
-            //select option filter data
-            // $(".btn-filter-date").click(function () {
-            //     var filterdate = $("#datepicker").val();
-            //     $.ajax({
-            //         type: "POST",
-            //         url: "@Url.Action("SubmitFilterDate", "Dashboard")",
-            //         data: { filterdate: filterdate },
-            //         success: function (data) {
-            //             chart.setData(data);
-            //         }
-            //     });
-            // })
-
             $(".btn-filter-date").click(function () {
                 var dateStart = $("#dateStart").val();
                 var dateEnd = $("#dateEnd").val();
@@ -151,12 +140,11 @@
                     url: "@Url.Action("SubmitFilterDate", "Dashboard")",
                     data: { dateStart: dateStart, dateEnd: dateEnd },
                     success: function (data) {
-                        chart.setData(data);
-                        // if (data != null) {
-                        //     chart.setData(data);
-                        // } else {
-                        //     Swal.fire("Date start must <= date end");
-                        // }
+                        if (data != null) {
+                            chart.setData(data);
+                        } else {
+                            Swal.fire("Date start must <= date end");
+                        }
                         
                     }
                 });
@@ -195,7 +183,7 @@
                 data: [0, 0],
                 backgroundColor: '#ccc',
                 labelColor: '#060',
-                colors: ['Yellow', 'Olive', 'Red', 'Maroon','Fuchsia', 'Purple', 'Teal', 'Aqua', 'Silver', 'Gray', 'Maroon', 'Navy'],
+                colors: ['Teal', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Silver', 'Red', 'Maroon', 'Fuchsia', 'Purple','Aqua'],
                 formatter: function (x) { return x + "%" }
             }).on('click', function (i, row) {
                 console.log(i, row);
@@ -210,40 +198,7 @@
             });
 
         });
-        Morris.Area({
-            element: 'graphArenaT',
-            behaveLikeLine: true,
-            data: [
-                { x: '2011 Q1', y: 3, z: 3 },
-                { x: '2011 Q2', y: 2, z: 1 },
-                { x: '2011 Q3', y: 2, z: 4 },
-                { x: '2011 Q4', y: 3, z: 3 }
-            ],
-            xkey: 'x',
-            ykeys: ['y', 'z'],
-            labels: ['Y', 'Z']
-        });
+
     </script>
-    <script>
-        // $(function () {
-        //     $("#datepicker").datepicker({
-        //         dateFormat: 'yy-mm-dd', onSelect: function (datetext) {
-        //             var d = new Date(); // for now
 
-        //             var h = d.getHours();
-        //             h = (h < 10) ? ("0" + h) : h;
-
-        //             var m = d.getMinutes();
-        //             m = (m < 10) ? ("0" + m) : m;
-
-        //             var s = d.getSeconds();
-        //             s = (s < 10) ? ("0" + s) : s;
-
-        //             datetext = datetext + " " + h + ":" + m + ":" + s;
-
-        //             $('#datepicker').val(datetext);
-        //         }
-        //     });
-        // });
-    </script>
 }

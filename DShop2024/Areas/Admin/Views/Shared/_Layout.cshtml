@@ -83,19 +83,9 @@
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-								
-								
 								<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Products</a></li>
-								<li><a asp-area="Admin" asp-controller="CategoryManage" asp-action="Index">Categories</a></li>
-								<li><a asp-area="Admin" asp-controller="BrandManage" asp-action="Index">Brands</a></li>
 								<li><a asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a></li>
-								<li><a asp-area="Admin" asp-controller="User" asp-action="Index">Users</a></li>
-								<li><a asp-area="Admin" asp-controller="Role" asp-action="Index">Roles</a></li>
 								<li><a asp-area="Admin" asp-controller="Slider" asp-action="Index">Sliders</a></li>
-								<li><a asp-area="Admin" asp-controller="Information" asp-action="Index">Information Shop</a></li>
-								<li><a asp-area="Admin" asp-controller="Shipping" asp-action="Index">Shippings</a></li>
-								<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
-								<li><a asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a></li>
 								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">Dashboard</a></li>
 								<li><a asp-area="Admin" asp-controller="Chat" asp-action="Index" >
 										Chat
@@ -103,20 +93,28 @@
 									</a>
 								</li>
 								<li><a asp-area="Admin" asp-controller="Contact" asp-action="Index">Contact</a></li>
-
 								<li>
 									<a target="_blank" class="dropdown-item" asp-action="Index" asp-controller="FileManager" asp-area="Files">
 										Manage files
 									</a>
 								</li>
 
+
+								@if (User?.IsInRole(RoleName.Administrator) ?? false)
+								{
+									<li><a asp-area="Admin" asp-controller="CategoryManage" asp-action="Index">Categories</a></li>
+									<li><a asp-area="Admin" asp-controller="BrandManage" asp-action="Index">Brands</a></li>
+									<li><a asp-area="Admin" asp-controller="User" asp-action="Index">Users</a></li>
+									<li><a asp-area="Admin" asp-controller="Role" asp-action="Index">Roles</a></li>
+									<li><a asp-area="Admin" asp-controller="Information" asp-action="Index">Information Shop</a></li>
+									<li><a asp-area="Admin" asp-controller="Shipping" asp-action="Index">Shippings</a></li>
+									<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
+									<li><a asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a></li>
+								}
 								
 
-							@* 	<li><a asp-area="Identity" asp-controller="User" asp-action="Index">UserManage</a></li>
-								<li><a asp-area="Identity" asp-controller="Role" asp-action="Index">RoleManage</a></li> *@
-								
-	
-								
+							 	@* <li><a asp-area="Identity" asp-controller="User" asp-action="Index">UserManage</a></li> *@
+								@* <li><a asp-area="Identity" asp-controller="Role" asp-action="Index">RoleManage</a></li>  *@
 							</ul>
 						</div>
 					</div>

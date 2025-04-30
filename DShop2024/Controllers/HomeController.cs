@@ -151,12 +151,9 @@ namespace DShop2024.Controllers
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "", 
                                             [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 6)
         {
-            //var products = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0)                                      
-            //                            .Include(p => p.Brand)
-            //                            .Include(p => p.Category)
-            //                            .ToList();
+            ViewBag.laptopPocketTypes = Product.laptopPocketTypes;
 
-            IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
+			IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
                                                     .Include(p => p.Brand)
                                                     .Include(p => p.Category);
             var count = await listProduct.CountAsync();

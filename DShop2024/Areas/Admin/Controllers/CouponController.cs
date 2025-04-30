@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize(Roles = "ADMIN")]
+	[Authorize(Roles = RoleName.Administrator)]
 	public class CouponController : Controller
 	{
 		private readonly DShopContext _context;

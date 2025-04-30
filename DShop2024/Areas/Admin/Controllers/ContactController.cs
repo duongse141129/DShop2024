@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "ADMIN")]
-    public class ContactController : Controller
+	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+	public class ContactController : Controller
     {
         private readonly DShopContext _dataContext;
 		private readonly IEmailSender _emailSender;
@@ -32,15 +33,6 @@ namespace DShop2024.Areas.Admin.Controllers
                                                         .OrderByDescending(d => d.DateSent)
                                                         .ToListAsync();
             return View(contacts);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int Id)
-        {
-            ContactModel contact = await _dataContext.Contacts.FindAsync(Id);
-
-            return View(contact);
-
         }
 
         [HttpGet]
@@ -99,10 +91,8 @@ namespace DShop2024.Areas.Admin.Controllers
           
         }
 
-
-
-
-        public async Task<IActionResult> Remove(int? id)
+		[Authorize(Roles = RoleName.Administrator)]
+		public async Task<IActionResult> Remove(int? id)
         {
             if (id == null)
             {
