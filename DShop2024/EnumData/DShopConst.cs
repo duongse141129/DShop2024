@@ -6,8 +6,8 @@
 		public static string OTP_RESET_PASSWORD = "ResetPassword";
 
 		public static string CART_KEY = "CART";
-		public static string SHIPPING_INFO = "SHIPPING INFO";
-		public static string COUPONS_APPPLY = "COUPONS APPPLY";
+		public static string INFO_CUSTOMER_DELIVERY = "INFO_CUSTOMER_DELIVERY";
+		public static string COUPONS_CUSTOMER_APPPLY = "COUPONS_CUSTOMER_APPPLY";
 
 		public static string SUCCESS_NOTIFICATION = "success";
 		public static string ERROR_NOTIFICATION = "error";

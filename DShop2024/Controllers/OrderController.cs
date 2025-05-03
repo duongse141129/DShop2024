@@ -1,5 +1,6 @@
 ﻿using DShop2024.Hubs;
 using DShop2024.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
@@ -25,7 +27,7 @@ namespace DShop2024.Controllers
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
                                                   .Where(o => o.UserId == user.Id)
-                                                  .OrderBy(o => o.CreatedDate)
+                                                  .OrderByDescending(o => o.CreatedDate)
                                                   .ToListAsync();
             return View(orders);
         }

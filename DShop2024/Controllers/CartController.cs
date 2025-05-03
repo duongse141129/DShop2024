@@ -23,9 +23,9 @@ namespace DShop2024.Controllers
         }
 		public IActionResult Index()
 		{
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery") ?? new InformationDelivery();
-			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
+			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 
 			decimal shippingPrice = 0;
 			if (info.ShippingCost != 0)
@@ -60,7 +60,7 @@ namespace DShop2024.Controllers
 		public async Task<ActionResult> AddToCart(int Id) {
 			ProductModel product = await _dataContext.Products.FindAsync(Id);
 
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if(cartItem == null)
 			{
@@ -81,7 +81,7 @@ namespace DShop2024.Controllers
 				
 				
 			}
-			HttpContext.Session.SetJson("Cart",cart);
+			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 
 			TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
@@ -92,12 +92,12 @@ namespace DShop2024.Controllers
 		{
 			ProductModel product = await _dataContext.Products.FindAsync(Id);
 
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if (product.Stock <= cartItem.Quantity)
 			{
 				TempData["error"] = $" Item {product.ProductName} only has {product.Stock} left";
-				HttpContext.Session.SetJson("Cart", cart);
+				HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 				return RedirectToAction("Index");
 			}
 
@@ -105,14 +105,14 @@ namespace DShop2024.Controllers
 			{
 				++cartItem.Quantity;
 			}
-			HttpContext.Session.SetJson("Cart", cart);
+			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 			return RedirectToAction("Index");
 
 		}
 
 		public ActionResult Decrease(int Id)
 		{
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if(cartItem.Quantity >1)
 			{
@@ -125,29 +125,29 @@ namespace DShop2024.Controllers
 
 			if(cart.Count == 0)
 			{
-				HttpContext.Session.Remove("Cart");
+				HttpContext.Session.Remove(DShopConst.CART_KEY);
 			}
-			HttpContext.Session.SetJson("Cart", cart);
+			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 			return RedirectToAction("Index");
 		}
 
 		public ActionResult Remove(int Id)
 		{
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			cart.RemoveAll(p => p.ProductId == Id);
 
 			if (cart.Count == 0)
 			{
-				HttpContext.Session.Remove("Cart");
+				HttpContext.Session.Remove(DShopConst.CART_KEY);
 			}
-			HttpContext.Session.SetJson("Cart", cart);
+			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 			return RedirectToAction("Index");
 		}
 
 		public ActionResult Clear()
 		{
-			HttpContext.Session.Remove("Cart");
+			HttpContext.Session.Remove(DShopConst.CART_KEY);
 			return RedirectToAction("Index");
 		}
 
@@ -171,7 +171,7 @@ namespace DShop2024.Controllers
 					shipppingPrice = existingShipping.Price;
 				}
 
-				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 				if (coupouns.Count > 0)
 				{
 					foreach (var item in coupouns)
@@ -179,7 +179,7 @@ namespace DShop2024.Controllers
 						if (item.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING) || item.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
 						{
 							informationDelivery.ShippingCost = 0;
-							HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
+							HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
 							return Ok(new { success = true, message = "Get shipping successful" });
 							
 						}
@@ -187,7 +187,7 @@ namespace DShop2024.Controllers
 				}
 
 				informationDelivery.ShippingCost = shipppingPrice;
-				HttpContext.Session.SetJson("InfoCustomerDelivery", informationDelivery);
+				HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
 				return Ok(new { success = true, message = "Get shipping successful" });
 			}
 			return Ok(new { success = false, message = "Get shipping fail. Please fill all inputs." });
@@ -234,7 +234,7 @@ namespace DShop2024.Controllers
 						return Ok(new { success = false, message = "You have already used this coupon" });
 					}
 
-					List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+					List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 					if ( coupouns.Count > 0 )
 					{
 						foreach (var item in coupouns)
@@ -252,7 +252,7 @@ namespace DShop2024.Controllers
                     }
                     if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
                     {
-                        List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
+                        List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 						if(cartItems.Count > 0 )
 						{
                             decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
@@ -264,11 +264,11 @@ namespace DShop2024.Controllers
 
                     if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING))
                     {
-                        InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
+                        InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
                         if(info != null)
 						{
 							info.ShippingCost = 0;
-                            HttpContext.Session.SetJson("InfoCustomerDelivery", info);
+                            HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
 							validCoupon.Value = 0;
                         }
                     }
@@ -278,11 +278,11 @@ namespace DShop2024.Controllers
 						var codeCustomer = validCoupon.CouponCode.Split('_')[1];
 						if (user.UserName.ToUpper().Equals(codeCustomer))
 						{
-							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
+							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
 							if (info != null)
 							{
 								info.ShippingCost = 0;
-								HttpContext.Session.SetJson("InfoCustomerDelivery", info);
+								HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
 								validCoupon.Value = 0;
 							}
 						}
@@ -294,7 +294,7 @@ namespace DShop2024.Controllers
 
 
 					coupouns.Add(validCoupon);
-					HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
+					HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);
 					return Ok(new { success = true, message = "Apply coupon successfully" });
 
 				}

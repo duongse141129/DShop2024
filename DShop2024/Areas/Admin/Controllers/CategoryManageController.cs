@@ -25,17 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/CategoryManage
         public async Task<IActionResult> Index(int pg =1)
         {
-            //return View(await _context.Categories.Where(p => p.Status == 1).ToListAsync());
-            List<CategoryModel> categories = await _context.Categories.ToListAsync();
-            int pageSize = 10;
-            if(pg<1) pg = 1;
-            int recsCount =categories.Count();
-            var pager = new Paginate(recsCount, pg, pageSize);
-            int recSkip = (pg - 1) * pageSize;
-
-            var data = categories.Skip(recSkip).Take(pager.PageSize).ToList();
-            ViewBag.Pager = pager;
-            return View(data);
+            return View(await _context.Categories.Where(p => p.Status != 0).ToListAsync());
         }
 
         // GET: Admin/CategoryManage/Details/5
@@ -181,7 +171,9 @@ namespace DShop2024.Areas.Admin.Controllers
             var categoryModel = await _context.Categories.FindAsync(id);
             if (categoryModel != null)
             {
-                _context.Categories.Remove(categoryModel);
+                categoryModel.Status = 0;
+                _context.Update(categoryModel);
+                await _context.SaveChangesAsync();
             }
 
             await _context.SaveChangesAsync();

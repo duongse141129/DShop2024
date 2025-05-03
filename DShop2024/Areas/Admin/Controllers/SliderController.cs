@@ -141,7 +141,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     ModelState.AddModelError("", "An error occurred while deleting the banner image");
                 }
             }
-            _context.Banners.Remove(banner);
+            banner.Status = 0;
+            _context.Banners.Update(banner);
             await _context.SaveChangesAsync();
             TempData["success"] = "Remove banner success";
             return RedirectToAction("Index");

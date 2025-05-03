@@ -25,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/PromotionModels
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Promotions.ToListAsync());
+            return View(await _context.Promotions.Where(p => p.Status != 0).ToListAsync());
         }
 
         // GET: Admin/PromotionModels/Details/5
@@ -145,7 +145,9 @@ namespace DShop2024.Areas.Admin.Controllers
             var promotionModel = await _context.Promotions.FindAsync(id);
             if (promotionModel != null)
             {
-                _context.Promotions.Remove(promotionModel);
+                promotionModel.Status = 0;
+                _context.Promotions.Update(promotionModel);
+                await _context.SaveChangesAsync();
             }
 
             await _context.SaveChangesAsync();

@@ -33,7 +33,7 @@ namespace DShop2024.Controllers
 
 		public async Task<string> CheckAllStock()
 		{
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			string productOutOfStock = "";
 			foreach (var item in cartItems)
 			{
@@ -55,29 +55,29 @@ namespace DShop2024.Controllers
 			if(string.IsNullOrEmpty(payment))
 			{
 				TempData["error"] = "Error payment";
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			string checkStock = await CheckAllStock();
 			if(!string.IsNullOrEmpty(checkStock))
 			{
 				TempData["error"] = checkStock;
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
-			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
-			//CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>("CouponCustomerApply");
-            List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
+			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
+			//CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>(DShopConst.COUPONS_CUSTOMER_APPPLY);
+            List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
             var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)
 			{
 				TempData["error"] = "Cart is empty";
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			if(info == null)
 			{
 				TempData["error"] = "Infomation delivery is null";
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			foreach (var coupon in coupouns)
 			{
@@ -102,39 +102,16 @@ namespace DShop2024.Controllers
                         }
 
                         coupouns.Remove(coupon);
-                        HttpContext.Session.SetJson("CouponCustomerApply", coupouns);     
+                        HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);     
 						
 						if(cp.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING || cp.Promotion.CategoryCouponName == DShopConst.NEW_CUSTOMER)
 						{
-							return RedirectToAction("GetShipping", "Cart", new { informationDelivery = info });
+							return RedirectToAction("GetShipping", DShopConst.CART_KEY, new { informationDelivery = info });
 						}
 
-                        return RedirectToAction("Index", "Cart");
+                        return RedirectToAction("Index", DShopConst.CART_KEY);
                     }
 
-					//if (cp.Status == 0)
-					//{
-					//	coupouns.Remove(coupon);
-					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-					//	TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
-					//	return RedirectToAction("Index", "Cart");
-					//}
-					//int quantityCoupon = cp.Quantity;
-					//if (quantityCoupon <= 0)
-					//{
-					//	coupouns.Remove(coupon);
-					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-					//	TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
-					//	return RedirectToAction("Index", "Cart");
-					//}
-					//var dateNow = DateTime.Today.Date;
-					//if (dateNow > cp.DateExpired.Date)
-					//{
-					//	coupouns.Remove(coupon);
-					//	HttpContext.Session.SetJson("CouponCustomerApply", coupouns);
-					//	TempData["error"] = $"Coupon {coupon.CouponCode} was expired. Do you still want to checkout?";
-					//	return RedirectToAction("Index", "Cart");
-					//}
 				}
 			}
 
@@ -167,7 +144,7 @@ namespace DShop2024.Controllers
 
 			}
 				
-			return RedirectToAction("Index", "Cart");
+			return RedirectToAction("Index", DShopConst.CART_KEY);
 		}
 
 
@@ -176,9 +153,9 @@ namespace DShop2024.Controllers
 			try
 			{
 
-				List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
-				InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>("InfoCustomerDelivery");
-				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>("CouponCustomerApply") ?? new List<CouponModel>();
+				List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
+				InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
+				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 				var user = await _userManager.GetUserAsync(this.User);
 
 				var order = new OrderModel();
@@ -230,7 +207,6 @@ namespace DShop2024.Controllers
 				{
 					CouponRedemptionModel couponRedemption = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
 					couponRedemption.status = 2;
-                    //CouponModel couponModel = await _dataContext.Coupons.FindAsync(item.Id);
                     CouponModel couponModel = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
                     couponModel.Quantity -= 1;
 					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, status = 1 };
@@ -256,9 +232,9 @@ namespace DShop2024.Controllers
                 //await _emailSender.SendEmailOrder(order, infoShop);
 				
 
-				HttpContext.Session.Remove("Cart");
-				HttpContext.Session.Remove("InfoCustomerDelivery");
-				HttpContext.Session.Remove("CouponCustomerApply");
+				HttpContext.Session.Remove(DShopConst.CART_KEY);
+				HttpContext.Session.Remove(DShopConst.INFO_CUSTOMER_DELIVERY);
+				HttpContext.Session.Remove(DShopConst.COUPONS_CUSTOMER_APPPLY);
 
 
 				TempData["success"] = "Checkout successful. Thank you for shopping at the DShop2024. ";
@@ -267,7 +243,7 @@ namespace DShop2024.Controllers
 			catch (Exception ex)
 			{
 				TempData["error"] = "CheckOut fail " +ex.Message;
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 
 		}
@@ -287,7 +263,7 @@ namespace DShop2024.Controllers
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "MOMO", orderCode = orderCode });		
 			}
 			TempData["error"] = "Momo transaction canceled";
-			return RedirectToAction("Index", "Cart");
+			return RedirectToAction("Index", DShopConst.CART_KEY);
 
 
 
@@ -303,7 +279,7 @@ namespace DShop2024.Controllers
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "VNpay", orderCode = orderCode });
 			}
 			TempData["error"] = "VNpay transaction canceled";
-			return RedirectToAction("Index", "Cart");
+			return RedirectToAction("Index", DShopConst.CART_KEY);
 	
 		}
 	

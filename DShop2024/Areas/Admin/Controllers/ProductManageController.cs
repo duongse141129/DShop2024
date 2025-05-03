@@ -214,9 +214,10 @@ namespace DShop2024.Areas.Admin.Controllers
                     ModelState.AddModelError("", "An error occurred while deleting the product image");
                 }
             }
-			_dataContext.Products.Remove(product);
-			await _dataContext.SaveChangesAsync();
-			TempData["success"] = "Remove product success";
+            product.Status = 0;
+            _dataContext.Products.Update(product);
+            await _dataContext.SaveChangesAsync();
+			TempData["success"] = "Remove product successful";
             return RedirectToAction("Index");
 
         }

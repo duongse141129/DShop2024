@@ -20,7 +20,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
 		public IActionResult Index()
 		{
-			var info = _dataContext.InformationShops.ToList();
+			var info = _dataContext.InformationShops.FirstOrDefault();
 			return View(info);
 		}
 

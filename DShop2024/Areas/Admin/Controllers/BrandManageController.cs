@@ -25,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/BrandManage
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Brands.Where(p => p.Status == 1).ToListAsync());
+            return View(await _context.Brands.Where(p => p.Status != 0).ToListAsync());
 
         }
 
@@ -168,7 +168,9 @@ namespace DShop2024.Areas.Admin.Controllers
             var brandModel = await _context.Brands.FindAsync(id);
             if (brandModel != null)
             {
-                _context.Brands.Remove(brandModel);
+                brandModel.Status = 0;
+                _context.Brands.Update(brandModel);
+                await _context.SaveChangesAsync();
             }
 			TempData["success"] = "Delete successful";
 			await _context.SaveChangesAsync();

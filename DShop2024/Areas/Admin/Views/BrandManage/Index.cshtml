@@ -9,6 +9,8 @@
 <p>
     <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
+
+
 <table class="table" id="myTable">
     <thead>
         <tr>
@@ -40,9 +42,17 @@
                 </td>
 
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <div class="btn-toolbar">
+                        <div class="btn-group mr-2">
+                            <a class="btn btn-sm-2 btn-warning" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        </div>
+                        <div class="btn-group mr-2">
+                            <a class="btn btn-sm-2 btn-info" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-sm-2 btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </div>
+                    </div>
                 </td>
             </tr>
         }

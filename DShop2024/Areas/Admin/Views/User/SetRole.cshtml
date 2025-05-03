@@ -1,0 +1,27 @@
+﻿@model DShop2024.Models.AppUserModel
+@{
+    ViewData["title"] = "Set Role User";
+}
+<h1>Set role User</h1>
+
+<div class="container">
+    <form asp-action="SetRole" enctype="multipart/form-data" method="post">
+        <h3>User: @Model.UserName</h3>
+        <p>@Model.Email</p>
+        <input type="hidden" name="userId"  value="@Model.Id"/>
+        <div class="form-group">
+            <label class="control-label">Roles</label>
+            <select name="roleId" class="form-control" asp-items="ViewBag.Roles">
+            </select>
+        </div>
+        <div class="form-group">
+            <button value="SetRole" class="btn btn-primary">SetRole</button>
+        </div>
+    </form>
+</div>
+
+
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

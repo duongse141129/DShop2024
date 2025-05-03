@@ -21,7 +21,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("Index")]
         public async Task<IActionResult> Index()
 		{ 
-            var shippingList = await _context.Shippings.Where(s => s.Status != 0).ToListAsync();
+            var shippingList = await _context.Shippings.ToListAsync();
             ViewBag.Shippings = shippingList;
 			return View();
 		}

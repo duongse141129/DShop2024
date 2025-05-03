@@ -104,7 +104,9 @@ namespace DShop2024.Areas.Admin.Controllers
                 var contactModel = await _dataContext.Contacts.FindAsync(id);
                 if (contactModel != null)
                 {
-                    _dataContext.Contacts.Remove(contactModel);
+                    contactModel.Status = 0;
+                    _dataContext.Update(contactModel);
+                    await _dataContext.SaveChangesAsync();
                 }
                 TempData["success"] = "Delete contact successful";
                 await _dataContext.SaveChangesAsync();

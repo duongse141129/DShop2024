@@ -109,11 +109,8 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             var chartData = new List<StatisticalViewModel>();
             var today = DateTime.Today;
-            //var month = new DateTime(today.Year, today.Month, 1);
             var month = DateTime.Today.Month;
             var year = DateTime.Today.Year;
-            //var first = month.AddMonths(-1);
-            //var last = month.AddDays(-1);
 
 
             if (filterdate == "last_month")
@@ -188,28 +185,6 @@ namespace DShop2024.Areas.Admin.Controllers
             var year = DateTime.Today.Year;
             var chartData = await getDataByYear(year);
             return Json(chartData);
-            //var chartData = await _dataContext.Orders
-            //  .Join(_dataContext.OrderDetails,
-            //      o => o.Id,
-            //      od => od.OrderId,
-            //      (o, od) => new StatisticalModel
-            //      {
-            //          date = o.CreatedDate,
-            //          revenue = od.Quantity * od.Price, // Calculate revenue based on order details
-            //          orders = 1 // Assuming each order detail represents one order
-            //      })
-            //  .GroupBy(s => s.date.Month)
-            //  .Select(group => new StatisticalViewModel
-            //  {
-            //      date = group.Key.ToString(),
-            //      revenue = group.Sum(s => s.revenue),
-            //      orders = group.Count()
-            //  })
-            //  .OrderBy(s => s.date)
-            //  .ToListAsync();
-
-            //var x = Json(chartData);
-            //return x;
         }
 
 

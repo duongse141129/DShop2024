@@ -10,12 +10,12 @@
         <ul class="nav navbar-nav navbar-right">
             <li class="nav-item">
                 <a class="nav-link text-light" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile" title="Manage">
-                    <i class="far fa-user"></i>@UserManager.GetUserName(User)
+                    <i class="fa fa-user" aria-hidden="true">@UserManager.GetUserName(User)</i>
                 </a>
             </li>
             <li class="nav-item">
                 <button title="Đăng xuất" type="submit" class="btn btn-link navbar-btn navbar-link  text-light">
-                    <i class="fas fa-sign-out-alt">Đăng xuất</i>
+                    <i class="fas fa-sign-out-alt">Logout</i>
                 </button>
             </li>
         </ul>
@@ -26,7 +26,7 @@ else
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
             <a title="Đăng nhập" class="nav-link  text-light" asp-area="Identity" asp-controller="Account" asp-action="Login">
-                <i class="fas fa-sign-in-alt">Đăng nhập</i>
+                <i class="fas fa-sign-in-alt">Login</i>
             </a>
         </li>
     </ul>

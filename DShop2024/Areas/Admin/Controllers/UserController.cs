@@ -1,10 +1,14 @@
-﻿using DShop2024.EnumData;
+﻿using App.Areas.Identity.Models.UserViewModels;
+using DShop2024.Areas.Admin.Models.User;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -27,16 +31,23 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userWithRoles = await (from u in _context.Users
-                                       join ur in _context.UserRoles on u.Id equals ur.UserId
-                                       join r in _context.Roles on ur.RoleId equals r.Id
-                                       select new { User = u, RoleName = r.Name }).ToListAsync();
-            return View(userWithRoles);
+            //var userWithRoles = await (from u in _context.Users
+            //                           join ur in _context.UserRoles on u.Id equals ur.UserId
+            //                           join r in _context.Roles on ur.RoleId equals r.Id
+            //                           orderby u.Status descending, r.Name                       
+            //                           select new { User = u, RoleName = r.Name }).ToListAsync();
+            var userWithRole = await _userManager.Users
+                            .Select( u => new UserWithRoleViewModel { User = u  })
+                            .ToListAsync();
+            foreach (var user in userWithRole)
+            {
+                var roles = await _userManager.GetRolesAsync(user.User);
+                user.RoleName = roles.FirstOrDefault();
+            }
 
-   //         var listUser = await _context.Users.ToListAsync();
-			//return View(listUser);
+            var userWithRoleVM =  userWithRole.OrderByDescending(u => u.User.Status).ThenBy(u => u.RoleName);
 
-
+            return View(userWithRoleVM);
 		}
 
 		[HttpGet]
@@ -44,52 +55,50 @@ namespace DShop2024.Areas.Admin.Controllers
 		{
 			var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
-            var user = new AppUserModel();
+            var user = new CreateUserRequest();
             return View(user);
 		}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AppUserModel user)
+        public async Task<IActionResult> Create(CreateUserRequest createUserRequest)
         {
             var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             if (ModelState.IsValid)
             {
-                var createUserResult = await _userManager.CreateAsync(user,user.PasswordHash);
-                if(createUserResult.Succeeded)
+                AppUserModel user = new AppUserModel { 
+                    UserName = createUserRequest.UserName,
+                    Email = createUserRequest.Email                  
+                };
+                try
                 {
-                    var createUser = await _userManager.FindByEmailAsync(user.Email);
-                    var userId = createUser.Id;
-                    var role = _roleManager.FindByIdAsync(user.RoleId);
-                    var addToRoleResult = await _userManager.AddToRoleAsync(createUser, role.Result.Name);
-                    if (!addToRoleResult.Succeeded)
+                    var createUserResult = await _userManager.CreateAsync(user, createUserRequest.Password);
+                    if (createUserResult.Succeeded)
                     {
-                        TempData["error"] = "Create user fail";
+                        var createUser = await _userManager.FindByEmailAsync(user.Email);
+                        var role = _roleManager.FindByIdAsync(createUserRequest.RoleId);
+                        var addToRoleResult = await _userManager.AddToRoleAsync(user, role.Result.Name);
+                        if (!addToRoleResult.Succeeded)
+                        {
+                            TempData["error"] = "Add role for user fail";
+                            return RedirectToAction("Index", "User");
+                        }
+
+                        TempData["success"] = "Create user successful";
                         return RedirectToAction("Index", "User");
                     }
-
-                    TempData["success"] = "Create user successful";
-                    return RedirectToAction("Index", "User");
+                    TempData["error"] = "Create user fail";
+                    return View(new CreateUserRequest());
                 }
-                return View(new AppUserModel());
-
-            }
-            else
-            {
-                TempData["error"] = "Model isn't valid";
-                List<string> errors = new List<string>();
-                foreach (var value in ModelState.Values)
+                catch (Exception ex)
                 {
-                    foreach (var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                    string errorMessage = string.Join("\n", errors);
-                    return BadRequest(errorMessage);
+                    TempData["error"] = "Create user fail "+ ex.Message;
+                    return View(new CreateUserRequest());
+
                 }
             }
-
-            return View(new AppUserModel());
+            TempData["error"] = "Model isn't valid. Input all values";
+            return View(new CreateUserRequest());
         }
 
         [HttpGet]
@@ -105,7 +114,19 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 return NotFound(); 
             }
-            var deleteResult = await _userManager.DeleteAsync(user);
+
+            var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
+            if (chechAdmin)
+            {
+                TempData["error"] = "Can not delete Admin ";
+                return RedirectToAction("Index");
+            }
+
+            user.Status = 0;
+            var deleteResult = await _userManager.UpdateAsync(user);
+            //_context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
             if (!deleteResult.Succeeded)
             {
                 return View("Error");
@@ -115,7 +136,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(string Id)
+        public async Task<IActionResult> RecoverAccount(string Id)
         {
             if (string.IsNullOrEmpty(Id))
             {
@@ -127,45 +148,162 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 return NotFound();
             }
-            var roles = await _roleManager.Roles.ToListAsync();
-            ViewBag.Roles = new SelectList(roles, "Id", "Name");
-            return View(user);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string Id,AppUserModel user)
-        {
-            var exitingUser = await _userManager.FindByIdAsync(Id);
-            if(exitingUser == null)
+            user.Status = 1;
+            var deleteResult = await _userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
+
+            if (!deleteResult.Succeeded)
             {
-                return NotFound();
+                TempData["error"] = "Recover account fail";
+                return RedirectToAction("Index");
             }
-            if (ModelState.IsValid)
-            {
-                exitingUser.UserName = user.UserName;
-                exitingUser.PhoneNumber = user.PhoneNumber;
-                exitingUser.EmailConfirmed = user.EmailConfirmed;
-                exitingUser.RoleId = user.RoleId;
-
-
-                var updateUserResult = await _userManager.UpdateAsync(exitingUser);
-                if (updateUserResult.Succeeded)
-                {
-                    TempData["success"] = "Create user successful";
-                    return RedirectToAction("Index", "User");
-                }
-                AddIdentityErrors(updateUserResult);
-                return View(exitingUser);
-
-            }
-            return View();
+            TempData["success"] = "Recover account successful";
+            return RedirectToAction("Index");
         }
+
 
         private void AddIdentityErrors(IdentityResult result)
         {
             foreach(var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SetPassword(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["error"] = "Not found user";
+                return RedirectToAction("Index", "User");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
+            if (chechAdmin)
+            {
+                TempData["error"] = "Can not modify Admin ";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.userName = user.UserName;
+            ViewBag.id = user.Id;
+
+            if (user == null)
+            {
+                TempData["error"] = $"Not found user id = {id}";
+                return RedirectToAction("Index", "User");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetPassword(string id, SetPasswordUserRequest model)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["error"] = "Not found user";
+                return RedirectToAction("Index", "User");
+            }
+            var user = await _userManager.FindByIdAsync(id);
+            ViewBag.userName = user.UserName;
+            ViewBag.id = user.Id;
+            if (user == null)
+            {
+                TempData["error"] = $"Not found user id = {id}";
+                return RedirectToAction("Index", "User");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            await _userManager.RemovePasswordAsync(user);
+
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
+            if (!addPasswordResult.Succeeded)
+            {
+                TempData["error"] = $"Set password user {user.UserName} fail"+ addPasswordResult.Errors.ToString();
+                return View(model);
+            }
+            TempData["success"] = $"Set password user {user.UserName} successful";
+            return RedirectToAction("Index", "User");
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> SetRole(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                TempData["error"] = "Not found user";
+                return RedirectToAction("Index", "User");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["error"] = $"Not found user id = {id}";
+                return RedirectToAction("Index", "User");
+            }
+
+            var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
+            if (chechAdmin)
+            {
+                TempData["error"] = "Can not modify Admin ";
+                return RedirectToAction("Index");
+            }
+
+            var roles = await _roleManager.Roles.ToListAsync();
+            var roleUser = await _userManager.GetRolesAsync(user);
+            if (roleUser.Count > 0)
+            {
+                var idRole = roles.Where(r => r.Name == roleUser.FirstOrDefault()).FirstOrDefault();
+                ViewBag.Roles = new SelectList(roles, "Id", "Name", idRole.Id);
+                return View(user);
+            }
+            ViewBag.Roles = new SelectList(roles, "Id", "Name");
+            return View(user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetRole(string userId, string roleId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["error"] = "Not found user";
+                return RedirectToAction("Index", "User");
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["error"] = $"Not found user id = {userId}";
+                return RedirectToAction("Index", "User");
+            }
+            try
+            {
+                var roleUser = await _userManager.GetRolesAsync(user);
+                var resultDelete = await _userManager.RemoveFromRolesAsync(user, roleUser);
+                if (!resultDelete.Succeeded)
+                {
+                    TempData["error"] = $"RemoveFromRolesAsync user {user.UserName} fail ";
+                    return RedirectToAction("SetRole", "User", new { id = userId });
+                }
+
+                var AddRoles = await _roleManager.FindByIdAsync(roleId);
+                var resultAdd = await _userManager.AddToRoleAsync(user, AddRoles.Name);
+
+                TempData["success"] = $"Set password user {user.UserName} successful";
+                return RedirectToAction("SetRole", "User", new {id = userId });
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Set role user {user.UserName} fail "+ ex.Message;
+                return RedirectToAction("SetRole", "User", new { id = userId });
             }
         }
 

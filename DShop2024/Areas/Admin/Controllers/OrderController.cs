@@ -20,7 +20,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var order = await _context.Orders.Where(p => p.Status != -1).Include(u => u.User).OrderByDescending(o => o.Id).ToListAsync();
+            var order = await _context.Orders.Include(u => u.User).OrderByDescending(o => o.Id).ToListAsync();
             return View(order);
         }
 
