@@ -17,18 +17,50 @@ namespace DShop2024.Areas.Admin.Controllers
 		{
 			_context = context;
 		}
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
-            var listCoupon = await _context.Coupons
+  
+            IQueryable <CouponModel> listCoupon = _context.Coupons
                                 .Where(c => c.Status != 0)
-                                .Include( c => c.Promotion)
-                                .OrderByDescending(c => c.Id)
-                                .ToListAsync();
-            
+                                .Include(c => c.Promotion)
+                                .OrderByDescending(c => c.Id);
+            var count = await listCoupon.CountAsync();
+            if (count > 0)
+            {
+                if (!String.IsNullOrEmpty(search))
+                {
+                    listCoupon = listCoupon.Where(c => c.CouponName.Contains(search) || c.Description.Contains(search));
+                }
+            }
+            ViewBag.search = search;
+            int totalCoupon = listCoupon.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalCoupon / 10);
 
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("Index", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize,
+                    search = search
+                })
+            };
+
+            var coupons = await listCoupon.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+
+            ViewBag.pagingModel = pagingModel;
             ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0), "Id", "CategoryCouponName");
-
-            return View(listCoupon);
+            return View(coupons);
 		}
 
 		[HttpGet]

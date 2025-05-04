@@ -7,66 +7,24 @@
 
 <div class="row">
 	<div class="col-sm-3">
-		@Html.Partial("_SidebarPartial")
+		<partial name="_SidebarPartial" />
 	</div>
 
 	<div class="col-sm-9 padding-right">
 		<div class="product-details">
 			<!--product-details-->
 			<div class="col-sm-5">
+				<h2>@Model.ProductDetail.ProductName</h2>
 				<div class="view-product">
 					<img src="~/media/products/@Model.ProductDetail.Image" alt="" />
-					<h3>ZOOM</h3>
-				</div>
-				<div id="similar-product" class="carousel slide" data-ride="carousel">
-
-					<!-- Wrapper for slides -->
-					<div class="carousel-inner">
-						<div class="item">
-							<a href=""><img src="images/product-details/similar1.jpg" alt=""></a>
-							<a href=""><img src="images/product-details/similar2.jpg" alt=""></a>
-							<a href=""><img src="images/product-details/similar3.jpg" alt=""></a>
-						</div>
-						
-
-					</div>
-
-					<!-- Controls -->
-					<a class="left item-control" href="#similar-product" data-slide="prev">
-						<i class="fa fa-angle-left"></i>
-					</a>
-					<a class="right item-control" href="#similar-product" data-slide="next">
-						<i class="fa fa-angle-right"></i>
-					</a>
 				</div>
 
 			</div>
 			<div class="col-sm-7">
 				<div class="product-information">
-					<!--/product-information-->
-					
-					<h2>@Model.ProductDetail.ProductName</h2>
-					
-				
+					<!--/product-information-->			
 					<span>
-						<span>@Model.ProductDetail.Price.ToString("#,##0 VND")</span>
-						<label>Quantity:</label>
-						<input type="text" value="1" />
-						@if (Model.ProductDetail.Stock > 0)
-						{
-							<button type="button" class="btn btn-fefault cart">
-								<i class="fa fa-shopping-cart"></i>
-								Add to cart
-							</button>
-						}
-						else
-						{
-							<button type="button" class="btn-outline-dark cart">
-								<i class="fa fa-shopping-cart"></i>
-								Out Of Order
-							</button>
-						}
-
+						<span>@Model.ProductDetail.Price.ToString("#,##0 VND")</span>						
 					</span>
 					<p><b>Availability:</b> In Stock</p>
 					<p><b>Condition:</b> New</p>
@@ -91,8 +49,42 @@
 
 					<p><b>Brand:</b>@Model.ProductDetail.Brand.BrandName </p>
 					<p><b>Category:</b>@Model.ProductDetail.Category.CategoryName </p>
-					<a href=""><img src="images/product-details/share.png" class="share img-responsive" alt="" /></a>
+					@if (Model.ProductDetail.Stock > 0)
+					{
+						@* <div class="col-md-2">
+							<a class="btn btn-default" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@Model.ProductDetail.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+						</div> *@
+						<button class="btn btn-default add-to-cart" data-product_id="@Model.ProductDetail.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
+
+					}
+					else
+					{
+						<button type="button" class="btn-outline-dark cart">
+							<i class="fa fa-shopping-cart"></i>
+							Out Of Order
+						</button>
+					}
 				</div><!--/product-information-->
+				@if (User.Identity?.IsAuthenticated ?? false)
+				{
+					<ul class="nav nav-pills nav-justified">
+						<li>
+							@if (!Model.IsInWishlist)
+							{
+								<button class="btn btn-danger add-btn-wishlist" data-product_id="@Model.ProductDetail.Id">Add to Wishlist</button>
+							}
+
+						</li>
+						<li>
+							@if (!Model.IsInCompare)
+							{
+								<button class="btn btn-info add-btn-compare" data-product_id="@Model.ProductDetail.Id">Add to Compare</button>
+							}
+
+
+						</li>
+					</ul>
+				}
 			</div>
 		</div><!--/product-details-->
 
@@ -101,9 +93,8 @@
 			<div class="col-sm-12">
 				<ul class="nav nav-tabs">
 					<li class="active"><a href="#details" data-toggle="tab">Details</a></li>
-					<li><a href="#companyprofile" data-toggle="tab">Company Profile</a></li>
-					<li><a href="#tag" data-toggle="tab">Tag</a></li>
-					<li ><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
+					<li><a href="#companyprofile" data-toggle="tab">Brand</a></li>
+					<li><a href="#tag" data-toggle="tab">Category</a></li>
 				</ul>
 			</div>
 			<div class="tab-content">
@@ -122,9 +113,6 @@
 					<h4>@Model.ProductDetail.Category.CategoryName</h4>
 					<p>@Html.Raw(@Model.ProductDetail.Category.Description);</p>
 				</div>
-
-	
-
 			</div>
 		</div><!--/category-tab-->
 
@@ -132,8 +120,18 @@
 		<h2 class="title text-center">Review product</h2>
 			<div class="container border border-primary" id="reviews">
 				<div class="col-sm-12">
-
 				<h4>Average Point: @Model.Point</h4>
+				<div class="rating-area">
+					<ul class="ratings">
+						<li>
+							<i class="@( Model.Point >= 1 ? "fa fa-star color" :  "fa fa-star")"></i>
+							<i class="@( Model.Point >= 2 ? "fa fa-star color" :  "fa fa-star")"></i>
+							<i class="@( Model.Point >= 3 ? "fa fa-star color" :  "fa fa-star")"></i>
+							<i class="@( Model.Point >= 4 ? "fa fa-star color" :  "fa fa-star")"></i>
+							<i class="@( Model.Point >= 5 ? "fa fa-star color" :  "fa fa-star")"></i>
+						</li>
+					</ul>
+				</div>
 				<h4>List feedback</h4>
 					@foreach (var item in Model.listRating)
 					{
@@ -149,8 +147,19 @@
 											<li><i class="fa fa-clock-o"></i>@item.RatingDateTime?.ToShortTimeString()</li>
 											<li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
 										</ul>
-										<p>@item.Star</p>
-										<p>@item.Comment</p>
+										<div class="rating-area">
+											<ul class="ratings">
+												<li class="rate-this">Rate this item:</li>
+												<li>
+													<i class="@( item.Star >= 1 ? "fa fa-star color" :  "fa fa-star")"></i>
+													<i class="@( item.Star >= 2 ? "fa fa-star color" :  "fa fa-star")"></i>
+													<i class="@( item.Star >= 3 ? "fa fa-star color" :  "fa fa-star")"></i>
+													<i class="@( item.Star >= 4 ? "fa fa-star color" :  "fa fa-star")"></i>
+													<i class="@( item.Star >= 5 ? "fa fa-star color" :  "fa fa-star")"></i>
+												</li>
+											</ul>
+										</div>
+										<p>@Html.Raw(@item.Comment)</p>
 									</div>
 								</li>
 							</ul>
@@ -159,22 +168,26 @@
 					}
 				@if (ViewBag.pagingmodel != null)
 				{
-					<partial name="_PagingXTL" model="@ViewBag.pagingmodel" />
+					<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 				}
-			
-					<h4>Your feekback</h4>
+				@if (User.Identity?.IsAuthenticated ?? false)
+				{
+					
+				
+				<h4>Your feekback</h4>
 					@if (Model.IsOrder)
 					{
 
-						if (Model.Feedback.Id != 0)
+						@if (Model.IsFeedback)
 						{
+
 							<p><b>Your Review</b></p>
 
 							<div class="response-area">
 								<ul class="media-list">
 									<li class="media">
 										<a class="pull-left" href="#">
-										<img class="media-object" src="~/media/avatar/@Model.Feedback.User.Avatar" alt="">
+											<img class="media-object" src="~/media/avatar/@Model.Feedback.User.Avatar" alt="">
 										</a>
 										<div class="media-body">
 											<ul class="sinlge-post-meta">
@@ -189,8 +202,7 @@
 								</ul>
 							</div>
 
-							<br /> 
-
+							<br />
 
 						}
 						else
@@ -218,7 +230,7 @@
 						<p>You have not purchased this product yet. </p>
 					}
 
-
+				}
 
 
 
@@ -235,31 +247,28 @@
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
 				<div class="carousel-inner">
 					<div class="item active">
-						@foreach (var relatedProducts in ViewBag.relatedProducts as IEnumerable<ProductModel>)
+						@if (ViewBag.relatedProducts != null)
 						{
-							<div class="col-sm-4">
-								<div class="product-image-wrapper">
-									<div class="single-products">
+							@foreach (var relatedProducts in ViewBag.relatedProducts as IEnumerable<ProductModel>)
+							{
+								<div class="col-sm-4">
+									<div class="product-image-wrapper">
+										<div class="single-products">
 
-										<div class="productinfo text-center">
-											<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProducts.Id">
-												<img src="~/media/products/@relatedProducts.Image" alt="@relatedProducts.ProductName" width="100%" />
-												<h2>$@relatedProducts.Price.ToString("#,##0 VND")</h2>
-												<p>@relatedProducts.ProductName</p>
-												<p>Category: @relatedProducts.Category.CategoryName</p>
-												<p>Brand: @relatedProducts.Brand.BrandName</p>
-											</a>
+											<div class="productinfo text-center">
+												<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProducts.Id">
+													<img src="~/media/products/@relatedProducts.Image" alt="@relatedProducts.ProductName" width="100%" />
+													<h2>$@relatedProducts.Price.ToString("#,##0 VND")</h2>
+													<p>@relatedProducts.ProductName</p>
+													<p>Category: @relatedProducts.Category.CategoryName</p>
+													<p>Brand: @relatedProducts.Brand.BrandName</p>
+												</a>
+											</div>
+
 										</div>
-
-									</div>
-									<div class="choose">
-										<ul class="nav nav-pills nav-justified">
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
-										</ul>
 									</div>
 								</div>
-							</div>
+							}
 						}
 
 					</div>
@@ -281,32 +290,30 @@
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
 				<div class="carousel-inner">
 					<div class="item active">
-						@foreach (var relatedProducts in ViewBag.recentlyViewedProducts as IEnumerable<ProductModel>)
+						@if (ViewBag.recentlyViewedProducts != null)
 						{
-							<div class="col-sm-4">
-								<div class="product-image-wrapper">
-									<div class="single-products">
+							@foreach (var relatedProducts in ViewBag.recentlyViewedProducts as IEnumerable<ProductModel>)
+							{
+								<div class="col-sm-4">
+									<div class="product-image-wrapper">
+										<div class="single-products">
 
-										<div class="productinfo text-center">
-											<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProducts.Id">
-												<img src="~/media/products/@relatedProducts.Image" alt="@relatedProducts.ProductName" width="100%" />
-												<h2>$@relatedProducts.Price.ToString("#,##0 VND")</h2>
-												<p>@relatedProducts.ProductName</p>
-												<p>Category: @relatedProducts.Category.CategoryName</p>
-												<p>Brand: @relatedProducts.Brand.BrandName</p>
-											</a>
+											<div class="productinfo text-center">
+												<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProducts.Id">
+													<img src="~/media/products/@relatedProducts.Image" alt="@relatedProducts.ProductName" width="100%" />
+													<h2>$@relatedProducts.Price.ToString("#,##0 VND")</h2>
+													<p>@relatedProducts.ProductName</p>
+													<p>Category: @relatedProducts.Category.CategoryName</p>
+													<p>Brand: @relatedProducts.Brand.BrandName</p>
+												</a>
+											</div>
+
 										</div>
-
-									</div>
-									<div class="choose">
-										<ul class="nav nav-pills nav-justified">
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
-										</ul>
 									</div>
 								</div>
-							</div>
+							}
 						}
+						
 
 					</div>
 				</div>
@@ -318,7 +325,71 @@
 </div>
 
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
+	<script>
+		$(document).ready(function () {
+			$('.add-to-cart').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToCart", "Cart")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Add to cart successful");
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-wishlist').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToWishList", "Home")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Add to wishlist successful");
+						}
+						else {
+							Swal.fire("Add to wishlist fail duplicate product");
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-compare').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToCompare", "Home")",
+					data: { Id: Id },
+					success: function (result) {
+						if (result) {
+							Swal.fire("Add to compare successful");
+							$('.add-btn-compare').hide()
+						}
+						else {
+							Swal.fire("Add to compare fail duplicate or maximum 5 product");
+						}
+
+					}
+				});
+			});
+		});
+	</script>
 }

@@ -4,6 +4,14 @@
     ViewData["title"] = "List User";
 }
 
+<div class="row">
+    <form asp-area="Admin" asp-controller="User" asp-action="Index" method="get">
+        <div class="search_box pull-right">
+            <input type="text" placeholder="Search user name or email" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )" />
+            <button class="btn btn-warning btn-locgia" type="submit">Search</button>
+        </div>
+    </form>
+</div>
 <p>
     <a class="btn btn-warning btn-sm" asp-action="Create" asp-controller="User">Create New User</a>
 </p>
@@ -66,4 +74,4 @@
     </tbody>
 </table>
 
-
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />

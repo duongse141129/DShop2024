@@ -1,14 +1,6 @@
 ﻿@using DShop2024.EnumData
 @model IEnumerable<ProductModel>
-@{
-	// Paginate pager = new Paginate();
-	// int pageNo = 0;
-	// if (ViewBag.Pager != null)
-	// {
-	// 	pager = ViewBag.Pager;
-	// 	pageNo = pager.CurrentPage;
-	// }
-}
+
 @* <div class="col-sm-3">
 	@Html.Partial("_SidebarPartial")
 	
@@ -100,8 +92,8 @@
 							</a>
 							@if(item.Stock > 0)
 							{
-								<a class="btn btn-default" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a> 
-								@* <button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button> *@
+								@* <a class="btn btn-default" asp-action="AddToCart" asp-controller="Cart" asp-route-Id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to cart</a>  *@
+								<button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button> 
 							}
 							else
 							{
@@ -122,7 +114,7 @@
 									<button class="btn btn-danger add-btn-wishlist" data-product_id="@item.Id">Add to Wishlist</button>
 								</li>
 								<li>
-									<button class="btn btn-primary add-btn-compare" data-product_id="@item.Id">Add to Compare</button>
+									<button class="btn btn-info add-btn-compare" data-product_id="@item.Id">Add to Compare</button>
 								</li>
 							</ul>
 						}
@@ -131,8 +123,7 @@
 		</div>
 		}
 	</div><!--features_items-->
-	@* <partial name="_PagingPartial" model="@pager" /> *@
-	<partial name="_PagingXTL" model="@ViewBag.pagingmodel" />
+	<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 </div>
 
 
@@ -140,31 +131,6 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
 	<script>
-		// $(document).ready(function () {
-		// 	$(function () {
-		// 		$("#slider-range").slider({
-		// 			range: true,
-		// 			step: 50000,
-		// 			min: 100000,
-		// 			max: 5000000,
-		// 			values: [100000, 300000],
-		// 			slide: function (event, ui) {
-		// 				$("#amount").val(
-		// 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
-		// 						.format(ui.values[0])
-		// 					+ " - " +
-		// 					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
-		// 						.format(ui.values[1]));
-		// 			}
-		// 		});
-		// 		$("#amount").val(
-		// 			new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
-		// 				.format($("#slider-range").slider("values", 0))
-		// 			+ " - " +
-		// 			new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
-		// 				.format($("#slider-range").slider("values", 1)));
-		// 	});
-		// });
 
 		$(document).ready(function () {
 			$(function () {

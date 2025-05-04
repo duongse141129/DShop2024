@@ -15,7 +15,6 @@
             <th>Phone</th>
             <th>Email</th>
             <th>Action</th>
-            <th></th>
 
         </tr>
     </thead>
@@ -23,9 +22,8 @@
             <tr>
                 <td>@Model.ShopName</td>
                 <td>@Html.Raw(Model.Description)</td>
-                <td><iframe src="@Model.Map" width="600" height="450" style="border:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></td>
-                <td>@Model.ShopName</td>
-                <td><img src="~/media/Logo/@Model.LogoImg" width="120" height="120" /></td>
+                <td>@Html.Raw(@Model.Map)</td>
+                <td><img src="~/media/Logo/@Model.LogoImg" width="120" height="120" /></td>             
                 <td>@Model.Phone</td>
                 <td>@Model.Email</td>
                 <td>

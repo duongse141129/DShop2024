@@ -42,6 +42,12 @@ namespace DShop2024.Controllers
 							.Include(p => p.Rating)
 							.ThenInclude(p => p.User)
 							.FirstOrDefaultAsync();
+				if (productById == null)
+				{
+					return NotFound();
+				}
+
+
 
 				var relatedProducts = await _dataContext.Products
 										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
@@ -58,7 +64,6 @@ namespace DShop2024.Controllers
 				}
 				else
 				{
-
 					recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductModel>>(rvproduct);
 				}
 
@@ -91,34 +96,44 @@ namespace DShop2024.Controllers
 										.Include(c => c.User);
 
 
-				var pointAvarge = 0.0;
+				double pointAvarge = 0.0;
 				bool checkUserOrder = false;
 				RatingModel feedback = new RatingModel();
 				List<RatingModel> ratings = new List<RatingModel>();
+				bool isInWishList = false;
+				bool isInCompare = false;
+				bool isFeedBack = false;
 
 				var count = await listRating.CountAsync();
-				if (count > 0)
+
+				if(count > 0)
 				{
-					pointAvarge = listRating.Average(p => p.Star);
+					pointAvarge = Math.Round(listRating.Average(p => p.Star), 1);
+				}
+				
+				if (user != null)
+				{
+					var checkOrder = await (from o in _dataContext.Orders
+											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+											where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
+											select o).FirstOrDefaultAsync();
 
-
-					if (user != null)
+					if (checkOrder != null)
 					{
-						feedback = listRating.Where(u => u.UserId == user.Id).FirstOrDefault();
-
-						//listRating.Remove(feedback);
-
-						var checkOrder = await (from o in _dataContext.Orders
-												join od in _dataContext.OrderDetails on o.Id equals od.OrderId
-												where o.UserId == user.Id && od.ProductId == productById.Id && o.Status == 4
-												select o).FirstOrDefaultAsync();
-						if (checkOrder != null)
+						checkUserOrder = true;
+						feedback = await listRating.Where(u => u.UserId == user.Id && u.ProductId == Id).FirstOrDefaultAsync();
+						if (feedback != null)
 						{
-							checkUserOrder = true;
+							isFeedBack = true;
+							listRating = listRating.Where(u => u.UserId != user.Id);
 						}
 					}
-
-
+					isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+					isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+				}
+				
+				if (count > 0)
+				{
 					int totalRating = listRating.Count();
 					if (pagesSize <= 0)
 						pagesSize = 5;
@@ -144,17 +159,8 @@ namespace DShop2024.Controllers
 					ratings = await listRating.Where(r => r.Id != feedback.Id)
 								.Skip((currentPage - 1) * pagesSize)
 								.Take(pagesSize).ToListAsync();
-
 					ViewBag.pagingModel = pagingModel;
-
-
-
-
-
-
 				}
-
-
 
 				var viewModel = new ProductDetailViewModel
 				{
@@ -162,7 +168,11 @@ namespace DShop2024.Controllers
 					Point = pointAvarge,
 					listRating = ratings,
 					IsOrder = checkUserOrder,
-					Feedback = feedback
+					Feedback = feedback,
+					IsInCompare = isInCompare,
+					IsInWishlist = isInWishList,
+					IsFeedback = isFeedBack
+					
 				};
 
 				return View(viewModel);
@@ -170,7 +180,7 @@ namespace DShop2024.Controllers
 			catch (Exception ex)
 			{
 
-				TempData["error"] = "fail dou to " + ex.Message;
+				TempData["error"] = "fail " + ex.Message;
 				return View();
 			}
 

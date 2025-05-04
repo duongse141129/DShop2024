@@ -6,13 +6,20 @@
 
 
 <hr />
-<div class="row">
-    <p>
-        <a class="btn btn-primary" asp-action="Create">Create New Coupon</a>
-    </p>
+
+<div class="container">
+    <div class="col-md-5">
+        <form asp-action="Index" asp-controller="Coupon">
+            <div class="search_box pull-right">
+                <input type="text" placeholder="search" name="search" value="@( ViewBag.search != "" ? ViewBag.search : "" )" />
+                <button class="btn btn-warning btn-locgia" type="submit">Search</button>
+            </div>
+        </form>
+        <a class="btn btn-info" asp-action="Create">Create New Coupon</a>
+    </div>
     <div class="col-md-9">
     <h5>List coupon</h5>
-        <table class="table" id="myTable">
+        <table class="table table-striped table-hover">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -69,6 +76,7 @@
 </div>
 
 
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 
 @section Scripts {
     @{

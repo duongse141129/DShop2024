@@ -25,14 +25,44 @@ namespace DShop2024.Areas.Admin.Controllers
 
 
 		}
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
         {
-            var contacts = await _dataContext.Contacts.Where(c => c.Status != 0)
+            //var contacts = await _dataContext.Contacts.Where(c => c.Status != 0)
+            //                                            .Include(u => u.User)
+            //                                            .Include(r => r.Respondent)
+            //                                            .OrderByDescending(d => d.DateSent)
+            //                                            .ToListAsync();
+
+            IQueryable<ContactModel> listContact = _dataContext.Contacts.Where(c => c.Status != 0)
                                                         .Include(u => u.User)
                                                         .Include(r => r.Respondent)
-                                                        .OrderByDescending(d => d.DateSent)
-                                                        .ToListAsync();
-            return View(contacts);
+                                                        .OrderByDescending(d => d.DateSent);
+			int totalOrder = listContact.Count();
+			if (pagesSize <= 0)
+				pagesSize = 5;
+			int countPages = (int)Math.Ceiling((double)totalOrder / 5);
+
+			if (currentPage > countPages)
+				currentPage = countPages;
+			if (currentPage < 1)
+				currentPage = 1;
+
+			var pagingModel = new PagingModel()
+			{
+				countpages = countPages,
+				currentpage = currentPage,
+				generateUrl = (pageNumber) => Url.Action("Index", new
+				{
+					p = pageNumber,
+					pagesSize = pagesSize
+				})
+			};
+
+			var contacts = await listContact.Skip((currentPage - 1) * pagesSize)
+						.Take(pagesSize).ToListAsync();
+
+			ViewBag.pagingModel = pagingModel;
+			return View(contacts);
         }
 
         [HttpGet]

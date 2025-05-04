@@ -29,23 +29,55 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            //var userWithRoles = await (from u in _context.Users
-            //                           join ur in _context.UserRoles on u.Id equals ur.UserId
-            //                           join r in _context.Roles on ur.RoleId equals r.Id
-            //                           orderby u.Status descending, r.Name                       
-            //                           select new { User = u, RoleName = r.Name }).ToListAsync();
-            var userWithRole = await _userManager.Users
-                            .Select( u => new UserWithRoleViewModel { User = u  })
-                            .ToListAsync();
-            foreach (var user in userWithRole)
+
+            IQueryable<UserWithRoleViewModel> userWithRole = _userManager.Users.OrderByDescending(u => u.Status)
+                                        .Select(u => new UserWithRoleViewModel { User = u });
+
+            var count = await userWithRole.CountAsync();
+            if (count > 0)
+            {
+                if (!String.IsNullOrEmpty(search))
+                {
+                    userWithRole = userWithRole.Where(c => c.User.UserName == search || c.User.Email == search);
+                }
+            }
+            ViewBag.search = search;
+            int totalCoupon = userWithRole.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalCoupon / 10);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("Index", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize,
+                    search = search
+                })
+            };
+
+            var listUserWithRole = await userWithRole.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+
+            ViewBag.pagingModel = pagingModel;
+
+            foreach (var user in listUserWithRole)
             {
                 var roles = await _userManager.GetRolesAsync(user.User);
                 user.RoleName = roles.FirstOrDefault();
             }
 
-            var userWithRoleVM =  userWithRole.OrderByDescending(u => u.User.Status).ThenBy(u => u.RoleName);
+            var userWithRoleVM = listUserWithRole.OrderBy(u => u.RoleName);
 
             return View(userWithRoleVM);
 		}

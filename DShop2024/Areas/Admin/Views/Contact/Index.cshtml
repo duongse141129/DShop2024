@@ -26,7 +26,7 @@
 						<li><i class="fa fa-calendar"></i>@item.DateSent.ToShortDateString()</li>
 					</ul>
 					<p><strong>Subject: @item.Subject</strong></p>
-					<p>@item.Message</p>
+					<p>@Html.Raw(@item.Message)</p>
 					@if (item.ReplyMessage == null && item.RespondentId == null)
 					{
 						<a class="btn btn-primary" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
@@ -50,7 +50,7 @@
 							<li><i class="fa fa-clock-o"></i>@item.DateRespone.ToShortTimeString()</li>
 							<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortTimeString()</li>
 						</ul>
-						<p>@item.ReplyMessage</p>
+						<p>@Html.Raw(@item.ReplyMessage)</p>				
 					</div>
 				</li>
 			}
@@ -61,7 +61,7 @@
 	</ul>
 </div><
 
-
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 
 
 

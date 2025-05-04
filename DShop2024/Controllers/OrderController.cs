@@ -20,15 +20,39 @@ namespace DShop2024.Controllers
             _userManager = userManager;
 
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 2)
         {
             var user = await _userManager.GetUserAsync(this.User);
-            List<OrderModel> orders =  await _context.Orders.Include(o => o.User)
+            IQueryable<OrderModel> listOrder = _context.Orders.Include(o => o.User)
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
                                                   .Where(o => o.UserId == user.Id)
-                                                  .OrderByDescending(o => o.CreatedDate)
-                                                  .ToListAsync();
+                                                  .OrderByDescending(o => o.CreatedDate);
+
+            int totalOrder = listOrder.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalOrder / 2);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("Index", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize
+                })
+            };
+
+            var orders = await listOrder.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+            ViewBag.pagingModel = pagingModel;
             return View(orders);
         }
     }

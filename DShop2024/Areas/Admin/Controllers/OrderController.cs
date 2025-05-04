@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
+using static DShop2024.EnumData.Product;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -18,10 +19,45 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            var order = await _context.Orders.Include(u => u.User).OrderByDescending(o => o.Id).ToListAsync();
-            return View(order);
+            IQueryable<OrderModel> listOrder =  _context.Orders.Include(u => u.User).OrderByDescending(o => o.Id);
+            var count = await listOrder.CountAsync();
+            if(count > 0)
+            {
+                if (!String.IsNullOrEmpty(searchOrderCode))
+                {
+                    listOrder = listOrder.Where(c => c.OrderCode == searchOrderCode);
+                }
+            }
+            ViewBag.searchOrderCode = searchOrderCode;
+            int totalOrder = listOrder.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalOrder / 10);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("Index", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize,
+                    searchOrderCode = searchOrderCode
+                })
+            };
+
+            var orders = await listOrder.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+
+            ViewBag.pagingModel = pagingModel;
+            return View(orders);
         }
 
         public async Task<IActionResult> ViewOrder(int Id )
