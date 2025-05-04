@@ -34,5 +34,6 @@ using Microsoft.EntityFrameworkCore;
 		public virtual DbSet<OrderCouponsModel> OrderCouponss { get; set; }
 		public virtual DbSet<CategoryCouponModel> CategoryCoupons { get; set; }
 		public virtual DbSet<PromotionModel> Promotions { get; set; }
+		public virtual DbSet<FAQModel> FAQs { get; set; }
 	}
 

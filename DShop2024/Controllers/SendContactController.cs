@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
@@ -16,8 +17,10 @@ namespace DShop2024.Controllers
 			_context = context;
             _userManager = userManager;
         }
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
+            var FAQs = await _context.FAQs.ToListAsync();
+            ViewBag.FAQs = FAQs;
 			return View();
 		}
 
