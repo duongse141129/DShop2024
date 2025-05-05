@@ -90,7 +90,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return Ok(new { success = true, Message = "Send message successful" });
 
             }
-            TempData["error"] = "Messages are empty";
+            TempData[DShopConst.TEMPDATA_ERROR] = "Messages are empty";
             return Ok(new { success = false, Message = "Send message fail" });
         }
     }

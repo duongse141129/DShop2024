@@ -90,13 +90,13 @@ namespace DShop2024.Areas.Admin.Controllers
                     }                    
                     _context.Orders.Update(order);
                     await _context.SaveChangesAsync();
-                    TempData["success"] = "Update Status order successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Update Status order successful";
                     return RedirectToAction("ViewOrder", "Order", new {order.Id});
 
                 }
                 catch (Exception ex)
                 {
-                    TempData["error"] = "Update status order fail " + ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Update status order fail " + ex.Message;
                     return RedirectToAction("ViewOrder", "Order", new { order.Id });
                 }
 
@@ -131,13 +131,13 @@ namespace DShop2024.Areas.Admin.Controllers
                     order.Status = 0;
                     _context.Orders.Update(order);
                     await _context.SaveChangesAsync();
-                    TempData["success"] = "Cancle order successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Cancle order successful";
                     return RedirectToAction("ViewOrder", "Order", new { order.Id });
 
                 }
                 catch (Exception ex)
                 {
-                    TempData["error"] = "Cancle order fail " + ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Cancle order fail " + ex.Message;
                     return RedirectToAction("ViewOrder", "Order", new { order.Id });
                 }
 
@@ -167,7 +167,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(500, "Error");
+                    return StatusCode(500, DShopConst.TEMPDATA_ERROR);
                 }
 
 			}

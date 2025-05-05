@@ -62,7 +62,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ShippingModel shipping = await _context.Shippings.FindAsync(Id);
             _context.Shippings.Remove(shipping);    
             await _context.SaveChangesAsync();
-            TempData["success"] = "Delete Shipping successful";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Shipping successful";
             return RedirectToAction("Index");
         }
 	}

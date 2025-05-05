@@ -84,12 +84,12 @@ namespace DShop2024.Areas.Admin.Controllers
 
                     if(couponModel.DateExpired < couponModel.DateStart)
                     {
-                        TempData["error"] = "DateExpired must >= date start";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "DateExpired must >= date start";
                         return RedirectToAction(nameof(Create));
                     } 
                     if(couponModel.DateStart < DateTime.Now.Date)
                     {
-                        TempData["error"] = "Cannot choose date in the past";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Cannot choose date in the past";
                         return RedirectToAction(nameof(Create));
                     }
 
@@ -97,7 +97,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     { 
                         if(couponModel.Value < 1000)
                         {
-							TempData["error"] = $"{promotion.CategoryCouponName} must >= 1000";
+							TempData[DShopConst.TEMPDATA_ERROR] = $"{promotion.CategoryCouponName} must >= 1000";
 							return RedirectToAction(nameof(Create));
 						}						
 					}   
@@ -105,7 +105,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     {
                         if(couponModel.Value >100 || couponModel.Value <1)
                         {
-							TempData["error"] = $"{promotion.CategoryCouponName} must from 1% to 100%";
+							TempData[DShopConst.TEMPDATA_ERROR] = $"{promotion.CategoryCouponName} must from 1% to 100%";
 							return RedirectToAction(nameof(Create));
 						}
 					}
@@ -114,16 +114,16 @@ namespace DShop2024.Areas.Admin.Controllers
                     couponModel.Status = 1;
                     _context.Add(couponModel);
                     await _context.SaveChangesAsync();
-                    TempData["success"] = "Add coupon successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Add coupon successful";
                     return RedirectToAction(nameof(Index));
                 }
 				catch (Exception ex)
 				{
-                    TempData["error"] = "Add coupon fail "+ ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Add coupon fail "+ ex.Message;
                     return RedirectToAction(nameof(Create));
                 }
             }
-            TempData["error"] = "Check all fields";
+            TempData[DShopConst.TEMPDATA_ERROR] = "Check all fields";
             return RedirectToAction(nameof(Create));
         }
 
@@ -131,7 +131,7 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if (id == null)
             {
-                TempData["error"] = "Not found ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Not found ";
                 return RedirectToAction(nameof(Index));
             }
             try
@@ -141,12 +141,12 @@ namespace DShop2024.Areas.Admin.Controllers
                 couponModel.Status = 0;
                 _context.Coupons.Update(couponModel);
                 await _context.SaveChangesAsync();
-                TempData["success"] = "Delete coupon successful " ;
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete coupon successful " ;
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["error"] = "Delete coupon fail " + ex.Message;
+                TempData[DShopConst.TEMPDATA_ERROR] = "Delete coupon fail " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }           
         }

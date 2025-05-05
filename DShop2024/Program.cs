@@ -34,7 +34,6 @@ builder.Services.AddDbContext<DShopContext>(options =>
 
 //builder.Services.AddDefaultIdentity<AppUserModel>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DShopContext>();
 
-//builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

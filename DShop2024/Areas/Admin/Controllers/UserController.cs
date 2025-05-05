@@ -100,7 +100,9 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 AppUserModel user = new AppUserModel { 
                     UserName = createUserRequest.UserName,
-                    Email = createUserRequest.Email                  
+                    Email = createUserRequest.Email,
+                    loginType = DShopConst.LOGIN_WEBSITE,
+                    Status = 1
                 };
                 try
                 {
@@ -112,24 +114,24 @@ namespace DShop2024.Areas.Admin.Controllers
                         var addToRoleResult = await _userManager.AddToRoleAsync(user, role.Result.Name);
                         if (!addToRoleResult.Succeeded)
                         {
-                            TempData["error"] = "Add role for user fail";
+                            TempData[DShopConst.TEMPDATA_ERROR] = "Add role for user fail";
                             return RedirectToAction("Index", "User");
                         }
 
                         TempData["success"] = "Create user successful";
                         return RedirectToAction("Index", "User");
                     }
-                    TempData["error"] = "Create user fail";
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Create user fail";
                     return View(new CreateUserRequest());
                 }
                 catch (Exception ex)
                 {
-                    TempData["error"] = "Create user fail "+ ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Create user fail "+ ex.Message;
                     return View(new CreateUserRequest());
 
                 }
             }
-            TempData["error"] = "Model isn't valid. Input all values";
+            TempData[DShopConst.TEMPDATA_ERROR] = "Model isn't valid. Input all values";
             return View(new CreateUserRequest());
         }
 
@@ -150,7 +152,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
             if (chechAdmin)
             {
-                TempData["error"] = "Can not delete Admin ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not delete Admin ";
                 return RedirectToAction("Index");
             }
 
@@ -161,7 +163,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (!deleteResult.Succeeded)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             TempData["success"] = "Delete successful";
             return RedirectToAction("Index");
@@ -186,7 +188,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (!deleteResult.Succeeded)
             {
-                TempData["error"] = "Recover account fail";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Recover account fail";
                 return RedirectToAction("Index");
             }
             TempData["success"] = "Recover account successful";
@@ -207,7 +209,7 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["error"] = "Not found user";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
                 return RedirectToAction("Index", "User");
             }
 
@@ -216,7 +218,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
             if (chechAdmin)
             {
-                TempData["error"] = "Can not modify Admin ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not modify Admin ";
                 return RedirectToAction("Index");
             }
 
@@ -225,7 +227,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (user == null)
             {
-                TempData["error"] = $"Not found user id = {id}";
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Not found user id = {id}";
                 return RedirectToAction("Index", "User");
             }
             return View();
@@ -237,7 +239,7 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["error"] = "Not found user";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
                 return RedirectToAction("Index", "User");
             }
             var user = await _userManager.FindByIdAsync(id);
@@ -245,7 +247,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.id = user.Id;
             if (user == null)
             {
-                TempData["error"] = $"Not found user id = {id}";
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Not found user id = {id}";
                 return RedirectToAction("Index", "User");
             }
             if (!ModelState.IsValid)
@@ -257,7 +259,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
             if (!addPasswordResult.Succeeded)
             {
-                TempData["error"] = $"Set password user {user.UserName} fail"+ addPasswordResult.Errors.ToString();
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Set password user {user.UserName} fail"+ addPasswordResult.Errors.ToString();
                 return View(model);
             }
             TempData["success"] = $"Set password user {user.UserName} successful";
@@ -271,21 +273,21 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(id))
             {
-                TempData["error"] = "Not found user";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
                 return RedirectToAction("Index", "User");
             }
 
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
-                TempData["error"] = $"Not found user id = {id}";
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Not found user id = {id}";
                 return RedirectToAction("Index", "User");
             }
 
             var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
             if (chechAdmin)
             {
-                TempData["error"] = "Can not modify Admin ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not modify Admin ";
                 return RedirectToAction("Index");
             }
 
@@ -307,13 +309,13 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                TempData["error"] = "Not found user";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
                 return RedirectToAction("Index", "User");
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                TempData["error"] = $"Not found user id = {userId}";
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Not found user id = {userId}";
                 return RedirectToAction("Index", "User");
             }
             try
@@ -322,7 +324,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 var resultDelete = await _userManager.RemoveFromRolesAsync(user, roleUser);
                 if (!resultDelete.Succeeded)
                 {
-                    TempData["error"] = $"RemoveFromRolesAsync user {user.UserName} fail ";
+                    TempData[DShopConst.TEMPDATA_ERROR] = $"RemoveFromRolesAsync user {user.UserName} fail ";
                     return RedirectToAction("SetRole", "User", new { id = userId });
                 }
 
@@ -334,7 +336,7 @@ namespace DShop2024.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["error"] = $"Set role user {user.UserName} fail "+ ex.Message;
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Set role user {user.UserName} fail "+ ex.Message;
                 return RedirectToAction("SetRole", "User", new { id = userId });
             }
         }

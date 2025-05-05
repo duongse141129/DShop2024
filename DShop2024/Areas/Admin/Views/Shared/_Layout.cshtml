@@ -178,7 +178,8 @@
 
 	<script>
 		$(function () {
-			var message = '@TempData["success"]';
+			
+			var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';
 			if (message != '') {
 				Swal.fire({
 					title: message,
@@ -186,7 +187,7 @@
 					draggable: true
 				});
 			}
-			var messageFail = '@TempData["error"]';
+			var messageFail = '@TempData[DShopConst.TEMPDATA_ERROR]';
 			if (messageFail != '') {
 				Swal.fire({
 					icon: "error",

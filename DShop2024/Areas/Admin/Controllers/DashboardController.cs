@@ -81,7 +81,7 @@ namespace DShop2024.Areas.Admin.Controllers
             DateTime dateEndSelect = DateTime.Parse(dateEnd);
             if(dateEndSelect < dateStartSelect)
             {
-                TempData["error"] = "Date start must <= date end";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Date start must <= date end";
                 return NoContent();
             }
 

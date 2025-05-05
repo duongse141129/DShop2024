@@ -43,13 +43,13 @@ namespace DShop2024.Areas.Admin.Controllers
                     var result = await _roleManager.CreateAsync(new IdentityRole(roleModel.Name));
                     if (!result.Succeeded)
                     {
-                        TempData["error"] = "Create role fail.";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Create role fail.";
                         return RedirectToAction("Create");
                     }
-                    TempData["success"] = "Create successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Create successful";
                     return RedirectToAction("Index");
                 }
-                TempData["error"] = "Create role fail. Role already exists ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Create role fail. Role already exists ";
                 return RedirectToAction("Create");
             }
             return View();
@@ -65,7 +65,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var role = await _roleManager.FindByIdAsync(Id);
             if(role.Name == RoleName.Administrator)
             {
-                TempData["error"] = "Can not delete role Admin ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not delete role Admin ";
                 return RedirectToAction("Index");
             }
             if (role == null)
@@ -75,12 +75,12 @@ namespace DShop2024.Areas.Admin.Controllers
             try
             {
                 await _roleManager.DeleteAsync(role);
-                TempData["success"] = "Role delete successful";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Role delete successful";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["error"] = "Role delete fail"+ ex.Message;              
+                TempData[DShopConst.TEMPDATA_ERROR] = "Role delete fail"+ ex.Message;              
             }
             return Redirect("Index");
         }
@@ -95,7 +95,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var role = await _roleManager.FindByIdAsync(Id);
             if (role.Name == RoleName.Administrator)
             {
-                TempData["error"] = "Can not modify role Admin ";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not modify role Admin ";
                 return RedirectToAction("Index");
             }
             return View(role);
@@ -122,17 +122,17 @@ namespace DShop2024.Areas.Admin.Controllers
                     var exitRole = await _roleManager.RoleExistsAsync(model.Name);
                     if (exitRole)
                     {
-                        TempData["error"] = "Role update fail. Role already exists ";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Role update fail. Role already exists ";
                         return RedirectToAction("Edit", new { Id = Id });
                     }
 
                     await _roleManager.UpdateAsync(role);
-                    TempData["success"] = "Role update successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Role update successful";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    TempData["error"] = "Role update fail "+ ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Role update fail "+ ex.Message;
                     return RedirectToAction("Edit", new { Id = Id});
                 }
             }

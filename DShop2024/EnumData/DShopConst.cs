@@ -9,12 +9,14 @@
 		public static string INFO_CUSTOMER_DELIVERY = "INFO_CUSTOMER_DELIVERY";
 		public static string COUPONS_CUSTOMER_APPPLY = "COUPONS_CUSTOMER_APPPLY";
 
-		public static string SUCCESS_NOTIFICATION = "success";
-		public static string ERROR_NOTIFICATION = "error";
+		public static string TEMPDATA_SUCCESS = "success";
+		public static string TEMPDATA_ERROR = "error";
 
 		public static string PERCENTAGE_DISCOUNT = "PERCENTAGE DISCOUNT";
 		public static string SUB_SUMTOTAL_DISCOUNT = "SUB SUMTOTAL DISCOUNT";
 		public static string FREE_SHIPPING = "FREE SHIPPING";
 		public static string NEW_CUSTOMER = "NEW CUSTOMER";
+
+		public static string LOGIN_WEBSITE = "WEBSITE";
 	}
 }

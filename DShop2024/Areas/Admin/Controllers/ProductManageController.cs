@@ -93,7 +93,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     await _dataContext.Products.AddAsync(productModel);
                     await _dataContext.SaveChangesAsync();
 
-                    TempData["success"] = "Add product success";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Add product success";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -180,7 +180,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     _dataContext.Update(exitedProduct);
                     await _dataContext.SaveChangesAsync();
 
-                    TempData["success"] = "Update product success";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Update product success";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
@@ -217,7 +217,7 @@ namespace DShop2024.Areas.Admin.Controllers
             product.Status = 0;
             _dataContext.Products.Update(product);
             await _dataContext.SaveChangesAsync();
-			TempData["success"] = "Remove product successful";
+			TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product successful";
             return RedirectToAction("Index");
 
         }
@@ -227,7 +227,7 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             if(IdProductsToDelete.Count == 0)
             {
-                TempData["success"] = "Select list product to delete mutiple" ;
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Select list product to delete mutiple" ;
                 return RedirectToAction("Index");
             }
             try
@@ -239,13 +239,13 @@ namespace DShop2024.Areas.Admin.Controllers
                     _dataContext.Products.Update(product);
                     await _dataContext.SaveChangesAsync();
                 }
-                TempData["success"] = "Delete Multiple product success";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Multiple product success";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
 
-                TempData["error"] = "Delete Multiple product fail "+ ex.Message;
+                TempData[DShopConst.TEMPDATA_ERROR] = "Delete Multiple product fail "+ ex.Message;
                 return RedirectToAction("Index");
             }
            
@@ -281,7 +281,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             _dataContext.ReceivingStocks.Add(receivingStock);
             await _dataContext.SaveChangesAsync();
-            TempData["success"] = $"Add quantity product: {product.ProductName} successful";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = $"Add quantity product: {product.ProductName} successful";
             return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
 
         }

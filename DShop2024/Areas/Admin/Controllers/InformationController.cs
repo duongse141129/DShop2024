@@ -65,12 +65,12 @@ namespace DShop2024.Areas.Admin.Controllers
 					_dataContext.Update(exitedInformationShop);
 					await _dataContext.SaveChangesAsync();
 
-					TempData["success"] = "Update Information shop successful";
+					TempData[DShopConst.TEMPDATA_SUCCESS] = "Update Information shop successful";
 					return RedirectToAction("Index");
 				}
 				catch (Exception ex)
 				{
-					TempData["error"] = "Update Information shop fail "+ex.Message;
+					TempData[DShopConst.TEMPDATA_ERROR] = "Update Information shop fail "+ex.Message;
 					return RedirectToAction("Index");
 				}
 			}

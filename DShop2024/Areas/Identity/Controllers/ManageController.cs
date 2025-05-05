@@ -167,7 +167,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await GetCurrentUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             var userLogins = await _userManager.GetLoginsAsync(user);
             var schemes = await _signInManager.GetExternalAuthenticationSchemesAsync();
@@ -201,7 +201,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await GetCurrentUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
             if (info == null)
@@ -265,7 +265,7 @@ namespace DShop2024.Areas.Identity.Controllers
         {
             var code = await _userManager.GenerateChangePhoneNumberTokenAsync(await GetCurrentUserAsync(), phoneNumber);
             // Send an SMS to verify the phone number
-            return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
+            return phoneNumber == null ? View(DShopConst.TEMPDATA_ERROR) : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
         }
 
         //
@@ -370,7 +370,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 _logger.LogInformation(1, "User generated new recovery code.");
                 return View("DisplayRecoveryCodes", new DisplayRecoveryCodesViewModel { Codes = codes });
             }
-            return View("Error");
+            return View(DShopConst.TEMPDATA_ERROR);
         }
 
         [HttpGet]
@@ -434,13 +434,13 @@ namespace DShop2024.Areas.Identity.Controllers
                 }
 
                 await _userManager.UpdateAsync(user);
-                TempData["success"] = "Edit profile successful" ;
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Edit profile successful" ;
                 await _signInManager.RefreshSignInAsync(user);
                 return RedirectToAction("EditProfile", "Manage");
             }
             catch (Exception ex)
             {
-                TempData["error"] = "Edit profile fail "+ ex.Message;
+                TempData[DShopConst.TEMPDATA_ERROR] = "Edit profile fail "+ ex.Message;
                 return RedirectToAction("EditProfile", "Manage");
             }
 

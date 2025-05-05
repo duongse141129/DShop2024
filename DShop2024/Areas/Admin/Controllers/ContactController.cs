@@ -91,7 +91,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 if (String.IsNullOrEmpty(replyMessage))
                 {
-                    TempData["error"] = "Message can't null";
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Message can't null";
                     return RedirectToAction("Reply", "Contact", new { id = IdContact });
                 }
                 var user = await _userManager.GetUserAsync(this.User);
@@ -110,12 +110,12 @@ namespace DShop2024.Areas.Admin.Controllers
 				await _emailSender.SendEmailContact(contactModel, infoShop);
 	
 
-                TempData["success"] = "Send gmail contact successful ";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Send gmail contact successful ";
                 return RedirectToAction("Index", "Contact");
             }
             catch (Exception ex)
             {
-                TempData["error"] = "Send gmail contact fail " + ex.Message;
+                TempData[DShopConst.TEMPDATA_ERROR] = "Send gmail contact fail " + ex.Message;
                 return RedirectToAction("Reply", "Contact", new { id = IdContact });
             }
           
@@ -138,13 +138,13 @@ namespace DShop2024.Areas.Admin.Controllers
                     _dataContext.Update(contactModel);
                     await _dataContext.SaveChangesAsync();
                 }
-                TempData["success"] = "Delete contact successful";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete contact successful";
                 await _dataContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["success"] = "Remove contact fail "+ ex.Message;
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove contact fail "+ ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }

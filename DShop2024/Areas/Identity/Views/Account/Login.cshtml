@@ -6,7 +6,7 @@
 @inject SignInManager<AppUserModel> SignInManager
 
 @{
-    ViewData["Title"] = "Đăng nhập";
+    ViewData["Title"] = "Login";
     Layout = "/Views/Shared/_Layout.cshtml";
 }
 
@@ -24,7 +24,7 @@
                     <div class="col-lg-6">
                         <div class="p-5">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Đăng nhập!</h1>
+                                <h1 class="h4 text-gray-900 mb-4">LOGIN!</h1>
                             </div>
                             <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post"  class="user">
                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -46,7 +46,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-user btn-block">Đăng nhập</button>
+                                <button type="submit" class="btn btn-primary btn-user btn-block">LOGIN</button>
                                 <hr>
  
                                 </form>
@@ -88,13 +88,13 @@
                             
                             <hr>
                             <div class="text-center">
-                                <a class="small" asp-action="ForgotPassword">Quyên mật khẩu?</a>
+                                <a class="small" asp-action="ForgotPassword">Forgot Password?</a>
                             </div>
                             <div class="text-center">
-                                <a class="small" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Chưa có tài khoản? Đăng ký</a>
+                                <a class="small" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">Register</a>
                             </div>
                             <div class="text-center">
-                                <a class="small" asp-action="ConfirmEmailAgain">Verify email again.</a>
+                                <a class="small" asp-action="ConfirmEmailAgain">Verify email.</a>
                             </div>
 
 

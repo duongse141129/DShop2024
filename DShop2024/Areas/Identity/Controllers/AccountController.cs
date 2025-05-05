@@ -63,20 +63,45 @@ namespace DShop2024.Areas.Identity.Controllers
             if (ModelState.IsValid)
             {
                  
-                var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);                
-                // Tìm UserName theo Email, đăng nhập lại
+                var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
+                AppUserModel user = null;
+
                 if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
                 {
-                    var user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
+                    user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
                     if (user != null)
                     {
                         result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
                     }
-                } 
+                }
+                else
+                {
+                    user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
+                }
+                
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(1, "User logged in.");
+
+                    if(user.Status == 0)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Account deleted ";
+                        return View(model);
+                    }
+
+                    var roleUser = await _userManager.GetRolesAsync(user);
+                    if(roleUser.Count > 0)
+                    {
+                        if (roleUser.FirstOrDefault() == RoleName.Administrator)
+                        {
+                            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                        }
+                        else if (roleUser.FirstOrDefault() == RoleName.Employee)
+                        {
+                            return RedirectToAction("Index", "Order", new { area = "Admin" });
+                        }
+                    }
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -86,12 +111,17 @@ namespace DShop2024.Areas.Identity.Controllers
                 
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning(2, "Tài khoản bị khóa");
+                    _logger.LogWarning(2, "Account locked");
                     return View("Lockout");
+                }
+                if (result.IsNotAllowed)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Email isn't verified";
+                    return View(model);
                 }
                 else
                 {
-                    ModelState.AddModelError("Không đăng nhập được.");
+                    ModelState.AddModelError("Can not login.");
                     return View(model);
                 }
             }
@@ -128,7 +158,13 @@ namespace DShop2024.Areas.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new AppUserModel { UserName = model.UserName, Email = model.Email };
+                var user = new AppUserModel 
+                { 
+                    UserName = model.UserName, 
+                    Email = model.Email ,
+                    loginType = DShopConst.LOGIN_WEBSITE,
+                    Status = 1
+                };
                 var result = await _userManager.CreateAsync(user, model.Password);
 
                 if (result.Succeeded)
@@ -246,10 +282,10 @@ namespace DShop2024.Areas.Identity.Controllers
                 _dataContext.Update(user);
                 await _dataContext.SaveChangesAsync();
          
-                TempData["success"] = "Confirm email successful";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Confirm email successful";
                 return View();
             }
-            TempData["error"] = "Code is invalid";
+            TempData[DShopConst.TEMPDATA_ERROR] = "Code is invalid";
             return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
         }
 
@@ -571,7 +607,7 @@ namespace DShop2024.Areas.Identity.Controllers
 
                 return RedirectToAction("ResetPassword", "Account", new {email = user.Email});
             }
-            TempData["error"] = "Code is invalid";
+            TempData[DShopConst.TEMPDATA_ERROR] = "Code is invalid";
             return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
         }
 
@@ -645,7 +681,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             var userFactors = await _userManager.GetValidTwoFactorProvidersAsync(user);
             var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
@@ -666,7 +702,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             // Dùng mã Authenticator
             if (model.SelectedProvider == "Authenticator")
@@ -678,7 +714,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var code = await _userManager.GenerateTwoFactorTokenAsync(user, model.SelectedProvider);
             if (string.IsNullOrWhiteSpace(code))
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
 
             var message = "Your security code is: " + code;
@@ -703,7 +739,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
@@ -751,7 +787,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             return View(new VerifyAuthenticatorCodeViewModel { ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
@@ -798,7 +834,7 @@ namespace DShop2024.Areas.Identity.Controllers
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
             if (user == null)
             {
-                return View("Error");
+                return View(DShopConst.TEMPDATA_ERROR);
             }
             return View(new UseRecoveryCodeViewModel { ReturnUrl = returnUrl });
         }

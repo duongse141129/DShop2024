@@ -59,7 +59,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 await _context.Banners.AddAsync(banner);
                 await _context.SaveChangesAsync();
 
-                TempData["success"] = "Add banner success";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Add banner success";
                 return RedirectToAction("Index");
             }
 
@@ -114,7 +114,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 _context.Update(exitedBanner);
                 await _context.SaveChangesAsync();
 
-                TempData["success"] = "Update banner success";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Update banner success";
                 return RedirectToAction("Index");
             }
 
@@ -144,7 +144,7 @@ namespace DShop2024.Areas.Admin.Controllers
             banner.Status = 0;
             _context.Banners.Update(banner);
             await _context.SaveChangesAsync();
-            TempData["success"] = "Remove banner success";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove banner success";
             return RedirectToAction("Index");
 
         }

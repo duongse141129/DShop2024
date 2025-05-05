@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -180,7 +181,7 @@ namespace DShop2024.Controllers
 			catch (Exception ex)
 			{
 
-				TempData["error"] = "fail " + ex.Message;
+				TempData[DShopConst.TEMPDATA_ERROR] = "fail " + ex.Message;
 				return View();
 			}
 
@@ -218,7 +219,7 @@ namespace DShop2024.Controllers
 				_dataContext.Ratings.Add(ratingModel);
 				await _dataContext.SaveChangesAsync();
 
-				TempData["success"] = "Feedback product successfully";
+				TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
 				return RedirectToAction("Details", new { Id = rating.ProductId });
 			}
 

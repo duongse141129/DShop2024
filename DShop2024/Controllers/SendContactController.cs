@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,12 +39,12 @@ namespace DShop2024.Controllers
                     contactModel.Status = 1;
                     _context.Add(contactModel);
                     await _context.SaveChangesAsync();
-                    TempData["success"] = "Send contact successful";
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Send contact successful";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    TempData["error"] = "Send contact fail "+ ex.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Send contact fail "+ ex.Message;
                     return RedirectToAction(nameof(Index));
                 }
             }

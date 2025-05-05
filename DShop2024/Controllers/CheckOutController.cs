@@ -54,13 +54,13 @@ namespace DShop2024.Controllers
 		{
 			if(string.IsNullOrEmpty(payment))
 			{
-				TempData["error"] = "Error payment";
+				TempData[DShopConst.TEMPDATA_ERROR] = "Error payment";
 				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			string checkStock = await CheckAllStock();
 			if(!string.IsNullOrEmpty(checkStock))
 			{
-				TempData["error"] = checkStock;
+				TempData[DShopConst.TEMPDATA_ERROR] = checkStock;
 				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 
@@ -71,12 +71,12 @@ namespace DShop2024.Controllers
             var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)
 			{
-				TempData["error"] = "Cart is empty";
+				TempData[DShopConst.TEMPDATA_ERROR] = "Cart is empty";
 				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			if(info == null)
 			{
-				TempData["error"] = "Infomation delivery is null";
+				TempData[DShopConst.TEMPDATA_ERROR] = "Infomation delivery is null";
 				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 			foreach (var coupon in coupouns)
@@ -90,15 +90,15 @@ namespace DShop2024.Controllers
                     {
 						if(cp.Status == 0)
 						{
-                            TempData["error"] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
+                            TempData[DShopConst.TEMPDATA_ERROR] = $"Coupon {coupon.CouponCode} have been removed. Do you still want to checkout?";
                         }
                         if (cp.Quantity <= 0)
                         {
-                            TempData["error"] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
+                            TempData[DShopConst.TEMPDATA_ERROR] = $"Coupon {coupon.CouponCode} is out of stock. Do you still want to checkout?";
                         }
                         if (dateNow > cp.DateExpired.Date)
                         {
-                            TempData["error"] = $"Coupon {coupon.CouponCode} was expired. Do you still want to checkout?";
+                            TempData[DShopConst.TEMPDATA_ERROR] = $"Coupon {coupon.CouponCode} was expired. Do you still want to checkout?";
                         }
 
                         coupouns.Remove(coupon);
@@ -237,12 +237,12 @@ namespace DShop2024.Controllers
 				HttpContext.Session.Remove(DShopConst.COUPONS_CUSTOMER_APPPLY);
 
 
-				TempData["success"] = "Checkout successful. Thank you for shopping at the DShop2024. ";
+				TempData[DShopConst.TEMPDATA_SUCCESS] = "Checkout successful. Thank you for shopping at the DShop2024. ";
 				return RedirectToAction("Index", "Home");
 			}
 			catch (Exception ex)
 			{
-				TempData["error"] = "CheckOut fail " +ex.Message;
+				TempData[DShopConst.TEMPDATA_ERROR] = "CheckOut fail " +ex.Message;
 				return RedirectToAction("Index", DShopConst.CART_KEY);
 			}
 
@@ -262,7 +262,7 @@ namespace DShop2024.Controllers
 				string orderCode = requestQuery["orderId"];
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "MOMO", orderCode = orderCode });		
 			}
-			TempData["error"] = "Momo transaction canceled";
+			TempData[DShopConst.TEMPDATA_ERROR] = "Momo transaction canceled";
 			return RedirectToAction("Index", DShopConst.CART_KEY);
 
 
@@ -278,7 +278,7 @@ namespace DShop2024.Controllers
 				var orderCode = response.OrderId;
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "VNpay", orderCode = orderCode });
 			}
-			TempData["error"] = "VNpay transaction canceled";
+			TempData[DShopConst.TEMPDATA_ERROR] = "VNpay transaction canceled";
 			return RedirectToAction("Index", DShopConst.CART_KEY);
 	
 		}

@@ -70,20 +70,20 @@ namespace DShop2024.Controllers
 			{
 				if (product.Stock <= cartItem.Quantity)
 				{
-					TempData["error"] = $" Item {product.ProductName} only has {product.Stock} left";
+					TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
 					
 				}
 				else
 				{
 					cartItem.Quantity += 1;
-					TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
+					TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
 				}
 				
 				
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 
-			TempData["success"] = $" Add Item {product.ProductName} to cart successfully";
+			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
 		
 		}
@@ -96,7 +96,7 @@ namespace DShop2024.Controllers
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if (product.Stock <= cartItem.Quantity)
 			{
-				TempData["error"] = $" Item {product.ProductName} only has {product.Stock} left";
+				TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
 				HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 				return RedirectToAction("Index");
 			}

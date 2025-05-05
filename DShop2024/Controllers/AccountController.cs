@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -79,7 +80,7 @@ namespace DShop2024.Controllers
 			}
 			catch (Exception ex)
 			{
-				TempData["error"] = ex.Message;
+				TempData[DShopConst.TEMPDATA_ERROR] = ex.Message;
                 return RedirectToAction("History");
             }
 			return RedirectToAction("History");
@@ -95,7 +96,7 @@ namespace DShop2024.Controllers
 				IdentityResult result = await _userManager.CreateAsync(userModel, user.Password);
 				if (result.Succeeded)
 				{
-					TempData["success"] = "Register account success";
+					TempData[DShopConst.TEMPDATA_SUCCESS] = "Register account success";
 					return Redirect("/Account/Login");
 				}
 				foreach(IdentityError error in result.Errors)
@@ -109,7 +110,7 @@ namespace DShop2024.Controllers
 
 		public async Task<IActionResult> Logout(string returnUrl = "/")
 		{
-			await _signInManager.SignOutAsync();	
+			await _signInManager.SignOutAsync();
 			return Redirect(returnUrl);
 		}
 	}

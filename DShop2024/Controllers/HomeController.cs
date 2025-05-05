@@ -318,7 +318,7 @@ namespace DShop2024.Controllers
 			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
-				TempData["error"] = "Product is exit in your list wishlist";
+				TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list wishlist";
 				return NoContent();
 			}
 			WishListModel wishList = new WishListModel 
@@ -348,14 +348,14 @@ namespace DShop2024.Controllers
             var countConpare = await (_dataContext.Compares.Where(co => co.UserId == user.Id)).CountAsync();
             if(countConpare == 5)
             {
-                TempData["error"] = "Maximum 5 product";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Maximum 5 product";
 				return NoContent();
 			}
 
             var chechExit = await (_dataContext.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
             if(chechExit != null)
             {                
-                TempData["error"] = "Product is exit in your list compare";
+                TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list compare";
                 return NoContent();
 			}
 
@@ -412,7 +412,7 @@ namespace DShop2024.Controllers
             _dataContext.Compares.Remove(compare);
             await _dataContext.SaveChangesAsync();
 
-            TempData["success"] = "Remove compare success";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove compare success";
             return RedirectToAction("Compare");
         }
 
@@ -428,7 +428,7 @@ namespace DShop2024.Controllers
                 await _dataContext.SaveChangesAsync();
             }
 
-            TempData["success"] = "Clear all compare success";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Clear all compare success";
             return RedirectToAction("Compare");
         }
 
@@ -439,7 +439,7 @@ namespace DShop2024.Controllers
             _dataContext.WishLists.Remove(wishList);
             await _dataContext.SaveChangesAsync();
 
-            TempData["success"] = "Remove wishList success";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove wishList success";
             return RedirectToAction("WishList");
         }
 
