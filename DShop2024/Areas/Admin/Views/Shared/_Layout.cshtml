@@ -56,12 +56,6 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4">
-						<div class="logo pull-left">
-							<a href="index.html"><img src="images/home/logo.png" alt="" /></a>
-						</div>
-						<div class="btn-group pull-right">
-							
-						</div>
 					</div>
 					
 				</div>
@@ -74,12 +68,6 @@
 				<div class="row">
 					<div class="col-sm-9">
 						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-								<span class="sr-only">Toggle navigation</span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-							</button>
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
@@ -88,17 +76,14 @@
 								<li><a asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a></li>
 								<li><a asp-area="Admin" asp-controller="Slider" asp-action="Index">Sliders</a></li>
 								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">Dashboard</a></li>
-								<li><a asp-area="Admin" asp-controller="Chat" asp-action="Index" >
+								<li>
+									<a asp-area="Admin" asp-controller="Chat" asp-action="Index" >
 										Chat
 										<span class="badge badge-light spanNoti" id="spanNoti">*</span>
 									</a>
 								</li>
 								<li><a asp-area="Admin" asp-controller="Contact" asp-action="Index">Contact</a></li>
-								<li>
-									<a target="_blank" class="dropdown-item" asp-action="Index" asp-controller="FileManager" asp-area="Files">
-										Manage files
-									</a>
-								</li>
+								<li><a target="_blank" class="dropdown-item" asp-action="Index" asp-controller="FileManager" asp-area="Files">Manage files</a></li>
 
 
 								@if (User?.IsInRole(RoleName.Administrator) ?? false)
@@ -112,11 +97,7 @@
 									<li><a asp-area="Admin" asp-controller="Coupon" asp-action="Index">Coupons</a></li>
 									<li><a asp-area="Admin" asp-controller="Promotion" asp-action="Index">Promotion</a></li>
 									<li><a asp-area="Admin" asp-controller="FAQ" asp-action="Index">FAQs</a></li>
-								}
-								
-
-							 	<li><a asp-area="Identity" asp-controller="User" asp-action="Index">UserManage</a></li> 
-							    <li><a asp-area="Identity" asp-controller="Role" asp-action="Index">RoleManage</a></li>
+								}								
 
 								<li><partial name="_LoginPartial" /></li>
 								
@@ -125,9 +106,6 @@
 					</div>
 
 					<div class="col-sm-3">
-						<div class="search_box pull-right">
-							<input type="text" placeholder="Search" />
-						</div>
 					</div>
 				</div>
 			</div>

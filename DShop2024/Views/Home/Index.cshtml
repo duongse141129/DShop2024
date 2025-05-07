@@ -17,12 +17,12 @@
 		<div class="row">
 			<div class="col-md-2">
 				<div class="search_box pull-right">
-						<input type="text" placeholder="Search" name="searchName" value="@( ViewBag.searchName!= "" ? ViewBag.searchName  : "" )" />
-						<button class="btn btn-warning btn-locgia" type="submit">Search</button>
+					<input type="text" placeholder="Search" name="searchName" value="@( ViewBag.searchName!= "" ? ViewBag.searchName  : "" )" />
+					button class="btn btn-warning btn-locgia" type="submit">Search</button>
 				</div>
 			</div>
 			<div class="col-2">
-				<p>Radio laptop pocket(INCH)</p>
+				<p>Laptop pocket(INCH)</p>
 					@foreach (var item in ViewBag.laptopPocketTypes)
 					{
 						<input type="radio" id="@item" name="laptopPocket" value="@item" @(ViewBag.laptopPocket == item ? "checked" : "") />
@@ -58,7 +58,6 @@
 		</div>
 		<div class="row">
 				<div class="col-md-5">
-					<h5>Filter by price</h5>
 					<input type="hidden" name="startprice" id="startprice">
 					<input type="hidden" name="endPrice" id="endPrice">
 					<p>

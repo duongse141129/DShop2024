@@ -61,6 +61,8 @@ namespace DShop2024.Areas.Admin.Controllers
 					exitedInformationShop.Map = informationShop.Map;
 					exitedInformationShop.Phone = informationShop.Phone;
 					exitedInformationShop.Email = informationShop.Email;
+					exitedInformationShop.PluginFacebook = informationShop.PluginFacebook;
+					exitedInformationShop.PluginYoutube = informationShop.PluginYoutube;
 
 					_dataContext.Update(exitedInformationShop);
 					await _dataContext.SaveChangesAsync();

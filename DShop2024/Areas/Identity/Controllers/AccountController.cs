@@ -1,3 +1,4 @@
+using System.Data;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -43,7 +44,8 @@ namespace DShop2024.Areas.Identity.Controllers
         }
 
         // GET: /Account/Login
-        [HttpGet("/login/")]
+        //[HttpGet("/login/")]
+        [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
@@ -53,7 +55,8 @@ namespace DShop2024.Areas.Identity.Controllers
 
         //
         // POST: /Account/Login
-        [HttpPost("/login/")]
+        //[HttpPost("/login/")]
+        [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
@@ -77,8 +80,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 else
                 {
                     user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
-                }
-                
+                }               
 
                 if (result.Succeeded)
                 {
@@ -102,7 +104,8 @@ namespace DShop2024.Areas.Identity.Controllers
                             return RedirectToAction("Index", "Order", new { area = "Admin" });
                         }
                     }
-                    return LocalRedirect(returnUrl);
+					return LocalRedirect(returnUrl);
+					
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -194,7 +197,7 @@ namespace DShop2024.Areas.Identity.Controllers
                     //       để kích hoạt tài khoản.");
 
 
-
+                    await _userManager.AddToRoleAsync(user, RoleName.Customer);
 
 
                     var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
@@ -434,15 +437,19 @@ namespace DShop2024.Areas.Identity.Controllers
 
                 if((externalEmailUser == null) && (externalEmail == model.Email)) 
                 {
+                    var userName = externalEmail.Split('@');
+
                     // Chua co Account -> Tao Account, lien ket, dang nhap
                     var newUser = new AppUserModel() {
-                        UserName = externalEmail,
+                        UserName = userName[0],
                         Email = externalEmail
                     };
 
                     var resultNewUser = await _userManager.CreateAsync(newUser);
                     if (resultNewUser.Succeeded)
                     {
+                        await _userManager.AddToRoleAsync(newUser, RoleName.Customer);
+
                         await _userManager.AddLoginAsync(newUser, info);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
                         await _userManager.ConfirmEmailAsync(newUser, code);

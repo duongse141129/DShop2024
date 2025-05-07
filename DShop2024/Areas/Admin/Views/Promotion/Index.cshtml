@@ -5,11 +5,9 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<h2>Category coupons</h2>
+
 <table class="table">
     <thead>
         <tr>
@@ -17,9 +15,8 @@
                 @Html.DisplayNameFor(model => model.CategoryCouponName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                @Html.DisplayNameFor(model => model.Description)
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -29,12 +26,7 @@
                 @Html.DisplayFor(modelItem => item.CategoryCouponName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    @Html.DisplayFor(modelItem => item.Description)
             </td>
         </tr>
 }

@@ -23,6 +23,8 @@ namespace DShop2024.Models
         public string Description { get; set; }
 
         public string LogoImg { get; set; }
+        public string PluginYoutube { get; set; }
+        public string PluginFacebook { get; set; }
 
 
         [NotMapped]

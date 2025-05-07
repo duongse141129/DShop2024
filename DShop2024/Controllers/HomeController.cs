@@ -1,5 +1,6 @@
 using DShop2024.EnumData;
 using DShop2024.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,119 +30,6 @@ namespace DShop2024.Controllers
 
 		}
 
-        #region
-
-        //     public async Task<IActionResult> Index(string CategorySlug = "", string BrandSlug = "",
-        //									int pg = 1, string searchName = "" ,
-        //								string sortBy = "", string startprice = "", string endPrice = "",
-        //                                         string laptopPocket = "" , string waterResistance = "", string USBChargingPort = "")
-        //     {
-        //         //var products = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0)                                      
-        //         //                            .Include(p => p.Brand)
-        //         //                            .Include(p => p.Category)
-        //         //                            .ToList();
-
-        //         IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
-        //                                                 .Include(p => p.Brand)
-        //                                                 .Include(p => p.Category);
-        //var count = await listProduct.CountAsync();
-        //         if(count > 0)
-        //         {
-        //	if (!String.IsNullOrEmpty(CategorySlug))
-        //	{
-        //		listProduct = listProduct.Where(c => c.Category.Slug == CategorySlug);
-        //	}
-        //	if (!String.IsNullOrEmpty(BrandSlug))
-        //	{
-        //		listProduct = listProduct.Where(c => c.Brand.Slug == BrandSlug);
-        //	}
-        //	if (!String.IsNullOrEmpty(searchName))
-        //	{
-        //		listProduct = listProduct.Where(c => c.ProductName.Contains(searchName));
-        //	}
-        //	if (!String.IsNullOrEmpty(laptopPocket))
-        //	{
-        //		decimal laptopPocketValue;
-        //		decimal.TryParse(laptopPocket, out laptopPocketValue);
-        //		listProduct = listProduct.Where(c => c.LaptopPocket >= laptopPocketValue);
-        //	}
-        //	if (!String.IsNullOrEmpty(waterResistance))
-        //	{				
-        //		listProduct = listProduct.Where(c => c.WaterResistance == true);
-        //	}
-        //	if (!String.IsNullOrEmpty(USBChargingPort))
-        //	{
-        //		listProduct = listProduct.Where(c => c.USBChargingPort == true);
-        //	}
-
-
-        //	if (sortBy == "priceIncrease")
-        //	{
-        //		listProduct = listProduct.OrderBy(p => p.Price);
-        //	}
-        //	else if (sortBy == "priceDecrease")
-        //	{
-        //		listProduct = listProduct.OrderByDescending(p => p.Price);
-        //	}
-        //	else if (sortBy == "newest")
-        //	{
-        //		listProduct = listProduct.OrderByDescending(p => p.Id);
-        //	}
-        //	else if (sortBy == "oldest")
-        //	{
-        //		listProduct = listProduct.OrderBy(p => p.Id);
-        //	}
-        //	else if (startprice != "" && endPrice != "")
-        //	{
-        //		decimal startPriceValue;
-        //		decimal endPriceValue;
-        //		if (decimal.TryParse(startprice, out startPriceValue) && decimal.TryParse(endPrice, out endPriceValue))
-        //		{
-        //			listProduct = listProduct.Where(p => p.Price >= startPriceValue && p.Price <= endPriceValue);
-        //		}
-        //		else
-        //		{
-        //			listProduct = listProduct.OrderByDescending(p => p.Id);
-        //		}
-        //	}
-        //	else
-        //	{
-        //		listProduct = listProduct.OrderByDescending(p => p.Id);
-        //	}
-
-        //}
-        //var filterSortBy = Enum.GetValues(typeof(Product.SortBy))
-        //			.Cast<Product.SortBy>()
-        //			.Select(v => v.ToString())
-        //			.ToList();
-        //ViewBag.sortBy = new SelectList(filterSortBy, sortBy);
-
-        //ViewBag.searchName = searchName;
-        //ViewBag.startprice = startprice;
-        //ViewBag.endPrice = endPrice;
-        //ViewBag.laptopPocket = laptopPocket;
-        //ViewBag.waterResistance = waterResistance;
-        //ViewBag.USBChargingPort = USBChargingPort;
-
-
-        //int pageSize = 6;
-        //if (pg < 1) pg = 1;
-        //int recsCount = listProduct.Count();
-        //var pager = new Paginate(recsCount, pg, pageSize);
-        //int recSkip = (pg - 1) * pageSize;
-
-        //listProduct = listProduct.Skip(recSkip).Take(pager.PageSize);
-
-        //await listProduct.ToListAsync();
-        //var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
-        //         ViewBag.Banners = slider;
-        //ViewBag.Pager = pager;
-
-
-        //return View(listProduct);
-        //     }
-
-        #endregion
 
         #region
 
@@ -149,7 +37,7 @@ namespace DShop2024.Controllers
                                                  string searchName = "",
                                             string sortBy = "", string startprice = "", string endPrice = "",
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "", 
-                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 6)
+                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 9)
         {
             ViewBag.laptopPocketTypes = Product.laptopPocketTypes;
 
@@ -240,8 +128,8 @@ namespace DShop2024.Controllers
 
             int totalProduct = listProduct.Count();
             if (pagesSize <= 0)
-                pagesSize = 6;
-            int countPages = (int)Math.Ceiling((double)totalProduct / 6);
+                pagesSize = 9;
+            int countPages = (int)Math.Ceiling((double)totalProduct / 9);
 
             if (currentPage > countPages)
                 currentPage = countPages;
@@ -294,24 +182,8 @@ namespace DShop2024.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        //public async Task<IActionResult> Contact()
-        //{
-        //    var contact = await _dataContext.Contacts.FirstOrDefaultAsync();
-        //    return View(contact);
-        //}
-        //public async Task<IActionResult> Contact()
-        //{
-        //    var contact = await _dataContext.InformationShops.FirstOrDefaultAsync();
-        //    return View(contact);
-        //}
-
-		public async Task<IActionResult> InformationShop()
-		{
-			var informationShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-			return View(informationShop);
-		}
-
-        [HttpPost]
+		[Authorize]
+		[HttpPost]
         public async Task<IActionResult> AddToWishList(int Id)
 		{
 			var user = await _userManager.GetUserAsync(User);
@@ -340,6 +212,7 @@ namespace DShop2024.Controllers
 			}
 		}
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddToCompare(int Id)
 		{
@@ -379,7 +252,7 @@ namespace DShop2024.Controllers
 			}
 		}
 
-
+		[Authorize]
 		public async Task<IActionResult> WishList()
 		{
 			var user = await _userManager.GetUserAsync(this.User);
@@ -391,6 +264,7 @@ namespace DShop2024.Controllers
             return View(wishListProduct);
 		}
 
+		[Authorize]
 		public async Task<IActionResult> Compare()
 		{
             var user = await _userManager.GetUserAsync(this.User);
@@ -401,7 +275,8 @@ namespace DShop2024.Controllers
             return View(compareProduct);
 		}
 
-        public async Task<IActionResult> DeleteCompare(int Id)
+		[Authorize]
+		public async Task<IActionResult> DeleteCompare(int Id)
         {
             var user = await _userManager.GetUserAsync(this.User);
             CompareModel compare = await _dataContext.Compares.Where( co => co.ProductId == Id )
@@ -416,7 +291,8 @@ namespace DShop2024.Controllers
             return RedirectToAction("Compare");
         }
 
-        public async Task<IActionResult> DeleteAllCompare()
+		[Authorize]
+		public async Task<IActionResult> DeleteAllCompare()
         {
             var user = await _userManager.GetUserAsync(this.User);
             List<CompareModel> compareProduct = await (from co in _dataContext.Compares
@@ -432,7 +308,8 @@ namespace DShop2024.Controllers
             return RedirectToAction("Compare");
         }
 
-        public async Task<IActionResult> DeleteWishList(int Id)
+		[Authorize]
+		public async Task<IActionResult> DeleteWishList(int Id)
         {
             WishListModel wishList = await _dataContext.WishLists.FindAsync(Id);
 

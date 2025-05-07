@@ -2,9 +2,9 @@
 @{
     ViewData["title"] = " Info shop";
 }
-<h4>Contact Admin</h4>
+<h4>Infomation shop</h4>
 
-<table class="table" id="myTable">
+@* <table class="table">
     <thead>
         <tr>
 
@@ -14,6 +14,8 @@
             <th>Logo</th>
             <th>Phone</th>
             <th>Email</th>
+            <th>Youtube</th>
+            <th>Facebook</th>
             <th>Action</th>
 
         </tr>
@@ -27,12 +29,65 @@
                 <td>@Model.Phone</td>
                 <td>@Model.Email</td>
                 <td>
-                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Contact" asp-route-Id="@Model.Id">Edit</a>
+                @Html.Raw(@Model.PluginYoutube)
+                   
+                </td>
+                <td>@Html.Raw(@Model.PluginFacebook)</td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Information" asp-route-Id="@Model.Id">Edit</a>
                 </td>
             </tr>
     </tbody>
+</table> *@
 
 
-
+<table class="table table-bordered table-striped">
+	<thead class="thead-dark">
+		<tr>
+			<th scope="col"></th>
+			<th scope="col">Product</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>Name</th>
+			<td>@Model.ShopName</td>
+		</tr>
+		<tr>
+			<th>Description</th>
+			<td>@Model.Description</td>
+		</tr>
+		<tr>
+			<th>Map</th>
+			<td>@Html.Raw(Model.Map)</td>
+		</tr>
+		<tr>
+			<th>Logo</th>
+			<td><img src="~/media/Logo/@Model.LogoImg" width="120" height="120" /></td>
+		</tr>
+		<tr>
+			<th>Phone</th>
+			<td>@Model.Phone</td>
+		</tr>
+		<tr>
+			<th>Email</th>
+			<td>@Model.Email</td>
+		</tr>
+		<tr>
+			<th>Youtube</th>
+			<td>@Html.Raw(Model.PluginYoutube)</td>
+		</tr>
+		<tr>
+			<th>Facebook</th>
+			<td>@Html.Raw(@Model.PluginFacebook)</td>
+		</tr>
+		<tr>
+			<th>Action</th>
+			<td><a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Information" asp-route-Id="@Model.Id">Edit</a></td>
+		</tr>
+	</tbody>
 </table>
 
+@section Scripts {
+	<script src="https://apis.google.com/js/platform.js"></script>
+}

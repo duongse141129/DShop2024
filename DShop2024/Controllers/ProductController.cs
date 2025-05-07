@@ -187,18 +187,6 @@ namespace DShop2024.Controllers
 
 		}
 
-		public async Task<IActionResult> Search(string searchTerm)
-		{
-			var products = await _dataContext.Products
-										.Where(p => p.ProductName.Contains(searchTerm) || p.Description.Contains(searchTerm))
-										.Where(p => p.Status == 1)
-										.Include(p => p.Brand)
-										.Include(p => p.Category)
-										.ToListAsync();
-			ViewBag.SearchTerm = searchTerm;
-
-			return View(products);
-		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
