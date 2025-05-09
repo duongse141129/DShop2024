@@ -29,23 +29,6 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-        // GET: Admin/BrandManage/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var brandModel = await _context.Brands
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (brandModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(brandModel);
-        }
 
         // GET: Admin/BrandManage/Create
         public IActionResult Create()
@@ -71,9 +54,17 @@ namespace DShop2024.Areas.Admin.Controllers
 				}
                 brandModel.Status =1;
 
-				_context.Add(brandModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(brandModel);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Create brand fail "+ ex.Message;
+                }
             }
             return View(brandModel);
         }
@@ -142,7 +133,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(brandModel);
         }
 
-        // GET: Admin/BrandManage/Delete/5
+
+        // POST: Admin/BrandManage/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -156,16 +148,6 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
-            return View(brandModel);
-        }
-
-        // POST: Admin/BrandManage/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var brandModel = await _context.Brands.FindAsync(id);
             if (brandModel != null)
             {
                 brandModel.Status = 0;

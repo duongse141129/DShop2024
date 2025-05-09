@@ -66,7 +66,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
 		public IActionResult Create()
 		{
-			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0), "Id", "CategoryCouponName");
+			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 			return View();
 		}
 
@@ -74,7 +74,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( CouponModel couponModel)
         {
-			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0), "Id", "CategoryCouponName");
+			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 
 			if (ModelState.IsValid)
             {

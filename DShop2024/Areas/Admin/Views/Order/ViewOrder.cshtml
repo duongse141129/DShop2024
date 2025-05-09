@@ -52,6 +52,29 @@
                         </address>
                     </div>
                 </div>
+                @if (Model.OrderCoupons.Count > 0)
+                {
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6 col-md-8">
+                            <h4>Coupon Apply</h4>
+                            <address>
+                                @foreach (var coupon in Model.OrderCoupons)
+                                {
+                                    <strong>@coupon.Coupon.CouponCode</strong>
+
+                                    <br>
+                                    <span>Coupon Name: @coupon.Coupon.CouponName</span>
+
+                                    <br>
+                                    <span>Description: @coupon.Coupon.Description</span>
+
+                                    <br>
+                                    <br />
+                                }
+                            </address>
+                        </div>
+                    </div>
+                }
                 <div class="row mb-3">
                     <div class="col-12">
                         <div class="table-responsive">

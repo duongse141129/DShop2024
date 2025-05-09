@@ -21,6 +21,7 @@
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
+                    <th>Coupon Code</th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Date Start</th>
@@ -35,6 +36,7 @@
                 @foreach (var item in Model)
                 {
                     <tr>
+                        <td>@item.CouponCode</td>
                         <td>@item.CouponName</td>
                         <td>@item.Description</td>
                         <td>@item.DateStart.ToString("dd-MM-yyyy")</td>

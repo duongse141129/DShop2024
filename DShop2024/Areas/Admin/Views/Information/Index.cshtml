@@ -2,43 +2,7 @@
 @{
     ViewData["title"] = " Info shop";
 }
-<h4>Infomation shop</h4>
-
-@* <table class="table">
-    <thead>
-        <tr>
-
-            <th>Name</th>
-            <th>Description</th>
-            <th>Map</th>
-            <th>Logo</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Youtube</th>
-            <th>Facebook</th>
-            <th>Action</th>
-
-        </tr>
-    </thead>
-    <tbody>
-            <tr>
-                <td>@Model.ShopName</td>
-                <td>@Html.Raw(Model.Description)</td>
-                <td>@Html.Raw(@Model.Map)</td>
-                <td><img src="~/media/Logo/@Model.LogoImg" width="120" height="120" /></td>             
-                <td>@Model.Phone</td>
-                <td>@Model.Email</td>
-                <td>
-                @Html.Raw(@Model.PluginYoutube)
-                   
-                </td>
-                <td>@Html.Raw(@Model.PluginFacebook)</td>
-                <td>
-                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Information" asp-route-Id="@Model.Id">Edit</a>
-                </td>
-            </tr>
-    </tbody>
-</table> *@
+<h2>Infomation shop</h2>
 
 
 <table class="table table-bordered table-striped">
@@ -55,11 +19,13 @@
 		</tr>
 		<tr>
 			<th>Description</th>
-			<td>@Model.Description</td>
+			<td>@Html.Raw(@Model.Description)</td>
 		</tr>
 		<tr>
 			<th>Map</th>
-			<td>@Html.Raw(Model.Map)</td>
+			<td>
+				@Html.Raw(@Model.Map)
+			</td>
 		</tr>
 		<tr>
 			<th>Logo</th>

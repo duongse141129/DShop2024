@@ -116,7 +116,10 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(fAQModel);
         }
 
-        // GET: Admin/FAQModels/Delete/5
+
+
+        // POST: Admin/FAQModels/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,16 +133,6 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
-            return View(fAQModel);
-        }
-
-        // POST: Admin/FAQModels/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var fAQModel = await _context.FAQs.FindAsync(id);
             if (fAQModel != null)
             {
                 _context.FAQs.Remove(fAQModel);

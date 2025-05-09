@@ -1,12 +1,12 @@
-﻿@if (TempData["success"] != null)
+﻿@if (TempData[DShopConst.TEMPDATA_SUCCESS] != null)
 {
     <div class="alert alert-success notification">
-        @TempData["success"];
+        @TempData[DShopConst.TEMPDATA_SUCCESS];
     </div>
 }
-@if (TempData["error"] != null)
+@if (TempData[DShopConst.TEMPDATA_ERROR] != null)
 {
     <div class="alert alert-dangerer notification">
-        @TempData["error"];
+        @TempData[DShopConst.TEMPDATA_ERROR];
     </div>
 }

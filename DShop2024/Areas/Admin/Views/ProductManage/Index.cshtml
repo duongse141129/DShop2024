@@ -50,9 +50,12 @@
                         <td>@item.Category.CategoryName</td>
                         <td>@item.Brand.BrandName</td>
                         <td>
-                            <a asp-action="Detail" class="btn btn-primary btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Detail</a>
-                            <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Edit</a>
-                            <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="ProductManage" asp-route-Id="@item.Id">Delete</a>
+                            <div class="btn-group">
+                                <a asp-action="Detail" class="btn btn-info btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Detail</a>
+                                <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Edit</a>
+                                <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="ProductManage" asp-route-Id="@item.Id">Delete</a>
+                            </div>
+                          
                         </td>
 
                     </tr>
@@ -103,7 +106,7 @@ else
                     <td>@item.Category.CategoryName</td>
                     <td>@item.Brand.BrandName</td>
                     <td>
-                        <a asp-action="Detail" class="btn btn-primary btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Detail</a>
+                        <a asp-action="Detail" class="btn btn-info btn-sm" asp-controller="ProductManage" asp-route-Id="@item.Id">Detail</a>
                     </td>
 
                 </tr>

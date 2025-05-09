@@ -1,10 +1,9 @@
 ﻿@using DShop2024.EnumData
 @model IEnumerable<ProductModel>
 
-@* <div class="col-sm-3">
-	@Html.Partial("_SidebarPartial")
-	
-</div> *@
+@{
+	ViewData["Title"] = "Home Page";
+}
 
 <partial name="_SliderPartial" /> 
 <div class="col-sm-3">
@@ -12,65 +11,10 @@
 </div> 
 
 <div class="col-sm-9 padding-right">
-	<div class="container">
-		<form asp-action="Index" asp-controller="Home">
-		<div class="row">
-			<div class="col-md-2">
-				<div class="search_box pull-right">
-					<input type="text" placeholder="Search" name="searchName" value="@( ViewBag.searchName!= "" ? ViewBag.searchName  : "" )" />
-					button class="btn btn-warning btn-locgia" type="submit">Search</button>
-				</div>
-			</div>
-			<div class="col-2">
-				<p>Laptop pocket(INCH)</p>
-					@foreach (var item in ViewBag.laptopPocketTypes)
-					{
-						<input type="radio" id="@item" name="laptopPocket" value="@item" @(ViewBag.laptopPocket == item ? "checked" : "") />
-						@if(item == "")
-						{
-							<label for="@item">None</label>
-						}
-						else
-						{
-							<label for="@item">@item</label>
-						}
-						
-					}
-			</div>
-			<div class="col-md-2">
-					
-					<input id="waterResistance" type="checkbox" name="waterResistance" @(ViewBag.waterResistance != "" ? "checked" : "") />
-					<label for="waterResistance">WaterResistance</label><br>
-					
-					<input id="USBChargingPort" type="checkbox" name="USBChargingPort" @(ViewBag.USBChargingPort != "" ? "checked" : "") />
-					<label for="USBChargingPort">USBChargingPort</label><br>
-			</div>
 
-	
-			<div class="col-md-2">
-				
-				<h5>Sort by</h5>
-					<select class="form-control" name="sortBy" asp-items="ViewBag.sortBy">
-						<option>------</option>
-					</select>
-			</div>
-
-		</div>
-		<div class="row">
-				<div class="col-md-5">
-					<input type="hidden" name="startprice" id="startprice">
-					<input type="hidden" name="endPrice" id="endPrice">
-					<p>
-						<input type="text" name="amount" id="amount" readonly="" style="border:0; color:#f6931f; font-weight:bold;" width="400">
-					</p>
-
-					<div id="slider-range"></div>
-					<button type="submit" name="locgia" class="btn btn-danger btn-locgia">Filter</button>
-
-				</div>
-		</div>
-		</form>
-	</div>
+	<form asp-action="Index" asp-controller="Home">
+		<partial name="_FilterProductsPartial" />
+	</form>
 
 	<div class="features_items">
 		<!--features_items-->

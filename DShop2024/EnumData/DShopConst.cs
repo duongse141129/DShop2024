@@ -18,5 +18,7 @@
 		public static string NEW_CUSTOMER = "NEW CUSTOMER";
 
 		public static string LOGIN_WEBSITE = "WEBSITE";
+
+		public static string DEFAULT_SHIPPING_COST = "50000";
 	}
 }

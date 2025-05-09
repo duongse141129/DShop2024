@@ -15,31 +15,22 @@
 		<div class="row">
 			<div class="col-sm-9">
 				<div class="blog-post-area">
+					<h1>@Model.ProductDetail.ProductName</h1>
 					<h2 class="title text-center">Detail Product</h2>
-					<div class="single-blog-post">
-						<h3>@Model.ProductDetail.ProductName</h3>
-						<div class="post-meta">
-							<ul>
-								<li><i class="fa fa-user"></i> Mac Doe</li>
-								<li><i class="fa fa-clock-o"></i> 1:33 pm</li>
-								<li><i class="fa fa-calendar"></i> DEC 5, 2013</li>
-							</ul>
-							<span>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star"></i>
-								<i class="fa fa-star-half-o"></i>
-							</span>
-						</div>
-						<a href="">
-							<img src="~/media/products/@Model.ProductDetail.Image" alt="">
-						</a>
+					<div class="single-blog-post">					
+							<a>
+								<img src="~/media/products/@Model.ProductDetail.Image" alt="">
+							</a>
+							
+
+						<h2 class="title text-center">Description Product</h2>
 						<dl class="row">
 							<dd class="col-sm-10">
+								
 								@Html.Raw(@Model.ProductDetail.Description)
 							</dd>
 						</dl>
+						<h2 class="title text-center">Item specifics</h2>
 						<table class="table table-bordered table-striped">
 							<thead class="thead-dark">
 								<tr>
@@ -107,25 +98,26 @@
 					</div>
 				</div><!--/blog-post-area-->
 
+				<p>
+					Average point: @Model.Point
+				</p>
 				<div class="rating-area">
 					<ul class="ratings">
 						<li class="rate-this">Rate this item:</li>
 						<li>
-							<i class="fa fa-star color"></i>
-							<i class="fa fa-star color"></i>
-							<i class="fa fa-star color"></i>
-							<i class="fa fa-star"></i>
-							<i class="fa fa-star"></i>
+							<i class="fa fa-star @( Model.Point >= 1 ? "color" : "")"></i>
+							<i class="fa fa-star @( Model.Point >= 2 ? "color" : "")"></i>
+							<i class="fa fa-star @( Model.Point >= 3 ? "color" : "")"></i>
+							<i class="fa fa-star @( Model.Point >= 4 ? "color" : "")"></i>
+							<i class="fa fa-star @( Model.Point >= 5 ? "color" : "")"></i>
 						</li>
 						<li class="color">(@Model.listRating.Count() votes)</li>
 					</ul>
-					<p>
-						Average point: @Model.Point
-					</p>
+
 				</div><!--/rating-area-->
 
-				<div class="response-area">
-					<h2>FEEDBACK</h2>
+				<h2 class="title text-center">FEEDBACK</h2>
+				<div class="response-area">					
 					<ul class="media-list">
 						@foreach (var item in Model.listRating)
 						{
@@ -149,7 +141,7 @@
 				</div><!--/Response-area-->
 				@if (ViewBag.pagingmodel != null)
 				{
-					<partial name="_PagingXTL" model="@ViewBag.pagingmodel" />
+					<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 				}
 				
 			</div>

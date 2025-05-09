@@ -1,18 +1,12 @@
 using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using System;
 using System.Diagnostics;
-using System.Drawing.Printing;
-using System.Linq;
-using static Azure.Core.HttpHeader;
+
 
 namespace DShop2024.Controllers
 {
@@ -37,7 +31,7 @@ namespace DShop2024.Controllers
                                                  string searchName = "",
                                             string sortBy = "", string startprice = "", string endPrice = "",
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "", 
-                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 9)
+                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 6)
         {
             ViewBag.laptopPocketTypes = Product.laptopPocketTypes;
 
@@ -128,8 +122,8 @@ namespace DShop2024.Controllers
 
             int totalProduct = listProduct.Count();
             if (pagesSize <= 0)
-                pagesSize = 9;
-            int countPages = (int)Math.Ceiling((double)totalProduct / 9);
+                pagesSize = 6;
+            int countPages = (int)Math.Ceiling((double)totalProduct / 6);
 
             if (currentPage > countPages)
                 currentPage = countPages;

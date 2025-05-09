@@ -66,6 +66,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 var order = await _context.Orders.Include(o => o.User)
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
+                                                  .Include(c => c.OrderCoupons)
+                                                  .ThenInclude(c => c.Coupon)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
 
 	        

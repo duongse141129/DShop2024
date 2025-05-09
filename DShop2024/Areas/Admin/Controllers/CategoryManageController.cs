@@ -145,7 +145,10 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(categoryModel);
         }
 
-        // GET: Admin/CategoryManage/Delete/5
+
+
+        // POST: Admin/CategoryManage/Delete/5
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -160,15 +163,6 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            return View(categoryModel);
-        }
-
-        // POST: Admin/CategoryManage/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var categoryModel = await _context.Categories.FindAsync(id);
             if (categoryModel != null)
             {
                 categoryModel.Status = 0;

@@ -26,6 +26,8 @@ namespace DShop2024.Controllers
             IQueryable<OrderModel> listOrder = _context.Orders.Include(o => o.User)
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
+                                                  .Include(c => c.OrderCoupons)
+                                                  .ThenInclude(c => c.Coupon)
                                                   .Where(o => o.UserId == user.Id)
                                                   .OrderByDescending(o => o.CreatedDate);
 

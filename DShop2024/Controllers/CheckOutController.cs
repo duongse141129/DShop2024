@@ -121,7 +121,7 @@ namespace DShop2024.Controllers
 			{
 				OrderInfoModel momoPayment = new OrderInfoModel { 
 					FullName = user.UserName,
-					OrderInfo = "Thanh toán qua Momo Payment tại DShop2024",
+					OrderInfo = "Momo Payment at DShop2024",
 					Amount = amount.ToString()
 				};
 				return RedirectToAction("CreatePaymentMomo", "Payment", new { momoPayment.FullName, momoPayment.OrderInfo, momoPayment.Amount });
@@ -131,7 +131,7 @@ namespace DShop2024.Controllers
 				PaymentInformationModel vnpayPayment = new PaymentInformationModel {
 					Name = user.UserName,
 					Amount = amount,
-					OrderDescription= "Thanh toan qua Vnpay tai DShop2024",
+					OrderDescription= "Vnpay payment at DShop2024",
 					OrderType = "other"
 				};
 				return RedirectToAction("CreatePaymentUrlVnpay", "Payment", new { vnpayPayment.Name, vnpayPayment.Amount, vnpayPayment.OrderDescription, vnpayPayment.OrderType });

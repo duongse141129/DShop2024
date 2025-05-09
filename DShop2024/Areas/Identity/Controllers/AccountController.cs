@@ -88,7 +88,7 @@ namespace DShop2024.Areas.Identity.Controllers
 
                     if(user.Status == 0)
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "Account deleted ";
+                        ModelState.AddModelError("Account was deleted ");
                         return View(model);
                     }
 
@@ -119,7 +119,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 }
                 if (result.IsNotAllowed)
                 {
-                    TempData[DShopConst.TEMPDATA_ERROR] = "Email isn't verified";
+                    ModelState.AddModelError("Email isn't verified");
                     return View(model);
                 }
                 else

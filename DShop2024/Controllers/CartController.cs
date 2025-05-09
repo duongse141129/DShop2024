@@ -21,7 +21,7 @@ namespace DShop2024.Controllers
 			_dataContext = context;
             _userManager = userManager;
         }
-		public IActionResult Index()
+		public  IActionResult Index()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
@@ -32,6 +32,7 @@ namespace DShop2024.Controllers
 			{
 				shippingPrice = info.ShippingCost;
 			}
+
 			decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
 			decimal sumCouponValue = coupouns.Sum(s => s.Value);
 			decimal grandTotal = sumPirceItemsCart + shippingPrice - sumCouponValue;
@@ -52,9 +53,26 @@ namespace DShop2024.Controllers
 			return View(cartItemViewModel);
 		}
 
-		public IActionResult CheckOut()
+		public async Task GetValueByPercentCoupon()
 		{
-			return View("~/Views/CheckOut/Index.cshtml");
+			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+			if (coupouns.Count > 0)
+			{
+				foreach (CouponModel couponModel in coupouns)
+				{
+					var coupon = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == couponModel.Id);
+					if (coupon.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
+					{
+						decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
+						var val = coupon.Value * subtotal / 100000;
+						var CellVal = Math.Ceiling(val);
+						couponModel.Value = CellVal * 1000;					
+					}
+				}
+				HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);
+			}
+
 		}
 
 		public async Task<ActionResult> AddToCart(int Id) {
@@ -82,7 +100,7 @@ namespace DShop2024.Controllers
 				
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-
+			await GetValueByPercentCoupon();
 			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
 		
@@ -106,11 +124,12 @@ namespace DShop2024.Controllers
 				++cartItem.Quantity;
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+			await GetValueByPercentCoupon();
 			return RedirectToAction("Index");
 
 		}
 
-		public ActionResult Decrease(int Id)
+		public async Task<ActionResult> Decrease(int Id)
 		{
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
@@ -128,10 +147,11 @@ namespace DShop2024.Controllers
 				HttpContext.Session.Remove(DShopConst.CART_KEY);
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+			await GetValueByPercentCoupon();
 			return RedirectToAction("Index");
 		}
 
-		public ActionResult Remove(int Id)
+		public async Task<ActionResult> Remove(int Id)
 		{
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
@@ -142,6 +162,7 @@ namespace DShop2024.Controllers
 				HttpContext.Session.Remove(DShopConst.CART_KEY);
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+			await GetValueByPercentCoupon();
 			return RedirectToAction("Index");
 		}
 

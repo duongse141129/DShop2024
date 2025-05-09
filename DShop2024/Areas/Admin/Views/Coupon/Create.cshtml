@@ -37,8 +37,8 @@
         </div>
 
         <div class="form-group">
-            <label asp-for="Value" class="control-label"></label>
-            <input asp-for="Value" min="0" type="number" class="form-control" />
+            <label id="labelValue" class="control-label">Value (%)</label>
+            <input asp-for="Value" id="valuecoupon" min="0" type="number" class="form-control" />
             <span asp-validation-for="Value" class="text-danger"></span>
         </div>
 
@@ -50,7 +50,6 @@
         <div class="form-group">
             <label>Promotion</label>
             <select asp-for="PromotionId" class="form-control" asp-items="ViewBag.listPromotion">
-                <option>--Choose a promotion</option>
             </select>
             <span asp-validation-for="PromotionId" class="text-danger" />
         </div>
@@ -64,3 +63,49 @@
         <a asp-action="Index" >Back to list</a>
     </p>
 </div>
+
+@section Scripts{
+
+  @*   <script type="text/javascript">
+        $(document).ready(function () {
+            $('#PromotionId').on('change', function () {
+                var promation = $(this).val();
+                var fs = 50000;
+                if (promation == 3) {
+                    $('#valuecoupon').val(fs);
+                    $('#valuecoupon').attr('disabled',"");          
+                }
+                return false;
+            });
+        });
+    </script> *@
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#PromotionId').on('change', function () {
+                var promation = $("#PromotionId option:selected").text();
+                if (promation == "FREE SHIPPING") {
+                    $('#valuecoupon').val("50000");
+                    $('#valuecoupon').attr('readonly', "");
+                    $('#labelValue').text("Value");
+                }
+                else if (promation == "PERCENTAGE DISCOUNT") {
+                    $('#valuecoupon').removeAttr('readonly');
+                    $('#valuecoupon').attr('min', "1");
+                    $('#valuecoupon').attr('max', "100");
+                    $('#valuecoupon').attr('step', "1");
+                    $('#valuecoupon').val("");
+                    $('#labelValue').text("Value (%)");
+                    
+                }
+                else if (promation == "SUB SUMTOTAL DISCOUNT") {
+                    $('#valuecoupon').removeAttr('readonly');
+                    $('#valuecoupon').attr('min', "1000");
+                    $('#valuecoupon').attr('step', "1000");
+                    $('#valuecoupon').val("");
+                    $('#labelValue').text("Value VND");
+                }
+                return false;
+            });
+        });
+    </script>
+}
