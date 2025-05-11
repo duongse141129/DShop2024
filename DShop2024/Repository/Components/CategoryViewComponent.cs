@@ -15,7 +15,7 @@ namespace DShop2024.Repository.Components
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
 			var categories = await _dataContext.Categories
-								.Where(p => p.Status == 1)
+								.Where(p => p.Status != 0)
 								.ToListAsync();
 
 			return View(categories);

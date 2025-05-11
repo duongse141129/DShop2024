@@ -155,8 +155,7 @@ namespace DShop2024.Controllers
 
             ViewBag.pagingModel = pagingModel;
 
-
-            return View(products);
+			return View(products);
         }
         #endregion
 

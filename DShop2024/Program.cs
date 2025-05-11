@@ -13,6 +13,8 @@ using DShop2024.Services;
 using DShop2024.Hubs;
 using DShop2024.AutoMapper;
 using Microsoft.Extensions.FileProviders;
+using System.Security.Policy;
+using System.Reflection.Metadata;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -129,15 +131,19 @@ app.MapControllerRoute(
     name: "category",
     pattern: "{area:exists}/{controller=ProductManage}/{action=Index}/{id?}");
 
-app.MapControllerRoute(
-    name: "Areas",
-    pattern: "/category/{Slug?}",
-    defaults: new { controller = "Category", action = "Index" });
+
 
 app.MapControllerRoute(
     name: "Areas",
-    pattern: "/brand/{Slug?}",
-    defaults: new { controller = "Brand", action = "Index" });
+    pattern: "/category/{CategorySlug?}",
+    defaults: new { controller = "Product", action = "Index" });
+
+app.MapControllerRoute(
+    name: "Areas",
+    pattern: "/brand/{BrandSlug?}",
+    defaults: new { controller = "Product", action = "Index"});
+
+
 
 app.MapControllerRoute(
     name: "default",

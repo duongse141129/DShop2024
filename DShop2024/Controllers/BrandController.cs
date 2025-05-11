@@ -14,14 +14,17 @@ namespace DShop2024.Controllers
 		}
 		public async Task<IActionResult> Index(string slug = "")
 		{
+			return RedirectToAction("Index", "Product", new { BrandSlug = slug });
+
 			BrandModel brand = await _dataContext.Brands
-										.Where(c => c.Status == 1)
+										.Where(c => c.Status != 0)
 										.Where(c => c.Slug == slug)
 										.FirstOrDefaultAsync();
 			if (brand == null)
 			{
 				return RedirectToAction("Index");
 			}
+
 
 			var productByBrand = await _dataContext.Products.Where(p => p.BrandId == brand.Id).ToListAsync();
 			productByBrand.OrderByDescending(c => c.Id);

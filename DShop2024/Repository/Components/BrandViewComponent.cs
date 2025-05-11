@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DShop2024.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Repository.Components
@@ -14,7 +15,22 @@ namespace DShop2024.Repository.Components
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
 			var brands = await _dataContext.Brands
-								.Where(p => p.Status == 1)
+								.Where(b => b.Status != 0)
+								.Join(_dataContext.Products.Where(p => p.Status != 0),
+								b => b.Id,
+								p => p.BrandId,
+								(b, p) => new { b, p })
+								.GroupBy(x => new
+								{
+									x.b.Slug,
+									x.b.BrandName
+								})
+								.Select( g => new BrandViewModel
+								{
+									Slug = g.Key.Slug, 
+									BrandName = g.Key.BrandName,
+									CountProduct = g.Count()
+								})
 								.ToListAsync();
 
 			return View(brands);

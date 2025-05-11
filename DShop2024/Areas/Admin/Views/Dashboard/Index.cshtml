@@ -32,21 +32,48 @@
                     <p>Lọc theo</p>
                     <p>
                         <select class="form-control filter-date">
-                            <option value="last_month">Tháng trước</option>
-                            <option value="this_month">Tháng này</option>
-                            <option selected value="this_year">Năm nay</option>
-                            <option value="last_year">Năm trước</option>
+                            <option value="last_month">Last month</option>
+                            <option value="this_month">This month</option>
+                            <option selected value="this_year">This year</option>
+                            <option value="last_year">Last year</option>
                         </select>
                     </p>
                 </div>
             </div>
+
+            <h1>Line Chart: </h1>
             <div id="myfirstchart" style="height: 350px;"></div>
+
+            <h1>Bar Chart:</h1>
             <div class="row">
-                <h1>Donut Chart of the number of products sold by brand </h1>
+                <div class="col-md-4">
+                    <p>
+                        <select class="form-control filter-barchart">
+                            <option selected value="this_year">This year</option>
+                            <option value="last_year">Last year</option>
+                        </select>
+                    </p>
+                </div>
+            </div>
+            <div id="mybarchart" style="height: 350px;"></div>
+
+
+          @*   legend
+              
+          <div class="grid-body no-border">
+                <div id="visitor_legend" class="bar-chart-legend"></div>
+                <div id="visitors_bar_chart" style="height:250px"></div> 
+                
+            </div> *@
+
+
+            <div class="row">
+                <h1>Donut Chart: Number of products sold by brand </h1>
                 <div id="graphBrand" style="width: 350px;"> </div>
-                <h1>Donut Chart of the number of products sold by category</h1>
+                <h1>Donut Chart: Number of products sold by category</h1>
                 <div id="graphCategories" style="width: 350px;"> </div>
 
+                <h1>Best seller product</h1>
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
@@ -105,9 +132,7 @@
                 parseTime: false,
                 data: chartData,
                 xkey: 'date',
-
                 ykeys: ['revenue', 'profit', 'orders', 'quantitysold'],
-
                 labels: ['Doanh thu','lợi nhuận' ,'Đơn hàng', 'Số lượng bán ra']
             });
             //filter all data chart
@@ -196,6 +221,63 @@
                     chartB.setData(data);
                 }
             });
+
+        });
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var chartData = [];
+            var chart = new Morris.Bar({
+                element: 'mybarchart',
+                data: chartData,
+                xkey: 'month',
+                ykeys: ['stockIn', 'stockOut'],
+                labels: ['nhập kho', 'xuất kho'],
+                barColors: ['#1fbba6', '#f8aa33', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+                gridTextColor: '#666',
+                grid: true,
+                barOpacity: 0.8
+            });
+
+
+
+
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartStock", "Dashboard")",
+                success: function (data) {
+                    chart.setData(data);
+                }
+            });
+
+
+            // var browsersChart = chart;
+
+            // // Legend for Bar chart
+            // browsersChart.options.labels.forEach(function (label, i) {
+            //     var legendItem = $('<span class="legend-item"></span>').text(label).prepend('<span class="legend-color">&nbsp;</span>');
+            //     legendItem.find('span')
+            //         .css('backgroundColor', browsersChart.options.barColors[i]);
+            //     $('#visitor_legend').append(legendItem)
+            // });
+
+            //submit filter date in chart
+            $(".filter-barchart").change(function () {
+                var filterbarchart = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetChartStockFilter", "Dashboard")",
+                    data: { filterbarchart: filterbarchart },
+                    success: function (data) {
+                        chart.setData(data);
+                    }
+                });
+            })
+
+
 
         });
 

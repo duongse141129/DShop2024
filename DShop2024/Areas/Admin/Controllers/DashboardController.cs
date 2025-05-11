@@ -26,11 +26,11 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var count_product = _dataContext.Products.Count();
-            var count_order = _dataContext.Orders.Count();
-            var count_category = _dataContext.Categories.Count();
-            var count_brand = _dataContext.Brands.Count();
-            var count_user = _dataContext.Users.Count();
+            var count_product = _dataContext.Products.Where(p => p.Status != 0).Count();
+            var count_order = _dataContext.Orders.Where(p => p.Status != 0).Count();
+            var count_category = _dataContext.Categories.Where(p => p.Status != 0).Count();
+            var count_brand = _dataContext.Brands.Where(p => p.Status != 0).Count();
+            var count_user = _dataContext.Users.Where(p => p.Status != 0).Count();
             ViewBag.CountProduct = count_product;
             ViewBag.CountOrder = count_order;
             ViewBag.CountCategory = count_category;
@@ -85,7 +85,6 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NoContent();
             }
 
-
             var chartDataRangeDay = await _dataContext.Orders
                             .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
                             .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
@@ -111,8 +110,6 @@ namespace DShop2024.Areas.Admin.Controllers
             var today = DateTime.Today;
             var month = DateTime.Today.Month;
             var year = DateTime.Today.Year;
-
-
             if (filterdate == "last_month")
             {
                 chartData = await getDataByMonth(month-1, year);
@@ -281,6 +278,77 @@ namespace DShop2024.Areas.Admin.Controllers
             }
             return Json(productsSoldByCategory);
         }
+
+        [HttpPost]
+        [Route("GetChartStock")]
+        public async Task<IActionResult> GetChartStock()
+        {
+            List<StockViewModel> stockViewModels = new List<StockViewModel> ();
+            int year = DateTime.Today.Year;
+            int month = DateTime.Today.Month;
+            for (int i = 1; i <= month; i++)
+            {
+
+                var stockIn = await _dataContext.ReceivingStocks
+                            .Where(r => r.DateReceive.Year == year && r.DateReceive.Month == i && r.Status != 0)
+                            .SumAsync(x => x.Quantity);
+
+                var stockOut = await _dataContext.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                                        .SelectMany(o => o.OrderDetails)
+                                        .Where(od => od.Status != 0)
+                                        .SumAsync(od => (int?)od.Quantity) ?? 0;
+
+                StockViewModel stockViewModel = new StockViewModel 
+                { 
+                    month = i,
+                    stockIn = stockIn,
+                    stockOut = stockOut,
+                };
+                stockViewModels.Add(stockViewModel);
+            }
+            return Json(stockViewModels.OrderBy(s => s.month));
+        }
+
+        [HttpPost]
+        [Route("GetChartStockFilter")]
+        public async Task<IActionResult> GetChartStockFilter(string filterbarchart)
+        {
+            List<StockViewModel> stockViewModels = new List<StockViewModel>();
+            int year = DateTime.Today.Year;
+            int month = DateTime.Today.Month;
+            if(filterbarchart == "this_year")
+            {
+                year = DateTime.Today.Year;
+            }
+            if(filterbarchart == "last_year")
+            {
+                year = year - 1;
+                month = 12;
+            }
+
+            for (int i = 1; i <= month; i++)
+            {
+
+                var stockIn = await _dataContext.ReceivingStocks
+                            .Where(r => r.DateReceive.Year == year && r.DateReceive.Month == i && r.Status != 0)
+                            .SumAsync(x => x.Quantity);
+
+                var stockOut = await _dataContext.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                                        .SelectMany(o => o.OrderDetails)
+                                        .Where(od => od.Status != 0)
+                                        .SumAsync(od => (int?)od.Quantity) ?? 0;
+
+                StockViewModel stockViewModel = new StockViewModel
+                {
+                    month = i,
+                    stockIn = stockIn,
+                    stockOut = stockOut,
+                };
+                stockViewModels.Add(stockViewModel);
+            }
+            return Json(stockViewModels.OrderBy(s => s.month));
+        }
+
 
 
     }

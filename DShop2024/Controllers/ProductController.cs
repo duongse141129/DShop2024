@@ -7,10 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System.Drawing.Printing;
-using System.Security.Cryptography;
-using static DShop2024.EnumData.Product;
-
 namespace DShop2024.Controllers
 {
 	public class ProductController : Controller
@@ -181,14 +177,13 @@ namespace DShop2024.Controllers
 					return NotFound();
 				}
 
-
-
-				var relatedProducts = await _dataContext.Products
+				List<ProductModel> relatedProducts = await _dataContext.Products
 										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
+										.Include (p => p.Brand)
+										.Include(p => p.Category)
 										.Take(3)
 										.ToListAsync();
 				ViewBag.relatedProducts = relatedProducts;
-
 
 				var rvproduct = Request.Cookies["RecentlyViewedProducts"];
 				List<ProductModel> recentlyViewedProducts;
@@ -200,7 +195,6 @@ namespace DShop2024.Controllers
 				{
 					recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductModel>>(rvproduct);
 				}
-
 
 				var checkAdd = recentlyViewedProducts.Any(p => p.Id == productById.Id);
 				if (!checkAdd)
@@ -226,7 +220,7 @@ namespace DShop2024.Controllers
 				var user = await _userManager.GetUserAsync(this.User);
 				IQueryable<RatingModel> listRating = _dataContext.Ratings
 										.Where(p => p.ProductId == Id)
-										.Where(r => r.Status == 1)
+										.Where(r => r.Status != 0)
 										.Include(c => c.User);
 
 

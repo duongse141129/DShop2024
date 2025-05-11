@@ -249,19 +249,19 @@
 					<div class="item active">
 						@if (ViewBag.relatedProducts != null)
 						{
-							@foreach (var relatedProducts in ViewBag.relatedProducts as IEnumerable<ProductModel>)
+							@foreach (var relatedProduct in ViewBag.relatedProducts as IEnumerable<ProductModel>)
 							{
 								<div class="col-sm-4">
 									<div class="product-image-wrapper">
 										<div class="single-products">
 
 											<div class="productinfo text-center">
-												<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProducts.Id">
-													<img src="~/media/products/@relatedProducts.Image" alt="@relatedProducts.ProductName" width="100%" />
-													<h2>$@relatedProducts.Price.ToString("#,##0 VND")</h2>
-													<p>@relatedProducts.ProductName</p>
-													<p>Category: @relatedProducts.Category.CategoryName</p>
-													<p>Brand: @relatedProducts.Brand.BrandName</p>
+												<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProduct.Id">
+													<img src="~/media/products/@relatedProduct.Image" alt="@relatedProduct.ProductName" width="100%" />
+													<h2>@relatedProduct.Price.ToString("#,##0 VND")</h2>
+													<p>@relatedProduct.ProductName</p>
+													<p>Category: @relatedProduct.Category.CategoryName</p>
+													<p>Brand: @relatedProduct.Brand.BrandName</p>
 												</a>
 											</div>
 
