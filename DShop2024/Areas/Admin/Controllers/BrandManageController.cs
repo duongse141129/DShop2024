@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using DShop2024.EnumData;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -16,10 +17,12 @@ namespace DShop2024.Areas.Admin.Controllers
 	public class BrandManageController : Controller
     {
         private readonly DShopContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public BrandManageController(DShopContext context)
+        public BrandManageController(DShopContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Admin/BrandManage
@@ -41,7 +44,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BrandName,Description")] BrandModel brandModel)
+        public async Task<IActionResult> Create([Bind("BrandName,Description,ImageUpload")] BrandModel brandModel)
         {
             if (ModelState.IsValid)
             {
@@ -52,6 +55,19 @@ namespace DShop2024.Areas.Admin.Controllers
                     TempData[DShopConst.TEMPDATA_ERROR] = "This brand already exists.";
                     return View(brandModel);
 				}
+
+                if (brandModel.ImageUpload != null)
+                {
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/brands");
+                    string imageName = Guid.NewGuid().ToString() + "_" + brandModel.ImageUpload.FileName;
+                    string filePath = Path.Combine(uploadsDir, imageName);
+
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
+                    await brandModel.ImageUpload.CopyToAsync(fs);
+                    fs.Close();
+                    brandModel.Image = imageName;
+
+                }
                 brandModel.Status =1;
 
                 try
@@ -90,7 +106,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandName,Description")] BrandModel brandModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,BrandName,Description,ImageUpload")] BrandModel brandModel)
         {
             if (id != brandModel.Id)
             {
@@ -109,7 +125,35 @@ namespace DShop2024.Areas.Admin.Controllers
                         return View(brandModel);
 					}
 
-					exitedBrand.BrandName = brandModel.BrandName;
+                    if (brandModel.ImageUpload != null)
+                    {
+
+                        string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/brands");
+                        string imageName = Guid.NewGuid().ToString() + "_" + brandModel.ImageUpload.FileName;
+                        string filePath = Path.Combine(uploadsDir, imageName);
+
+                        string oldFilePath = Path.Combine(uploadsDir, exitedBrand.Image);
+                        try
+                        {
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+							TempData[DShopConst.TEMPDATA_ERROR] = "update brand fail"+ ex.Message;
+							return View(brandModel);
+						}
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                        await brandModel.ImageUpload.CopyToAsync(fs);
+                        fs.Close();
+                        exitedBrand.Image = imageName;
+
+                    }
+
+                    exitedBrand.BrandName = brandModel.BrandName;
 					exitedBrand.Description = brandModel.Description;
 					exitedBrand.Slug = brandModel.Slug;
 					exitedBrand.Status = 1;

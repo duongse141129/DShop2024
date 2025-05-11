@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using DShop2024.EnumData;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -16,10 +17,12 @@ namespace DShop2024.Areas.Admin.Controllers
 	public class CategoryManageController : Controller
     {
         private readonly DShopContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CategoryManageController(DShopContext context)
+        public CategoryManageController(DShopContext context , IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Admin/CategoryManage
@@ -58,7 +61,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CategoryName,Description,Slug")] CategoryModel categoryModel)
+        public async Task<IActionResult> Create([Bind("CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
             
             
@@ -70,6 +73,19 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("", "This category already exists");
                     return View(categoryModel);
+                }
+
+                if (categoryModel.ImageUpload != null)
+                {
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/categories");
+                    string imageName = Guid.NewGuid().ToString() + "_" + categoryModel.ImageUpload.FileName;
+                    string filePath = Path.Combine(uploadsDir, imageName);
+
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
+                    await categoryModel.ImageUpload.CopyToAsync(fs);
+                    fs.Close();
+                    categoryModel.Image = imageName;
+
                 }
                 categoryModel.Status = 1;
 
@@ -101,7 +117,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryName,Description")] CategoryModel categoryModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
             if (id != categoryModel.Id)
             {
@@ -120,7 +136,34 @@ namespace DShop2024.Areas.Admin.Controllers
 						return View(categoryModel);
 					}
 
-					exitedCategory.CategoryName = categoryModel.CategoryName;
+                    if (categoryModel.ImageUpload != null)
+                    {
+
+                        string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/categories");
+                        string imageName = Guid.NewGuid().ToString() + "_" + categoryModel.ImageUpload.FileName;
+                        string filePath = Path.Combine(uploadsDir, imageName);
+
+                        string oldFilePath = Path.Combine(uploadsDir, exitedCategory.Image);
+                        try
+                        {
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            ModelState.AddModelError("", "An error occurred while deleting the product image");
+                        }
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                        await categoryModel.ImageUpload.CopyToAsync(fs);
+                        fs.Close();
+                        exitedCategory.Image = imageName;
+
+                    }
+
+                    exitedCategory.CategoryName = categoryModel.CategoryName;
 					exitedCategory.Description = categoryModel.Description;
 					exitedCategory.Slug = categoryModel.Slug;
 					exitedCategory.Status = 1;

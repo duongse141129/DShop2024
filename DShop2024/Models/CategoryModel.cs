@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DShop2024.Repository.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DShop2024.Models
@@ -14,6 +15,12 @@ namespace DShop2024.Models
 		public string? Description { get; set; }
 		public string Slug { get; set; }
 		public int Status { get; set; }
-	
+
+		public string Image { get; set; }
+
+		[NotMapped]
+		[FileExtension]
+		public IFormFile? ImageUpload { get; set; }
+
 	}
 }

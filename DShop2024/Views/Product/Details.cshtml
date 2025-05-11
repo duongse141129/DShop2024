@@ -105,12 +105,14 @@
 
 				<div class="tab-pane fade" id="companyprofile">
 					<h4>@Model.ProductDetail.Brand.BrandName</h4>
+					<img src="~/media/brands/@Model.ProductDetail.Brand.Image" width="120" height="100" />
 					<p>@Html.Raw(@Model.ProductDetail.Brand.Description);</p>
 			
 				</div>
 
 				<div class="tab-pane fade" id="tag">
 					<h4>@Model.ProductDetail.Category.CategoryName</h4>
+					<img src="~/media/categories/@Model.ProductDetail.Category.Image" width="120" height="100" />
 					<p>@Html.Raw(@Model.ProductDetail.Category.Description);</p>
 				</div>
 			</div>

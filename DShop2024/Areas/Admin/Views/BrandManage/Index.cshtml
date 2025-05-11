@@ -18,6 +18,9 @@
                 @Html.DisplayNameFor(model => model.BrandName)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Image)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
@@ -34,6 +37,7 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.BrandName)
                 </td>
+                <td><img src="~/media/brands/@item.Image" width="120" height="100" /></td>
                 <td>
                     @Html.Raw(@item.Description)
                 </td>

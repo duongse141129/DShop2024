@@ -402,6 +402,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 var user = await GetCurrentUserAsync();
 
                 user.HomeAdress = model.HomeAdress;
+                user.PhoneNumber = model.PhoneNumber;
                 user.BirthDate = model.BirthDate;
                 user.Occupation = model.Occupation;
                 user.sex = model.Gender;

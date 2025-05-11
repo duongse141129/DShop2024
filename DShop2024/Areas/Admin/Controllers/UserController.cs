@@ -1,14 +1,12 @@
-﻿using App.Areas.Identity.Models.UserViewModels;
-using DShop2024.Areas.Admin.Models.User;
+﻿using DShop2024.Areas.Admin.Models.User;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+
 
 namespace DShop2024.Areas.Admin.Controllers
 {

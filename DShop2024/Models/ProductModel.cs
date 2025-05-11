@@ -12,8 +12,8 @@ namespace DShop2024.Models
 		[Required, MinLength(4, ErrorMessage = "Product name can not null and must > 4 characters")]
 		public string ProductName { get; set; }
 		public string Slug { get; set; }
-		public string Image { get; set; }
-		public string? Description { get; set; }
+        public string Image { get; set; }
+        public string? Description { get; set; }
 		[Required(ErrorMessage = "Product price can not null ")]
 		[Range(1000, int.MaxValue, ErrorMessage = "Price > {1}")]
 		[Column(TypeName ="decimal(8,2)")]

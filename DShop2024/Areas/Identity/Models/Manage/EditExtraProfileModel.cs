@@ -8,24 +8,26 @@ namespace App.Areas.Identity.Models.ManageViewModels
 {
   public class EditExtraProfileModel
   {
-          [Display(Name = "Tên tài khoản")]
+          [Display(Name = "User Name")]
           public string UserName { get; set; }
 
-          [Display(Name = "Địa chỉ email")]
+          [Display(Name = "Email")]
           public string UserEmail { get; set; }
-          [Display(Name = "Số điện thoại")]
+          [Display(Name = "Phone number")]
+          [DataType(DataType.PhoneNumber)]
           public string PhoneNumber { get; set; }
 
-          [Display(Name = "Địa chỉ")]
+          [Display(Name = "Address")]
           [StringLength(400)]
           public string HomeAdress { get; set; }
 
 
-          [Display(Name = "Ngày sinh")]
+          [Display(Name = "Birthday")]
           [DataType(DataType.Date)]
           public DateTime? BirthDate { get; set; }
 
           [Column(TypeName = "nvarchar")]
+          [Display(Name = "Occupation")]
           [StringLength(100)]
           public string Occupation { get; set; }
 

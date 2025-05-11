@@ -75,11 +75,6 @@
             <span asp-validation-for="USBChargingPort" class="text-danger" />
         </div>
 
-
-
-
-
-
         <div class="form-group">
             <label>Category</label>
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
@@ -125,6 +120,11 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $("#ImageUpload").change(function () {
+            readURL(this);
+        });
+    </script>
   @*   <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
     <script>
