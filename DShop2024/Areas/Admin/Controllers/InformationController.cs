@@ -25,11 +25,19 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Edit(int Id)
+		public async Task<IActionResult> Edit(int? Id)
 		{
-			InformationShopModel info = await _dataContext.InformationShops.FindAsync(Id);
+            if (Id == null)
+            {
+                return NotFound();
+            }
 
-			return View(info);
+            InformationShopModel info = await _dataContext.InformationShops.FindAsync(Id);
+            if (info == null)
+            {
+                return NotFound();
+            }
+            return View(info);
 
 		}
 
@@ -37,6 +45,11 @@ namespace DShop2024.Areas.Admin.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int Id, InformationShopModel informationShop)
 		{
+			if(Id != informationShop.Id)
+			{
+				return NotFound();
+			}
+
 			var exitedInformationShop = await _dataContext.InformationShops.FindAsync(Id);
 			if (ModelState.IsValid)
 			{

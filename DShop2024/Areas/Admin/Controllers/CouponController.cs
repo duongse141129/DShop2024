@@ -129,15 +129,19 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Not found ";
-                return RedirectToAction(nameof(Index));
-            }
+			if (id == null)
+			{
+				return NotFound();
+			}
+			var couponModel = await _context.Coupons
+				.FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+			if (couponModel == null)
+			{
+				return NotFound();
+			}
+
             try
-            {
-                var couponModel = await _context.Coupons
-                .FirstOrDefaultAsync(m => m.Id == id);
+            {            
                 couponModel.Status = 0;
                 _context.Coupons.Update(couponModel);
                 await _context.SaveChangesAsync();

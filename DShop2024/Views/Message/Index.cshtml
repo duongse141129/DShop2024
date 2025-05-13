@@ -7,41 +7,42 @@
 
 
 <div class="container">
-
-
-   
-        <div class="row p-1">
-            <div class="col-1">User</div>
-            <div class="col-5"><input name="userInput"  type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled /></div>
-        </div>
-        <div class="row p-1">
-            <div class="col-1">Message</div>
-            <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput"  maxlength="300" /></div>
-        </div>
-        <div class="row p-1">
-            <div class="col-6 text-end">
-                <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
-            </div>
-        </div>
-
-    <hr />
- 
-    <div class="row p-1">
+    <div class="scroll-container">
         <div class="col-3">
-
-             <ul id="messagesList_@UserManager.GetUserName(User)">
+            <ul id="messagesList_@UserManager.GetUserName(User)">
                 @foreach (var item in Model)
                 {
-                    <li>
-                        <span> @item.Timestamp</span>
-                        <p>[@item.RoleName][@item.UserName]: @item.ContentMessage  </p>
-                    </li>
-                    
+                    @if (item.UserName == UserManager.GetUserName(User))
+                    {
+                        <li class="text-info">
+                            <span> @item.Timestamp</span>
+                            <p>[@item.RoleName][@item.UserName]: @item.ContentMessage  </p>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <span> @item.Timestamp</span>
+                            <p>[@item.RoleName][@item.UserName]: @item.ContentMessage  </p>
+                        </li>
+                    }
                 }
+            </ul>
+        </div>
+    </div>
 
-            </ul> 
-
-
+    <hr />
+    <div class="row p-1">
+        <div class="col-1">User</div>
+        <div class="col-5"><input name="userInput" type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled /></div>
+    </div>
+    <div class="row p-1">
+        <div class="col-1">Message</div>
+        <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput" maxlength="300" /></div>
+    </div>
+    <div class="row p-1">
+        <div class="col-6 text-end">
+            <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
         </div>
     </div>
 </div>

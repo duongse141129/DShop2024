@@ -177,39 +177,61 @@ namespace DShop2024.Controllers
 
 		[Authorize]
 		[HttpPost]
-        public async Task<IActionResult> AddToWishList(int Id)
+        public async Task<IActionResult> AddToWishList(int? Id)
 		{
-			var user = await _userManager.GetUserAsync(User);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
 			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list wishlist";
-				return NoContent();
-			}
-			WishListModel wishList = new WishListModel 
-            { 
-                ProductId = Id,
-                UserId = user.Id           
-            };
-            _dataContext.WishLists.Add(wishList);
+                return Ok(new { success = false, Message = "Add to wishList fail "});
+            }
 
             try
             {
+                WishListModel wishList = new WishListModel
+                {
+                    ProductId = product.Id,
+                    UserId = user.Id
+                };
+                _dataContext.WishLists.Add(wishList);
+
                 await _dataContext.SaveChangesAsync();
                 return Ok(new {success = true, Message = "Add to wishList successful"});
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-				return NoContent();
-			}
+                return Ok(new { success = false, Message = "Add to wishList fail "+ex.Message });
+            }
 		}
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> AddToCompare(int Id)
+        public async Task<IActionResult> AddToCompare(int? Id)
 		{
-			var user = await _userManager.GetUserAsync(User);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
 
             var countConpare = await (_dataContext.Compares.Where(co => co.UserId == user.Id)).CountAsync();
             if(countConpare == 5)
@@ -224,24 +246,20 @@ namespace DShop2024.Controllers
                 TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list compare";
                 return NoContent();
 			}
-
-
-            CompareModel compare = new CompareModel
-			{
-				ProductId = Id,
-				UserId = user.Id
-			};
-			_dataContext.Compares.Add(compare);
-
 			try
 			{
-				await _dataContext.SaveChangesAsync();
+                CompareModel compare = new CompareModel
+                {
+                    ProductId = product.Id,
+                    UserId = user.Id
+                };
+                _dataContext.Compares.Add(compare);
+                await _dataContext.SaveChangesAsync();
 				return Ok(new { success = true, Message = "Add to compare successful" });
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-
-				return StatusCode(500, "Add to compare fail");
+                return Ok(new { success = false, Message = "Add to compare fail " + ex.Message });
 			}
 		}
 
@@ -275,13 +293,21 @@ namespace DShop2024.Controllers
             CompareModel compare = await _dataContext.Compares.Where( co => co.ProductId == Id )
                                                                 .Where(co => co.UserId == user.Id)
                                                                 .FirstOrDefaultAsync();
-                                                                        ;
-            
-            _dataContext.Compares.Remove(compare);
-            await _dataContext.SaveChangesAsync();
 
-            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove compare success";
-            return RedirectToAction("Compare");
+            try
+            {
+                _dataContext.Compares.Remove(compare);
+                await _dataContext.SaveChangesAsync();
+
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove compare success";
+                return RedirectToAction("Compare");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove compare fail "+ex.Message;
+                return RedirectToAction("Compare");
+            }
+
         }
 
 		[Authorize]
@@ -291,26 +317,55 @@ namespace DShop2024.Controllers
             List<CompareModel> compareProduct = await (from co in _dataContext.Compares
                                                        where co.UserId == user.Id
                                                        select co).ToListAsync();
-            foreach (var compare in compareProduct)
+
+            try
             {
-                _dataContext.Compares.Remove(compare);
-                await _dataContext.SaveChangesAsync();
+                foreach (var compare in compareProduct)
+                {
+                    _dataContext.Compares.Remove(compare);
+                    await _dataContext.SaveChangesAsync();
+                }
+
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Clear all compare success";
+                return RedirectToAction("Compare");
+            }
+            catch (Exception ex)
+            {
+
+                TempData[DShopConst.TEMPDATA_ERROR] = "Clear all compare fail "+ ex.Message;
+                return RedirectToAction("Compare");
             }
 
-            TempData[DShopConst.TEMPDATA_SUCCESS] = "Clear all compare success";
-            return RedirectToAction("Compare");
         }
 
 		[Authorize]
-		public async Task<IActionResult> DeleteWishList(int Id)
+		public async Task<IActionResult> DeleteWishList(int? Id)
         {
+            if (Id == null)
+            {
+                return NotFound();
+            }
             WishListModel wishList = await _dataContext.WishLists.FindAsync(Id);
+            if (wishList == null)
+            {
+                return NotFound();
+            }
 
-            _dataContext.WishLists.Remove(wishList);
-            await _dataContext.SaveChangesAsync();
+            try
+            {
+                _dataContext.WishLists.Remove(wishList);
+                await _dataContext.SaveChangesAsync();
 
-            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove wishList success";
-            return RedirectToAction("WishList");
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove wishList success";
+                return RedirectToAction("WishList");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove wishList fail "+ex.Message;
+                return RedirectToAction("WishList");
+            }
+
+
         }
 
     }

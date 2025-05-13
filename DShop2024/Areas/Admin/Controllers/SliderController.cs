@@ -1,9 +1,7 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Admin.Controllers
@@ -41,44 +39,62 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-         
-
-                if (banner.ImageUpload != null)
+                try
                 {
-                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/banners");
-                    string imageName = Guid.NewGuid().ToString() + "_" + banner.ImageUpload.FileName;
-                    string filePath = Path.Combine(uploadsDir, imageName);
+                    if (banner.ImageUpload != null)
+                    {
+                        string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/banners");
+                        string imageName = Guid.NewGuid().ToString() + "_" + banner.ImageUpload.FileName;
+                        string filePath = Path.Combine(uploadsDir, imageName);
 
-                    FileStream fs = new FileStream(filePath, FileMode.Create);
-                    await banner.ImageUpload.CopyToAsync(fs);
-                    fs.Close();
-                    banner.Image = imageName;
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                        await banner.ImageUpload.CopyToAsync(fs);
+                        fs.Close();
+                        banner.Image = imageName;
 
+                    }
+                    banner.Status = 1;
+                    await _context.Banners.AddAsync(banner);
+                    await _context.SaveChangesAsync();
+
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Add banner success";
+                    return RedirectToAction("Index");
                 }
-                //banner.Status = 1;
-                await _context.Banners.AddAsync(banner);
-                await _context.SaveChangesAsync();
-
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Add banner success";
-                return RedirectToAction("Index");
+                catch (Exception ex)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Add banner fail "+ex.Message;
+                    return View(banner);
+                }    
             }
-
             return View(banner);
         }
 
 
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int Id)
+        public async Task<IActionResult> Edit(int? Id)
         {
-            BannerModel banner = await _context.Banners.FindAsync(Id);
-            return View(banner);
-
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var bannerModel = await _context.Brands
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (bannerModel == null)
+            {
+                return NotFound();
+            }
+            return View(bannerModel);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, BannerModel banner)
         {
+            if (Id != banner.Id)
+            {
+                return NotFound();
+            }
 
             var exitedBanner = await _context.Banners.FindAsync(Id);
 
@@ -90,40 +106,64 @@ namespace DShop2024.Areas.Admin.Controllers
                     string imageName = Guid.NewGuid().ToString() + "_" + banner.ImageUpload.FileName;
                     string filePath = Path.Combine(uploadsDir, imageName);
 
-                    string oldFilePath = Path.Combine(uploadsDir, exitedBanner.Image);
-                    try
+                    if (exitedBanner.Image != null)
                     {
-                        if (System.IO.File.Exists(oldFilePath))
+                        string oldFilePath = Path.Combine(uploadsDir, exitedBanner.Image);
+                        try
                         {
-                            System.IO.File.Delete(oldFilePath);
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the banner image " + ex.Message;
+                            return View(exitedBanner);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError("", "An error occurred while deleting the banner image");
-                    }
+
                     FileStream fs = new FileStream(filePath, FileMode.Create);
                     await banner.ImageUpload.CopyToAsync(fs);
                     fs.Close();
                     exitedBanner.Image = imageName;
 
                 }
-                exitedBanner.BannerName = banner.BannerName;
-                exitedBanner.Description = banner.Description;
-                exitedBanner.Status = banner.Status;
-                _context.Update(exitedBanner);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    exitedBanner.BannerName = banner.BannerName;
+                    exitedBanner.Description = banner.Description;
+                    exitedBanner.Status = banner.Status;
+                    _context.Update(exitedBanner);
+                    await _context.SaveChangesAsync();
 
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Update banner success";
-                return RedirectToAction("Index");
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Update banner success";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Update banner fail "+ex.Message;
+                    return View(exitedBanner);
+                }
+
             }
 
             return View(exitedBanner);
         }
 
-        public async Task<IActionResult> Delete(int Id)
+        public async Task<IActionResult> Delete(int? Id)
         {
-            BannerModel banner = await _context.Banners.FindAsync(Id);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            BannerModel banner = await _context.Banners.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (banner == null)
+            {
+                return NotFound();
+            }
+
+            
             if (!string.Equals(banner.Image, "noname.jpg"))
             {
                 string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/banners");
@@ -138,15 +178,24 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while deleting the banner image");
+                    TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the banner image " + ex.Message;
+                    return RedirectToAction("Index");
                 }
             }
-            banner.Status = 0;
-            _context.Banners.Update(banner);
-            await _context.SaveChangesAsync();
-            TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove banner success";
-            return RedirectToAction("Index");
+            try
+            {
+                banner.Status = 0;
+                _context.Banners.Update(banner);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove banner success";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove banner fail " + ex.Message;
+                return RedirectToAction("Index");
 
+            }
         }
 
 

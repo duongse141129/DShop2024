@@ -24,6 +24,7 @@ connection.on("ReceiveMessage", function (user, message) {
     if (user == message["userName"] && message["receiver"] == null) {
         var idmessage = `messagesList_${message["userName"]}`;
         document.getElementById(idmessage).appendChild(li);
+        li.classList.add("text-info");
         li.appendChild(span);
         li.appendChild(p);
         span.textContent = `${message["timestamp"]}`;

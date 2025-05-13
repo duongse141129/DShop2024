@@ -9,6 +9,7 @@ using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using DShop2024.EnumData;
 using Microsoft.AspNetCore.Hosting;
+using System.Reflection;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -31,23 +32,6 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(await _context.Categories.Where(p => p.Status != 0).ToListAsync());
         }
 
-        // GET: Admin/CategoryManage/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var categoryModel = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (categoryModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(categoryModel);
-        }
 
         // GET: Admin/CategoryManage/Create
         [HttpGet]
@@ -89,9 +73,19 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 categoryModel.Status = 1;
 
-				_context.Add(categoryModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(categoryModel);
+                    await _context.SaveChangesAsync();
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Create category successful";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Delete category fail " + ex.Message;
+                    return View(categoryModel);
+                }
+
             }
             return View(categoryModel);
         }
@@ -104,7 +98,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var categoryModel = await _context.Categories.FindAsync(id);
+            var categoryModel = await _context.Categories.FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
             if (categoryModel == null)
             {
                 return NotFound();
@@ -143,19 +137,23 @@ namespace DShop2024.Areas.Admin.Controllers
                         string imageName = Guid.NewGuid().ToString() + "_" + categoryModel.ImageUpload.FileName;
                         string filePath = Path.Combine(uploadsDir, imageName);
 
-                        string oldFilePath = Path.Combine(uploadsDir, exitedCategory.Image);
-                        try
+                        if (exitedCategory.Image != null)
                         {
-                            if (System.IO.File.Exists(oldFilePath))
+                            string oldFilePath = Path.Combine(uploadsDir, exitedCategory.Image);
+                            try
                             {
-                                System.IO.File.Delete(oldFilePath);
-                            }
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Delete(oldFilePath);
+                                }
 
+                            }
+                            catch (Exception ex)
+                            {
+                                ModelState.AddModelError("", "An error occurred while deleting the product image");
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            ModelState.AddModelError("", "An error occurred while deleting the product image");
-                        }
+
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await categoryModel.ImageUpload.CopyToAsync(fs);
                         fs.Close();
@@ -170,9 +168,9 @@ namespace DShop2024.Areas.Admin.Controllers
 
 					_context.Update(exitedCategory);
 					await _context.SaveChangesAsync();
-
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Update category successful";
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException db)
                 {
                     if (!CategoryModelExists(categoryModel.Id))
                     {
@@ -180,7 +178,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                     else
                     {
-                        throw;
+                        TempData[DShopConst.TEMPDATA_ERROR] = "update category fail" + db.Message;
+                        return View(categoryModel);
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -200,21 +199,44 @@ namespace DShop2024.Areas.Admin.Controllers
             }
 
             var categoryModel = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
             if (categoryModel == null)
             {
                 return NotFound();
             }
 
-            if (categoryModel != null)
+            try
             {
+                if (categoryModel.Image != null)
+                {
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/categories");
+                    string oldFilePath = Path.Combine(uploadsDir, categoryModel.Image);
+                    try
+                    {
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the banner image " + ex.Message;
+                        return RedirectToAction("Index");
+                    }
+                }
+
                 categoryModel.Status = 0;
                 _context.Update(categoryModel);
                 await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Delete category fail " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool CategoryModelExists(int id)

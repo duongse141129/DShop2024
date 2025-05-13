@@ -166,7 +166,7 @@ namespace DShop2024.Controllers
 
 				var productById = await _dataContext.Products
 							.Where(p => p.Id == Id)
-							.Where(p => p.Status == 1)
+							.Where(p => p.Status != 0)
 							.Include(p => p.Brand)
 							.Include(p => p.Category)
 							.Include(p => p.Rating)

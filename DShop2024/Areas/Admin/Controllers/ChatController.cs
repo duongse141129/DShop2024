@@ -36,8 +36,20 @@ namespace DShop2024.Areas.Admin.Controllers
 
             return View(userWithRoles);
         }
+
         public async Task<IActionResult> ChatWithCustomer(string customerId)
         {
+            if (String.IsNullOrEmpty(customerId))
+            {
+                return NotFound();
+            }
+            var user = await _context.Users
+                .FirstOrDefaultAsync(m => m.Id == customerId && m.Status != 0);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
             List<MessageViewModel> messages = await (from m in _context.Messages
                                                      join u in _context.Users on m.UserId equals u.Id
                                                      join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -50,7 +62,6 @@ namespace DShop2024.Areas.Admin.Controllers
                                                          ContentMessage = m.ContentMessage,
                                                          Timestamp = m.Timestamp.ToString("MM/dd/yyyy HH:mm:ss"),
                                                      })
-                                                
                                                      .ToListAsync();
 
             var reciver = await _userManager.FindByIdAsync(customerId);

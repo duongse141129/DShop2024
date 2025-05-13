@@ -88,6 +88,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var user = new CreateUserRequest();
             return View(user);
 		}
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserRequest createUserRequest)
@@ -99,7 +100,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 AppUserModel user = new AppUserModel { 
                     UserName = createUserRequest.UserName,
                     Email = createUserRequest.Email,
-                    loginType = DShopConst.LOGIN_WEBSITE,
+                    loginType = UserEnumData.LOGIN_WEBSITE,
+                    Avatar = UserEnumData.IMAGE_DEFAULT,
                     Status = 1
                 };
                 try
@@ -143,7 +145,6 @@ namespace DShop2024.Areas.Admin.Controllers
             var user = await _userManager.FindByIdAsync(Id);
             if(user == null)
             {
-
                 return NotFound(); 
             }
 
@@ -156,14 +157,14 @@ namespace DShop2024.Areas.Admin.Controllers
 
             user.Status = 0;
             var deleteResult = await _userManager.UpdateAsync(user);
-            //_context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             if (!deleteResult.Succeeded)
             {
-                return View(DShopConst.TEMPDATA_ERROR);
+                TempData[DShopConst.TEMPDATA_ERROR] = "Delete user fail";
+                return RedirectToAction("Index");
             }
-            TempData["success"] = "Delete successful";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete successful";
             return RedirectToAction("Index");
         }
 
@@ -177,7 +178,6 @@ namespace DShop2024.Areas.Admin.Controllers
             var user = await _userManager.FindByIdAsync(Id);
             if (user == null)
             {
-
                 return NotFound();
             }
             user.Status = 1;
@@ -212,6 +212,10 @@ namespace DShop2024.Areas.Admin.Controllers
             }
 
             var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
             var chechAdmin = await _userManager.IsInRoleAsync(user, RoleName.Administrator);
             if (chechAdmin)

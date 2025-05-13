@@ -265,7 +265,7 @@ public class SendMailService : IEmailSender
 		image.ContentId = MimeUtils.GenerateMessageId();
 
 		string path = "";
-        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCoupon.html"));
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCouponPersent.html"));
         path = path.Replace("{{UserName}}", userModel.UserName);
         path = path.Replace("{{CouponName}}", couponModel.CouponName);
         path = path.Replace("{{Description}}", couponModel.Description);

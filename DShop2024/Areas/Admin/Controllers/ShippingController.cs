@@ -49,21 +49,39 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 return Ok(new {success = true, message = "Add shipping successful" });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
-                return Ok(new { success = false, message = "Add shipping fail" });
+                return Ok(new { success = false, message = "Add shipping fail "+ex.Message });
             }
         }
 
         [Route("Delete")]
-        public async Task<IActionResult> Delete(int Id)
+        public async Task<IActionResult> Delete(int? Id)
         {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+
             ShippingModel shipping = await _context.Shippings.FindAsync(Id);
-            _context.Shippings.Remove(shipping);    
-            await _context.SaveChangesAsync();
-            TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Shipping successful";
-            return RedirectToAction("Index");
+            if (shipping == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                _context.Shippings.Remove(shipping);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Shipping successful";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Shipping fail "+ex.Message;
+                return RedirectToAction("Index");
+            }
+
         }
 	}
 }

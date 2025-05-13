@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using static DShop2024.EnumData.Product;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -108,9 +107,19 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		[Authorize(Roles = RoleName.Administrator)]
 		[HttpGet]
-        public async Task<IActionResult> Edit(int Id)
+        public async Task<IActionResult> Edit(int? Id)
 		{
-			ProductModel product = await _dataContext.Products.FindAsync(Id);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
@@ -126,6 +135,10 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, UpdateProductRequest product)
         {
+            if (Id != product.Id)
+            {
+                return NotFound();
+            }
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
@@ -137,7 +150,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
                     if (product.OriginalPrice > product.Price)
                     {
-                        ModelState.AddModelError("", "original price must <=  price");
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Original price must <=  price";
                         return View(product);
                     }
 
@@ -145,7 +158,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
                     if (slug != null && product.Slug != exitedProduct.Slug)
                     {
-                        ModelState.AddModelError("", "Can't same slug");
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Can't same slug";
                         return View(product);
                     }
 
@@ -156,18 +169,22 @@ namespace DShop2024.Areas.Admin.Controllers
                         string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
                         string filePath = Path.Combine(uploadsDir, imageName);
 
-                        string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
-                        try
+                        if(exitedProduct.Image != null)
                         {
-                            if (System.IO.File.Exists(oldFilePath))
+                            string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
+                            try
                             {
-                                System.IO.File.Delete(oldFilePath);
-                            }
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Delete(oldFilePath);
+                                }
 
-                        }
-                        catch (Exception ex)
-                        {
-                            ModelState.AddModelError("", "An error occurred while deleting the product image");
+                            }
+                            catch (Exception ex)
+                            {
+                                TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the product image "+ex.Message;
+                                return View(product);
+                            }
                         }
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
@@ -185,7 +202,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while deleting the product image " + ex.Message);
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Edit product fail " + ex.Message;
+                    return View(product);
                 }
                
             }
@@ -194,9 +212,18 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 		[Authorize(Roles = RoleName.Administrator)]
-		public async Task<IActionResult> Delete(int Id)
+		public async Task<IActionResult> Delete(int? Id)
 		{
-			ProductModel product = await _dataContext.Products.FindAsync(Id);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
 			if(!string.Equals(product.Image, "noname.jpg"))
 			{
                 string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
@@ -211,14 +238,24 @@ namespace DShop2024.Areas.Admin.Controllers
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while deleting the product image");
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Remove image product fail " + ex.Message;
+                    return RedirectToAction("Index");
                 }
             }
-            product.Status = 0;
-            _dataContext.Products.Update(product);
-            await _dataContext.SaveChangesAsync();
-			TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product successful";
-            return RedirectToAction("Index");
+            try
+            {
+                product.Status = 0;
+                _dataContext.Products.Update(product);
+                await _dataContext.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product successful";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product fail "+ex.Message;
+                return RedirectToAction("Index");
+            }
+
 
         }
 
@@ -252,8 +289,19 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AddQuantity(int Id)
+        public async Task<IActionResult> AddQuantity(int? Id)
         {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var productModel = await _dataContext.Brands
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (productModel == null)
+            {
+                return NotFound();
+            }
+
             var receivingStockList = await _dataContext.ReceivingStocks.Where(x => x.ProductId == Id).Include(r => r.User).ToListAsync();
             ViewBag.receivingStockList = receivingStockList;
             ViewBag.Id = Id;
@@ -264,25 +312,36 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StoreProductQuantity(ReceivingStockModel receivingStock)
         {
-            var product = await _dataContext.Products.FindAsync(receivingStock.ProductId);
-            if(product == null)
+            var product = await _dataContext.Products.FirstOrDefaultAsync(m => m.Id == receivingStock.ProductId && m.Status != 0);
+            if (product == null)
             {
                 return NotFound();
             }
-            product.Stock += receivingStock.Quantity;
 
-            var user = await _userManager.GetUserAsync(this.User);
 
-            receivingStock.Quantity = receivingStock.Quantity;
-            receivingStock.ProductId = receivingStock.ProductId;
-            receivingStock.DateReceive = DateTime.Now;
-            receivingStock.UserId = user.Id;
-            receivingStock.Status = 1;
+            try
+            {
+                product.Stock += receivingStock.Quantity;
 
-            _dataContext.ReceivingStocks.Add(receivingStock);
-            await _dataContext.SaveChangesAsync();
-            TempData[DShopConst.TEMPDATA_SUCCESS] = $"Add quantity product: {product.ProductName} successful";
-            return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
+                var user = await _userManager.GetUserAsync(this.User);
+
+                receivingStock.Quantity = receivingStock.Quantity;
+                receivingStock.ProductId = receivingStock.ProductId;
+                receivingStock.DateReceive = DateTime.Now;
+                receivingStock.UserId = user.Id;
+                receivingStock.Status = 1;
+
+                _dataContext.ReceivingStocks.Add(receivingStock);
+                await _dataContext.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = $"Add quantity product: {product.ProductName} successful";
+                return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Add quantity product: {product.ProductName} fail "+ ex.Message;
+                return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
+            }
+
 
         }
 
@@ -294,8 +353,8 @@ namespace DShop2024.Areas.Admin.Controllers
 			}
 
 			var productModel = await _dataContext.Products.Include( b => b.Brand).Include( c => c.Category)
-				.FirstOrDefaultAsync(m => m.Id == id);
-			if (productModel == null)
+                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+            if (productModel == null)
 			{
 				return NotFound();
 			}

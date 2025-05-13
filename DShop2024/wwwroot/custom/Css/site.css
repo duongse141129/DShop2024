@@ -27,3 +27,10 @@
         margin: 3px 5px;
         display: inline-block;
     }
+
+.scroll-container {
+    width: 700px;
+    height: 450px;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+}

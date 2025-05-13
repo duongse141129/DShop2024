@@ -165,7 +165,8 @@ namespace DShop2024.Areas.Identity.Controllers
                 { 
                     UserName = model.UserName, 
                     Email = model.Email ,
-                    loginType = DShopConst.LOGIN_WEBSITE,
+                    loginType = UserEnumData.LOGIN_WEBSITE,
+                    Avatar = UserEnumData.IMAGE_DEFAULT,
                     Status = 1
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -174,68 +175,49 @@ namespace DShop2024.Areas.Identity.Controllers
                 {
                     _logger.LogInformation("Đã tạo user mới.");
 
-                    //// Phát sinh token để xác nhận email
-                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-                    //// https://localhost:7213/confirm-email?userId=fdsfds&code=xyz&returnUrl=
-                    //var callbackUrl = Url.ActionLink(
-                    //                   action: nameof(ConfirmEmail),
-                    //                   values:
-                    //                       new
-                    //                       {
-                    //                           area = "Identity",
-                    //                           userId = user.Id,
-                    //                           code = code
-                    //                       },
-                    //                   protocol: Request.Scheme);
-
-                    //await _emailSender.SendEmailAsync(model.Email,
-                    //    "Xác nhận địa chỉ email",
-                    //    @$"Bạn đã đăng ký tài khoản trên RazorWeb, 
-                    //       hãy <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>bấm vào đây</a> 
-                    //       để kích hoạt tài khoản.");
-
-
-                    await _userManager.AddToRoleAsync(user, RoleName.Customer);
-
-
-                    var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
-                    if (promotion == null)
+                    try
                     {
-                        promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
-                        await _dataContext.Promotions.AddAsync(promotion);
+                        await _userManager.AddToRoleAsync(user, RoleName.Customer);
+                        var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+                        if (promotion == null)
+                        {
+                            promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
+                            await _dataContext.Promotions.AddAsync(promotion);
+                            await _dataContext.SaveChangesAsync();
+                        }
+                        CouponModel couponModel = new CouponModel
+                        {
+                            CouponName = "Promotion for new customer",
+                            CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
+                            Value = 50000,
+                            DateStart = DateTime.Today,
+                            DateExpired = DateTime.Today.AddDays(7),
+                            Quantity = 1,
+                            Status = 1,
+                            Description = "Free shipping for new customers' first order",
+                            PromotionId = promotion.Id
+                        };
+                        await _dataContext.Coupons.AddAsync(couponModel);
                         await _dataContext.SaveChangesAsync();
+
+                        var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                        await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+
+                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                        {
+
+                            return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_CONFIRM_EMAIL });
+                        }
+                        else
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return LocalRedirect(returnUrl);
+                        }
                     }
-                    CouponModel couponModel = new CouponModel
+                    catch (Exception ex)
                     {
-                        CouponName = "Promotion for new customer",
-                        CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
-                        Value = 50000,
-                        DateStart = DateTime.Today,
-                        DateExpired = DateTime.Today.AddDays(7),
-                        Quantity = 1,
-                        Status = 1,
-                        Description = "Free shipping for new customers' first order",
-                        PromotionId = promotion.Id
-                    };
-                    await _dataContext.Coupons.AddAsync(couponModel);
-                    await _dataContext.SaveChangesAsync();
-
-                    var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-                    await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
-
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-
-                        return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_CONFIRM_EMAIL });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
-
+                        ModelState.AddModelError(ex.Message);
+                    }              
                 }
 
                 ModelState.AddModelError(result);
@@ -248,13 +230,17 @@ namespace DShop2024.Areas.Identity.Controllers
         // GET: /Account/ConfirmEmail
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterConfirmation(string? userId)
+        public async Task<IActionResult> RegisterConfirmation(string userId)
         {
-            if (userId == null)
+            if (String.IsNullOrEmpty(userId))
             {
                 return NotFound();
             }
             var user = await _userManager.FindByIdAsync(userId);
+            if(user == null)
+            {
+                return NotFound();
+            }
            
             return View(user);
         }
@@ -514,18 +500,6 @@ namespace DShop2024.Areas.Identity.Controllers
                     // Don't reveal that the user does not exist or is not confirmed
                     return View("ForgotPasswordConfirmation");
                 }
-                //var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                //var callbackUrl = Url.ActionLink(
-                //    action: nameof(ResetPassword),
-                //    values: new { area = "Identity", code },
-                //    protocol: Request.Scheme);
-
-
-                //await _emailSender.SendEmailAsync(
-                //    model.Email,
-                //    "Reset Password",
-                //    $"Hãy bấm <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>vào đây</a> để đặt lại mật khẩu.");
 
                 return RedirectToAction("SendOtp", "Account" ,new { email = user.Email, typeService = DShopConst.OTP_RESET_PASSWORD });
    
@@ -536,9 +510,9 @@ namespace DShop2024.Areas.Identity.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> SendOtp(string? email, string typeService)
+        public async Task<IActionResult> SendOtp(string email, string typeService)
         {
-            if (email == null)
+            if ( String.IsNullOrEmpty(email))
             {
                 return View("NotFoundEmail");
             }

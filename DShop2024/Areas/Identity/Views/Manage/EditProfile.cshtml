@@ -62,7 +62,7 @@
 
             <button id="update-profile-button" type="submit" class="btn btn-primary">Lưu dữ liệu</button>
         </form>
-        @if (Model.loginType == UserEnumData.LOGIN_BY_WEBSITE)
+        @if (Model.loginType == UserEnumData.LOGIN_WEBSITE)
         {
             <a asp-controller="Manage" asp-action="ChangePassword">Change Password</a>
         }

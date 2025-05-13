@@ -1,11 +1,8 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using Microsoft.EntityFrameworkCore;
-using static DShop2024.EnumData.Product;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -60,24 +57,29 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(orders);
         }
 
-        public async Task<IActionResult> ViewOrder(int Id )
+        public async Task<IActionResult> ViewOrder(int? Id )
         {
+            if (Id == null)
             {
-                var order = await _context.Orders.Include(o => o.User)
+                return NotFound();
+            }
+            var order = await _context.Orders.Include(o => o.User)
                                                   .Include(od => od.OrderDetails)
                                                   .ThenInclude(p => p.Product)
                                                   .Include(c => c.OrderCoupons)
                                                   .ThenInclude(c => c.Coupon)
-                                                  .FirstOrDefaultAsync(o => o.Id == Id);
-
-	        
-				return View(order);
-            }
+                                                  .FirstOrDefaultAsync(o => o.Id == Id);	        
+		    return View(order);
+            
         }
  
-        public async Task<IActionResult> UpdateStatusOrder(int orderId)
+        public async Task<IActionResult> UpdateStatusOrder(int? orderId)
         {
-            {
+                if (orderId == null)
+                {
+                    return NotFound();
+                }
+
                 var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == orderId);
 
                 if (order == null)
@@ -102,12 +104,16 @@ namespace DShop2024.Areas.Admin.Controllers
                     return RedirectToAction("ViewOrder", "Order", new { order.Id });
                 }
 
-            }
+            
         }
 
-        public async Task<IActionResult> CancelOrder(int orderId)
+        public async Task<IActionResult> CancelOrder(int? orderId)
         {
-            {
+                if (orderId == null)
+                {
+                    return NotFound();
+                }
+
                 var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == orderId);
 
                 if (order == null)
@@ -143,37 +149,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     return RedirectToAction("ViewOrder", "Order", new { order.Id });
                 }
 
-            }
+            
         }
-
-
-
-
-        [HttpPost]
-        [Route("UpdateOrder")]
-        public async Task<IActionResult> UpdateOrder(int orderId, int status)
-		{
-			{
-                var order = await _context.Orders.FirstOrDefaultAsync(od => od.Id == orderId);
-
-				if(order == null){
-                    return NotFound();
-                }
-                order.Status = status;
-                try
-                {
-                    _context.Orders.Update(order);
-                    await _context.SaveChangesAsync();
-                    return Ok(new{success = true, message ="Update Order status successful"});
-
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, DShopConst.TEMPDATA_ERROR);
-                }
-
-			}
-		}
 
 		
     }

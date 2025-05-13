@@ -63,15 +63,16 @@ namespace DShop2024.Areas.Admin.Controllers
             }
 
             var role = await _roleManager.FindByIdAsync(Id);
-            if(role.Name == RoleName.Administrator)
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Can not delete role Admin ";
-                return RedirectToAction("Index");
-            }
             if (role == null)
             {
                 return NotFound();
             }
+            if (role.Name == RoleName.Administrator)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Can not delete role Admin ";
+                return RedirectToAction("Index");
+            }
+
             try
             {
                 await _roleManager.DeleteAsync(role);
@@ -93,6 +94,10 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
             var role = await _roleManager.FindByIdAsync(Id);
+            if (role == null)
+            {
+                return NotFound();
+            }
             if (role.Name == RoleName.Administrator)
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Can not modify role Admin ";
@@ -109,13 +114,13 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            if(ModelState.IsValid)
+            var role = await _roleManager.FindByIdAsync(Id);
+            if (role == null)
             {
-                var role = await _roleManager.FindByIdAsync(Id);
-                if(role == null)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
                 role.Name = model.Name;
                 try
                 {

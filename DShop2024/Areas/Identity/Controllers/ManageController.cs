@@ -425,7 +425,8 @@ namespace DShop2024.Areas.Identity.Controllers
                     }
                     catch (Exception ex)
                     {
-                        ModelState.AddModelError("", "An error occurred while deleting the product image" + ex.Message );
+                        TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the product image " + ex.Message;
+                        return RedirectToAction("EditProfile", "Manage");
                     }
                     FileStream fs = new FileStream(filePath, FileMode.Create);
                     await model.AvatarUpload.CopyToAsync(fs);

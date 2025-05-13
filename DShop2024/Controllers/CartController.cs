@@ -75,9 +75,17 @@ namespace DShop2024.Controllers
 
 		}
 
-		public async Task<ActionResult> AddToCart(int Id) {
-			ProductModel product = await _dataContext.Products.FindAsync(Id);
-
+		public async Task<ActionResult> AddToCart(int? Id) {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if(cartItem == null)
@@ -106,9 +114,18 @@ namespace DShop2024.Controllers
 		
 		}
 
-		public async Task<ActionResult> Increase(int Id)
+		public async Task<ActionResult> Increase(int? Id)
 		{
-			ProductModel product = await _dataContext.Products.FindAsync(Id);
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
 
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
@@ -129,9 +146,20 @@ namespace DShop2024.Controllers
 
 		}
 
-		public async Task<ActionResult> Decrease(int Id)
+		public async Task<ActionResult> Decrease(int? Id)
 		{
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			if(cartItem.Quantity >1)
 			{
@@ -151,9 +179,20 @@ namespace DShop2024.Controllers
 			return RedirectToAction("Index");
 		}
 
-		public async Task<ActionResult> Remove(int Id)
+		public async Task<ActionResult> Remove(int? Id)
 		{
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+							.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 			cart.RemoveAll(p => p.ProductId == Id);
 

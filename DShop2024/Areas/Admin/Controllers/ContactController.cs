@@ -27,11 +27,6 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
         public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
         {
-            //var contacts = await _dataContext.Contacts.Where(c => c.Status != 0)
-            //                                            .Include(u => u.User)
-            //                                            .Include(r => r.Respondent)
-            //                                            .OrderByDescending(d => d.DateSent)
-            //                                            .ToListAsync();
 
             IQueryable<ContactModel> listContact = _dataContext.Contacts.Where(c => c.Status != 0)
                                                         .Include(u => u.User)
@@ -75,8 +70,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
             var contactModel = await _dataContext.Contacts
                 .Include(u => u.User)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (contactModel == null)
+				.FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+			if (contactModel == null)
             {
                 return NotFound();
             }
@@ -128,17 +123,20 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+			var contacModel = await _dataContext.Contacts
+	                    .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+			if (contacModel == null)
+			{
+				return NotFound();
+			}
 
-            try
+			try
             {
                 var contactModel = await _dataContext.Contacts.FindAsync(id);
-                if (contactModel != null)
-                {
-                    contactModel.Status = 0;
-                    _dataContext.Update(contactModel);
-                    await _dataContext.SaveChangesAsync();
-                }
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete contact successful";
+				contactModel.Status = 0;
+				_dataContext.Update(contactModel);
+				await _dataContext.SaveChangesAsync();
+				TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete contact successful";
                 await _dataContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
