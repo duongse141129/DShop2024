@@ -165,7 +165,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 { 
                     UserName = model.UserName, 
                     Email = model.Email ,
-                    loginType = UserEnumData.LOGIN_WEBSITE,
+                    LoginType = UserEnumData.LOGIN_WEBSITE,
                     Avatar = UserEnumData.IMAGE_DEFAULT,
                     Status = 1
                 };
@@ -178,30 +178,8 @@ namespace DShop2024.Areas.Identity.Controllers
                     try
                     {
                         await _userManager.AddToRoleAsync(user, RoleName.Customer);
-                        var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
-                        if (promotion == null)
-                        {
-                            promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
-                            await _dataContext.Promotions.AddAsync(promotion);
-                            await _dataContext.SaveChangesAsync();
-                        }
-                        CouponModel couponModel = new CouponModel
-                        {
-                            CouponName = "Promotion for new customer",
-                            CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
-                            Value = 50000,
-                            DateStart = DateTime.Today,
-                            DateExpired = DateTime.Today.AddDays(7),
-                            Quantity = 1,
-                            Status = 1,
-                            Description = "Free shipping for new customers' first order",
-                            PromotionId = promotion.Id
-                        };
-                        await _dataContext.Coupons.AddAsync(couponModel);
-                        await _dataContext.SaveChangesAsync();
 
-                        var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-                        await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+                        await SendPromotionToNewCustomer(user);
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
@@ -225,6 +203,43 @@ namespace DShop2024.Areas.Identity.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        public async Task SendPromotionToNewCustomer(AppUserModel user)
+        {
+            var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+            if (promotion == null)
+            {
+                promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
+                await _dataContext.Promotions.AddAsync(promotion);
+                await _dataContext.SaveChangesAsync();
+            }
+            CouponModel couponModel = new CouponModel
+            {
+                CouponName = "Promotion for new customer",
+                CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
+                Value = 50000,
+                DateStart = DateTime.Today,
+                DateExpired = DateTime.Today.AddDays(7),
+                Quantity = 1,
+                Status = 1,
+                Description = "Free shipping for new customers' first order",
+                PromotionId = promotion.Id
+            };
+
+            try
+            {
+                await _dataContext.Coupons.AddAsync(couponModel);
+                await _dataContext.SaveChangesAsync();
+
+                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(ex.Message);
+            }
+
         }
         
         // GET: /Account/ConfirmEmail
@@ -319,7 +334,7 @@ namespace DShop2024.Areas.Identity.Controllers
             returnUrl ??= Url.Content("~/");
             if (remoteError != null)
             {
-                ModelState.AddModelError(string.Empty, $"Lỗi sử dụng dịch vụ ngoài: {remoteError}");
+                ModelState.AddModelError(string.Empty, $"Error using external service: {remoteError}");
                 return View(nameof(Login));
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -428,12 +443,17 @@ namespace DShop2024.Areas.Identity.Controllers
                     // Chua co Account -> Tao Account, lien ket, dang nhap
                     var newUser = new AppUserModel() {
                         UserName = userName[0],
-                        Email = externalEmail
+                        Email = externalEmail,
+                        LoginType = UserEnumData.LOGIN_GMAIL,
+                        Avatar = UserEnumData.IMAGE_DEFAULT,
+                        Status = 1
                     };
 
                     var resultNewUser = await _userManager.CreateAsync(newUser);
                     if (resultNewUser.Succeeded)
                     {
+                        await SendPromotionToNewCustomer(newUser);
+
                         await _userManager.AddToRoleAsync(newUser, RoleName.Customer);
 
                         await _userManager.AddLoginAsync(newUser, info);
@@ -553,9 +573,9 @@ namespace DShop2024.Areas.Identity.Controllers
         // GET: /Account/ForgotPasswordConfirmation
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPasswordConfirmation(string? email)
+        public async Task<IActionResult> ForgotPasswordConfirmation(string email)
         {
-            if( email == null)
+            if( String.IsNullOrEmpty(email))
             {
                 return View("NotFoundEmail");
             }
@@ -606,9 +626,9 @@ namespace DShop2024.Areas.Identity.Controllers
         // GET: /Account/ResetPassword
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string? email)
+        public IActionResult ResetPassword(string email)
         {
-            if (email == null)
+            if (String.IsNullOrEmpty(email))
             {
                 return View("NotFoundEmail");
             }

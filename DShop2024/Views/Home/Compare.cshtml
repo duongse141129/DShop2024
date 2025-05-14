@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<DShop2024.Models.ProductModel>
 @{
-    ViewData["Title"] = "Compare Product";
+    ViewData["Title"] = "Compare Products";
 }
 
 @if(Model.Count() == 0)
@@ -64,10 +64,10 @@ else
             }
         </tr>
         <tr>
-            <td>Compartment</td>
+            <td>Main Pocket</td>
             @foreach (var item in Model)
             {
-                <td>@item.Compartment</td>
+               <td>@item.MainPocket</td>
             }
         </tr>
         <tr>

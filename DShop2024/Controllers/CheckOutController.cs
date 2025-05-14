@@ -206,10 +206,10 @@ namespace DShop2024.Controllers
 				foreach (var item in coupouns)
 				{
 					CouponRedemptionModel couponRedemption = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
-					couponRedemption.status = 2;
+					couponRedemption.Status = 2;
                     CouponModel couponModel = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
                     couponModel.Quantity -= 1;
-					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, status = 1 };
+					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, Status = 1 };
 
 					if(couponModel.Promotion.CategoryCouponName == DShopConst.NEW_CUSTOMER)
 					{

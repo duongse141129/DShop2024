@@ -11,7 +11,7 @@ namespace DShop2024.Models
 		public int OrderId { get; set; }
 		public int CouponId { get; set; }
 
-		public int status { get; set; }
+		public int Status { get; set; }
 
 		[ForeignKey("OrderId")]
 		public virtual OrderModel Order { get; set; }

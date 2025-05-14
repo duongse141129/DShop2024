@@ -47,7 +47,7 @@
                 </td>
  
                 <td>
-                    <span class="text text-@((Order.SpanStatusOrder)item.Status)"> @((Order.StatusOrder)item.Status) </span>
+                    <span class="text text-@((OrderEnumData.SpanStatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
                 </td>
                 <td>
                     <a asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>

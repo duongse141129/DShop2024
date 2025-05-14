@@ -62,7 +62,6 @@ namespace DShop2024.Areas.Identity.Controllers
                 profile = new EditExtraProfileModel()
                 {
                     BirthDate = user.BirthDate,
-                    HomeAdress = user.HomeAdress,
                     UserName = user.UserName,
                     UserEmail = user.Email,
                     PhoneNumber = user.PhoneNumber,
@@ -381,14 +380,13 @@ namespace DShop2024.Areas.Identity.Controllers
             var model = new EditExtraProfileModel()
             {
                 BirthDate = user.BirthDate,
-                HomeAdress = user.HomeAdress,
                 UserName = user.UserName,
                 UserEmail = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Occupation = user.Occupation,
                 Avatar = user.Avatar,
-                Gender = user.sex,
-                loginType = user.loginType,
+                Gender = user.Gender,
+                LoginType = user.LoginType,
             };
             return View(model);
         }
@@ -401,11 +399,10 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 var user = await GetCurrentUserAsync();
 
-                user.HomeAdress = model.HomeAdress;
                 user.PhoneNumber = model.PhoneNumber;
                 user.BirthDate = model.BirthDate;
                 user.Occupation = model.Occupation;
-                user.sex = model.Gender;
+                user.Gender = model.Gender;
 
                 if (model.AvatarUpload != null)
                 {

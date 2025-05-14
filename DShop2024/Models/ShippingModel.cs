@@ -10,6 +10,5 @@ namespace DShop2024.Models
 		public int Id { get; set; }
 		public decimal Price { get; set; }
         public string Province { get; set; }
-        public int Status { get; set; }
 	}
 }

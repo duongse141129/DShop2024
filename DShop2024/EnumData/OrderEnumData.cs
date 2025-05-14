@@ -1,6 +1,6 @@
 ﻿namespace DShop2024.EnumData
 {
-	public class Order
+	public class OrderEnumData
 	{
 		public enum StatusOrder
 		{

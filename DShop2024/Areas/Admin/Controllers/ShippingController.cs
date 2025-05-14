@@ -30,11 +30,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("StoreShipping")]
         public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, decimal price)
         {
-   
-            
-            shippingModel.Price = price;
-            shippingModel.Status = 1;         
-
+            shippingModel.Price = price;       
             try
             {
                 var existingShipping = await _context.Shippings.FirstOrDefaultAsync(x => x.Province == tinh );

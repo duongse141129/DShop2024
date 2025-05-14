@@ -12,7 +12,7 @@ namespace DShop2024.Models
 		public string UserId { get; set; }
 		public int CouponId { get; set; }
 
-		public int status { get; set; }
+		public int Status { get; set; }
 
 
 		[ForeignKey("CouponId")]

@@ -219,7 +219,7 @@ namespace DShop2024.Controllers
 		public async Task<ActionResult> GetShipping(InformationDelivery informationDelivery)
 		{
 
-			decimal shipppingPrice = 50000;
+			decimal shipppingPrice = DShopConst.DEFAULT_SHIPPING_COST;
 			if (ModelState.IsValid)
 			{
 
@@ -285,11 +285,11 @@ namespace DShop2024.Controllers
 
 					if (CheckUsed == null)
 					{
-						CouponRedemptionModel couponRedemption = new CouponRedemptionModel { UserId = user.Id, CouponId = validCoupon.Id, status = 1 };
+						CouponRedemptionModel couponRedemption = new CouponRedemptionModel { UserId = user.Id, CouponId = validCoupon.Id, Status = 1 };
 						await _dataContext.CouponRedemptions.AddAsync(couponRedemption);
 						await _dataContext.SaveChangesAsync();
 					}
-					if (CheckUsed != null && CheckUsed.status == 2 )
+					if (CheckUsed != null && CheckUsed.Status == 2 )
 					{
 						return Ok(new { success = false, message = "You have already used this coupon" });
 					}

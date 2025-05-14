@@ -100,7 +100,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 AppUserModel user = new AppUserModel { 
                     UserName = createUserRequest.UserName,
                     Email = createUserRequest.Email,
-                    loginType = UserEnumData.LOGIN_WEBSITE,
+                    LoginType = UserEnumData.LOGIN_WEBSITE,
                     Avatar = UserEnumData.IMAGE_DEFAULT,
                     Status = 1
                 };

@@ -18,6 +18,6 @@
 		public static string NEW_CUSTOMER = "NEW CUSTOMER";
 
 
-		public static string DEFAULT_SHIPPING_COST = "50000";
+		public static decimal DEFAULT_SHIPPING_COST = 50000;
 	}
 }

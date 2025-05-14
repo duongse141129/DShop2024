@@ -11,24 +11,20 @@ namespace DShop2024.Models
 		[StringLength(100)]
 		public string Occupation { get; set; }
 
-		[Column(TypeName = "nvarchar")]
-		[StringLength(400)]
-		public string HomeAdress { get; set; }
     
 		[DataType(DataType.Date)]
 		public DateTime? BirthDate { get; set; }
 
-		public string RoleId { get; set; }
 
         [Column(TypeName = "nvarchar")]
         [StringLength(500)]
         public string? Avatar { get; set; }
 
-		public bool? sex { get; set; }
+		public bool? Gender { get; set; }
 
         [Column(TypeName = "nvarchar")]
         [StringLength(100)]
-        public string loginType { get; set; }
+        public string LoginType { get; set; }
 
 
 

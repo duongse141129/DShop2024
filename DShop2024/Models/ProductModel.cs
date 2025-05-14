@@ -45,7 +45,7 @@ namespace DShop2024.Models
         public string Material { get; set; }
         [Required(ErrorMessage = "Compartment is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Compartment must >= {1}")]
-        public int Compartment { get; set; }
+        public int MainPocket { get; set; }
         public bool WaterResistance { get; set; }
         public bool USBChargingPort { get; set; }
 

@@ -33,7 +33,7 @@ namespace DShop2024.Controllers
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "", 
                                             [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 6)
         {
-            ViewBag.laptopPocketTypes = Product.laptopPocketTypes;
+            ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
 			IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
                                                     .Include(p => p.Brand)
@@ -104,8 +104,8 @@ namespace DShop2024.Controllers
                 }
 
             }
-            var filterSortBy = Enum.GetValues(typeof(Product.SortBy))
-                        .Cast<Product.SortBy>()
+            var filterSortBy = Enum.GetValues(typeof(ProductEnumData.SortBy))
+                        .Cast<ProductEnumData.SortBy>()
                         .Select(v => v.ToString())
                         .ToList();
             ViewBag.sortBy = new SelectList(filterSortBy, sortBy);

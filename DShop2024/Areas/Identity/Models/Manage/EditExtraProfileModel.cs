@@ -17,10 +17,6 @@ namespace App.Areas.Identity.Models.ManageViewModels
           [DataType(DataType.PhoneNumber)]
           public string PhoneNumber { get; set; }
 
-          [Display(Name = "Address")]
-          [StringLength(400)]
-          public string HomeAdress { get; set; }
-
 
           [Display(Name = "Birthday")]
           [DataType(DataType.Date)]
@@ -39,7 +35,7 @@ namespace App.Areas.Identity.Models.ManageViewModels
         [StringLength(500)]
         public string? Avatar { get; set; }
 
-        public string loginType { get; set; }
+        public string LoginType { get; set; }
 
         [NotMapped]
         [FileExtension]

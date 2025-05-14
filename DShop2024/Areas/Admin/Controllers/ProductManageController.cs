@@ -43,7 +43,7 @@ namespace DShop2024.Areas.Admin.Controllers
 			ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
 			ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName");
 
-            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, "");
+            ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, "");
 
             return View();
 		}
@@ -55,7 +55,7 @@ namespace DShop2024.Areas.Admin.Controllers
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
-            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, product.LaptopPocket);
+            ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket);
 
             if (ModelState.IsValid)
 			{
@@ -123,7 +123,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
 
-            ViewBag.laptopPocket = new SelectList(Product.laptopPocketTypes, product.LaptopPocket.ToString());
+            ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket.ToString());
 
             UpdateProductRequest updateProduct = _mapper.Map<UpdateProductRequest>(product);
             return View(updateProduct);
