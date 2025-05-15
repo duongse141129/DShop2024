@@ -68,10 +68,6 @@ public class DShopContext : IdentityDbContext<AppUserModel>
             entity.HasIndex(c => c.CouponCode).IsUnique();
         });
 
-        modelBuilder.Entity<BannerModel>(entity =>
-        {
-            entity.HasIndex(c => c.BannerName).IsUnique();
-        });
     }
 
 
