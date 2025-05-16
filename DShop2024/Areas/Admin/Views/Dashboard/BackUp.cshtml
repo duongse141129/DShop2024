@@ -1,0 +1,277 @@
+﻿﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="row">
+    <div class="container-fluid">
+        <div class="col-md-12">
+            <h5>Thống kê số lượng</h5>
+            <ul>
+                <li>Tổng đơn hàng : @ViewBag.CountProduct</li>
+                <li>Tổng sản phẩm : @ViewBag.CountProduct</li>
+                <li>Tổng danh mục sản phẩm : @ViewBag.CountCategory</li>
+                <li>Tổng nhãn hàng sản phẩm : @ViewBag.Brand</li>
+                <li>Tổng khách hàng : @ViewBag.CountUser</li>
+            </ul>
+        </div>
+        <div class="col-md-12">
+
+            <h5>Thống kê bán hàng</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <p>Lọc theo ngày tháng</p>
+                    <form>
+                        Ngày:
+                        <label>From: </label>
+                        <input type="date" name="dateStart" class="form-control" id="dateStart">
+                        <label>To: </label>
+                        <input type="date" name="dateEnd" class="form-control" id="dateEnd">
+                        <button type="button" class="btn btn-primary btn-filter-date">Lọc theo ngày</button>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <p>Lọc theo</p>
+                    <p>
+                        <select class="form-control filter-date">
+                            <option value="last_month">Last month</option>
+                            <option value="this_month">This month</option>
+                            <option selected value="this_year">This year</option>
+                            <option value="last_year">Last year</option>
+                        </select>
+                    </p>
+                </div>
+            </div>
+
+            <h1>Line Chart: </h1>
+            <div id="myfirstchart" style="height: 350px;"></div>
+
+            <h1>Bar Chart:</h1>
+            <div class="row">
+                <div class="col-md-4">
+                    <p>
+                        <select class="form-control filter-barchart">
+                            <option selected value="this_year">This year</option>
+                            <option value="last_year">Last year</option>
+                        </select>
+                    </p>
+                </div>
+            </div>
+            <div id="mybarchart" style="height: 350px;"></div>
+
+            <div class="row">
+                <h1>Donut Chart: Number of products sold by brand </h1>
+                <div id="graphBrand" style="width: 350px;"> </div>
+                <h1>Donut Chart: Number of products sold by category</h1>
+                <div id="graphCategories" style="width: 350px;"> </div>
+
+                <h1>Best seller product</h1>
+                <div class="col-md-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Original Price</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity Sold</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewBag.bestSaleProducts)
+                            {
+                                <tr>
+                                    <th>@item.Id</th>
+                                    <th>
+                                        <div class="col-sm-5">
+                                            <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@item.Id">
+                                                @item.ProductName
+                                            </a>
+                                            <img src="~/media/products/@item.Image" width="120" height="100" />
+                                        </div>
+
+
+                                    </th>
+                                    <th>@item.OriginalPrice</th>
+                                    <th>@item.Price</th>
+                                    <th>@item.QuantitySold</th>
+                                </tr>
+                            }
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            var chartData = [];
+            var chart = new Morris.Line({
+                element: 'myfirstchart',
+                parseTime: false,
+                data: chartData,
+                xkey: 'date',
+                ykeys: ['revenue', 'profit', 'orders', 'quantitysold'],
+                labels: ['Doanh thu', 'lợi nhuận', 'Đơn hàng', 'Số lượng bán ra']
+            });
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartData", "Dashboard")",
+                success: function (data) {
+                    chart.setData(data);
+                }
+            });
+
+            //submit filter date in chart
+            $(".filter-date").change(function () {
+                var filterdate = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SelectFilterDate", "Dashboard")",
+                    data: { filterdate: filterdate },
+                    success: function (data) {
+                        chart.setData(data);
+                    }
+                });
+            })
+
+            $(".btn-filter-date").click(function () {
+                var dateStart = $("#dateStart").val();
+                var dateEnd = $("#dateEnd").val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SubmitFilterDate", "Dashboard")",
+                    data: { dateStart: dateStart, dateEnd: dateEnd },
+                    success: function (data) {
+                        if (data != null) {
+                            chart.setData(data);
+                        } else {
+                            Swal.fire("Date start must <= date end");
+                        }
+
+                    }
+                });
+            })
+
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            var chartData = [];
+            var chartB = new Morris.Donut({
+                element: 'graphBrand',
+                data: [0, 0],
+                backgroundColor: '#ccc',
+                labelColor: '#060',
+                colors: ['Maroon', 'Navy', 'Yellow', 'Olive', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Teal', 'Aqua', 'Silver', 'Gray'],
+                formatter: function (x) { return x + "%" }
+            }).on('click', function (i, row) {
+                console.log(i, row);
+            });
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartBrand", "Dashboard")",
+                success: function (data) {
+                    chartB.setData(data);
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            var chartData = [];
+            var chartB = new Morris.Donut({
+                element: 'graphCategories',
+                data: [0, 0],
+                backgroundColor: '#ccc',
+                labelColor: '#060',
+                colors: ['Teal', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Silver', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Aqua'],
+                formatter: function (x) { return x + "%" }
+            }).on('click', function (i, row) {
+                console.log(i, row);
+            });
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartCategories", "Dashboard")",
+                success: function (data) {
+                    chartB.setData(data);
+                }
+            });
+
+        });
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var chartData = [];
+            var chart = new Morris.Bar({
+                element: 'mybarchart',
+                data: chartData,
+                xkey: 'month',
+                ykeys: ['stockIn', 'stockOut'],
+                labels: ['nhập kho', 'xuất kho'],
+                barColors: ['#1fbba6', '#f8aa33', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
+                gridTextColor: '#666',
+                grid: true,
+                barOpacity: 0.8
+            });
+
+
+
+
+            //filter all data chart
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("GetChartStock", "Dashboard")",
+                success: function (data) {
+                    chart.setData(data);
+                }
+            });
+
+
+            // var browsersChart = chart;
+
+            // // Legend for Bar chart
+            // browsersChart.options.labels.forEach(function (label, i) {
+            //     var legendItem = $('<span class="legend-item"></span>').text(label).prepend('<span class="legend-color">&nbsp;</span>');
+            //     legendItem.find('span')
+            //         .css('backgroundColor', browsersChart.options.barColors[i]);
+            //     $('#visitor_legend').append(legendItem)
+            // });
+
+            //submit filter date in chart
+            $(".filter-barchart").change(function () {
+                var filterbarchart = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GetChartStockFilter", "Dashboard")",
+                    data: { filterbarchart: filterbarchart },
+                    success: function (data) {
+                        chart.setData(data);
+                    }
+                });
+            })
+
+
+
+        });
+
+    </script>
+
+}

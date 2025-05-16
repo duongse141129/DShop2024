@@ -26,16 +26,14 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var count_product = _dataContext.Products.Where(p => p.Status != 0).Count();
-            var count_order = _dataContext.Orders.Where(p => p.Status != 0).Count();
-            var count_category = _dataContext.Categories.Where(p => p.Status != 0).Count();
-            var count_brand = _dataContext.Brands.Where(p => p.Status != 0).Count();
-            var count_user = _dataContext.Users.Where(p => p.Status != 0).Count();
-            ViewBag.CountProduct = count_product;
-            ViewBag.CountOrder = count_order;
-            ViewBag.CountCategory = count_category;
-            ViewBag.Brand = count_brand;
-            ViewBag.CountUser = count_user;
+            var countProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0).Count();
+            var countOrder = _dataContext.Orders.Where(p => p.Status != 0).Count();
+            var CountCompletedOrder = _dataContext.Orders.Where(p => p.Status == 4).Count();
+            var countUser = _dataContext.Users.Where(p => p.Status != 0).Count();
+            ViewBag.CountProduct = countProduct;
+            ViewBag.CountUser = countUser;
+            ViewBag.CountOrder = countOrder;
+            ViewBag.CountCompletedOrder = CountCompletedOrder;
 
             var bestSaleProducts = await _dataContext.Products
                             .Where(p => p.Status != 0)

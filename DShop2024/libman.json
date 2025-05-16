@@ -24,6 +24,17 @@
       "provider": "cdnjs",
       "library": "summernote@0.8.18",
       "destination": "wwwroot/lib/summernote/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "jquery-easing@1.4.1",
+      "destination": "wwwroot/lib/jquery-easing"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "font-awesome@5.2.0",
+      "destination": "wwwroot/lib/font-awesome"
     }
+
   ]
 }

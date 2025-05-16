@@ -1,122 +1,225 @@
 ﻿﻿@{
     ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<div class="row">
-    <div class="container-fluid">
-        <div class="col-md-12">
-            <h5>Thống kê số lượng</h5>
-            <ul>
-                <li>Tổng đơn hàng : @ViewBag.CountProduct</li>
-                <li>Tổng sản phẩm : @ViewBag.CountProduct</li>
-                <li>Tổng danh mục sản phẩm : @ViewBag.CountCategory</li>
-                <li>Tổng nhãn hàng sản phẩm : @ViewBag.Brand</li>
-                <li>Tổng khách hàng : @ViewBag.CountUser</li>
-            </ul>
+
+<div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Dashboard</h3>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-icon">
+                            <div class="icon-big text-center icon-primary bubble-shadow-small">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="col col-stats ms-3 ms-sm-0">
+                            <div class="numbers">
+                                <p class="card-category">Users</p>
+                                <h4 class="card-title">@ViewBag.CountUser</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-icon">
+                            <div class="icon-big text-center icon-info bubble-shadow-small">                             
+                                <i class="fas fa-boxes"></i>                              
+                            </div>
+                        </div>
+                        <div class="col col-stats ms-3 ms-sm-0">
+                            <div class="numbers">
+                                <p class="card-category">Available Products</p>
+                                <h4 class="card-title">@ViewBag.CountProduct</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-icon">
+                            <div class="icon-big text-center icon-success bubble-shadow-small">
+                                <i class="fas fa-luggage-cart"></i>
+                            </div>
+                        </div>
+                        <div class="col col-stats ms-3 ms-sm-0">
+                            <div class="numbers">
+                                <p class="card-category">Total Orders</p>
+                                <h4 class="card-title">@ViewBag.CountOrder</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-icon">
+                            <div class="icon-big text-center icon-secondary bubble-shadow-small">
+                                <i class="far fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="col col-stats ms-3 ms-sm-0">
+                            <div class="numbers">
+                                <p class="card-category">Completed Orders</p>
+                                <h4 class="card-title">@ViewBag.CountCompletedOrder</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title">Sales statistics</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <p>Filter by date</p>
+                            <form>
+                                <label>From: </label>
+                                <input type="date" name="dateStart" class="form-control" id="dateStart">
+                                <label>To: </label>
+                                <input type="date" name="dateEnd" class="form-control" id="dateEnd">
+                                <button type="button" class="btn btn-info btn-filter-date">Filter</button>
+                            </form>
+                        </div>
+                        <div class="col-sm-4">
+                            <p>Filter by month or year</p>
+                            <p>
+                                <select class="form-control filter-date">
+                                    <option value="last_month">Last month</option>
+                                    <option value="this_month">This month</option>
+                                    <option selected value="this_year">This year</option>
+                                    <option value="last_year">Last year</option>
+                                </select>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                   <div class="chart-container" style="min-height: 580px">
+                        <div id="myfirstchart" style="height: 420px;"></div>                 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title">Quantity of product's brand sold by percentage</div>
+                    </div>
+                </div>
+                <div class="card-body pb-0">                 
+                     <div class="mb-4 mt-2">
+                        <div id="graphBrand" style="width: 250px;"> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-round">
+                <div class="card-body pb-0">
+                    <h4 class="mb-2">Quantity of product's category sold by percentage</h4>
+                    <div class="pull-in sparkline-fix">
+                        <div id="graphCategories" style="width: 250px;"> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-12">
-
-            <h5>Thống kê bán hàng</h5>
-            <div class="row">
-                <div class="col-md-4">
-                    <p>Lọc theo ngày tháng</p>
-                    <form>
-                        Ngày:
-                        <label>From: </label>
-                        <input type="date" name="dateStart" class="form-control" id="dateStart">
-                        <label>To: </label>
-                        <input type="date" name="dateEnd" class="form-control" id="dateEnd">
-                        <button type="button" class="btn btn-primary btn-filter-date">Lọc theo ngày</button>
-                    </form>
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <h4 class="card-title">Import-Export Group Chart</h4>
+                        <div class="card-tools">
+                            <select class="form-control filter-barchart">
+                                <option selected value="this_year">This year</option>
+                                <option value="last_year">Last year</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <p>Lọc theo</p>
-                    <p>
-                        <select class="form-control filter-date">
-                            <option value="last_month">Last month</option>
-                            <option value="this_month">This month</option>
-                            <option selected value="this_year">This year</option>
-                            <option value="last_year">Last year</option>
-                        </select>
-                    </p>
+                <div class="card-body">
+                    <div class="chart-container" style="min-height: 580px">
+                        <div id="mybarchart" style="height: 500px;"></div>
+                    </div>
                 </div>
             </div>
-
-            <h1>Line Chart: </h1>
-            <div id="myfirstchart" style="height: 350px;"></div>
-
-            <h1>Bar Chart:</h1>
-            <div class="row">
-                <div class="col-md-4">
-                    <p>
-                        <select class="form-control filter-barchart">
-                            <option selected value="this_year">This year</option>
-                            <option value="last_year">Last year</option>
-                        </select>
-                    </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Best selling products</div>
+                        <div class="card-tools">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div id="mybarchart" style="height: 350px;"></div>
-
-
-          @*   legend
-              
-          <div class="grid-body no-border">
-                <div id="visitor_legend" class="bar-chart-legend"></div>
-                <div id="visitors_bar_chart" style="height:250px"></div> 
-                
-            </div> *@
-
-
-            <div class="row">
-                <h1>Donut Chart: Number of products sold by brand </h1>
-                <div id="graphBrand" style="width: 350px;"> </div>
-                <h1>Donut Chart: Number of products sold by category</h1>
-                <div id="graphCategories" style="width: 350px;"> </div>
-
-                <h1>Best seller product</h1>
-                <div class="col-md-12">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">Id</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Original Price</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Quantity Sold</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in ViewBag.bestSaleProducts)
-                            {
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <!-- Projects table -->
+                        <table class="table align-items-center mb-0 table-hover">
+                            <thead class="thead-light">
                                 <tr>
-                                    <th>@item.Id</th>
-                                    <th>
-                                        <div class="col-sm-5">
-                                            <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@item.Id">
-                                                @item.ProductName
-                                            </a>
-                                            <img src="~/media/products/@item.Image" width="120" height="100" />
-                                        </div>
-                                   
-                              
-                                    </th>
-                                    <th>@item.OriginalPrice</th>
-                                    <th>@item.Price</th>
-                                    <th>@item.QuantitySold</th>
+                                    <th scope="col">Id</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col" class="text-end">Original Price</th>
+                                    <th scope="col" class="text-end">Price</th>
+                                    <th scope="col" class="text-end">Quantity Sold</th>
                                 </tr>
-                            }
-   
-                        
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewBag.bestSaleProducts)
+                                {
+                                    <tr>
+                                        <th>@item.Id</th>
+                                        <th>
+                                            <div class="col-md-5">
+                                                <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@item.Id">
+                                                    @item.ProductName
+                                                </a>
+                                                <img src="~/media/products/@item.Image" width="120" height="100" />
+                                            </div>
+                                        </th>
+                                        <th class="text-end">@item.OriginalPrice.ToString("#,##0 VND")</th>
+                                        <th class="text-end">@item.Price.ToString("#,##0 VND")</th>
+                                        <th class="text-end">@item.QuantitySold</th>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-
-           
         </div>
     </div>
 </div>
+
 @section Scripts {
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
@@ -132,8 +235,9 @@
                 parseTime: false,
                 data: chartData,
                 xkey: 'date',
+                xLabels: 'month',
                 ykeys: ['revenue', 'profit', 'orders', 'quantitysold'],
-                labels: ['Doanh thu','lợi nhuận' ,'Đơn hàng', 'Số lượng bán ra']
+                labels: ['Revenue', 'Profit', 'Orders', 'Quantity Sold']
             });
             //filter all data chart
             $.ajax({
@@ -234,7 +338,7 @@
                 data: chartData,
                 xkey: 'month',
                 ykeys: ['stockIn', 'stockOut'],
-                labels: ['nhập kho', 'xuất kho'],
+                labels: ['Import', 'Export'],
                 barColors: ['#1fbba6', '#f8aa33', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
                 gridTextColor: '#666',
                 grid: true,

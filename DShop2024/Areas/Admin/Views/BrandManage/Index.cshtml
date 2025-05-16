@@ -1,61 +1,64 @@
 ﻿@model IEnumerable<DShop2024.Models.BrandModel>
 
 @{
-    ViewData["title"] = "List Brand";
+    ViewData["title"] = "Manage Brand";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
+<div class="page-inner">
+    <h1>@ViewData["title"]</h1>
+    <div class="col-sm-4">
+        <a class="btn btn-primary" asp-action="Create">Create New Brand</a>
+    </div>
 
 
-<p>
-    <a class="btn btn-primary" asp-action="Create">Create New Brand</a>
-</p>
-
-
-<table class="table table-striped table-hover" id="myTable">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.BrandName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Image)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Slug)
-            </th>
-
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <table class="table table-striped table-hover" id="myTable">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.BrandName)
-                </td>
-                <td><img src="~/media/brands/@item.Image" width="120" height="100" /></td>
-                <td>
-                    @Html.Raw(@item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Slug)
-                </td>
+                <th>
+                    @Html.DisplayNameFor(model => model.BrandName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Image)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Slug)
+                </th>
 
-                <td>
-                    <div class="btn-toolbar">
-                        <div class="btn-group mr-2">
-                            <a class="btn btn-sm-2 btn-warning" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                        </div>
-                        <div class="btn-group">
-                            <a class="btn btn-sm-2 btn-danger confirmDeletion" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                        </div>
-                    </div>
-                </td>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.BrandName)
+                    </td>
+                    <td><img src="~/media/brands/@item.Image" width="120" height="100" /></td>
+                    <td>
+                        @Html.Raw(@item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Slug)
+                    </td>
+
+                    <td>
+                        <div class="btn-toolbar">
+                            <div class="btn-group mr-2">
+                                <a class="btn btn-sm-2 btn-warning" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                            </div>
+                            <div class="btn-group">
+                                <a class="btn btn-sm-2 btn-danger confirmDeletion" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
