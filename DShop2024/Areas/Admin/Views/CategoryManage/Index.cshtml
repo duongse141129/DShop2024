@@ -1,15 +1,14 @@
 ﻿@model IEnumerable<DShop2024.Models.CategoryModel>
 
 @{
-    ViewData["Title"] = "List Category ";
-
+    ViewData["Title"] = "Manage Category ";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-
-
-<p>
+<h1>@ViewData["title"]</h1>
+<div class="col-sm-4">
     <a class="btn btn-primary" asp-action="Create">Create New Category</a>
-</p>
+</div>
 <table class="table table-striped table-hover" id="myTable">
     <thead>
         <tr>

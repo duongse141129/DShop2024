@@ -10,6 +10,7 @@ namespace DShop2024.Areas.Admin.Controllers
 	public class PromotionController : Controller
     {
         private readonly DShopContext _context;
+        private readonly string sidebar = "promotion";
 
         public PromotionController(DShopContext context)
         {
@@ -18,6 +19,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = sidebar;
             return View(await _context.Promotions.Where(p => p.Status != 0).ToListAsync());
         }
         

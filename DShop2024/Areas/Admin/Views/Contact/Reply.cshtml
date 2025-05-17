@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Reply email";
+	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h1>Replay email contact</h1>
 
@@ -20,12 +21,12 @@
 				<input type="hidden" name="IdContact" value="@Model.Id" />
 				<div class="text-area">
 					<div class="blank-arrow">
-						<label>Reaply Message</label>
+						<label>Reply Message</label>
 					</div>
 					<span>*</span>
-					<textarea name="replyMessage" rows="11"></textarea>
-				<input class="btn btn-primary" type="submit" value="REPLY"  />
+					<textarea name="replyMessage" class="col-sm-8" rows="11"></textarea>
 				</div>
+				<input class="btn btn-primary" type="submit" value="REPLY" />
 			</form>
 		</div>
 	</div>

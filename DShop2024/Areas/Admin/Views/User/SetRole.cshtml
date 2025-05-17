@@ -1,8 +1,10 @@
 ﻿@model DShop2024.Models.AppUserModel
 @{
     ViewData["title"] = "Set Role User";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1>Set role User</h1>
+
+<h1>@ViewData["title"]</h1>
 
 <div class="container">
     <form asp-action="SetRole" enctype="multipart/form-data" method="post">

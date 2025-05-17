@@ -1,15 +1,15 @@
 ﻿@model IEnumerable<DShop2024.Models.FAQModel>
 
 @{
-    ViewData["Title"] = "Index";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Manage FAQ";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["title"]</h1>
 
-<p>
+<div class="col-sm-4">
     <a class="btn btn-primary" asp-action="Create">Create New</a>
-</p>
+</div>
 <table class="table table-striped table-hover" id="myTable">
     <thead>
         <tr>

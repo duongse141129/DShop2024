@@ -2,11 +2,12 @@
 
 @{
     ViewData["Title"] = "Add quantity product ";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
     var totalQuantity = 0;
     var stt = 1;
 }
 
-<h1>Add quantity product </h1>
+<h1>@ViewData["title"]</h1>
 
 
 <div class="row">

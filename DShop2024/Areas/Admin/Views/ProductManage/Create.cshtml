@@ -2,8 +2,9 @@
 @model CreateProductRequest
 @{
     ViewData["title"] = "Create Product";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h4>Create Product </h4>
+<h1>@ViewData["title"]</h1>
 
 <div class="col-md-9">
     <form asp-action="Create" enctype="multipart/form-data">

@@ -12,6 +12,7 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string sidebar = "slider";
 
         public SliderController(DShopContext context, IWebHostEnvironment webHostEnvironment)
 		{
@@ -21,13 +22,15 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-			return View(await _context.Banners.Where(p => p.Status != 0).ToListAsync());
+            ViewBag.sidebar = sidebar;
+            return View(await _context.Banners.Where(p => p.Status != 0).ToListAsync());
 
 		}
 
         [HttpGet]
         public IActionResult Create()
         {
+            ViewBag.sidebar = sidebar;
 
             return View();
         }
@@ -36,7 +39,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BannerModel banner)
         {
-
+            ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
                 try
@@ -74,6 +77,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? Id)
         {
+            ViewBag.sidebar = sidebar;
             if (Id == null)
             {
                 return NotFound();
@@ -91,6 +95,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, BannerModel banner)
         {
+            ViewBag.sidebar = sidebar;
             if (Id != banner.Id)
             {
                 return NotFound();
@@ -153,6 +158,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? Id)
         {
+            ViewBag.sidebar = sidebar;
             if (Id == null)
             {
                 return NotFound();

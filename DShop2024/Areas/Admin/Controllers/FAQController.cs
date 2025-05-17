@@ -13,6 +13,7 @@ namespace DShop2024.Areas.Admin.Controllers
     public class FAQController : Controller
     {
         private readonly DShopContext _context;
+        private readonly string sidebar = "faq";
 
         public FAQController(DShopContext context)
         {
@@ -22,12 +23,14 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/FAQModels
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = sidebar;
             return View(await _context.FAQs.ToListAsync());
         }
 
         // GET: Admin/FAQModels/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            ViewBag.sidebar = sidebar;
             if (id == null)
             {
                 return NotFound();
@@ -46,6 +49,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/FAQModels/Create
         public IActionResult Create()
         {
+            ViewBag.sidebar = sidebar;
             return View();
         }
 
@@ -56,6 +60,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Question,Answer")] FAQModel fAQModel)
         {
+            ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
                 _context.Add(fAQModel);
@@ -68,6 +73,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/FAQModels/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.sidebar = sidebar;
             if (id == null)
             {
                 return NotFound();
@@ -88,6 +94,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer")] FAQModel fAQModel)
         {
+            ViewBag.sidebar = sidebar;
             if (id != fAQModel.Id)
             {
                 return NotFound();
@@ -122,6 +129,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
+            ViewBag.sidebar = sidebar;
             if (id == null)
             {
                 return NotFound();

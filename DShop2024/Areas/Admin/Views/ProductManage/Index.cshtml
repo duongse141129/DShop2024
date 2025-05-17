@@ -1,8 +1,9 @@
 ﻿@model IEnumerable<ProductModel>
 @{
-    ViewData["title"] = "Manage Product";
+    ViewData["title"] = "Manage Products";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h4>List Product Admin</h4>
+<h1>@ViewData["title"]</h1>
 
 @if (User.IsInRole(RoleName.Administrator))
 {

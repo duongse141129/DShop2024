@@ -1,10 +1,11 @@
 ﻿@model BannerModel
 @{
     ViewData["title"] = "Edit Banner";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h4>Edit Product </h4>
+<h1>@ViewData["title"]</h1>
 
-<div class="col-md-9">
+<div class="col-md-4">
     <form asp-action="Edit" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="@Model.Id" />

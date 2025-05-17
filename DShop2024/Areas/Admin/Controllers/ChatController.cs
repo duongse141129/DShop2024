@@ -18,6 +18,7 @@ namespace DShop2024.Areas.Admin.Controllers
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly string sidebar = "chat";
 
         public ChatController(DShopContext context, UserManager<AppUserModel> userManager, IHubContext<ChatHub> hubContext)
         {
@@ -28,6 +29,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = sidebar;
             var userWithRoles = await (from u in _context.Users
                                        join ur in _context.UserRoles on u.Id equals ur.UserId
                                        join r in _context.Roles on ur.RoleId equals r.Id
@@ -39,6 +41,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ChatWithCustomer(string customerId)
         {
+            ViewBag.sidebar = sidebar;
             if (String.IsNullOrEmpty(customerId))
             {
                 return NotFound();
@@ -73,6 +76,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SendMessage(string receiver, string messageInput)
         {
+            ViewBag.sidebar = sidebar;
             var user = await _userManager.GetUserAsync(this.User);
             if (!String.IsNullOrEmpty(messageInput))
             {

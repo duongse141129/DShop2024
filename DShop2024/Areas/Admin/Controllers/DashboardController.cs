@@ -18,6 +18,7 @@ namespace DShop2024.Areas.Admin.Controllers
     {
         private readonly DShopContext _dataContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string sidebar = "dashboard";
 
         public DashboardController(DShopContext context, IWebHostEnvironment webHostEnvironment)
         {
@@ -26,6 +27,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = sidebar;
             var countProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0).Count();
             var countOrder = _dataContext.Orders.Where(p => p.Status != 0).Count();
             var CountCompletedOrder = _dataContext.Orders.Where(p => p.Status == 4).Count();

@@ -1,0 +1,61 @@
+﻿﻿@using Microsoft.AspNetCore.Identity
+@using DShop2024.Models
+
+@inject SignInManager<AppUserModel> SignInManager
+@inject UserManager<AppUserModel> UserManager
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item topbar-user dropdown hidden-caret">
+        <a class="dropdown-toggle profile-pic"
+           data-bs-toggle="dropdown"
+           href="#"
+           aria-expanded="false">
+            <div class="avatar-sm">
+                <img src="~/assets/img/profile.jpg"
+                     alt="..."
+                     class="avatar-img rounded-circle" />
+            </div>
+            <span class="profile-username">
+                <span class="op-7">Hi,</span>
+                <span class="fw-bold">@UserManager.GetUserName(User)</span>
+            </span>
+        </a>
+        <ul class="dropdown-menu dropdown-user animated fadeIn">
+            <div class="dropdown-user-scroll scrollbar-outer">
+            <li>
+                <div class="user-box">
+                    <div class="avatar-lg">
+                        <img src="~/assets/img/profile.jpg"
+                             alt="image profile"
+                             class="avatar-img rounded" />
+                    </div>
+                    <div class="u-text">
+                        <h4>@UserManager.GetUserName(User)</h4>
+                        <a class="btn btn-xs btn-secondary btn-sm" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile" title="Manage">
+                            View Profile
+                        </a>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="dropdown-divider"></div>
+                <form asp-area="Identity" asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
+                    <button title="Logoff" type="submit" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt">Logout</i>
+                    </button>
+                </form>
+            </li>
+            </div>
+        </ul>
+    </li>
+}
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item">
+            <a title="Login" class="navbar-right nav-link  text-light" asp-area="Identity" asp-controller="Account" asp-action="Login">
+                <i class="fa fa-lock"></i>Login
+            </a>
+        </li>
+    </ul>
+}

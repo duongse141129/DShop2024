@@ -1,14 +1,16 @@
 ﻿@model IEnumerable<DShop2024.Models.BannerModel>
 
 @{
-    ViewData["title"] = "List Banner";
+    ViewData["title"] = "Manage Banner";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
 
-
-<p>
+<h1>@ViewData["title"]</h1>
+<div class="col-sm-4">
     <a class="btn btn-primary" asp-action="Create">Create New Banner</a>
-</p>
+</div>
+
 <table class="table" id="myTable">
     <thead>
         <tr>

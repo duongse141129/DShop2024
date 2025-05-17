@@ -14,6 +14,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         private readonly DShopContext _context;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly string sidebar = "role";
 
         public RoleController(DShopContext context, RoleManager<IdentityRole> roleManager)
         {
@@ -22,12 +23,14 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = sidebar;
             return View(await _context.Roles.OrderByDescending(p => p.Id).ToListAsync());
         }
 
 
         public IActionResult Create()
         {
+            ViewBag.sidebar = sidebar;
             return View();
         }
 
@@ -36,6 +39,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name")] IdentityRole roleModel)
         {
+            ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
                 if (!_roleManager.RoleExistsAsync(roleModel.Name).GetAwaiter().GetResult())
@@ -57,6 +61,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(string Id)
         {
+            ViewBag.sidebar = sidebar;
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -89,7 +94,8 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string Id)
         {
-            if(string.IsNullOrEmpty(Id))
+            ViewBag.sidebar = sidebar;
+            if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
             }
@@ -110,6 +116,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string Id, IdentityRole model)
         {
+            ViewBag.sidebar = sidebar;
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();

@@ -12,14 +12,15 @@ namespace DShop2024.Areas.Admin.Controllers
 	public class CouponController : Controller
 	{
 		private readonly DShopContext _context;
+        private readonly string sidebar = "coupon";
 
-		public CouponController(DShopContext context)
+        public CouponController(DShopContext context)
 		{
 			_context = context;
 		}
 		public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
-  
+            ViewBag.sidebar = sidebar;
             IQueryable <CouponModel> listCoupon = _context.Coupons
                                 .Where(c => c.Status != 0)
                                 .Include(c => c.Promotion)
@@ -66,7 +67,8 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
 		public IActionResult Create()
 		{
-			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
+            ViewBag.sidebar = sidebar;
+            ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 			return View();
 		}
 
@@ -74,7 +76,8 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( CouponModel couponModel)
         {
-			ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
+            ViewBag.sidebar = sidebar;
+            ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 
 			if (ModelState.IsValid)
             {
@@ -129,7 +132,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-			if (id == null)
+            ViewBag.sidebar = sidebar;
+            if (id == null)
 			{
 				return NotFound();
 			}

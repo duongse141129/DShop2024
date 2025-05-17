@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<DShop2024.Models.OrderModel>
 
 @{
-    ViewData["Title"] = "List order";
+    ViewData["Title"] = "Manage order";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-
+<h1>@ViewData["title"]</h1>
 <div class="row">
     <form asp-action="Index" asp-controller="Order">
         <div class="search_box pull-right">

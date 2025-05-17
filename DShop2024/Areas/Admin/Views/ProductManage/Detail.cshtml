@@ -1,9 +1,10 @@
 ﻿@model DShop2024.ViewModels.ProductDetailViewModel
 
 @{
-	ViewData["Title"] = "Details";
-	Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Details Product";
+	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+<h1>@ViewData["title"]</h1>
 
 <div>
 	<a asp-action="Edit" asp-route-id="@Model.ProductDetail?.Id">Edit</a> |

@@ -2,8 +2,9 @@
 @model UpdateProductRequest
 @{
     ViewData["title"] = "Edit Product";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h4>Edit Product </h4>
+<h1>@ViewData["title"]</h1>
 
 <div class="col-md-9">
     <form asp-action="Edit" enctype="multipart/form-data">

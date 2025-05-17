@@ -2,12 +2,12 @@
 @model CreateUserRequest
 @{
     ViewData["title"] = "Create User";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-
-<h1>Create User</h1>
+<h1>@ViewData["title"]</h1>
 
 <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-4">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">

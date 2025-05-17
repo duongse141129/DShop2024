@@ -19,6 +19,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IMapper _mapper;
+        private readonly string sidebar = "product";
 
         public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager, IMapper mapper)
 		{
@@ -29,6 +30,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 		public async Task<IActionResult> Index()
 		{
+            ViewBag.sidebar = sidebar;
             var products =  await _dataContext.Products.Where(p => p.Status != 0)
                                                             .Include(p => p.Category)
                                                             .Include(p => p.Brand)
@@ -40,7 +42,8 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
 		public IActionResult Create()
 		{
-			ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
+            ViewBag.sidebar = sidebar;
+            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
 			ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName");
 
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, "");
@@ -53,6 +56,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateProductRequest product)
         {
+            ViewBag.sidebar = sidebar;
             ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket);
@@ -109,6 +113,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
         public async Task<IActionResult> Edit(int? Id)
 		{
+            ViewBag.sidebar = sidebar;
             if (Id == null)
             {
                 return NotFound();
@@ -135,6 +140,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, UpdateProductRequest product)
         {
+            ViewBag.sidebar = sidebar;
             if (Id != product.Id)
             {
                 return NotFound();
@@ -214,6 +220,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[Authorize(Roles = RoleName.Administrator)]
 		public async Task<IActionResult> Delete(int? Id)
 		{
+            ViewBag.sidebar = sidebar;
             if (Id == null)
             {
                 return NotFound();
@@ -262,7 +269,8 @@ namespace DShop2024.Areas.Admin.Controllers
 		[Authorize(Roles = RoleName.Administrator)]
 		public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
         {
-            if(IdProductsToDelete.Count == 0)
+            ViewBag.sidebar = sidebar;
+            if (IdProductsToDelete.Count == 0)
             {
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Select list product to delete mutiple" ;
                 return RedirectToAction("Index");
@@ -291,6 +299,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> AddQuantity(int? Id)
         {
+            ViewBag.sidebar = sidebar;
             if (Id == null)
             {
                 return NotFound();
@@ -312,6 +321,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StoreProductQuantity(ReceivingStockModel receivingStock)
         {
+            ViewBag.sidebar = sidebar;
             var product = await _dataContext.Products.FirstOrDefaultAsync(m => m.Id == receivingStock.ProductId && m.Status != 0);
             if (product == null)
             {
@@ -347,7 +357,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Detail(int? id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
-			if (id == null)
+            ViewBag.sidebar = sidebar;
+            if (id == null)
 			{
 				return NotFound();
 			}
