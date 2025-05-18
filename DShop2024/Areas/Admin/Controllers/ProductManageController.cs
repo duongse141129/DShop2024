@@ -304,7 +304,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            var productModel = await _dataContext.Brands
+            var productModel = await _dataContext.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (productModel == null)
             {

@@ -31,7 +31,7 @@ namespace DShop2024.Controllers
                                                  string searchName = "",
                                             string sortBy = "", string startprice = "", string endPrice = "",
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "", 
-                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 6)
+                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 8)
         {
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
@@ -122,8 +122,8 @@ namespace DShop2024.Controllers
 
             int totalProduct = listProduct.Count();
             if (pagesSize <= 0)
-                pagesSize = 6;
-            int countPages = (int)Math.Ceiling((double)totalProduct / 6);
+                pagesSize = 8;
+            int countPages = (int)Math.Ceiling((double)totalProduct / 8);
 
             if (currentPage > countPages)
                 currentPage = countPages;

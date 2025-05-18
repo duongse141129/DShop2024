@@ -11,10 +11,10 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
                 <div class="row gy-3 mb-3">
-                    <div class="col-6">
+                    <div class="col-md-12">
                         <h2 class="text-uppercase text-endx m-0">Invoice: @Model.OrderCode</h2>
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-12">
                         @if(Model.Status == 0)
                         {
                             <h4>Invoice has been cancelled</h4>
@@ -31,7 +31,7 @@
                         
                         <hr>
                     </div>
-                    <div class="col-12">
+                    <div class="col-md-12">
         
                         <address>
                             <strong>@Model.CreatedDate.ToLongDateString()</strong><br>
@@ -95,7 +95,7 @@
                                     @foreach (var item in Model.OrderDetails)
                                     {
                                         <tr>
-                                            <th scope="row">@i</th>
+                                            <td scope="row">@i</td>
                                             <td>@item.ProductId</td>
                                             <td>
                                                 <p>@item.Product.ProductName</p>
@@ -109,24 +109,34 @@
                                         </tr>
                                         i++;
                                     }
-                                    
-                                    <tr>
+                                    <tr >
+                                         <td></td>
+                                        <td></td>
                                         <td colspan="3" class="text-end">Subtotal</td>
-                                        <td class="text-end">@Model.OrderDetails.Sum( od => od.Quantity * od.Price )</td>
+                                        <td class="text-end">@Model.OrderDetails.Sum(od => od.Quantity * od.Price)</td>
                                     </tr>
                                     <tr>
+                                        <td></td>
+                                        <td></td>
                                         <td colspan="3" class="text-end">coupon</td>
-                                        <td class="text-end">- @Model.ValueCoupon</td>
+                                        <td class="text-end">-@Model.ValueCoupon</td>
                                     </tr>
                                     <tr>
+                                        <td></td>
+                                        <td></td>
                                         <td colspan="3" class="text-end">Shipping Cost</td>
-                                        <td class="text-end">+ @Model.ShippingCost</td>
+                                        <td class="text-end">+@Model.ShippingCost</td>
                                     </tr>
                                     <tr>
+                                        <td></td>
+                                        <td></td>
                                         <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
                                         <td class="text-end">@Model.TotalPrice</td>
                                     </tr>
+
                                 </tbody>
+
+
                             </table>
                         </div>
                     </div>

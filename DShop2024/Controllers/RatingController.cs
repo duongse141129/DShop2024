@@ -1,0 +1,58 @@
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DShop2024.Controllers
+{
+	public class RatingController : Controller
+	{
+		private readonly DShopContext _dataContext;
+		private readonly UserManager<AppUserModel> _userManager;
+		public RatingController(DShopContext context, UserManager<AppUserModel> userManager)
+		{
+			_dataContext = context;
+			_userManager = userManager;
+		}
+		public IActionResult Index()
+		{
+			return View();
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> CommentProduct(RatingModel rating)
+		{
+			if (ModelState.IsValid)
+			{
+				var user = await _userManager.GetUserAsync(this.User);
+				var ratingModel = new RatingModel
+				{
+					ProductId = rating.ProductId,
+					Comment = rating.Comment,
+					RatingDateTime = DateTime.Now,
+					Star = rating.Star,
+					UserId = user.Id,
+					Status = 1
+				};
+				try
+				{
+					_dataContext.Ratings.Add(ratingModel);
+					await _dataContext.SaveChangesAsync();
+
+					TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
+					return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+				}
+				catch (Exception ex)
+				{
+					TempData[DShopConst.TEMPDATA_ERROR] = "Feedback product fail " + ex.Message;
+					return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+				}
+
+			}
+			TempData[DShopConst.TEMPDATA_ERROR] = "Please fill all value ";
+			return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+
+		}
+	}
+}

@@ -44,7 +44,7 @@ namespace DShop2024.Repository.Components
 				 AveragePoint = g.Average(x => x.r.Star)
 			 })
 			 .OrderByDescending(x => x.AveragePoint)
-			 .Take(5)
+			 .Take(3)
 			 .ToListAsync();
 
 			return View(bestRatingProducts);

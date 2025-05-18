@@ -153,7 +153,7 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}");
 
 //Seed data
 //var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DShopContext>();

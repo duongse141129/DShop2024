@@ -212,18 +212,30 @@
 
 
 							<p><b>Write Your Review</b></p>
-							<form autocomplete="off" asp-controller="Product" asp-action="CommentProduct" method="post">
+							<form autocomplete="off" asp-action="CommentProduct" asp-controller="Rating" method="post">
+								<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 								<span>
 									<input type="hidden" name="ProductId" asp-for="@Model.Feedback.ProductId" value="@Model.ProductDetail.Id" />
 									<input name="Star" asp-for="@Model.Feedback.Star" type="number" min="1" max="5" step="1" value="5" />
 								</span>
 								<textarea asp-for="@Model.Feedback.Comment" name="Comment" placeholder="Enter your review"></textarea>
 								<span asp-validation-for="@Model.Feedback.Comment" class="text-danger"></span>
-								<b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
 								<button type="submit" class="btn btn-default pull-right">
 									Submit
 								</button>
-							</form> 
+							</form>
+
+
+@* 							<form autocomplete="off" asp-action="CommentProduct" asp-controller="Product" method="post" enctype="multipart/form-data">
+								<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+								<span>
+									<input type="hidden" name="ProductId" asp-for="@Model.Feedback.ProductId" value="@Model.ProductDetail.Id" />
+									<input name="Star" asp-for="@Model.Feedback.Star" type="number" min="1" max="5" step="1" value="5" />
+								</span>
+								<textarea asp-for="@Model.Feedback.Comment" name="Comment" placeholder="Enter your review"></textarea>
+								<span asp-validation-for="@Model.Feedback.Comment" class="text-danger"></span>
+								<input type="submit" class="btn btn-primary" value="Feedback"  />
+							</form>  *@
 
 						}
 					}

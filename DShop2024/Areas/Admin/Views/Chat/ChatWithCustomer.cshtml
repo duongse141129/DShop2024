@@ -2,14 +2,13 @@
 @inject UserManager<AppUserModel> UserManager
 @model IEnumerable<DShop2024.ViewModels.MessageViewModel>
 @{
-    ViewData["Title"] = "Chat";
+    ViewData["Title"] = "Chat with customer";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-
+<h1> @ViewData["Title"]</h1>
 <div class="container">
-    <div class="scroll-container">
+     <div class="scroll-container">
         <div class="col-3">
-
             <ul id="messagesList_@ViewBag.receiverName">
                 @foreach (var item in Model)
                 {
@@ -30,9 +29,41 @@
                     }
                 }
 
-            </ul>
+            </ul> 
         </div>
-    </div>
+    </div> 
+@* 
+    <div class="scroll-container">
+        <div class="row">
+            <div id="messagesList_@ViewBag.receiverName">
+                @foreach (var item in Model)
+                {
+
+                    @if (item.UserName == UserManager.GetUserName(User))
+                    {
+ 
+                            <div class="col-sm-12 text-end">
+                                <span> @item.Timestamp</span>
+                                <p>[@item.RoleName][@item.UserName]: @item.ContentMessage</p>
+                            </div>
+
+                    
+                    }
+                    else
+                    {
+                       
+                            <div class="col-sm-12 text-info">
+                                <span> @item.Timestamp</span>
+                                <p>[@item.RoleName][@item.UserName]: @item.ContentMessage</p>
+                            </div>
+                                            
+                    }
+                }
+
+            </div>
+        </div>
+    </div> *@
+
 
     <hr />
     <div class="row p-1">

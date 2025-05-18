@@ -165,18 +165,11 @@ namespace DShop2024.Controllers
 				}
 
 				var productById = await _dataContext.Products
-							.Where(p => p.Id == Id)
-							.Where(p => p.Status != 0)
+							.Where(p => p.Id == Id && p.Status != 0)
 							.Include(p => p.Brand)
 							.Include(p => p.Category)
-							.Include(p => p.Rating)
-							.ThenInclude(p => p.User)
 							.FirstOrDefaultAsync();
-				if (productById == null)
-				{
-					return NotFound();
-				}
-
+		
 				List<ProductModel> relatedProducts = await _dataContext.Products
 										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
 										.Include (p => p.Brand)
@@ -226,42 +219,41 @@ namespace DShop2024.Controllers
 
 				double pointAvarge = 0.0;
 				bool checkUserOrder = false;
-				RatingModel feedback = new RatingModel();
+				RatingModel myFeedback = new RatingModel();
 				List<RatingModel> ratings = new List<RatingModel>();
 				bool isInWishList = false;
 				bool isInCompare = false;
 				bool isFeedBack = false;
 
 				var count = await listRating.CountAsync();
+			
 
-				if(count > 0)
-				{
-					pointAvarge = Math.Round(listRating.Average(p => p.Star), 1);
-				}
-				
-				if (user != null)
-				{
-					var checkOrder = await (from o in _dataContext.Orders
-											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
-											where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
-											select o).FirstOrDefaultAsync();
-
-					if (checkOrder != null)
-					{
-						checkUserOrder = true;
-						feedback = await listRating.Where(u => u.UserId == user.Id && u.ProductId == Id).FirstOrDefaultAsync();
-						if (feedback != null)
-						{
-							isFeedBack = true;
-							listRating = listRating.Where(u => u.UserId != user.Id);
-						}
-					}
-					isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
-					isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
-				}
 				
 				if (count > 0)
 				{
+					pointAvarge = Math.Round(listRating.Average(p => p.Star), 1);
+
+					if (user != null)
+					{
+						var checkOrder = await (from o in _dataContext.Orders
+												join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+												where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
+												select o).FirstOrDefaultAsync();
+
+						if (checkOrder != null)
+						{
+							checkUserOrder = true;
+							myFeedback = await listRating.Where(u => u.UserId == user.Id && u.ProductId == Id).FirstOrDefaultAsync();
+							if (myFeedback != null)
+							{
+								isFeedBack = true;
+								listRating = listRating.Where(u => u.UserId != user.Id);
+							}
+						}
+						isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+						isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+					}
+
 					int totalRating = listRating.Count();
 					if (pagesSize <= 0)
 						pagesSize = 5;
@@ -284,7 +276,7 @@ namespace DShop2024.Controllers
 						})
 					};
 
-					ratings = await listRating.Where(r => r.Id != feedback.Id)
+					ratings = await listRating
 								.Skip((currentPage - 1) * pagesSize)
 								.Take(pagesSize).ToListAsync();
 					ViewBag.pagingModel = pagingModel;
@@ -296,7 +288,7 @@ namespace DShop2024.Controllers
 					Point = pointAvarge,
 					listRating = ratings,
 					IsOrder = checkUserOrder,
-					Feedback = feedback,
+					Feedback = myFeedback,
 					IsInCompare = isInCompare,
 					IsInWishlist = isInWishList,
 					IsFeedback = isFeedBack
@@ -309,7 +301,7 @@ namespace DShop2024.Controllers
 			{
 
 				TempData[DShopConst.TEMPDATA_ERROR] = "fail " + ex.Message;
-				return View();
+				return RedirectToAction("Index");
 			}
 
 		}
@@ -331,12 +323,51 @@ namespace DShop2024.Controllers
         }
 
 
-        [Authorize]
+
+
+		//[Authorize]
+		//[HttpPost]
+		//[ValidateAntiForgeryToken]
+		//public async Task<IActionResult> CommentProduct(RatingModel rating)
+		//{
+		//	var x = "";
+		//	if (ModelState.IsValid)
+		//	{
+		//		var user = await _userManager.GetUserAsync(this.User);
+		//		var ratingModel = new RatingModel
+		//		{
+		//			ProductId = rating.ProductId,
+		//			Comment = rating.Comment,
+		//			RatingDateTime = DateTime.Now,
+		//			Star = rating.Star,
+		//			UserId = user.Id,
+		//			Status = 1
+		//		};
+		//		try
+		//		{
+		//			_dataContext.Ratings.Add(ratingModel);
+		//			await _dataContext.SaveChangesAsync();
+
+		//			TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
+		//			return RedirectToAction("Details", new { Id = rating.ProductId });
+		//		}
+		//		catch (Exception ex)
+		//		{
+		//			TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product fail " + ex.Message;
+		//			return RedirectToAction("Details", new { Id = rating.ProductId });
+		//		}
+
+		//	}
+		//	return RedirectToAction("Details", new { Id = rating.ProductId });
+
+		//}
+
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CommentProduct(RatingModel rating)
 		{
-			if(ModelState.IsValid)
+			if (ModelState.IsValid)
 			{
 				var user = await _userManager.GetUserAsync(this.User);
 				var ratingModel = new RatingModel
@@ -351,7 +382,7 @@ namespace DShop2024.Controllers
 				_dataContext.Ratings.Add(ratingModel);
 				await _dataContext.SaveChangesAsync();
 
-				TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
+				TempData["success"] = "Feedback product successfully";
 				return RedirectToAction("Details", new { Id = rating.ProductId });
 			}
 
