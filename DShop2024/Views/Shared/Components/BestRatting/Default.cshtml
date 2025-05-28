@@ -1,7 +1,91 @@
 ﻿@using DShop2024.ViewModels
 @model IEnumerable<ProductViewModel>
 
-<h2 class="title text-center">Features Items</h2>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="section-header d-flex justify-content-between">
+
+            <h2 class="section-title">Featured products</h2>
+
+            <div class="d-flex align-items-center">
+                <a asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Products →</a>
+                <div class="swiper-buttons">
+                    <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
+                    <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="products-carousel swiper">
+            <div class="swiper-wrapper">
+
+                @foreach (var item in Model)
+                {
+                    <div class="product-item swiper-slide">
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+                                <i class="fas fa-retweet"></i>
+                            </a>
+                            <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        }
+                        <figure>
+                            <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" title="Product Title">
+                                <img src="~/media/products/@item.Image" class="tab-image">
+                            </a>
+                        </figure>
+                        <h3>@item.ProductName</h3>
+                        <span class="qty">Point</span><span class="rating"> @item.AveragePoint</span>
+                        <div class="d-flex mb-2">
+                            <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+                            <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+                            <i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+                            <i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+                            <i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+                        </div>
+                        <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                        <span class="qty">@item.BrandName</span><br />
+                        <span class="qty">@item.CategoryName</span>
+                        <div class="d-flex align-items-center justify-content-between">
+                            @if (item.Stock > 0)
+                            {
+                                <button class="btn btn-primary add-to-cart" data-product_id="@item.Id">Add to Cart</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-primary add-to-cart">Out Of Order</button>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+        <!-- / products-carousel -->
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+@* <h2 class="title text-center">Features Items</h2>
 @foreach (var item in Model)
 {
 	<div class="col-sm-4">
@@ -57,4 +141,4 @@
 }
 
 
-
+ *@

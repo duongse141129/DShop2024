@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol.Plugins;
+using SixLabors.ImageSharp;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -18,13 +19,15 @@ namespace DShop2024.Areas.Admin.Controllers
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly string sidebar = "chat";
 
-        public ChatController(DShopContext context, UserManager<AppUserModel> userManager, IHubContext<ChatHub> hubContext)
+        public ChatController(DShopContext context, UserManager<AppUserModel> userManager, IHubContext<ChatHub> hubContext, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _userManager = userManager;
             _hubContext = hubContext;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -64,6 +67,8 @@ namespace DShop2024.Areas.Admin.Controllers
                                                          RoleName = r.Name, 
                                                          ContentMessage = m.ContentMessage,
                                                          Timestamp = m.Timestamp.ToString("MM/dd/yyyy HH:mm:ss"),
+                                                         Receiver = m.ReceiverId,
+                                                         Avatar = u.Avatar
                                                      })
                                                      .ToListAsync();
 
@@ -92,13 +97,16 @@ namespace DShop2024.Areas.Admin.Controllers
                 var role = await _userManager.GetRolesAsync(user);
 
                 var reciver = await _userManager.FindByIdAsync(receiver);
+
                 MessageViewModel modelVM = new MessageViewModel
                 {
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
                     UserName = user.UserName,
                     RoleName = role.FirstOrDefault(),
-                    Receiver = reciver.UserName
+                    Receiver = reciver.UserName,
+                    Avatar = user.Avatar,
+                    PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}"
                 };
 
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);

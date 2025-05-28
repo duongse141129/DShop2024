@@ -6,28 +6,30 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <form asp-area="Identity" asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
-        <ul class="nav navbar-nav navbar-right">
-            <li class="nav-item">
-                <a class="nav-link text-light" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile" title="Manage">
-                    <i class="fa fa-user" aria-hidden="true">@UserManager.GetUserName(User)</i>
-                </a>
-            </li>
-            <li class="nav-item">
-                <button title="Logoff" type="submit" class="btn btn-link navbar-btn navbar-link  text-light">
-                    <i class="fas fa-sign-out-alt">Logout</i>
-                </button>
-            </li>
-        </ul>
-    </form>
+       <form asp-area="Identity" asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
+        <a class="my-auto" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile" title="Manage">
+            @await Component.InvokeAsync("Avatar")
+          @UserManager.GetUserName(User)
+        </a>
+        <button title="Logoff" type="submit" class="my-auto">
+            <i class="fas fa-sign-out-alt">Logout</i>
+        </button>
+
+
+
+    </form> 
 }
 else
 {
-    <ul class="nav navbar-nav navbar-right">
+    <a title="Login" class="my-auto" asp-area="Identity" asp-controller="Account" asp-action="Login">
+        <i class="fa fa-lock"></i>Login
+    </a>
+
+@*     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
-            <a title="Login" class="nav-link  text-light" asp-area="Identity" asp-controller="Account" asp-action="Login">
+            <a title="Login" class="nav-link " asp-area="Identity" asp-controller="Account" asp-action="Login">
                 <i class="fa fa-lock"></i>Login
             </a>
         </li>
-    </ul>
+    </ul> *@
 }

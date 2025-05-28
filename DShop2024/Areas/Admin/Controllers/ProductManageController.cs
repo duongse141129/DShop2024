@@ -311,9 +311,15 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var receivingStockList = await _dataContext.ReceivingStocks.Where(x => x.ProductId == Id).Include(r => r.User).ToListAsync();
+            var receivingStockList = await _dataContext.ReceivingStocks.Where(x => x.ProductId == Id && x.Status != 0)
+                                                .Include(p => p.Product)
+                                                .Include(r => r.User)
+                                                .ToListAsync();
             ViewBag.receivingStockList = receivingStockList;
-            ViewBag.Id = Id;
+            ViewBag.totalQuantity = receivingStockList.Sum(r => r.Quantity);
+            ViewBag.totalOriginalPrice = receivingStockList.Sum(r => r.Product.OriginalPrice);
+            ViewBag.product = productModel;
+
             return View();
         }
 

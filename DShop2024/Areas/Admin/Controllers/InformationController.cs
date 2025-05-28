@@ -76,6 +76,7 @@ namespace DShop2024.Areas.Admin.Controllers
 					exitedInformationShop.ShopName = informationShop.ShopName;
 					exitedInformationShop.Description = informationShop.Description;
 					exitedInformationShop.Map = informationShop.Map;
+					exitedInformationShop.Address = informationShop.Address;
 					exitedInformationShop.Phone = informationShop.Phone;
 					exitedInformationShop.Email = informationShop.Email;
 					exitedInformationShop.PluginFacebook = informationShop.PluginFacebook;

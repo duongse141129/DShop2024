@@ -13,8 +13,10 @@ namespace DShop2024.Models
         [Required(ErrorMessage = "Enter your name shop")]
         public string ShopName { get; set; }
 
-        [Required(ErrorMessage = "Enter your local address")]
+        [Required(ErrorMessage = "Enter your map")]
         public string Map { get; set; }
+        [Required(ErrorMessage = "Enter your local address")]
+        public string Address { get; set; }
         [Required(ErrorMessage = "Enter your hotline")]
         public string Phone { get; set; }
         [Required(ErrorMessage = "Enter your email address")]

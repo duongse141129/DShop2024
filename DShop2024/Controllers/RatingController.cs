@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ namespace DShop2024.Controllers
 		{
 			return View();
 		}
-
+		[Authorize]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CommentProduct(RatingModel rating)
@@ -41,17 +42,17 @@ namespace DShop2024.Controllers
 					await _dataContext.SaveChangesAsync();
 
 					TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
-					return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+					return RedirectToAction("Details", "ShopProducts", new { Id = rating.ProductId });
 				}
 				catch (Exception ex)
 				{
 					TempData[DShopConst.TEMPDATA_ERROR] = "Feedback product fail " + ex.Message;
-					return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+					return RedirectToAction("Details", "ShopProducts", new { Id = rating.ProductId });
 				}
 
 			}
 			TempData[DShopConst.TEMPDATA_ERROR] = "Please fill all value ";
-			return RedirectToAction("Details", "Product", new { Id = rating.ProductId });
+			return RedirectToAction("Details", "ShopProducts", new { Id = rating.ProductId });
 
 		}
 	}

@@ -25,7 +25,7 @@ namespace DShop2024.Models
         public int CategoryId { get; set; }
 		public BrandModel Brand { get; set; }
 		public CategoryModel Category { get; set; }
-		public RatingModel Rating { get; set; }
+
 		public int Status { get; set; }
 
         [Required(ErrorMessage = "Original Price is required ")]
@@ -58,6 +58,7 @@ namespace DShop2024.Models
         public IFormFile? ImageUpload { get; set; }
 
         public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }
+        public virtual ICollection<RatingModel> Ratings { get; set; }
 
     }
 }

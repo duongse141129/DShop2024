@@ -24,32 +24,12 @@ namespace DShop2024.Controllers
 		public  IActionResult Index()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
-			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
-
-			decimal shippingPrice = 0;
-			if (info.ShippingCost != 0)
-			{
-				shippingPrice = info.ShippingCost;
-			}
-
 			decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
-			decimal sumCouponValue = coupouns.Sum(s => s.Value);
-			decimal grandTotal = sumPirceItemsCart + shippingPrice - sumCouponValue;
-			if(grandTotal < 0)
+			CartItemViewModel cartItemViewModel = new CartItemViewModel
 			{
-				grandTotal = 0;
-			}
-
-			CartItemViewModel cartItemViewModel = new CartItemViewModel {
 				CartItems = cartItems,
 				SumPriceItemsCart = sumPirceItemsCart,
-				SumCouponValue = sumCouponValue,
-				GrandTotal = grandTotal,
-				CouponsApply = coupouns,
-				InfoDelivery = info
 			};
-
 			return View(cartItemViewModel);
 		}
 
@@ -75,20 +55,21 @@ namespace DShop2024.Controllers
 
 		}
 
-		public async Task<ActionResult> AddToCart(int? Id) {
-            if (Id == null)
-            {
-                return NotFound();
-            }
-            ProductModel product = await _dataContext.Products
-                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-            if (product == null)
-            {
-                return NotFound();
-            }
+		public async Task<ActionResult> AddToCart(int? Id)
+		{
+			if (Id == null)
+			{
+				return NotFound();
+			}
+			ProductModel product = await _dataContext.Products
+				.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+			if (product == null)
+			{
+				return NotFound();
+			}
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			if(cartItem == null)
+			if (cartItem == null)
 			{
 				cart.Add(new CartItemModel(product));
 			}
@@ -97,21 +78,21 @@ namespace DShop2024.Controllers
 				if (product.Stock <= cartItem.Quantity)
 				{
 					TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
-					
+
 				}
 				else
 				{
 					cartItem.Quantity += 1;
 					TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
 				}
-				
-				
+
+
 			}
 			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 			await GetValueByPercentCoupon();
 			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
 			return Redirect(Request.Headers["Referer"].ToString());
-		
+
 		}
 
 		public async Task<ActionResult> Increase(int? Id)

@@ -1,119 +1,167 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-	<meta name="author" content="">
-	<title>Home | E-Shopper</title>
-	<link href="~/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
-	<link href="~/css/prettyPhoto.css" rel="stylesheet">
-	<link href="~/css/price-range.css" rel="stylesheet">
-	<link href="~/css/animate.css" rel="stylesheet">
-	<link href="~/css/main.css" rel="stylesheet">
-	<link href="~/css/responsive.css" rel="stylesheet">
-	<link href="~/custom/css/site.css" rel="stylesheet">
-	<link href="~/custom/Css/StyleOrder.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Fruitables - Vegetable Website Template</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
 
-	<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.min.css" rel="stylesheet">
-	<!--[if lt IE 9]>
-	<script src="js/html5shiv.js"></script>
-	<script src="js/respond.min.js"></script>
-	<![endif]-->
-	<link rel="shortcut icon" href="images/ico/favicon.ico">
-	<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
-	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
 
-</head><!--/head-->
+    <!-- Icon Font Stylesheet -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="~/template/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+    <link href="~/template/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="~/template/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="~/template/css/style.css" rel="stylesheet">
+
+ 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous"> 
+    <link rel="stylesheet" type="text/css" href="~/template/home/css/vendor.css"> 
+    <link rel="stylesheet" type="text/css" href="~/template/home/style.css">
+
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+
+    <link href="~/custom/css/site.css" rel="stylesheet" />
+    <link href="~/custom/css/styleorder.css" rel="stylesheet" />
+</head>
 
 <body>
-	<header id="header">
-		<!--header-->
 
+    <!-- Spinner Start -->
+    <div id="spinner" class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50  d-flex align-items-center justify-content-center">
+        <div class="spinner-grow text-primary" role="status"></div>
+    </div>
+    <!-- Spinner End -->
+    <!-- Navbar start -->
+    <div class="container-fluid ">
+        <div class="container topbar bg-primary d-none d-lg-block">
+            <div class="d-flex justify-content-between">
+                <div class="top-info ps-2">
+                    @if (User.IsInRole(RoleName.Administrator) || User.IsInRole(RoleName.Employee))
+                    {
+                        <a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Manage Products</a>
+                    }
+                </div>
+                <div class="top-link pe-2">
+                    <a asp-action="Index" asp-controller="SendContact" class="text-white"><small class="text-white mx-2">Contact</small>/</a>
+                    <a asp-action="AboutUs" asp-controller="Home" class="text-white"><small class="text-white ms-2">About Us</small></a>
+                </div>
+            </div>
+        </div>
+        <div class="container px-0">
+            <nav class="navbar navbar-light bg-white navbar-expand-xl p-5">
+                @await Component.InvokeAsync("LogoShop")
 
-		<div class="header-middle">
-			<!--header-middle-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-					</div>
-					<div class="col-sm-8">
-						<div class="shop-menu pull-right">
-							<ul class="nav navbar-nav">
-								@if (User.IsInRole(RoleName.Administrator) || User.IsInRole(RoleName.Employee))
-								{
-									<li><a asp-area="Admin" asp-controller="ProductManage" asp-action="Index">Manage Products</a></li>
-								}
-								
-								<li><a asp-action="WishList" asp-controller="Home"><i class="fa fa-star"></i> Wishlist</a></li>
-								<li><a asp-action="Compare" asp-controller="Home"><i class="fa fa-crosshairs"></i> Compare</a></li>
-								<li><a asp-action="Index" asp-controller="Order"><i class="fa fa-star"></i> History Shopping</a></li>						
-								<li><partial name="_LoginPartial" /></li>
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto">
+                        <a class="nav-item nav-link active" asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i>Home</a>
+                        <a class="nav-item nav-link" asp-action="Index" asp-controller="ShopProducts"><i class="fas fa-th-list"></i>Shop</a>
+                        <a class="nav-item nav-link" asp-action="Index" asp-controller="Message"><i class="far fa-comments"></i>Chat</a>
 
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header-middle-->
-
-		<div class="header-bottom">
-			<!--header-bottom-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-9">
-						<div class="navbar-header">
-						</div>
-						<div class="mainmenu pull-left">
-							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-controller="Home" asp-action="Index" class="active">Home</a></li>
-								<li><a asp-action="Index" asp-controller="Product">Products</a></li>
-								<li><a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-cart"></i>Cart</a></li>
-								<li><a asp-action="Index" asp-controller="Message">Chat</a></li>
-								<li><a asp-action="Index" asp-controller="SendContact">Contact</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-3">
-					</div>
-				</div>
-			</div>
-		</div><!--/header-bottom-->
-	</header><!--/header-->
-
-
-
-	<section>
-		<div class="container">
-
-				<partial name="_NotificationPartial" />
-				@RenderBody();
-		</div>
-	</section>
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
+                            <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                                <a class="dropdown-item" asp-action="WishList" asp-controller="Home"><i class="far fa-heart"></i> Wishlist</a>
+                                <a class="dropdown-item" asp-action="Compare" asp-controller="Home"><i class="fa fa-crosshairs"></i> Compare</a>
+                                <a class="dropdown-item" asp-action="Index" asp-controller="Order"><i class="fas fa-history"></i>History Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex m-3 me-0">
+                        <a asp-action="Index" asp-controller="Cart" class="position-relative me-4 my-auto">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </a>
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
 
 
 
-	<footer id="footer">
-		<!--Footer-->
-	 	 <partial name="_FooterPartial" />  
-
-	</footer><!--/Footer-->
+    <partial name="_NotificationPartial" />
+    @RenderBody();
 
 
 
-	<script src="https://apis.google.com/js/platform.js"></script>
-	<script src="~/js/jquery.js"></script>
-	<script src="~/js/bootstrap.min.js"></script>
-	<script src="~/js/jquery.scrollUp.min.js"></script>
-	<script src="~/js/price-range.js"></script>
-	<script src="~/js/jquery.prettyPhoto.js"></script>
-	<script src="~/js/main.js"></script>
-	<script src="~/custom/js/site.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
-	@await RenderSectionAsync("Scripts", required: false)
+    <!-- Footer Start -->
+    <partial name="_FooterPartial" />
+    <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/template/lib/easing/easing.min.js"></script>
+    <script src="~/template/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/template/lib/lightbox/js/lightbox.min.js"></script>
+    <script src="~/template/lib/owlcarousel/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="~/template/js/main.js"></script>
+
+
+   <script src="~/template/home/js/jquery-1.11.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script> 
+    <script src="~/template/home/js/plugins.js"></script>
+    <script src="~/template/home/js/script.js"></script>
+
+
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
+    <script src="~/custom/js/site.js"></script>
+
+    <script>
+        $(function () {
+
+            var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';
+            if (message != '') {
+                Swal.fire({
+                    title: message,
+                    icon: "success",
+                    draggable: true
+                });
+            }
+            var messageFail = '@TempData[DShopConst.TEMPDATA_ERROR]';
+            if (messageFail != '') {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: messageFail
+                });
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
 </body>
+
 </html>

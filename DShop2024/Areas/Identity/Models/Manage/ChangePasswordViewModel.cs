@@ -11,20 +11,20 @@ namespace App.Areas.Identity.Models.ManageViewModels
 {
     public class ChangePasswordViewModel
     {
-        [Required(ErrorMessage = "Phải nhập {0}")]
+        [Required(ErrorMessage = "The {0} field is required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu hiện tại")]
+        [Display(Name = "Current password")]
         public string OldPassword { get; set; }
 
-        [Required(ErrorMessage = "Phải nhập {0}")]
-        [StringLength(100, ErrorMessage = "{0} phải dài tối thiểu {2} ký tự.", MinimumLength = 6)]
+        [Required(ErrorMessage = "The {0} field is required")]
+        [StringLength(100, ErrorMessage = "{0} must have at least {2} characteres.", MinimumLength = 6)]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu mới")]
+        [Display(Name = "New password")]
         public string NewPassword { get; set; }
 
         [DataType(DataType.Password)]
-        [Display(Name = "Xác nhận lại mật khẩu")]
-        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận phải trùng với mật khẩu mới")]
+        [Display(Name = "New password confirmation")]
+        [Compare("NewPassword", ErrorMessage = "Confirm password must match new password")]
         public string ConfirmPassword { get; set; }
     }
 }

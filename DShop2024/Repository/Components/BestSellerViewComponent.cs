@@ -46,7 +46,7 @@ namespace DShop2024.Repository.Components
 				 QuantitySold = g.Sum(x => x.od.Quantity)
 			 })
 			 .OrderByDescending(x => x.QuantitySold)
-			 .Take(3)
+			 .Take(8)
 			 .ToListAsync();
 			return View(bestSaleProducts);
 

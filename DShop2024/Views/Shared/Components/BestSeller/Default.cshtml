@@ -1,7 +1,82 @@
 ﻿@using DShop2024.ViewModels
 @model IEnumerable<ProductViewModel>
 
-<h2 class="title text-center">Best Selling Products </h2>
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="section-header d-flex flex-wrap justify-content-between my-5">
+
+            <h2 class="section-title">Best selling products</h2>
+
+            <div class="d-flex align-items-center">
+                <a asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Products →</a>
+                <div class="swiper-buttons">
+                    <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
+                    <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="products-carousel swiper">
+            <div class="swiper-wrapper">
+                @foreach (var item in Model)
+                {
+                    <div class="product-item swiper-slide">
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+                                <i class="fas fa-retweet"></i>
+                            </a>
+                            <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+                                <i class="far fa-heart"></i>
+                            </a>
+                        }
+                        <figure>
+                            <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" title="Product Title">
+                                <img src="~/media/products/@item.Image" class="tab-image">
+                            </a>
+                        </figure>
+                        <h3>@item.ProductName</h3>
+                        <span class="qty">Sold: </span><span class="rating"> @item.QuantitySold</span>
+                        <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                        <span class="qty">@item.BrandName</span><br />
+                        <span class="qty">@item.CategoryName</span>
+                        <div class="d-flex align-items-center justify-content-between">
+                            @if (item.Stock > 0)
+                            {
+                                <button class="btn btn-primary add-to-cart" data-product_id="@item.Id">Add to Cart</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-primary add-to-cart">Out Of Order</button>
+                            }
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+        <!-- / products-carousel -->
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+@* <h2 class="title text-center">Best Selling Products </h2>
 
 
 @foreach (var item in Model)
@@ -47,7 +122,7 @@
 		</div>
 	</div>
 }
-
+ *@
 
 
 

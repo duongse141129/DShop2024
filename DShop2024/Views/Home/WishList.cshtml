@@ -1,14 +1,32 @@
-﻿@{
-    ViewData["title"] = "Compare Product";
+﻿@model IEnumerable<DShop2024.Models.ProductModel>
+
+@{
+    ViewData["title"] = "Wishlist Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h4>List Compare Product </h4>
-<table class="table" id="myTable">
+
+<section class="py-5">
+    <div class="container-fluid bg-light  py-5">
+
+@if(Model.Count() == 0)
+{
+    <h4>List compare is empty</h4>
+}
+else
+{
+
+
+
+    <h4>List Compare Product </h4>
+            <a asp-action="DeleteAllWishList" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home">Clear all</a>
+        <table class="table table-hover" id="myTable">
     <thead>
         <tr>
             <th scope="col">Stt</th>
             <th scope="col">Image</th>
             <th scope="col">Product Name</th>
-            <th scope="col">Description</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Category</th>
             <th scope="col">Price</th>
             <th scope="col">Action</th>
 
@@ -22,13 +40,14 @@
         {
             <tr>
                 <th scope="row">@i</th>
-                <td><img src="~/media/products/@item.Product.Image" width="120" height="100" /></td>
-                <td>@item.Product.ProductName</td>
-                <td>@Html.Raw(item.Product.Description)</td>
-                <td>@item.Product.Price.ToString("#,##0 VND")</td>
+                <td><img src="~/media/products/@item.Image" width="120" height="100" /></td>
+                <td>@item.ProductName</td>
+                <td>@item.Brand.BrandName</td>
+                <td>@item.Category.CategoryName</td>
+                <td>@item.Price.ToString("#,##0 VND")</td>
                 <td>
 
-                    <a asp-action="DeleteWishList" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@item.WishList.Id">Delete</a>
+                    <a asp-action="DeleteWishList" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@item.Id">Delete</a>
                 </td>
 
             </tr>
@@ -42,3 +61,9 @@
 
 </table>
 
+
+
+}
+    </div>
+
+</section>

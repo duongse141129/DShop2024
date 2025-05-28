@@ -1,5 +1,41 @@
-﻿
-<div class="row">
+﻿<section class="py-5 overflow-hidden">
+    <div class="container-fluid">
+        @await Component.InvokeAsync("BestSeller")  
+    </div>
+</section>
+
+
+<section class="py-5 overflow-hidden">
+    <div class="container-fluid">
+        @await Component.InvokeAsync("BestRatting")
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* <div class="row">
     @await Component.InvokeAsync("BestRatting")
 </div>
 <br/>
@@ -11,3 +47,4 @@
 
 
 
+ *@

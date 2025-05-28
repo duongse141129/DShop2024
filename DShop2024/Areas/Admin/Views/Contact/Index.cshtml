@@ -6,7 +6,78 @@
 
 <h1>@ViewData["title"]</h1>
 
-<div class="response-area">
+@foreach (var item in Model)
+{
+	<div class="owl-item">
+		<div class="testimonial-item img-border-radius rounded p-4">
+			<div class="position-relative">
+				<div class="d-flex align-items-center flex-nowrap border-bottom border-secondary">
+					<div class="bg-secondary rounded">
+						<img src="~/media/avatar/@item.User.Avatar" class="img-fluid rounded media-avatar" alt="">
+					</div>
+					<div class="ms-4 d-block">
+						<h4 class="text-dark">@item.User.UserName</h4>
+						<p class="m-0 pb-3">@item.User.Email</p>
+						<ul class="sinlge-post-meta">
+							<li><i class="far fa-clock"></i>@item.DateSent.ToShortTimeString()</li>
+							<li><i class="fa fa-calendar"></i>@item.DateSent.ToShortDateString()</li>
+						</ul>
+					</div>
+				</div>
+				<div class="mb-4 pb-4 border-bottom ">
+					<p>Subject: <strong>@item.Subject</strong></p>
+					<p class="mb-0">
+						@Html.Raw(@item.Message)
+					</p>
+				</div>
+			</div>
+			@if (item.ReplyMessage == null && item.RespondentId == null)
+			{
+				<a class="btn btn-info" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
+			}
+			@if (User.IsInRole(RoleName.Administrator))
+			{
+				<a class="btn btn-danger confirmDeletion" asp-action="Remove" asp-controller="Contact" asp-route-id="@item.Id">Remove</a>
+			}
+		</div>
+	</div>
+	<br />
+
+	@if (item.ReplyMessage != null && item.RespondentId != null)
+	{
+		<div class="owl-item-replay">
+			<div class="testimonial-item img-border-radius rounded p-4">
+				<div class="position-relative">
+					<div class="d-flex align-items-center flex-nowrap border-bottom border-secondary">
+						<div class="bg-secondary rounded">
+							<img src="~/media/avatar/@item.Respondent.Avatar" class="img-fluid rounded media-avatar" alt="">
+						</div>
+						<div class="ms-4 d-block">
+							<h4 class="text-dark">@item.Respondent.UserName</h4>
+							<p class="m-0 pb-3">@item.Respondent.Email</p>
+							<ul class="sinlge-post-meta">
+								<li><i class="far fa-clock"></i>@item.DateRespone.ToShortTimeString()</li>
+								<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortTimeString()</li>
+							</ul>
+						</div>
+					</div>
+					<div class="mb-4 pb-4 border-bottom ">
+						<p class="mb-0">
+							@Html.Raw(@item.ReplyMessage)
+						</p>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<br />
+	}
+}
+
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+
+@* <div class="response-area">
 	<h2>Contacts</h2>
 	<ul class="media-list">
 		@foreach (var item in Model)
@@ -22,7 +93,7 @@
 						<li><i class="fa fa-calendar"></i>@item.DateSent.ToShortDateString()</li>
 					</ul>
 					<p><strong>Subject: @item.Subject</strong></p>
-					<p>@Html.Raw(@item.Message)</p>
+					<p>@Html.Raw(item.Message)</p>
 					@if (item.ReplyMessage == null && item.RespondentId == null)
 					{
 						<a class="btn btn-info" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
@@ -57,7 +128,7 @@
 	</ul>
 </div><
 
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" /> *@
 
 
 

@@ -31,6 +31,44 @@ namespace DShop2024.Controllers
 
 		}
 
+		public IActionResult Index()
+		{
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
+			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+
+			if(cartItems.Count == 0)
+			{
+				return RedirectToAction("Index", "Cart");
+			}
+
+			decimal shippingPrice = 0;
+			if (info.ShippingCost != 0)
+			{
+				shippingPrice = info.ShippingCost;
+			}
+
+			decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
+			decimal sumCouponValue = coupouns.Sum(s => s.Value);
+			decimal grandTotal = sumPirceItemsCart + shippingPrice - sumCouponValue;
+			if (grandTotal < 0)
+			{
+				grandTotal = 0;
+			}
+
+			CartItemViewModel cartItemViewModel = new CartItemViewModel
+			{
+				CartItems = cartItems,
+				SumPriceItemsCart = sumPirceItemsCart,
+				SumCouponValue = sumCouponValue,
+				GrandTotal = grandTotal,
+				CouponsApply = coupouns,
+				InfoDelivery = info
+			};
+
+			return View(cartItemViewModel);
+		}
+
 		public async Task<string> CheckAllStock()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
@@ -54,19 +92,18 @@ namespace DShop2024.Controllers
 		{
 			if(string.IsNullOrEmpty(payment))
 			{
-				TempData[DShopConst.TEMPDATA_ERROR] = "Error payment";
-				return RedirectToAction("Index", DShopConst.CART_KEY);
+				TempData[DShopConst.TEMPDATA_ERROR] = "Please select payment method";
+				return RedirectToAction("Index");
 			}
 			string checkStock = await CheckAllStock();
 			if(!string.IsNullOrEmpty(checkStock))
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = checkStock;
-				return RedirectToAction("Index", DShopConst.CART_KEY);
+				return RedirectToAction("Index");
 			}
 
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-			//CouponModel coupoun = HttpContext.Session.GetJson<CouponModel>(DShopConst.COUPONS_CUSTOMER_APPPLY);
             List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
             var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)

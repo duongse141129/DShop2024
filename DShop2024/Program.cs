@@ -141,19 +141,19 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/brand/{BrandSlug?}",
-    defaults: new { controller = "Product", action = "Index"});
+    defaults: new { controller = "Product", action = "Index" });
 
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/product/{Slug?}",
-    defaults: new { controller = "Product", action = "GetDetailProductBySlug" });
+    defaults: new { controller = "ShopProducts", action = "GetDetailProductBySlug" });
 
 
 
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}");
+	name: "default",
+	pattern: "{controller=Home}/{action=Index}");
 
 //Seed data
 //var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DShopContext>();

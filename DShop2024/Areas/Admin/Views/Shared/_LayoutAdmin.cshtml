@@ -38,6 +38,8 @@
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" rel="stylesheet">
 
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+
     <link href="~/css/responsive.css" rel="stylesheet">
 
     <link href="~/custom/Css/StyleOrder.css" rel="stylesheet">
@@ -59,6 +61,7 @@
                     <div class="logo-header" data-background-color="purple">
                         <a href="index.html" class="logo">
                             <img src="~/assets/img/kaiadmin/logo_light.png" alt="navbar brand" class="navbar-brand" height="20px" />
+
                         </a>
                         <div class="nav-toggle">
                             <button class="btn btn-toggle toggle-sidebar">
@@ -189,7 +192,7 @@
         <div class="container">
             <div class="page-inner">
                 <partial name="_NotificationPartial" />
-                 @RenderBody();
+                 @RenderBody()
             </div>
         </div>
 
@@ -277,6 +280,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/chatnoti.js"></script>
 
     <script>
@@ -310,7 +314,6 @@
 
     <script>
         $(function () {
-
             var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';
             if (message != '') {
                 Swal.fire({

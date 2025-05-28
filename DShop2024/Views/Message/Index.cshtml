@@ -3,12 +3,143 @@
 @model IEnumerable<DShop2024.ViewModels.MessageViewModel>
 @{
     ViewData["Title"] = "Chat";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<section>
+    <div class="container py-5 ws">
 
-<div class="container">
+        <div class="scroll-container p-3" data-bs-spy="scroll" id="messagesList_@UserManager.GetUserName(User)">
+            @foreach (var item in Model)
+            {
+                @if (item.UserName == UserManager.GetUserName(User))
+                {
+                    <div class="styletime-customer">
+                        <p class="sptime">@item.Timestamp</p>
+                        <p class="sptime">___</p>
+                        <p class="sptime">[@item.RoleName] @item.UserName</p>
+                    </div>
+                    <div class="stylecontent-customer">
+                        <div>
+                            <p class="spcontent-customer">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                    </div>
+                }
+                else
+                {
+                    <div class="styletime-toreciever">
+                        <p class="sptime">[@item.RoleName] @item.UserName</p>
+                        <p class="sptime">___</p>
+                        <p class="sptime">@item.Timestamp</p>
+                    </div>
+                    <div class="stylecontent-toreciever">
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                        <div>
+                            <p class="spcontent-toreciever">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                    </div>
+                }
+
+
+               @*  @if (item.UserName == UserManager.GetUserName(User))
+                {
+                    <div class="styletime-customer">
+                        <p class="small mb-1 text-muted">@item.Timestamp</p>
+                        <p class="small mb-1 text-muted">___</p>
+                        <p class="small mb-1">[@item.RoleName] @item.UserName</p>
+                    </div>
+                    <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+                        <div>
+                            <p class="small p-2 me-3 mb-3 text-dark rounded-3 bg-warning">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-start">
+                        <p class="small mb-1">[@item.RoleName] @item.UserName</p>
+                        <p class="small mb-1">___</p>
+                        <p class="small mb-1 text-muted">@item.Timestamp</p>
+                    </div>
+                    <div class="d-flex flex-row justify-content-start">
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                        <div>
+                            <p class="small p-2 ms-3 mb-3 rounded-3 bg-body-secondary">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                    </div>
+                } *@
+            }
+@*     <div class="d-flex justify-content-between">
+        <p class="small mb-1"> Customer sad Timona Siera</p>
+        <p class="small mb-1 text-muted">23 Jan 2:00 pm</p>
+    </div>
+    <div class="d-flex flex-row justify-content-start">
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp"
+             alt="avatar 1" style="width: 45px; height: 100%;">
+        <div>
+            <p class="small p-2 ms-3 mb-3 rounded-3 bg-body-secondary">
+                For what reason
+                would it
+                be advisable for me to think about business content?
+            </p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <p class="small mb-1 text-muted">23 Jan 2:05 pm</p>
+        <p class="small mb-1">Johny Bullock</p>
+    </div>
+    <div class="d-flex flex-row justify-content-end mb-4 pt-1">
+        <div>
+            <p class="small p-2 me-3 mb-3 text-white rounded-3 bg-warning">
+                Thank you for your believe in
+                our
+                supports
+            </p>
+        </div>
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
+             alt="avatar 1" style="width: 45px; height: 100%;">
+    </div>
+ *@
+  
+
+        </div>
+        <div class="row p-1">
+            <div class="col-1">User</div>
+            <div class="col-5"><input name="userInput" type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled /></div>
+        </div>
+        <div class="row p-1">
+            <div class="col-1">Message</div>
+            <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput" maxlength="300" /></div>
+        </div>
+        <div class="row p-1">
+            <div class="col-6 text-end">
+                <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
+            </div>
+        </div>
+
+    </div>
+</section> 
+
+
+
+@* <div class="container p-5 my-5 border">
     <div class="scroll-container">
-        <div class="col-3">
+        <div class="col-sm-4">
             <ul id="messagesList_@UserManager.GetUserName(User)">
                 @foreach (var item in Model)
                 {
@@ -45,7 +176,7 @@
             <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
         </div>
     </div>
-</div>
+</div>  *@
 
 
 @section Scripts {

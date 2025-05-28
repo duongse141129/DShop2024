@@ -1,4 +1,31 @@
-﻿.pager-area {
+﻿
+
+.owl-item {
+    width: 635.5px;
+    margin-right: 25px;
+}
+
+.owl-item-replay {
+    width: 635.5px;
+    margin-left: 100px;
+}
+.testimonial-item {
+    background-color: #e3dcdc;
+}
+.media-avatar {
+    width: 100px;
+    height: 100px;
+}
+
+
+
+
+
+
+
+
+
+.pager-area {
     overflow: hidden;
 }
 

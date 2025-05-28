@@ -65,68 +65,75 @@ namespace DShop2024.Areas.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                 
-                var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
-                AppUserModel user = null;
-
-                if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
+                if (_dataContext.Users.Any(x => x.UserName == model.UserNameOrEmail) || _dataContext.Users.Any(y => y.Email == model.UserNameOrEmail))
                 {
-                    user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
-                    if (user != null)
+                    var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
+                    AppUserModel user = null;
+
+                    if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
                     {
-                        result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+                        user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
+                        if (user != null)
+                        {
+                            result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+                        }
                     }
-                }
-                else
-                {
-                    user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
-                }               
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation(1, "User logged in.");
-
-                    if(user.Status == 0)
+                    else
                     {
-                        ModelState.AddModelError("Account was deleted ");
+                        user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
+                    }
+
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation(1, "User logged in.");
+
+                        if (user.Status == 0)
+                        {
+                            ModelState.AddModelError("Account was deleted ");
+                            return View(model);
+                        }
+
+                        var roleUser = await _userManager.GetRolesAsync(user);
+                        if (roleUser.Count > 0)
+                        {
+                            if (roleUser.FirstOrDefault() == RoleName.Administrator)
+                            {
+                                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                            }
+                            else if (roleUser.FirstOrDefault() == RoleName.Employee)
+                            {
+                                return RedirectToAction("Index", "Order", new { area = "Admin" });
+                            }
+                        }
+                        return LocalRedirect(returnUrl);
+
+                    }
+                    if (result.RequiresTwoFactor)
+                    {
+                        return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+                    }
+
+                    if (result.IsLockedOut)
+                    {
+                        _logger.LogWarning(2, "Account locked");
+                        return View("Lockout");
+                    }
+                    if (result.IsNotAllowed)
+                    {
+                        ModelState.AddModelError("Email isn't verified");
                         return View(model);
                     }
-
-                    var roleUser = await _userManager.GetRolesAsync(user);
-                    if(roleUser.Count > 0)
+                    else
                     {
-                        if (roleUser.FirstOrDefault() == RoleName.Administrator)
-                        {
-                            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
-                        }
-                        else if (roleUser.FirstOrDefault() == RoleName.Employee)
-                        {
-                            return RedirectToAction("Index", "Order", new { area = "Admin" });
-                        }
+                        ModelState.AddModelError("Wrong password.");
+                        return View(model);
                     }
-					return LocalRedirect(returnUrl);
-					
-                }
-                if (result.RequiresTwoFactor)
-                {
-                   return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                }
-                
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning(2, "Account locked");
-                    return View("Lockout");
-                }
-                if (result.IsNotAllowed)
-                {
-                    ModelState.AddModelError("Email isn't verified");
-                    return View(model);
                 }
                 else
                 {
-                    ModelState.AddModelError("Can not login.");
+                    ModelState.AddModelError("Account does not exist.");
                     return View(model);
-                }
+                }         
             }
             return View(model);
         }
@@ -137,7 +144,7 @@ namespace DShop2024.Areas.Identity.Controllers
         public async Task<IActionResult> LogOff()
         {
             await _signInManager.SignOutAsync();
-            _logger.LogInformation("User đăng xuất");
+            _logger.LogInformation("User logoff");
             return RedirectToAction("Index", "Home", new {area = ""});
         }
         //

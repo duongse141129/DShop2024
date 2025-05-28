@@ -11,9 +11,7 @@
            href="#"
            aria-expanded="false">
             <div class="avatar-sm">
-                <img src="~/assets/img/profile.jpg"
-                     alt="..."
-                     class="avatar-img rounded-circle" />
+                @await Component.InvokeAsync("Avatar")
             </div>
             <span class="profile-username">
                 <span class="op-7">Hi,</span>
@@ -25,9 +23,7 @@
             <li>
                 <div class="user-box">
                     <div class="avatar-lg">
-                        <img src="~/assets/img/profile.jpg"
-                             alt="image profile"
-                             class="avatar-img rounded" />
+                            @await Component.InvokeAsync("Avatar")
                     </div>
                     <div class="u-text">
                         <h4>@UserManager.GetUserName(User)</h4>

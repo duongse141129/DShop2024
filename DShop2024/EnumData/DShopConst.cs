@@ -2,7 +2,9 @@
 {
     public class DShopConst
     {
-		public static string OTP_CONFIRM_EMAIL = "ConfirmEmail";
+        public static string SEVER_ADDRESS = "https://localhost:7213";
+
+        public static string OTP_CONFIRM_EMAIL = "ConfirmEmail";
 		public static string OTP_RESET_PASSWORD = "ResetPassword";
 
 		public static string CART_KEY = "CART";

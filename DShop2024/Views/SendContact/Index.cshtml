@@ -2,19 +2,39 @@
 
 @{
     ViewData["Title"] = "Send contact";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<section >
+    <div class="container p-5 my-5 border ws">
+
 
 
 <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-12">
 
-       
-        <div id="accordion">
-            <h2>Frequently Asked Questions</h2>
+                <h2>Frequently Asked Questions</h2>
+
+                @foreach (var item in ViewBag.FAQs as IEnumerable<FAQModel>)
+                {
+                <p>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample_@item.Id" aria-expanded="false" aria-controls="collapseExample_@item.Id">
+                            @item.Question
+                    </button>
+                </p>
+                <div class="collapse" id="collapseExample_@item.Id">
+                    <div class="card card-body">
+                            @item.Answer
+                    </div>
+                </div>
+
+                }
+    
+@*             <h2>Frequently Asked Questions</h2>
             @foreach (var item in ViewBag.FAQs as IEnumerable<DShop2024.Models.FAQModel>)
             {
                 <p>
-                    <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample_@item.Id" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample_@item.Id" role="button" aria-expanded="false" aria-controls="collapseExample_@item.Id">
                         @item.Question
                     </a>
                 </p>
@@ -23,31 +43,35 @@
                         @item.Answer
                     </div>
                 </div>
-            }      
-        </div>
+            }       *@
+    
         <br/>
-        <h1>Send contact</h1>
-        <hr />
 
-        <form asp-action="Send" asp-controller="SendContact" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Subject" class="control-label"></label>
-                <input asp-for="Subject" class="form-control" />
-                <span asp-validation-for="Subject" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Message" class="control-label"></label>
-                <textarea asp-for="Message" class="form-control" rows="10"  ></textarea>
-                <span asp-validation-for="Message" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Send" class="btn btn-primary" />
-            </div>
-        </form>
+    </div>
+    <div class="col-md-8">
+                <h1>Send contact</h1>
+                <hr />
+
+                <form asp-action="Send" asp-controller="SendContact" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="Subject" class="control-label"></label>
+                        <input asp-for="Subject" class="form-control" />
+                        <span asp-validation-for="Subject" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Message" class="control-label"></label>
+                        <textarea asp-for="Message" class="form-control" rows="10"></textarea>
+                        <span asp-validation-for="Message" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Send" class="btn btn-primary" />
+                    </div>
+                </form>
     </div>
 </div>
-
+    </div>
+</section>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

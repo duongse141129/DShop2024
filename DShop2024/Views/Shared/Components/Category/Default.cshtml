@@ -1,7 +1,24 @@
 ﻿@model IEnumerable<CategoryModel>
 
+<ul class="list-unstyled fruite-categorie list-group">
+    <li>
+        <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == "" ? "active" : "")">
+            <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="">ALL</a>
+        </div>
+    </li>
+    @foreach (var item in Model)
+    {
+        <li>
+            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == item.Slug ? "active" : "")">
+                <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="@item.Slug">@item.CategoryName</a>
+            </div>
+        </li>
+    }
+</ul>
 
-<div class="panel panel-default">
+
+
+@* <div class="panel panel-default">
 	<div class="panel-heading">
 		<h4 class="panel-title"><a asp-action="Index" asp-controller="Product" asp-route-CategorySlug="">ALL</a></h4>
 	</div>
@@ -15,3 +32,4 @@
 		</div>
 	</div>
 }
+ *@

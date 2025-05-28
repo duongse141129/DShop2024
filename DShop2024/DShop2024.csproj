@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\admin\**" />
-    <Content Remove="wwwroot\admin\**" />
-    <EmbeddedResource Remove="wwwroot\admin\**" />
-    <None Remove="wwwroot\admin\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\media\Email\sendCoupon.html" />
   </ItemGroup>
 
@@ -43,6 +36,7 @@
 
   <ItemGroup>
     <Folder Include="Uploads\" />
+    <Folder Include="wwwroot\css\" />
     <Folder Include="wwwroot\media\banners\" />
     <Folder Include="wwwroot\media\products\" />
   </ItemGroup>

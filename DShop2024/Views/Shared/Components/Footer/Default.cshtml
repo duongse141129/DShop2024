@@ -1,5 +1,70 @@
 ﻿@model InformationShopModel
 
+<div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
+    <div class="row g-4">
+        <div class="col-lg-6">
+       
+                <h1 class="text-primary mb-0">@Model.ShopName</h1>
+
+        </div>
+        <div class="col-lg-3">
+            <div class="position-relative mx-auto">
+                @Html.Raw(Model.PluginFacebook)
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="d-flex justify-content-end pt-3">
+                @Html.Raw(Model.PluginYoutube)
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row g-5">
+    <div class="col-lg-3 col-md-6">
+        <div class="footer-item">
+            <h4 class="text-light mb-3">Description:</h4>
+            <p class="mb-4">
+                @Html.Raw(Model.Description)
+            </p>
+            <a asp-action="AboutUs" asp-controller="Home" class="btn border-secondary py-2 px-4 rounded-pill text-primary">Read More</a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="d-flex flex-column footer-item">
+            <h4 class="text-light text-end mb-3">Shop Info</h4>
+            <a class="btn-link" asp-action="AboutUs" asp-controller="Home">About Us</a>
+            <a class="btn-link" asp-action="Index" asp-controller="SendContact">Contact Us</a>
+            <a class="btn-link" asp-action="Index" asp-controller="SendContact">FAQs</a>
+            <a class="btn-link" asp-action="Index" asp-controller="Message">Chat</a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="d-flex flex-column text-start footer-item">
+            <h4 class="text-light mb-3 text-end">Account</h4>
+            <a class="btn-link" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile">My Account</a>
+            <a class="btn-link" asp-action="Index" asp-controller="ShopProducts">Shop details</a>
+            <a class="btn-link" asp-action="Index" asp-controller="Cart">Shopping Cart</a>
+            <a class="btn-link" asp-action="Index" asp-controller="CheckOut">Check Out</a>
+            <a class="btn-link" asp-action="WishList" asp-controller="Home">Wishlist</a>
+            <a class="btn-link" asp-action="Compare" asp-controller="Home">Compare</a>
+            <a class="btn-link" asp-action="Index" asp-controller="Order">Order History</a>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="footer-item">
+            <h4 class="text-light mb-3">Contact</h4>
+            <p>Address: @Model.Address</p>
+            <p>Email: @Model.Email</p>
+            <p>Phone: @Model.Phone</p>
+            <p>Payment Accepted</p>
+            <img class="img-fluid" src="~/media/payment/momo_logo.png" width="50" alt="" />
+            <img class="img-fluid" src="~/media/payment/vnpaylogo.png" width="50" alt="" />
+        </div>
+    </div>
+</div>
+
+
+@* 
 <div class="row">
 	<div class="col-sm-3">
 		<div class="companyinfo">
@@ -21,4 +86,4 @@
 			@Html.Raw(Model.PluginYoutube)
 		</div>
 	</div>
-</div>
+</div> *@

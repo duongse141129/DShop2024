@@ -3,24 +3,23 @@
 @{
     ViewData["Title"] = "Add quantity product ";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
-    var totalQuantity = 0;
     var stt = 1;
 }
 
 <h1>@ViewData["title"]</h1>
 
-
 <div class="row">
     <div class="col-md-2">
+        <h2>@ViewBag.product.ProductName</h2>
+        <img src="~/media/products/@ViewBag.product.Image" class="img-fluid rounded" width="300" height="350" alt="">
         <form asp-action="StoreProductQuantity" asp-controller="ProductManage" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" name="ProductId" value="@ViewBag.Id" />
+            <input type="hidden" name="ProductId" value="@ViewBag.product.Id" />
             <div class="form-group">
                 <label asp-for="Quantity" class="control-label"></label>
                 <input min="1" value="1" step="1" asp-for="Quantity" class="form-control" />
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
- 
             <div class="form-group">
                 <input type="submit" value="Add" class="btn btn-primary" />
             </div>
@@ -63,7 +62,6 @@
                 </td>
                 <td>@item.User.UserName</td>
             </tr>
-            totalQuantity += item.Quantity;
             stt++;
         }
          
@@ -71,7 +69,15 @@
             <td></td>
             <td></td>
             <td></td>
-            <td><b>Total Quantities : @totalQuantity</b></td>
+            <td>
+                <div class="col-md-12">
+                    <b>Total Quantities : @ViewBag.totalQuantity </b>
+                </div>
+                    <b>
+                        Total Price : @ViewBag.totalOriginalPrice.ToString("#,##0 VND")
+                    </b>
+                </div>
+            </td>
         </tr>
     </tbody>
 </table>

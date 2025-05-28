@@ -9,7 +9,9 @@ namespace DShop2024.ViewModels
         public string ContentMessage { get; set; }
         public String Timestamp { get; set; }
         public string UserName { get; set; }
+        public string Avatar { get; set; }
         public string RoleName { get; set; }
         public string Receiver { get; set; }
+        public string PathImage { get; set; }
     }
 }

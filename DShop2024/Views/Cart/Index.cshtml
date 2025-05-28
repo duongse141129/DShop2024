@@ -1,13 +1,105 @@
 ﻿@using DShop2024.ViewModels
 @model CartItemViewModel
-<section id="cart_items">
-	<div class="container">
-		<div class="breadcrumbs">
-			<ol class="breadcrumb">
-				<li><a href="#">Home</a></li>
-				<li class="active">Shopping Cart</li>
-			</ol>
+@{
+	ViewData["Title"] = "Cart Page";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!-- Cart Page Start -->
+<div class="container-fluid py-5">
+	<div class="container py-5 ws">
+		<div class="p-5 rounded ws">
+			@if(Model.CartItems.Count > 0)
+			{
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+								<th scope="col">Products</th>
+								<th scope="col">Name</th>
+								<th scope="col">Price</th>
+								<th scope="col">Quantity</th>
+								<th scope="col">Total</th>
+								<th scope="col">Handle</th>
+
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var item in Model.CartItems)
+							{
+								<tr>
+									<th scope="row">
+										<div class="d-flex align-items-center">
+											<img src="~/media/products/@item.Image" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="" alt="">
+										</div>
+									</th>
+									<td>
+										<p class="mb-0 mt-4">@item.ProductName</p>
+									</td>
+									<td>
+										<p class="mb-0 mt-4">@item.Price.ToString("#,##0 VND")</p>
+									</td>
+									<td>
+										<div class="input-group quantity mt-4" style="width: 100px;">
+											<div class="input-group-btn">
+												<a class="btn btn-sm btn-minus rounded-circle bg-light border" asp-controller="Cart" asp-action="Decrease" asp-route-id="@item.ProductId">
+													<i class="fa fa-minus"></i>
+												</a>
+
+											</div>
+											<input type="text" class="form-control form-control-sm text-center border-0" value="@item.Quantity" step="1" readonly>
+											<div class="input-group-btn">
+												<a class="btn btn-sm btn-plus rounded-circle bg-light border" asp-controller="Cart" asp-action="Increase" asp-route-id="@item.ProductId">
+													<i class="fa fa-plus"></i>
+												</a>
+											</div>
+										</div>
+									</td>
+									<td>
+										<p class="mb-0 mt-4">@item.Total.ToString("#,##0 VND")</p>
+									</td>
+									<td>
+										<a class="btn btn-md rounded-circle bg-light border mt-4" asp-controller="Cart" asp-action="Remove" asp-route-id="@item.ProductId">
+											<i class="fa fa-times text-danger"></i>
+										</a>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+				<div class="mt-5">
+					<a class="btn btn-danger border-secondary rounded-pill px-4 py-3 confirmDeletion" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
+				</div>
+				<div class="row g-4 justify-content-end">
+					<div class="col-8"></div>
+					<div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+						<div class="bg-light rounded">
+				 			<div class="p-4">
+								<h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+							</div> 
+							<div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+								<h5 class="mb-0 ps-4 me-4">Total</h5>
+								<p class="mb-0 pe-4">@Model.SumPriceItemsCart.ToString("#,##0 VND")</p>
+							</div>
+							<a class="btn btn-primary border-secondary rounded-pill px-4 py-3 text-uppercase mb-4 ms-4" asp-action="Index" asp-controller="CheckOut">Proceed Checkout</a>
+						</div>
+					</div>
+				</div>
+			}
+			else
+			{
+				<h2>Your Cart is empty</h2>
+			}
+
+	
 		</div>
+	</div>
+</div>
+<!-- Cart Page End -->
+@*
+<section id="cart_items">
+	<div class="container-fluid bg-light py-5">
+
 		<div class="table-responsive cart_info">
 			@if (Model.CartItems.Count > 0)
 			{
@@ -168,7 +260,7 @@
 						</div>
 					</div>
 				</div>
-			</section>
+			</section> 
 			}
 			else
 			{
@@ -176,12 +268,8 @@
 			}
 		</div>
 	</div>
-</section> <!--/#cart_items-->
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.scrollUp.min.js"></script>
-<script src="js/jquery.prettyPhoto.js"></script>
-<script src="js/main.js"></script>
+</section> 
+ *@
 
 @section Scripts{
 	@{

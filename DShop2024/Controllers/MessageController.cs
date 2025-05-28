@@ -39,7 +39,7 @@ namespace DShop2024.Controllers
                                                          RoleName = r.Name,
                                                          ContentMessage = m.ContentMessage,
                                                          Timestamp = m.Timestamp.ToString("MM/dd/yyyy HH:mm:ss"),
-
+                                                         Avatar = u.Avatar
                                                      })
                                          .ToListAsync();
 
@@ -69,7 +69,9 @@ namespace DShop2024.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
                     UserName = user.UserName,
-                    RoleName = RoleName.Customer
+                    RoleName = RoleName.Customer,
+                    Avatar = user.Avatar,
+                    PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}"
                 };
 
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);

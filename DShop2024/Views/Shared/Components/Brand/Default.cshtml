@@ -1,8 +1,26 @@
 ﻿@using DShop2024.ViewModels
 @model IEnumerable<BrandViewModel>
 
+<ul class="list-unstyled fruite-categorie list-group">
+    <li>
+        <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.BrandSlug == "" ? "active" : "")">
+            <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="">ALL</a>
+        </div>
+    </li>
+    @foreach (var item in Model)
+    {
+        <li>
+            <div class="d-flex justify-content-between fruite-name list-group-item @(ViewBag.BrandSlug == item.Slug ? "active" : "") ">
+                <a class="btn-link" asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug"> @item.BrandName</a>
+                <span>@item.CountProduct</span>
+            </div>
+        </li>
+    }
+</ul>
 
-<div class="brands-name">
+
+
+@* <div class="brands-name">
 	<ul class="nav nav-pills nav-stacked">
 		<li>
 			<a asp-action="Index" asp-controller="Product" asp-route-BrandSlug="">ALL</a>
@@ -22,4 +40,4 @@
 
 		</ul>
 	</div>
-}
+} *@

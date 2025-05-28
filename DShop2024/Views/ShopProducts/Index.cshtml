@@ -1,0 +1,269 @@
+﻿@using DShop2024.ViewModels
+@model IEnumerable<ProductViewModel>
+@{
+	ViewData["Title"] = "Shopping Page";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Fruits Shop Start-->
+<div class="container-fluid fruite py-5">
+    <div class="container py-5 ws">
+        <h1 class="mb-4">Fresh fruits shop</h1>
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <form asp-action="Index" asp-controller="Product">
+                    <partial name="_FilterProductsPartial" />
+                </form>
+
+                <div class="row g-4">
+                    <div class="col-lg-3">
+						<partial name="_SidebarPartial" />
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+
+                                <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 ">
+                                    @foreach (var item in Model)
+                                    {
+                                        <div class="col">
+                                            <div class="product-item">
+												@if (User.Identity?.IsAuthenticated ?? false)
+												{
+													<a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+														<i class="fas fa-retweet"></i>
+													</a>
+													<a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+														<i class="far fa-heart"></i>
+													</a>
+												}
+                                                <figure>
+													<a asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
+               
+                                                        <img src="~/media/products/@item.Image" class="tab-image">
+                                                    </a>
+                                                </figure>
+                                                <h3>@item.ProductName</h3>
+												<span class="qty">Point</span><span class="rating"> @item.AveragePoint</span>
+												<div class="d-flex mb-2">
+													<i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+												</div>
+                                                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                                                <span class="qty">@item.BrandName</span><br />
+                                                <span class="qty">@item.CategoryName</span>
+                                                <div class="d-flex align-items-center justify-content-between">
+													@if (item.Stock > 0)
+													{
+														<button class="btn btn-primary add-to-cart" data-product_id="@item.Id">Add to Cart</button>
+													}
+													else
+													{
+														<button class="btn btn-primary add-to-cart">Out Of Order</button>
+													}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <!-- / product-grid -->
+								<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Fruits Shop End-->
+
+
+
+
+
+
+
+@* <section>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-3">
+				<partial name="_SidebarPartial" />
+			</div>
+
+			<div class="col-sm-9 padding-right">
+				<form asp-action="Index" asp-controller="Product">
+					<partial name="_FilterProductsPartial" />
+				</form>
+				
+
+				<div class="features_items">
+					<!--features_items-->
+					<h2 class="title text-center">Features Items</h2>
+
+					@foreach (var item in Model)
+					{
+						<div class="col-sm-4">
+							<div class="product-image-wrapper">
+								<div class="single-products">
+
+									<div class="productinfo text-center">
+										<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
+											<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100%" height="200px" />
+											<h2>@item.Price.ToString("#,##0 VND")</h2>
+											<p>@item.ProductName</p>
+											<p>Category: @item.Category.CategoryName</p>
+											<p>Brand: @item.Brand.BrandName</p>
+										</a>
+										@if (item.Stock > 0)
+										{
+											<button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
+										}
+										else
+										{
+											<button class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Out Of Order</button>
+										}
+
+									</div>
+
+								</div>
+
+
+
+								<div class="choose">
+									@if (User.Identity?.IsAuthenticated ?? false)
+									{
+										<ul class="nav nav-pills nav-justified">
+											<li>
+												<button class="btn btn-danger add-btn-wishlist" data-product_id="@item.Id">Add to Wishlist</button>
+											</li>
+											<li>
+												<button class="btn btn-info add-btn-compare" data-product_id="@item.Id">Add to Compare</button>
+											</li>
+										</ul>
+									}
+								</div>
+							</div>
+						</div>
+					}					
+				</div><!--features_items-->
+				<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+			</div>
+		</div>
+	</div>
+</section>
+ *@
+@section Scripts {
+	<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.js"></script> 
+
+	<script>
+
+		$(document).ready(function () {
+			$(function () {
+				$("#slider-range").slider({
+					range: true,
+					step: 50000,
+					min: 10000,
+					max: 5000000,
+					// values: [100000, 300000],
+					values: [@(ViewBag.startprice != "" ? ViewBag.startprice : 50000) , @(ViewBag.endPrice != "" ? ViewBag.endPrice : 800000)],
+					slide: function (event, ui) {
+						$("#amount").val(
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[0])
+							+ " - " +
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[1]));
+					}
+				});
+				$("#amount").val(
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 0))
+					+ " - " +
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 1)));
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+
+			$('.btn-locgia').on('click', function () {
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			$('.add-to-cart').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToCart", "Cart")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Add to cart successful");
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-wishlist').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToWishList", "Home")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Add to wishlist successful");
+						}
+						else {
+							Swal.fire("Add to wishlist fail duplicate product");
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-compare').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToCompare", "Home")",
+					data: { Id: Id },
+					success: function (result) {
+						if (result.success) {
+							Swal.fire("Add to compare successful");
+						}
+						else {
+							Swal.fire(result.message);
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+}

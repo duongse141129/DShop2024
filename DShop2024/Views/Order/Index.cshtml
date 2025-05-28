@@ -2,9 +2,12 @@
 
 @{
     ViewData["title"] = "History shopping";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
 @foreach (var item in Model)
 {
  
@@ -14,10 +17,10 @@
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
                     <div class="row gy-3 mb-3">
-                        <div class="col-6">
+                                    <div class="col-md-12">
                             <h2 class="text-uppercase text-endx m-0">Invoice: @item.OrderCode</h2>
                         </div>
-                        <div class="col-6">
+                                    <div class="col-md-12">
                             @if (item.Status == 0)
                             {
                                 <h4>Invoice has been cancelled</h4>
@@ -113,18 +116,26 @@
                                         }
 
                                         <tr>
+                                            <td></td>
+                                            <td></td>
                                             <td colspan="3" class="text-end">Subtotal</td>
                                             <td class="text-end">@item.OrderDetails.Sum(od => od.Quantity * od.Price)</td>
                                         </tr>
                                         <tr>
+                                            <td></td>
+                                            <td></td>
                                             <td colspan="3" class="text-end">coupon</td>
                                             <td class="text-end">- @item.ValueCoupon</td>
                                         </tr>
                                         <tr>
+                                            <td></td>
+                                            <td></td>
                                             <td colspan="3" class="text-end">Shipping Cost</td>
                                             <td class="text-end">+ @item.ShippingCost</td>
                                         </tr>
                                         <tr>
+                                            <td></td>
+                                            <td></td>
                                             <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
                                             <td class="text-end">@item.TotalPrice</td>
                                         </tr>
@@ -141,3 +152,6 @@
     <hr>
 }
 <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+        </div>
+    </div>
+</div>

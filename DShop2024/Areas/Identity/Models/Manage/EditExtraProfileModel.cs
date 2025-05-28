@@ -1,5 +1,3 @@
-
-
 using DShop2024.Repository.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -34,6 +32,8 @@ namespace App.Areas.Identity.Models.ManageViewModels
         [Column(TypeName = "nvarchar")]
         [StringLength(500)]
         public string? Avatar { get; set; }
+
+        public string? RoleName { get; set; }
 
         public string LoginType { get; set; }
 

@@ -6,6 +6,67 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h1> @ViewData["Title"]</h1>
+
+<section>
+    <div class="container py-5">
+        <div class="scroll-container p-3" data-bs-spy="scroll" id="messagesList_@ViewBag.receiverName">
+            @foreach (var item in Model)
+            {
+                @if (item.Receiver == @ViewBag.receiver)
+                {
+                    <div class="styletime-toreciever">
+                        <p class="sptime">[@item.RoleName] @item.UserName</p>
+                        <p class="sptime">___</p>
+                        <p class="sptime">@item.Timestamp</p>
+                    </div>
+                    <div class="stylecontent-toreciever">
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                        <div>
+                            <p class="spcontent-toreciever">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="styletime-customer">
+                        <p class="sptime">@item.Timestamp</p>
+                        <p class="sptime">___</p>
+                        <p class="sptime">[@item.RoleName] @item.UserName</p>
+                    </div>
+                    <div class="stylecontent-customer">
+                        <div>
+                            <p class="spcontent-customer">
+                                @item.ContentMessage
+                            </p>
+                        </div>
+                        <img src="~/media/avatar/@item.Avatar"
+                             alt="avatar 1" class="message-img">
+                    </div>
+                }
+            }
+        </div>
+        <div class="row p-1">
+            <div class="col-1">User</div>
+            <div class="col-5"><input name="userInput" type="text" id="userInput" value="@UserManager.GetUserName(User)" disabled /></div>
+            <input name="receiver" id="receiver" type="hidden" value="@ViewBag.receiver" />
+        </div>
+        <div class="row p-1">
+            <div class="col-1">Message</div>
+            <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput" maxlength="300" /></div>
+        </div>
+        <div class="row p-1">
+            <div class="col-6 text-end">
+                <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
+            </div>
+        </div>
+    </div>
+</section>
+
+@*
+
 <div class="container">
      <div class="scroll-container">
         <div class="col-3">
@@ -32,7 +93,9 @@
             </ul> 
         </div>
     </div> 
-@* 
+
+
+
     <div class="scroll-container">
         <div class="row">
             <div id="messagesList_@ViewBag.receiverName">
@@ -62,7 +125,9 @@
 
             </div>
         </div>
-    </div> *@
+    </div> 
+
+
 
 
     <hr />
@@ -82,7 +147,7 @@
             <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
         </div>
     </div>
-</div>
+    </div> *@
 
 
 @section Scripts {
