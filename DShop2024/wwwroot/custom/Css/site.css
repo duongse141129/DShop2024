@@ -38,6 +38,14 @@
 .ws {
     background-color: whitesmoke;
 }
+.bgLogin {
+    background-color: whitesmoke;
+    border-radius: 1rem;
+}
+.lgTitle {
+    color: #00abfa;
+
+}
 a{
     text-decoration: none;
 }
@@ -101,3 +109,25 @@ a{
     border-radius: 10px;
     background-color: #e9ecef;
 }
+
+#cpnCode {
+    background-color: #8739e6;
+    border: 1px dashed aliceblue solid 5px;
+    color: aliceblue;
+    padding: 10px 20px;
+}
+
+inValue {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 3px solid #ccc;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    outline: none;
+}
+
+    inValue:focus {
+        border: 3px solid #555;
+    }

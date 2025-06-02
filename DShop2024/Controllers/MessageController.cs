@@ -7,11 +7,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.WebRequestMethods;
 
 namespace DShop2024.Controllers
 {
-	[Authorize]
-	public class MessageController : Controller
+    [Authorize(Roles = RoleName.Customer)]
+    public class MessageController : Controller
     {
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
@@ -60,6 +61,7 @@ namespace DShop2024.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now,
                     UserId = user.Id,
+                    IsRead = false,
                 };
                 await _context.Messages.AddAsync(model);
                 await _context.SaveChangesAsync();
@@ -69,9 +71,13 @@ namespace DShop2024.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
                     UserName = user.UserName,
+                    UserId = user.Id,
                     RoleName = RoleName.Customer,
                     Avatar = user.Avatar,
-                    PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}"
+                    PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}",
+                    PathUser = $" {DShopConst.SEVER_ADDRESS}/Admin/Chat/ChatWithCustomer?customerId={user.Id}",
+                    DaysLeftTime = GetDayLeft(DateTime.Now)
+
                 };
 
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
@@ -80,6 +86,25 @@ namespace DShop2024.Controllers
             }
             TempData[DShopConst.TEMPDATA_ERROR] = "Messages are empty";
             return Ok(new { success = false, Message = "Send message fail" });
+        }
+
+
+        public static string GetDayLeft(DateTime dateTime)
+        {
+            var d = DateTime.Today.Date - dateTime.Date;
+            if (d.Days < 1)
+            {
+                return "Today " + dateTime.ToString("hh:mm tt");
+            }
+            if (d.Days == 1)
+            {
+                return "1 day ago " + dateTime.ToString("hh:mm tt");
+            }
+            if (d.Days == 2)
+            {
+                return "2 days ago " + dateTime.ToString("hh:mm tt");
+            }
+            return "";
         }
     }
 }

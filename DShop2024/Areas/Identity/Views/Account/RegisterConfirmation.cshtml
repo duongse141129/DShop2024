@@ -4,13 +4,20 @@
     ViewData["Title"] = "Register confirm";
 }
 
-<h1>@ViewData["Title"]</h1>
 
-<p>The gmail verification code has been sent to your mailbox</p>
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h1>@ViewData["Title"]</h1>
 
-<form asp-asp-area="Identity" asp-controller="Account" asp-action="ConfirmEmailByOTP" method="post">
-    <input  type="hidden" name="userId" value="@Model.Id" />
-    <input type="text" name="codeConfirmEmail" value="" />
-    <input type="submit" value="Confirm"/>
-    <a asp-area="Identity" asp-controller="Account" asp-action="SendOtpConfirmEmail" asp-route-userId="@Model.Id">SendOTP again</a>
-</form>
+            <p>The gmail verification code has been sent to your mailbox</p>
+
+            <form asp-asp-area="Identity" asp-controller="Account" asp-action="ConfirmEmailByOTP" method="post">
+                <input type="hidden" name="userId" value="@Model.Id" />
+                <input type="text" name="codeConfirmEmail" value="" />
+                <input type="submit" value="Confirm" />
+                <a asp-area="Identity" asp-controller="Account" asp-action="SendOtpConfirmEmail" asp-route-userId="@Model.Id">SendOTP again</a>
+            </form>
+        </div>
+    </div>
+</div>

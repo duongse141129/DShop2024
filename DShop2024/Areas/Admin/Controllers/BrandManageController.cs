@@ -13,8 +13,8 @@ using DShop2024.EnumData;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(Roles = RoleName.Administrator)]
-	public class BrandManageController : Controller
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    public class BrandManageController : Controller
     {
         private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -26,7 +26,6 @@ namespace DShop2024.Areas.Admin.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // GET: Admin/BrandManage
         public async Task<IActionResult> Index()
         {
             ViewBag.sidebar = sidebar;
@@ -34,17 +33,14 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-
-        // GET: Admin/BrandManage/Create
+        [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
             ViewBag.sidebar = sidebar;
             return View();
         }
 
-        // POST: Admin/BrandManage/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BrandName,Description,ImageUpload")] BrandModel brandModel)
@@ -91,7 +87,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(brandModel);
         }
 
-        // GET: Admin/BrandManage/Edit/5
+
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.sidebar = sidebar;
@@ -108,9 +105,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(brandModel);
         }
 
-        // POST: Admin/BrandManage/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,BrandName,Description,ImageUpload")] BrandModel brandModel)
@@ -192,7 +187,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
-        // POST: Admin/BrandManage/Delete/5
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
             ViewBag.sidebar = sidebar;

@@ -422,6 +422,9 @@ namespace DShop2024.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<bool?>("IsRead")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ReceiverId")
                         .HasColumnType("nvarchar(450)");
 
@@ -694,8 +697,7 @@ namespace DShop2024.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .IsUnique();
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
@@ -1057,8 +1059,8 @@ namespace DShop2024.Migrations
             modelBuilder.Entity("DShop2024.Models.RatingModel", b =>
                 {
                     b.HasOne("DShop2024.Models.ProductModel", "Product")
-                        .WithOne("Rating")
-                        .HasForeignKey("DShop2024.Models.RatingModel", "ProductId")
+                        .WithMany("Ratings")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1167,7 +1169,7 @@ namespace DShop2024.Migrations
                 {
                     b.Navigation("OrderDetails");
 
-                    b.Navigation("Rating");
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }

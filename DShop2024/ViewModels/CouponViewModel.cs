@@ -17,7 +17,7 @@ namespace DShop2024.ViewModels
 		public int Status { get; set; }
 
 		public string CategoryCouponName { get; set; }
-		public int daysleft { get; set; }
+		public string DaysLeft { get; set; }
 
 	}
 }

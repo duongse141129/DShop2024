@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using DShop2024.EnumData;
-using Microsoft.AspNetCore.Hosting;
-using System.Reflection;
+
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(Roles = RoleName.Administrator)]
-	public class CategoryManageController : Controller
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    public class CategoryManageController : Controller
     {
         private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -27,7 +21,6 @@ namespace DShop2024.Areas.Admin.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        // GET: Admin/CategoryManage
         public async Task<IActionResult> Index(int pg =1)
         {
             ViewBag.sidebar = sidebar;
@@ -35,7 +28,8 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
-        // GET: Admin/CategoryManage/Create
+
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpGet]
         public IActionResult Create()
         {
@@ -43,9 +37,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Admin/CategoryManage/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
@@ -92,7 +85,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(categoryModel);
         }
 
-        // GET: Admin/CategoryManage/Edit/5
+
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.sidebar = sidebar;
@@ -109,9 +103,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(categoryModel);
         }
 
-        // POST: Admin/CategoryManage/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
@@ -193,8 +186,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
 
 
-        // POST: Admin/CategoryManage/Delete/5
 
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
             ViewBag.sidebar = sidebar;

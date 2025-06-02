@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\chatNotification.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\js\chatNotification.js" />
     <_ContentIncludedByDefault Remove="wwwroot\media\Email\sendCoupon.html" />
   </ItemGroup>
 
@@ -36,12 +41,21 @@
 
   <ItemGroup>
     <Folder Include="Uploads\" />
+    <Folder Include="Views\Shared\Components\NotificationMessage\" />
     <Folder Include="wwwroot\css\" />
     <Folder Include="wwwroot\media\banners\" />
     <Folder Include="wwwroot\media\products\" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\js\chatNotification.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Shared\Components\NotificationMessage\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="wwwroot\js\chatnoti.js">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

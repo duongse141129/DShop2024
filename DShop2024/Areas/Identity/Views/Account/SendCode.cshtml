@@ -1,20 +1,27 @@
 ﻿@model SendCodeViewModel
 @{
-    ViewData["Title"] = "Gửi mã xác thực";
+    ViewData["Title"] = "Send verification code";
 }
-
-<h1>@ViewData["Title"].</h1>
-
-<form asp-controller="Account" asp-action="SendCode" asp-route-returnurl="@Model.ReturnUrl" method="post" class="form-horizontal" role="form">
-    <input asp-for="RememberMe" type="hidden" />
-    <div class="row">
-        <div class="col-md-8">
-            Mã xác thực gửi tới:
-            <select asp-for="SelectedProvider" asp-items="Model.Providers"></select>
-            <button type="submit" class="btn btn-success btn-sm">Gửi</button>
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h1>@ViewData["Title"]</h1>
+            <form asp-controller="Account" asp-action="SendCode" asp-route-returnurl="@Model.ReturnUrl" method="post" class="form-horizontal" role="form">
+                <input asp-for="RememberMe" type="hidden" />
+                <div class="row">
+                    <div class="col-md-8">
+                        Verification code sent to:
+                        <select asp-for="SelectedProvider" asp-items="Model.Providers"></select>
+                        <button type="submit" class="btn btn-success btn-sm">Send</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-</form>
+</div>
+
+
+
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial"); }

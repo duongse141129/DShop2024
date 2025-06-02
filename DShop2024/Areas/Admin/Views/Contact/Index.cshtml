@@ -4,7 +4,10 @@
 	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>@ViewData["title"]</h1>
+<h1 class="text-primary">@ViewData["title"]</h1>
+<img src="https://localhost:7213/contents/baloda.jpg?_t=1748806444" width="200" height="300" alt="">
+<img src="https://localhost:7213/contents/phongcanh.jpg?_t=1748806438" width="350" height="300" alt="">
+
 
 @foreach (var item in Model)
 {
@@ -77,58 +80,6 @@
 
 <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 
-@* <div class="response-area">
-	<h2>Contacts</h2>
-	<ul class="media-list">
-		@foreach (var item in Model)
-		{
-			<li class="media">
-				<a class="pull-left" href="#">
-					<img class="media-object" src="~/media/avatar/@item.User.Avatar" alt="" width="100" height="100">
-				</a>
-				<div class="media-body">
-					<ul class="sinlge-post-meta">
-						<li><i class="fa fa-user"></i>@item.User.UserName</li>
-						<li><i class="far fa-clock"></i>@item.DateSent.ToShortTimeString()</li>
-						<li><i class="fa fa-calendar"></i>@item.DateSent.ToShortDateString()</li>
-					</ul>
-					<p><strong>Subject: @item.Subject</strong></p>
-					<p>@Html.Raw(item.Message)</p>
-					@if (item.ReplyMessage == null && item.RespondentId == null)
-					{
-						<a class="btn btn-info" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id"><i class="fa fa-reply"></i>Replay</a>
-					}
-					@if (User.IsInRole(RoleName.Administrator))
-					{
-						<a class="btn btn-danger confirmDeletion" asp-action="Remove" asp-controller="Contact" asp-route-id="@item.Id">Remove</a>
-					}
-				
-				</div>
-			</li>
-			@if(item.ReplyMessage != null && item.RespondentId != null)
-			{
-				<li class="media second-media">
-					<a class="pull-left" href="#">
-						<img class="media-object" src="~/media/avatar/@item.Respondent.Avatar" alt="" width="100" height="100">
-					</a>
-					<div class="media-body">
-						<ul class="sinlge-post-meta">
-							<li><i class="fa fa-user"></i>@item.Respondent.UserName</li>
-							<li><i class="far fa-clock"></i>@item.DateRespone.ToShortTimeString()</li>
-							<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortTimeString()</li>
-						</ul>
-						<p>@Html.Raw(@item.ReplyMessage)</p>				
-					</div>
-				</li>
-			}
-		}
-		
-		
-
-	</ul>
-</div><
-
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" /> *@
 
 
 

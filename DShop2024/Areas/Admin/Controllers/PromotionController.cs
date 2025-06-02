@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(Roles = RoleName.Administrator)]
-	public class PromotionController : Controller
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    public class PromotionController : Controller
     {
         private readonly DShopContext _context;
         private readonly string sidebar = "promotion";

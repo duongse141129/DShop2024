@@ -22,13 +22,7 @@ namespace DShop2024.Repository.Components
             if (_signInManager.IsSignedIn(HttpContext.User))
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
-                var roles = await _userManager.GetRolesAsync(user);
-                UserWithRoleViewModel userWithRole = new UserWithRoleViewModel
-                {
-                    User = user,
-                    RoleName = roles.FirstOrDefault()
-                };
-                return View(userWithRole);
+                return View(user);
             }
             return View();
 

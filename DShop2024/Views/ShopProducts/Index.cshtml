@@ -212,6 +212,7 @@
 					success: function (result) {
 						if (result) {
 							Swal.fire("Add to cart successful");
+							loadQuantityCart();
 						}
 
 					}
@@ -266,4 +267,10 @@
 			});
 		});
 	</script>
+	<script>
+		function loadQuantityCart() {
+			$('#cartQuantity').load("/AjaxContent/QuantityCart");
+		}
+	</script>
+
 }

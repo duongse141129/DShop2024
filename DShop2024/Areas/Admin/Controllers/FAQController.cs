@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
+using DShop2024.EnumData;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
     public class FAQController : Controller
     {
         private readonly DShopContext _context;
@@ -46,16 +46,14 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(fAQModel);
         }
 
-        // GET: Admin/FAQModels/Create
+        [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
             ViewBag.sidebar = sidebar;
             return View();
         }
 
-        // POST: Admin/FAQModels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Question,Answer")] FAQModel fAQModel)
@@ -70,7 +68,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(fAQModel);
         }
 
-        // GET: Admin/FAQModels/Edit/5
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.sidebar = sidebar;
@@ -87,9 +85,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(fAQModel);
         }
 
-        // POST: Admin/FAQModels/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer")] FAQModel fAQModel)
@@ -124,9 +120,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
-
-        // POST: Admin/FAQModels/Delete/5
-
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
             ViewBag.sidebar = sidebar;

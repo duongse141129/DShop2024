@@ -2,10 +2,7 @@
     ViewData["title"] = "List Chatting User ";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1>@ViewData["title"]</h1>
-
-
-
+<h1 class="text-primary">@ViewData["title"]</h1>
 
 
 <table class="table">
@@ -17,11 +14,6 @@
         </tr>
     </thead>
     <tbody>
-
-
-
-
-
         @foreach (var userWithRoles in Model)
         {
             <tr>

@@ -94,6 +94,7 @@ builder.Services.AddSingleton<IdentityErrorDescriber, AppIdentityErrorDescriber>
 builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(ProductMapper));
+builder.Services.AddAutoMapper(typeof(CouponMapper));
 
 var app = builder.Build();
 

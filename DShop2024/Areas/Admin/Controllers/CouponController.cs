@@ -1,5 +1,7 @@
-﻿using DShop2024.EnumData;
+﻿using AutoMapper;
+using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,16 +10,19 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize(Roles = RoleName.Administrator)]
-	public class CouponController : Controller
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    public class CouponController : Controller
 	{
 		private readonly DShopContext _context;
+        private readonly IMapper _mapper;
         private readonly string sidebar = "coupon";
 
-        public CouponController(DShopContext context)
+
+        public CouponController(DShopContext context, IMapper mapper)
 		{
 			_context = context;
-		}
+            _mapper = mapper;
+        }
 		public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
             ViewBag.sidebar = sidebar;
@@ -58,13 +63,15 @@ namespace DShop2024.Areas.Admin.Controllers
 
             var coupons = await listCoupon.Skip((currentPage - 1) * pagesSize)
                         .Take(pagesSize).ToListAsync();
-
+            var couponViewModels = _mapper.Map<List<CouponViewModel>>(coupons);
             ViewBag.pagingModel = pagingModel;
             ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0), "Id", "CategoryCouponName");
-            return View(coupons);
+            return View(couponViewModels);
 		}
 
-		[HttpGet]
+
+        [Authorize(Roles = RoleName.Administrator)]
+        [HttpGet]
 		public IActionResult Create()
 		{
             ViewBag.sidebar = sidebar;
@@ -72,7 +79,9 @@ namespace DShop2024.Areas.Admin.Controllers
 			return View();
 		}
 
-		[HttpPost]
+
+        [Authorize(Roles = RoleName.Administrator)]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( CouponModel couponModel)
         {
@@ -83,6 +92,13 @@ namespace DShop2024.Areas.Admin.Controllers
             {
 				try
 				{
+                    var couponCodeExit = await _context.Coupons.Where(c => c.CouponCode == couponModel.CouponCode).AnyAsync();
+                    if (couponCodeExit)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Coupon Code already exists";
+                        return RedirectToAction(nameof(Create));
+                    }
+
                     var promotion = await _context.Promotions.FindAsync(couponModel.PromotionId);
 
                     if(couponModel.DateExpired < couponModel.DateStart)
@@ -130,6 +146,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return RedirectToAction(nameof(Create));
         }
 
+
+        [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
             ViewBag.sidebar = sidebar;
@@ -159,6 +177,78 @@ namespace DShop2024.Areas.Admin.Controllers
             }           
         }
 
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> ShowCoupon(int? id)
+        {
+            ViewBag.sidebar = sidebar;
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var couponModel = await _context.Coupons
+                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+            if (couponModel == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                if(couponModel.Quantity == 0)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Show coupon fail. Out of coupon";
+                    return RedirectToAction(nameof(Index));
+                }
+                if(couponModel.DateExpired < DateTime.Today)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Show coupon fail. Coupon was expired";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                couponModel.Status = 2;
+                _context.Coupons.Update(couponModel);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Show coupon successful ";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Show coupon fail " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> HideCoupon(int? id)
+        {
+            ViewBag.sidebar = sidebar;
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var couponModel = await _context.Coupons
+                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+            if (couponModel == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                couponModel.Status = 1;
+                _context.Coupons.Update(couponModel);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Hide coupon successful ";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Hide coupon fail " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
     }
 }

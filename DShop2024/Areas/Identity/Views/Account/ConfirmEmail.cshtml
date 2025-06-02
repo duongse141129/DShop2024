@@ -1,11 +1,19 @@
 ﻿@{
-    ViewData["Title"] = "Xác thực email";
+    ViewData["Title"] = "Confirm email";
 }
 
-<h1>@ViewData["Title"].</h1>
-<div>
-    <p>
-        Bạn đã hoàn thành xác thực email. 
-        Hãy <a asp-controller="Account" asp-action="Login">bấm vào đây để đăng nhập</a>.
-    </p>
+
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h1>@ViewData["Title"].</h1>
+            <div>
+                <p>
+                    You have completed email verification.
+                    Click <a asp-controller="Account" asp-action="Login"> to login</a>.
+                </p>
+            </div>
+
+        </div>
+    </div>
 </div>

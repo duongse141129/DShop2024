@@ -52,8 +52,6 @@
                 <h1>Send contact</h1>
                 <hr />
 
-                <form asp-action="Send" asp-controller="SendContact" enctype="multipart/form-data">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
                         <label asp-for="Subject" class="control-label"></label>
                         <input asp-for="Subject" class="form-control" />
@@ -65,14 +63,36 @@
                         <span asp-validation-for="Message" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <input type="submit" value="Send" class="btn btn-primary" />
+                        <input type="submit" class="btn btn-primary sendContactButton" id="sendContactButton" value="Send Message" />
                     </div>
-                </form>
     </div>
 </div>
     </div>
 </section>
 @section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.sendContactButton').click(function () {
+                var messageInput = $('#Message').val();
+                var subjectInput = $('#Subject').val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Send", "SendContact")",
+                    data: { message: messageInput, subject: subjectInput },
+                    success: function (result) {
+                        if (result.success) {
+                            Swal.fire(result.noti);
+                            // Swal.fire("Add to compare successful");
+                        }
+                        else {
+                            Swal.fire(result.noti);
+                        }
+
+                    }
+                });
+            });
+        });
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

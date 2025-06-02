@@ -4,16 +4,25 @@
     ViewData["Title"] = "Manage order";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1>@ViewData["title"]</h1>
-<div class="row">
-    <form asp-action="Index" asp-controller="Order">
-        <div class="search_box pull-right">
-            <input type="text" placeholder="Search Order Code" name="searchOrderCode" value="@( ViewBag.searchOrderCode != "" ? ViewBag.searchOrderCode  : "" )" />
-            <button  class="btn btn-warning btn-locgia" type="submit">Search</button>
-        </div>
-    </form>
-</div>
+<h1 class="text-primary">@ViewData["title"]</h1>
 
+<div class="row py-5">
+    <div class="col-md-8"></div>
+    <div class="col-md-4 ">
+        <form asp-action="Index" asp-controller="Order">
+            <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button type="submit" class="btn btn-search pe-1">
+                            <i class="fa fa-search search-icon"></i>
+                        </button>
+                    </div>
+                    <input type="text" placeholder="Search Order Code" class="form-control" name="searchOrderCode" value="@( ViewBag.searchOrderCode != "" ? ViewBag.searchOrderCode  : "" )">
+                </div>
+            </nav>
+        </form>
+    </div>
+</div>
 <table class="table">
     <thead>
         <tr>

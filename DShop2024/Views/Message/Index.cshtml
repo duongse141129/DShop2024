@@ -5,6 +5,48 @@
     ViewData["Title"] = "Chat";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+    @await Component.InvokeAsync("NotificationMessage")
+   @*  <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" aria-haspopup="true">
+        <i class="fa fa-search"></i>
+    </a>
+    <ul class="dropdown-menu dropdown-search animated fadeIn">
+        <form class="navbar-left navbar-form nav-search">
+            <div class="input-group">
+                <input type="text" placeholder="Search ..." class="form-control">
+            </div>
+        </form>
+    </ul> *@
+
+  @*   <a class="nav-link dropdown-toggle"
+       href="#"
+       id="messageDropdown"
+       role="button"
+       data-bs-toggle="dropdown"
+       aria-haspopup="true"
+       aria-expanded="false">
+        <i class="fa fa-envelope"></i>
+        <span id="countNotiMessage"></span>
+    </a>
+    <ul class="dropdown-menu messages-notif-box animated fadeIn"
+        aria-labelledby="messageDropdown">
+        <li>
+            <div class="dropdown-title d-flex justify-content-between align-items-center">
+                Messages
+                <a id="readAllMessage" class="small">Mark all as read</a>
+            </div>
+        </li>
+        <li>
+            <div class="message-notif-scroll scrollbar-outer">
+                <div id="listNotiMessage" class="notif-center">
+                </div>
+            </div>
+        </li>
+        <li>
+
+        </li>
+    </ul> *@
+</li>
 
 <section>
     <div class="container py-5 ws">
@@ -182,6 +224,7 @@
 @section Scripts {
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/chat.js"></script>
+    <script src="~/js/chatnotification.js"></script>
     <script>
         $(document).ready(function () {
             $('.sendMessageButton').click(function () {
@@ -195,7 +238,7 @@
 
                     success: function (result) {
                         if (result.success) {
-                           
+                            loadNotifiMessage();
                         }
                         else {
                             
@@ -205,5 +248,10 @@
                 });
             });
         });
+    </script>
+    <script>
+        function loadNotifiMessage() {
+            $('#notiComponent').load("/AjaxContent/ReloadNotificationMessage");
+        }
     </script>
 }

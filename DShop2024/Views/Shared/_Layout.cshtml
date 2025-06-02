@@ -31,7 +31,7 @@
  
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous"> 
-    <link rel="stylesheet" type="text/css" href="~/template/home/css/vendor.css"> 
+    <link rel="stylesheet" type="text/css" href="~/template/home/css/vendor.css">  
     <link rel="stylesheet" type="text/css" href="~/template/home/style.css">
 
      <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,8 +65,8 @@
                     }
                 </div>
                 <div class="top-link pe-2">
-                    <a asp-action="Index" asp-controller="SendContact" class="text-white"><small class="text-white mx-2">Contact</small>/</a>
-                    <a asp-action="AboutUs" asp-controller="Home" class="text-white"><small class="text-white ms-2">About Us</small></a>
+                    <a asp-area="" asp-action="Index" asp-controller="SendContact" class="text-white"><small class="text-white mx-2">Contact</small>/</a>
+                    <a asp-area="" asp-action="AboutUs" asp-controller="Home" class="text-white"><small class="text-white ms-2">About Us</small></a>
                 </div>
             </div>
         </div>
@@ -76,23 +76,21 @@
 
                 <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                     <div class="navbar-nav mx-auto">
-                        <a class="nav-item nav-link active" asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i>Home</a>
-                        <a class="nav-item nav-link" asp-action="Index" asp-controller="ShopProducts"><i class="fas fa-th-list"></i>Shop</a>
-                        <a class="nav-item nav-link" asp-action="Index" asp-controller="Message"><i class="far fa-comments"></i>Chat</a>
+                        <a class="nav-item nav-link active" asp-area="" asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i>Home</a>
+                        <a class="nav-item nav-link" asp-area="" asp-action="Index" asp-controller="ShopProducts"><i class="fas fa-th-list"></i>Shop</a>
+                        <a class="nav-item nav-link" asp-area="" asp-action="Index" asp-controller="Message"><i class="far fa-comments"></i>Chat</a>
 
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
                             <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                                <a class="dropdown-item" asp-action="WishList" asp-controller="Home"><i class="far fa-heart"></i> Wishlist</a>
-                                <a class="dropdown-item" asp-action="Compare" asp-controller="Home"><i class="fa fa-crosshairs"></i> Compare</a>
-                                <a class="dropdown-item" asp-action="Index" asp-controller="Order"><i class="fas fa-history"></i>History Shopping</a>
+                                <a class="dropdown-item" asp-area="" asp-action="WishList" asp-controller="Home"><i class="far fa-heart"></i> Wishlist</a>
+                                <a class="dropdown-item" asp-area="" asp-action="Compare" asp-controller="Home"><i class="fa fa-crosshairs"></i> Compare</a>
+                                <a class="dropdown-item" asp-area="" asp-action="Index" asp-controller="Order"><i class="fas fa-history"></i>History Shopping</a>
                             </div>
                         </div>
                     </div>
                     <div class="d-flex m-3 me-0">
-                        <a asp-action="Index" asp-controller="Cart" class="position-relative me-4 my-auto">
-                            <i class="fas fa-shopping-cart fa-2x"></i>
-                        </a>
+                        @await Component.InvokeAsync("Cart")
                         <partial name="_LoginPartial" />
                     </div>
                 </div>
@@ -104,7 +102,7 @@
 
 
     <partial name="_NotificationPartial" />
-    @RenderBody();
+    @RenderBody()
 
 
 
@@ -137,10 +135,10 @@
     <script src="https://apis.google.com/js/platform.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
     <script src="~/custom/js/site.js"></script>
+    
 
     <script>
         $(function () {
-
             var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';
             if (message != '') {
                 Swal.fire({

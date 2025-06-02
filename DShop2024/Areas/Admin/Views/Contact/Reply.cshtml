@@ -1,22 +1,24 @@
 ﻿@model DShop2024.Models.ContactModel
 
 @{
-    ViewData["Title"] = "Reply email";
+    ViewData["Title"] = "Reply email contact";
 	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1>Replay email contact</h1>
+<h1 class="text-primary">@ViewData["title"]</h1>
 
 <div class="replay-box">
 	<div class="row">
 		<div class="col-sm-4">
-			<h2>Leave a replay</h2>
+
 			<h4>@Model.User.UserName</h4>
+			<img src="~/media/avatar/@Model.User.Avatar" width="150" height="150" alt="">
 			<p>@Model.User.Email</p>
 			<p>@Model.DateSent</p>
-			<p>@Model.Subject</p>
+			<p><strong>Subject:</strong> @Model.Subject</p>
 			<p>@Model.Message</p>
 		</div>
 		<div class="col-sm-8">
+			<h2>Leave a replay</h2>
 			<form asp-action="Reply" method="post" asp-controller="Contact">
 				<input type="hidden" name="IdContact" value="@Model.Id" />
 				<div class="text-area">
@@ -24,7 +26,7 @@
 						<label>Reply Message</label>
 					</div>
 					<span>*</span>
-					<textarea name="replyMessage" class="col-sm-8" rows="11"></textarea>
+					<textarea name="replyMessage" class="col-sm-12" rows="11"></textarea>
 				</div>
 				<input class="btn btn-primary" type="submit" value="REPLY" />
 			</form>

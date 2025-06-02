@@ -15,10 +15,10 @@ namespace App.Areas.Identity.Models.AccountViewModels
 
         public string ReturnUrl { get; set; }
 
-        [Display(Name = "Nhớ cho trình duyệt này?")]
+        [Display(Name = "Remember this browser?")]
         public bool RememberBrowser { get; set; }
 
-        [Display(Name = "Nhớ thông tin đăng nhập?")]
+        [Display(Name = "Remember Me?")]
         public bool RememberMe { get; set; }
     }
 }

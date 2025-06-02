@@ -294,6 +294,15 @@
 										{
 											<button class="btn btn-primary add-to-cart">Out Of Order</button>
 										}
+										@if (User.Identity?.IsAuthenticated ?? false)
+										{
+											<a data-product_id="@relatedProduct.Id" class="btn-compare add-btn-compare">
+												<i class="fas fa-retweet"></i>
+											</a>
+											<a data-product_id="@relatedProduct.Id" class="btn-wishlist add-btn-wishlist">
+												<i class="far fa-heart"></i>
+											</a>
+										}
  
 	
                                 </div>
@@ -359,19 +368,7 @@
                                 <span class="qty">@item.BrandName</span><br />
                                 <span class="qty">@item.CategoryName</span>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <div class="input-group product-qty">
-                                        <span class="input-group-btn">
-                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
-                                        </span>
-											<input type="text" id="quantity" name="quantity" class="form-control input-number" min="1" value="1" max="10" step="1" readonly>
-                                        <span class="input-group-btn">
-                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </span>
-                                    </div>
+                           
                                     @if (item.Stock > 0)
                                     {
                                         <button class="btn btn-primary add-to-cart" data-product_id="@item.Id">Add to Cart</button>
@@ -748,6 +745,7 @@
 					success: function (result) {
 						if (result) {
 							Swal.fire("Add to cart successful");
+							loadQuantityCart();
 						}
 
 					}
@@ -813,6 +811,7 @@
 						if (result) {
 							Swal.fire("Add to wishlist successful");
 							$('.add-btn-detail-wishlist').hide();
+							loadQuantityCart();
 						}
 						else {
 							Swal.fire("Add to wishlist fail duplicate product");
@@ -847,7 +846,11 @@
 		});
 	</script>
 
-
+	<script>
+		function loadQuantityCart() {
+			$('#cartQuantity').load("/AjaxContent/QuantityCart");
+		}
+	</script>
 
 
 

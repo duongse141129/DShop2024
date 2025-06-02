@@ -8,7 +8,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("Admin/Shipping")]
-    [Authorize(Roles = RoleName.Administrator)]
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
     public class ShippingController : Controller
 	{
         private readonly DShopContext _context;
@@ -28,6 +28,7 @@ namespace DShop2024.Areas.Admin.Controllers
 			return View();
 		}
 
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [Route("StoreShipping")]
         public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, decimal price)
@@ -55,6 +56,7 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = RoleName.Administrator)]
         [Route("Delete")]
         public async Task<IActionResult> Delete(int? Id)
         {

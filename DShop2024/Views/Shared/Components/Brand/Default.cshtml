@@ -11,7 +11,7 @@
     {
         <li>
             <div class="d-flex justify-content-between fruite-name list-group-item @(ViewBag.BrandSlug == item.Slug ? "active" : "") ">
-                <a class="btn-link" asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug"> @item.BrandName</a>
+                <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug"> @item.BrandName</a>
                 <span>@item.CountProduct</span>
             </div>
         </li>

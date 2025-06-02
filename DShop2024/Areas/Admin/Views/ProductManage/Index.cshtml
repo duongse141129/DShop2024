@@ -3,14 +3,14 @@
     ViewData["title"] = "Manage Products";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1>@ViewData["title"]</h1>
+<h1 class="text-primary">@ViewData["title"]</h1>
 
 @if (User.IsInRole(RoleName.Administrator))
 {
     <a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
     <br />
-    <form asp-action="DeleteMultiple" asp-controller="ProductManage">
-        <input type="submit" class="btn btn-danger btn-sm confirmDeletion" value="Delete multiple products" onclick="return confirm('Are you sure you want to delete these products?');" />
+    <form asp-action="DeleteMultiple" asp-controller="ProductManage" class="py-2">
+        <input type="submit" class="btn btn-danger btn-sm confirmDeletion" value="Delete multiple products" />
 
         <table class="table table-striped" id="myTable">
             <thead>

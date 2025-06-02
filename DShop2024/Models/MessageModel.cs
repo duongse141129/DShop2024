@@ -13,6 +13,7 @@ namespace DShop2024.Models
         public DateTime Timestamp { get; set; }
         public string UserId { get; set; }
         public string ReceiverId { get; set; }
+        public bool? IsRead { get; set; }
 
         [ForeignKey("UserId")]
         public virtual AppUserModel User { get; set; }

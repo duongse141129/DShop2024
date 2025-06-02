@@ -13,5 +13,10 @@ namespace DShop2024.ViewModels
         public string RoleName { get; set; }
         public string Receiver { get; set; }
         public string PathImage { get; set; }
+        public string UserId { get; set; }
+        public bool? IsRead { get; set; }
+        public int MessageId { get; set; }
+        public string PathUser { get; set; }
+        public string DaysLeftTime { get; set; }
     }
 }

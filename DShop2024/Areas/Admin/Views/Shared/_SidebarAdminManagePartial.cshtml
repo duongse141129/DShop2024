@@ -1,5 +1,4 @@
 ﻿
-
 <div class="sidebar" data-background-color="dark">
     <div class="sidebar-logo">
         <!-- Logo Header -->
@@ -25,30 +24,16 @@
         <div class="sidebar-content">
             <ul class="nav nav-secondary">
                 <li class="nav-item @( ViewBag.sidebar == "dashboard" ? "active" : "")">
-                    <a data-bs-toggle="collapse"
-                       href="#dashboard"
-                       class="collapsed"
-                       aria-expanded="false">
+                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                         <i class="fas fa-chart-bar"></i>
                         <p>Dashboard</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="dashboard">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="active">
-                                    <span class="sub-item">Dashboard</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
                 <li class="nav-item">
                     <a asp-area="" asp-controller="Home" asp-action="Index" >
                         <i class="fas fa-home"></i>
                         <p>Home</p>
-                        <span class="caret"></span>
                     </a>
                 </li>
                 
@@ -126,81 +111,65 @@
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "order" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#order">
+                    <a asp-area="Admin" asp-controller="Order" asp-action="Index">
                         <i class="fas fa-cart-plus"></i>
                         <p>Order</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="order">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Order" asp-action="Index">
-                                    <span class="sub-item">Manage Orders</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "user" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#user">
-                        <i class="fas fa-address-card"></i>
-                        <p>User</p>
-                        <span class="caret"></span>
-                    </a>
-                    <div class="collapse" id="user">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="User" asp-action="Index">
-                                    <span class="sub-item">Manage Users</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="User" asp-action="Create">
-                                    <span class="sub-item">Create User</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                @if (User.IsInRole(RoleName.Administrator))
+                {
+                    <li class="nav-item  @( ViewBag.sidebar == "user" ? "active" : "")">
+                        <a data-bs-toggle="collapse" href="#user">
+                            <i class="fas fa-address-card"></i>
+                            <p>User</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="user">
+                            <ul class="nav nav-collapse">
+                                <li>
+                                    <a asp-area="Admin" asp-controller="User" asp-action="Index">
+                                        <span class="sub-item">Manage Users</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-area="Admin" asp-controller="User" asp-action="Create">
+                                        <span class="sub-item">Create User</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "role" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#role">
-                        <i class="fas fa-user-tag"></i>
-                        <p>Role</p>
-                        <span class="caret"></span>
-                    </a>
-                    <div class="collapse" id="role">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Role" asp-action="Index">
-                                    <span class="sub-item">Manage Roles</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="Role" asp-action="Create">
-                                    <span class="sub-item">Create Roles</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                    <li class="nav-item  @( ViewBag.sidebar == "role" ? "active" : "")">
+                        <a data-bs-toggle="collapse" href="#role">
+                            <i class="fas fa-user-tag"></i>
+                            <p>Role</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="role">
+                            <ul class="nav nav-collapse">
+                                <li>
+                                    <a asp-area="Admin" asp-controller="Role" asp-action="Index">
+                                        <span class="sub-item">Manage Roles</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-area="Admin" asp-controller="Role" asp-action="Create">
+                                        <span class="sub-item">Create Roles</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                }
+
 
                 <li class="nav-item  @( ViewBag.sidebar == "shipping" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#shipping">
+                    <a asp-area="Admin" asp-controller="Shipping" asp-action="Index">
                         <i class="fas fa-shipping-fast"></i>
-                        <p>Shipping</p>
-                        <span class="caret"></span>
+                        <p>Shipping</p>                 
                     </a>
-                    <div class="collapse" id="shipping">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Shipping" asp-action="Index">
-                                    <span class="sub-item">Manage Shippings</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "coupon" ? "active" : "")">
@@ -248,20 +217,11 @@
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "promotion" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#promotion">
+                    <a asp-area="Admin" asp-controller="Promotion" asp-action="Index">
                         <i class="far fa-file-alt"></i>
                         <p>Promotion</p>
                         <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="promotion">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Promotion" asp-action="Index">
-                                    <span class="sub-item">View Promotions</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "faq" ? "active" : "")">
@@ -287,73 +247,38 @@
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "contact" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#contact">
+                    <a  asp-area="Admin" asp-controller="Contact" asp-action="Index">
                         <i class="fas fa-list"></i>
                         <p>Contact</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="contact">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Contact" asp-action="Index">
-                                    <span class="sub-item">Manage Contacts</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "chat" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#chat">
+                    <a asp-area="Admin" asp-controller="Chat" asp-action="Index">
                         <i class="fab fa-weixin"></i>
-
                         <p>Chat</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="chat">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Chat" asp-action="Index">
-                                    <span class="sub-item">Manage chat</span>
-                                    <span class="badge badge-success spanNoti" id="spanNoti">(*)</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "information" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#information">
+                    <a asp-area="Admin" asp-controller="Information" asp-action="Index">
                         <i class="fas fa-store-alt"></i>
                         <p>Information Shop</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="information">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Information" asp-action="Index">
-                                    <span class="sub-item">Information Shop</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "stock" ? "active" : "")">
-                    <a data-bs-toggle="collapse" href="#stock">
+                <li class="nav-item  @( ViewBag.sidebar == "stockIn" ? "active" : "")">
+                    <a  asp-area="Admin" asp-controller="Stock" asp-action="Index">
                         <i class="fas fa-exchange-alt"></i>
                         <p>Stock</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="stock">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a asp-area="Admin" asp-controller="Information" asp-action="Index">
-                                    <span class="sub-item">Information Shop</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                </li>
+
+                <li class="nav-item ">
+                    <a target="_blank" class="dropdown-item" asp-action="Index" asp-controller="FileManager" asp-area="Files">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Manage files</p>
+                    </a>
                 </li>
 
             </ul>

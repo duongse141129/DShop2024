@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol.Plugins;
 using SixLabors.ImageSharp;
 
 namespace DShop2024.Areas.Admin.Controllers
@@ -55,7 +54,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
+            await ReadMessage(customerId);
             List<MessageViewModel> messages = await (from m in _context.Messages
                                                      join u in _context.Users on m.UserId equals u.Id
                                                      join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -78,6 +77,64 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(messages);
         }
 
+        public async Task ReadMessage(string customerId)
+        {
+  
+            try
+            {
+                var latestMessages = _context.Messages
+                      .GroupBy(m => m.UserId)
+                      .Select(g => new { UserId = g.Key, Date = g.Max(m => m.Timestamp) });
+
+                var result = await _context.Messages
+                    .Join(latestMessages, m => new { m.UserId, m.Timestamp }, lm => new { lm.UserId, Timestamp = lm.Date }, (m, lm) => m)
+                    .Where(m => m.UserId == customerId)
+                    .Select(m => m.Id).ToListAsync();
+
+                foreach (var messageId in result)
+                {
+                    MessageModel m = await _context.Messages.FindAsync(messageId);
+                    m.IsRead = true;
+                    _context.Messages.Update(m);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Read Message fail " +ex.Message;
+            }
+
+        }
+
+        public async Task<IActionResult> ReadAllMessage2days(string customerId)
+        {
+            try
+            {
+                var messageIds = await _context.Messages
+                        .Join(_context.Users, m => m.UserId, u => u.Id, (m, u) => new { m, u })
+                        .Join(_context.UserRoles, mu => mu.u.Id, ur => ur.UserId, (mu, ur) => new { mu.m, mu.u, ur })
+                        .Join(_context.Roles, mur => mur.ur.RoleId, r => r.Id, (mur, r) => new { mur.m, mur.u, mur.ur, r })
+                        .Where(mur => mur.u.Status != 0 && mur.r.Name == RoleName.Customer && mur.m.Timestamp > DateTime.Now.AddDays(-2))
+                        .Select(mur => mur.m.Id).ToListAsync();
+
+                foreach (var id in messageIds)
+                {
+                    MessageModel m = await _context.Messages.FindAsync(id);
+                    m.IsRead = true;
+                    _context.Messages.Update(m);
+                    await _context.SaveChangesAsync();
+                }
+                return Ok(new { success = true, Message = "read all message successful" });
+            }
+            catch (Exception ex)
+            {
+
+                return Ok(new { success = true, Message = "read all message fail "+ ex.Message });
+            }
+
+        }
+
+
         [HttpPost]
         public async Task<IActionResult> SendMessage(string receiver, string messageInput)
         {
@@ -90,7 +147,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now,
                     UserId = user.Id,
-                    ReceiverId = receiver
+                    ReceiverId = receiver,
+                    IsRead = false,
                 };
                 await _context.Messages.AddAsync(model);
                 await _context.SaveChangesAsync();

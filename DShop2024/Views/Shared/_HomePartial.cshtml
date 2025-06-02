@@ -1,4 +1,11 @@
-﻿<section class="py-5 overflow-hidden">
+﻿
+<section class="py-5">
+    <div class="container-fluid">
+        @await Component.InvokeAsync("Coupon")
+    </div>
+</section>
+
+<section class="py-5 overflow-hidden">
     <div class="container-fluid">
         @await Component.InvokeAsync("BestSeller")  
     </div>

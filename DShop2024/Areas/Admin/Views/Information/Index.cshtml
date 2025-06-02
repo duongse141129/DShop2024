@@ -4,14 +4,14 @@
 	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h1>@ViewData["title"]</h1>
+<h1 class="text-primary">@ViewData["title"]</h1>
 
 
-<table class="table table-bordered table-striped">
+<table class="table table-responsive table-striped">
 	<thead class="thead-dark">
 		<tr>
 			<th scope="col"></th>
-			<th scope="col">Product</th>
+			<th scope="col">Information</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -56,8 +56,11 @@
 			<td>@Html.Raw(@Model.PluginFacebook)</td>
 		</tr>
 		<tr>
-			<th>Action</th>
-			<td><a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Information" asp-route-Id="@Model.Id">Edit</a></td>
+			@if (User.IsInRole(RoleName.Administrator))
+			{
+				<th>Action</th>
+				<td><a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Information" asp-route-Id="@Model.Id">Edit</a></td>
+			}
 		</tr>
 	</tbody>
 </table>

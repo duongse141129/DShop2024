@@ -1,0 +1,55 @@
+﻿@model IEnumerable<ContactModel>
+
+<a class="nav-link dropdown-toggle"
+   href="#"
+   id="messageDropdown"
+   role="button"
+   data-bs-toggle="dropdown"
+   aria-haspopup="true"
+   aria-expanded="false">
+    <i class="fa fa-bell"></i>
+    <span class="notification bg-secondary">@Model.Count()</span>
+</a>
+<ul class="dropdown-menu messages-notif-box animated fadeIn"
+    aria-labelledby="messageDropdown">
+    <li>
+        <div class="dropdown-title d-flex justify-content-between align-items-center">
+            Contacts
+        </div>
+    </li>
+    <li>
+        <div class="message-notif-scroll scrollbar-outer">
+            <div class="notif-center">
+                @foreach (var item in Model)
+                {
+                    <a asp-area="Admin" asp-controller="Contact" asp-action="Reply" asp-route-Id="@item.Id">
+                        <div class="notif-img">
+                            <img src="~/media/avatar/@item.User.Avatar"
+                                 alt="Img Profile" />
+                        </div>
+                        <div class="notif-content">
+                            <span class="subject">@item.User.UserName</span>
+                            <span class="block">
+                                <strong>Subject: </strong>
+                                @if (item.Subject.Length > 10)
+                                {
+                                    @item.Subject.Substring(1, 10)
+                                }
+                                else
+                                {
+                                    @item.Subject
+                                }
+                            </span>
+                            <span class="time">@item.DateSent.ToString("MM/dd/yyyy")</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </li>
+    <li>
+        <a class="see-all" asp-area="Admin" asp-controller="Contact" asp-action="Index">
+            See all contact<i class="fa fa-angle-right"></i>
+        </a>
+    </li>
+</ul>

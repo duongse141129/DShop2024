@@ -1,0 +1,86 @@
+﻿@model IEnumerable<DShop2024.Models.ReceivingStockModel>
+
+@{
+    ViewData["Title"] = "Manage stock";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+
+
+<div class="row py-5">
+    <div class="col-md-8">
+        <a asp-area="Admin" asp-action="Index" asp-controller="ProductManage" class="btn btn-primary">Add Quantity</a>
+    </div>
+    <div class="col-md-4 ">
+        <form asp-area="Admin" asp-action="AddQuantity" asp-controller="ProductManage" method="get">
+            <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button type="submit" class="btn btn-search pe-1">
+                            <i class="fa fa-search search-icon"></i>
+                        </button>
+                    </div>
+                    <input type="text" placeholder="Search Product ID" class="form-control" name="Id" />
+                </div>
+            </nav>
+        </form>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date Receive</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Original Price</th>
+            <th>Total Price</th>
+            <th>User</th>
+            
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.DateReceive
+                </td>
+                <td>
+                    <div class="col-sm-12">
+                        ID: @item.Product.Id
+                    </div>
+                    <div class="col-sm-12">
+                        @item.Product.ProductName
+                    </div>
+                    <div class="col-sm-8">
+                        <img src="~/media/products/@item.Product.Image" width="125" height="150" />
+                    </div>            
+                </td>
+                <td>
+                    @item.Quantity
+                </td>
+                <td>
+                    @item.Product.OriginalPrice.ToString("#,##0 VND")
+                </td>
+                <td>
+                    @((item.Quantity * item.Product.OriginalPrice).ToString("#,##0 VND"))
+                </td>
+                <td>
+
+                    <div class="col-sm-12 text-center">
+                        @item.User.UserName
+                    </div>
+                    <div class="col-sm-12 text-center">
+                        <img src="~/media/avatar/@item.User.Avatar" width="100" height="100" />
+                    </div>
+                 
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+

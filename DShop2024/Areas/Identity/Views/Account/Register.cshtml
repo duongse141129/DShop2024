@@ -1,56 +1,149 @@
 ﻿@using DShop2024.Models
 @inject SignInManager<AppUserModel> SignInManager
-
 @model RegisterViewModel
 @{
-    ViewData["Title"] = "Đăng ký tài khoản";
+    ViewData["Title"] = "Register account";
 }
 
+<section class="vh-100" style="background-color: #508bfc;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card shadow-2-strong bgLogin">
+                    <div class="card-body p-5 text-center bgLogin">
+                        <h3 class="mb-5 lgTitle">REGISTER</h3>
+                        <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="user">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<div class="card o-hidden border-0 shadow-lg my-5">
-    <div class="card-body p-0">
-        <!-- Nested Row within Card Body -->
-        <div class="row">
-            <div class="col-lg-7">
-                <div class="p-5">
-                    <div class="text-center">
-                        <h1 class="h4 text-gray-900 mb-4">Tạo tài khoản mới</h1>
-                    </div>
-                    <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="user">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                        <div class="form-group">
-                            <input asp-for="UserName" class="form-control form-control-user" />
-                            <span asp-validation-for="UserName" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <input asp-for="Email" class="form-control form-control-user" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-
-                        <div class="form-group row">
-                            <div class="col-sm-6 mb-3 mb-sm-0">
-                                <input asp-for="Password" class="form-control form-control-user">
-                                <span asp-validation-for="Password" class="text-danger"></span>
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <input asp-for="UserName" type="text" id="typeEmailX-2" class="form-control form-control-lg" />
+                                <span asp-validation-for="UserName" class="text-danger"></span>
                             </div>
-                            <div class="col-sm-6">
-                                <input  asp-for="ConfirmPassword"  class="form-control form-control-user">
-                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <input asp-for="Email" type="email" id="typeEmail" class="form-control form-control-lg" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-user btn-block">Đăng ký</button>
-                        <hr>
 
+                            <div class="form-group row py-5">
+                                <div class="col-sm-6 mb-3 mb-sm-0">
+                                    <input asp-for="Password" class="form-control form-control-user">
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input asp-for="ConfirmPassword" class="form-control form-control-user">
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block w-100" type="submit">Register</button>
                         </form>
+                        <hr class="my-4">
+                        @{
+                            var schemes = await SignInManager.GetExternalAuthenticationSchemesAsync();
+                            var loginProviders = schemes.ToList();
 
-@{
+                            if (loginProviders.Count >= 0)
+                            {
+                                <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
+                                    <div>
+                                        <p>
+                                            @foreach (var provider in loginProviders)
+                                            {
+                                                // var cssClass = "btn btn-user btn-block";
+                                                // var icon = "";
+                                                // if (provider.Name == "Google")
+                                                // {
+                                                //     cssClass = "btn btn-google btn-user btn-block";
+                                                //     icon = "<i class=\"fab fa-google\"></i>";
+                                                // }
+
+                                                // <button type="submit" class="@cssClass"
+                                                //         name="provider" value="@provider.Name"
+                                                //         title="Log in using your @provider.Name account">
+                                                //     @Html.Raw(icon) @provider.Name
+                                                // </button>
+                                                if (provider.Name == "Google")
+                                                {
+                                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-lg btn-block btn-primary" style="background-color: #dd4b39;"
+                                                            type="submit">
+                                                        <i class="fab fa-google me-2"></i> Sign Up with google
+                                                    </button>
+                                                }
+                                            }
+                                        </p>
+                                    </div>
+                                </form>
+                            }
+                        }
+                        <hr class="my-2">
+                        <div class="text-center">
+                            <a class="small" asp-action="ForgotPassword">Forgot Password?</a>
+                        </div>
+                        <div class="text-center">
+                            <a class="small" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">Already have an account? Sign in</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* <div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <!-- Nested Row within Card Body -->
+                    <div class="row">
+                        <div class="col-lg-7">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Create new account</h1>
+                                </div>
+                                <form asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="user">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div class="form-group">
+                                        <input asp-for="UserName" class="form-control form-control-user" />
+                                        <span asp-validation-for="UserName" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <input asp-for="Email" class="form-control form-control-user" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <input asp-for="Password" class="form-control form-control-user">
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input asp-for="ConfirmPassword" class="form-control form-control-user">
+                                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">Register</button>
+                                    <hr>
+                                </form>
+                                @{
                                     var schemes = await SignInManager.GetExternalAuthenticationSchemesAsync();
                                     var loginProviders = schemes.ToList();
-                                    if (loginProviders.Count == 0)
-                                    { 
-                                    }
-                                    else
+                                    if (loginProviders.Count >= 0)
                                     {
                                         <form asp-controller="Account" asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
                                             <div>
@@ -69,10 +162,10 @@
                                                             cssClass = "btn btn-facebook btn-user btn-block";
                                                             icon = "<i class=\"fab fa-facebook\"></i>";
                                                         }
-                                                        <button type="submit" class="@cssClass" 
-                                                            name="provider" value="@provider.Name" 
-                                                            title="Log in using your @provider.Name account">
-                                                            Đăng ký bằng @Html.Raw(icon) @provider.Name
+                                                        <button type="submit" class="@cssClass"
+                                                                name="provider" value="@provider.Name"
+                                                                title="Log in using your @provider.Name account">
+                                                            Sign up with @Html.Raw(icon) @provider.Name
                                                         </button>
                                                     }
                                                 </p>
@@ -80,21 +173,22 @@
                                         </form>
                                     }
                                 }
-
-                    
-                    <hr>
-                   
-                    <div class="text-center">
-                        <a class="small" asp-action="ForgotPassword">Quyên mật khẩu?</a>
-                    </div>
-                    <div class="text-center">
-                        <a class="small" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">Đã có tài khoản? Đăng nhập</a>
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" asp-action="ForgotPassword">Forgot Password?</a>
+                                </div>
+                                <div class="text-center">
+                                    <a class="small" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]">Already have an account? Sign in</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</div> *@
+
 
 
 @section Scripts {

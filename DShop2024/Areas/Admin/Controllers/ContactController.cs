@@ -1,10 +1,8 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Admin.Controllers
@@ -100,6 +98,7 @@ namespace DShop2024.Areas.Admin.Controllers
 				contactModel.ReplyMessage = replyMessage;
                 contactModel.DateRespone = DateTime.Now;
                 contactModel.RespondentId = user.Id;
+                contactModel.Status = 2;
                 _dataContext.Update(contactModel);
                 await _dataContext.SaveChangesAsync();
 				//await _emailSender.SendEmailAsync(contactModel.User.Email, contactModel.Subject, replyMessage);

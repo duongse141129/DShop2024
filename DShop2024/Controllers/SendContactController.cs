@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
-	[Authorize]
-	public class SendContactController : Controller
+    [Authorize(Roles = RoleName.Customer)]
+    public class SendContactController : Controller
 	{
 		private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
@@ -26,29 +26,30 @@ namespace DShop2024.Controllers
 		}
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Send([Bind("Subject,Message")] ContactModel contactModel)
+        public async Task<IActionResult> Send(string subject, string message)
         {
-            if (ModelState.IsValid)
+            if(string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(message))
             {
+                return Ok(new { success = false, noti = "Please fill all inputs " });
+            }
                 try
                 {
+                    ContactModel contactModel = new ContactModel();
                     var user = await _userManager.GetUserAsync(this.User);
                     contactModel.UserId = user.Id;
                     contactModel.DateSent = DateTime.Now;
                     contactModel.Status = 1;
+                    contactModel.Subject = subject;
+                    contactModel.Message = message;
                     _context.Add(contactModel);
                     await _context.SaveChangesAsync();
-                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Send contact successful";
-                    return RedirectToAction(nameof(Index));
+                    return Ok(new { success = true, noti = "Send contact successful "});
                 }
                 catch (Exception ex)
                 {
-                    TempData[DShopConst.TEMPDATA_ERROR] = "Send contact fail "+ ex.Message;
-                    return RedirectToAction(nameof(Index));
+                    return Ok(new { success = false, noti = "Send contact fail " + ex.Message });
                 }
-            }
-            return RedirectToAction("Index");
+
         }
 
 

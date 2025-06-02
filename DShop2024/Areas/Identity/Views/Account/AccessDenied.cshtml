@@ -1,8 +1,13 @@
 @{
-    ViewData["Title"] = "Hạn chế truy cập";
+    ViewData["Title"] = "Access Denied";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">Bạn không được phép truy cập chức năng này.</p>
-</header>
+
+<div class="container-fluid contact py-5">
+    <div class="container py-5">
+        <div class="p-5 bg-light rounded">
+            <h1 class="text-danger">@ViewData["Title"]</h1>
+            <p class="text-danger">You are not authorized to access this function.</p>
+        </div>
+    </div>
+</div>

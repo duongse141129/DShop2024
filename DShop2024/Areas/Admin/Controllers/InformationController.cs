@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize(Roles = RoleName.Administrator)]
-	public class InformationController : Controller
+    [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    public class InformationController : Controller
 	{
 		private readonly DShopContext _dataContext;
 		private readonly IWebHostEnvironment _webHostEnvironment;
@@ -26,7 +26,8 @@ namespace DShop2024.Areas.Admin.Controllers
 			return View(info);
 		}
 
-		[HttpGet]
+        [Authorize(Roles = RoleName.Administrator)]
+        [HttpGet]
 		public async Task<IActionResult> Edit(int? Id)
 		{
             ViewBag.sidebar = sidebar;
@@ -44,7 +45,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		}
 
-		[HttpPost]
+        [Authorize(Roles = RoleName.Administrator)]
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int Id, InformationShopModel informationShop)
 		{

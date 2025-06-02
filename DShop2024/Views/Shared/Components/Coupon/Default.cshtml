@@ -1,0 +1,31 @@
+﻿@model IEnumerable<CouponModel>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6">
+            <div class="banner-ad bg-@(CouponEnumData.getbgColor(item.Promotion.CategoryCouponName)) mb-3">
+                <div class="banner-content p-5">
+                    @if(item.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING)
+                    {
+                        <div class="categories text-primary fs-3 fw-bold">FREE SHIPPING</div>
+                    }
+                    @if (item.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
+                    {
+                        <div class="categories text-primary fs-3 fw-bold">Upto @item.Value % Off</div>
+                    }
+                    @if (item.Promotion.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
+                    {
+                        <div class="categories text-primary fs-3 fw-bold">Discount @item.Value</div>
+                    }
+                   
+                    <h3 class="banner-title">Coupon Name: @item.CouponName</h3>
+                    <p>@item.Description</p>
+                    <p><strong>FROM @item.DateStart.ToString("MMMM dd, yyyy") - TO @item.DateExpired.ToString("MMMM dd, yyyy")</strong></p>
+                    <span id="cpnCode">@item.CouponCode</span>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>
