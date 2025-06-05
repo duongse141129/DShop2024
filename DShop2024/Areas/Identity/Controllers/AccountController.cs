@@ -8,7 +8,9 @@ using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
@@ -522,6 +524,11 @@ namespace DShop2024.Areas.Identity.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if(user.LoginType == UserEnumData.LOGIN_GMAIL)
+                {
+                    return View("NoNeedPassword");
+                }
+
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist or is not confirmed
@@ -533,6 +540,41 @@ namespace DShop2024.Areas.Identity.Controllers
             }
             return View(model);
         }
+
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendOtpConfirmEmailAgian(string? userId)
+        {
+            if (userId == null)
+            {
+                return NotFound();
+            }
+            var user = await _dataContext.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_CONFIRM_EMAIL });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendOtpResetPaswordAgain(string? userId)
+        {
+            if ( String.IsNullOrEmpty(userId))
+            {
+                return NotFound();
+            }
+            var user = await _dataContext.Users.FindAsync(userId);
+            if(user == null) 
+            {
+                return NotFound(); 
+            }
+            return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_RESET_PASSWORD });
+        }
+
 
 
         [HttpGet]
@@ -616,7 +658,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 return RedirectToAction("ResetPassword", "Account", new {email = user.Email});
             }
             TempData[DShopConst.TEMPDATA_ERROR] = "Code is invalid";
-            return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
+            return RedirectToAction("ForgotPasswordConfirmation", "Account", new { email = user.Email });
         }
 
 

@@ -57,11 +57,15 @@
                                     <span class="sub-item">Manage Brands</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="BrandManage" asp-action="Create">
-                                    <span class="sub-item">Create Brand</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="BrandManage" asp-action="Create">
+                                        <span class="sub-item">Create Brand</span>
+                                    </a>
+                                </li>
+                            }
+              
                         </ul>
                     </div>
                 </li>
@@ -79,11 +83,15 @@
                                     <span class="sub-item">Manage Categories</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="CategoryManage" asp-action="Create">
-                                    <span class="sub-item">Create Category</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="CategoryManage" asp-action="Create">
+                                        <span class="sub-item">Create Category</span>
+                                    </a>
+                                </li>
+                            }
+           
                         </ul>
                     </div>
                 </li>
@@ -101,11 +109,14 @@
                                     <span class="sub-item">Manage Products</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="ProductManage" asp-action="Create">
-                                    <span class="sub-item">Create Product</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="ProductManage" asp-action="Create">
+                                        <span class="sub-item">Create Product</span>
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
                 </li>
@@ -185,11 +196,14 @@
                                     <span class="sub-item">Manage Coupons</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="Coupon" asp-action="Create">
-                                    <span class="sub-item">Create Coupons</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="Coupon" asp-action="Create">
+                                        <span class="sub-item">Create Coupons</span>
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
                 </li>
@@ -207,11 +221,14 @@
                                     <span class="sub-item">Manage Sliders</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="Slider" asp-action="Create">
-                                    <span class="sub-item">Create Sliders</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="Slider" asp-action="Create">
+                                        <span class="sub-item">Create Sliders</span>
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
                 </li>
@@ -237,11 +254,14 @@
                                     <span class="sub-item">Manage FAQs</span>
                                 </a>
                             </li>
-                            <li>
-                                <a asp-area="Admin" asp-controller="FAQ" asp-action="Create">
-                                    <span class="sub-item">Create FAQs</span>
-                                </a>
-                            </li>
+                            @if (User.IsInRole(RoleName.Administrator))
+                            {
+                                <li>
+                                    <a asp-area="Admin" asp-controller="FAQ" asp-action="Create">
+                                        <span class="sub-item">Create FAQs</span>
+                                    </a>
+                                </li>
+                            }  
                         </ul>
                     </div>
                 </li>

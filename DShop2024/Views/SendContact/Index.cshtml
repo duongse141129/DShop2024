@@ -7,11 +7,11 @@
 
 <section >
     <div class="container p-5 my-5 border ws">
-
-
-
-<div class="row">
-    <div class="col-md-12">
+        <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+            @await Component.InvokeAsync("Contact")
+        </li>
+        <div class="row">
+            <div class="col-md-12">
 
                 <h2>Frequently Asked Questions</h2>
 
@@ -47,8 +47,8 @@
     
         <br/>
 
-    </div>
-    <div class="col-md-8">
+            </div>
+            <div class="col-md-8">
                 <h1>Send contact</h1>
                 <hr />
 
@@ -65,8 +65,8 @@
                     <div class="form-group">
                         <input type="submit" class="btn btn-primary sendContactButton" id="sendContactButton" value="Send Message" />
                     </div>
-    </div>
-</div>
+            </div>
+        </div>
     </div>
 </section>
 @section Scripts {

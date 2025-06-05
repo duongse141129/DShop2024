@@ -17,31 +17,11 @@ connection.on("ReceiveMessage", function (user, message) {
     //receiver
 
     if (user == message["userName"] && message["receiver"] == null) {
-
         var spanIdU = `spanuser_${message["userName"]}`;
-        var spannoti = `spanNoti`;
-
         var divideuser = document.getElementById(spanIdU);
         divideuser.style.display = "block";
-
-        var dividenoti = document.getElementById(spannoti);
-        dividenoti.style.display = "block";
-        //if (divideuser.style.display == "none") {
-        //    console.log("2a");
-        //    divideuser.style.display = "block";
-        //} else {
-        //    console.log("2b" + divideuser.style.display);
-        //    divideuser.style.display = "block";
-        //}
     
-    } else if (user == message["userName"] && message["receiver"] != "") {
-        var idmessage = `messagesList_${message["receiver"]}`;
-        document.getElementById(idmessage).appendChild(li);
-        li.appendChild(span);
-        li.appendChild(p)
-        span.textContent = `${message["timestamp"]}`;
-        p.textContent = `[${message["roleName"]}][${user}] : ${message["contentMessage"]}`;
-    }
+    } 
        
 });
 

@@ -20,7 +20,7 @@
 					<h2 class="title text-center">Detail Product</h2>
 					<div class="single-blog-post">					
 							<a>
-								<img src="~/media/products/@Model.ProductDetail.Image" alt="">
+								<img src="~/media/products/@Model.ProductDetail.Image" width="500" height="500" alt="">
 							</a>
 							
 
@@ -119,26 +119,34 @@
 
 				<h2 class="title text-center">FEEDBACK</h2>
 				<div class="response-area">					
-					<ul class="media-list">
+					<div class="media-list">
 						@foreach (var item in Model.listRating)
 						{
-							<li class="media">
-								<a class="pull-left" href="#">
-									<img class="media-object" src="~/media/avatar/imagesdefault.png" alt="">
-								</a>
-								<div class="media-body">
+							<div class="row pb-2">
+								<div class="col-sm-2 ps-5">
+									<img class="avatar-img rounded" src="~/media/avatar/@item.User.Avatar" width="120" alt="">
+								</div>
+								<div class="col-md-10">
 									<ul class="sinlge-post-meta">
 										<li><i class="fa fa-user"></i>@item.User.UserName</li>
-										<li><i class="fa fa-clock-o"></i>@item.RatingDateTime?.ToShortTimeString()</li>
+										<li><i class="far fa-clock"></i>@item.RatingDateTime?.ToShortTimeString()</li>
 										<li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
 									</ul>
-									<p>@item.Star</p>
+									<span>Point: @item.Star</span>
+									<div class="d-fex ">
+										<i class="fa fa-star @( item.Star >= 1 ? "text-warning" : "")"></i>
+										<i class="fa fa-star @( item.Star >= 2 ? "text-warning" : "")"></i>
+										<i class="fa fa-star @( item.Star >= 3 ? "text-warning" : "")"></i>
+										<i class="fa fa-star @( item.Star >= 4 ? "text-warning" : "")"></i>
+										<i class="fa fa-star @( item.Star >= 5 ? "text-warning" : "")"></i>
+									</div>
 									<p>@item.Comment</p>
 								</div>
-							</li>
+							</div>
 						}
+					</div> 
 
-					</ul>
+
 				</div><!--/Response-area-->
 				@if (ViewBag.pagingmodel != null)
 				{

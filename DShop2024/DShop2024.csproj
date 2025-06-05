@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\js\chatNotification.js" />
+    <Content Remove="wwwroot\js\contactNotification.js" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\js\chatNotification.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\contactNotification.js" />
     <_ContentIncludedByDefault Remove="wwwroot\media\Email\sendCoupon.html" />
   </ItemGroup>
 
@@ -49,6 +51,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\js\chatNotification.js" />
+    <None Include="wwwroot\js\contactNotification.js" />
   </ItemGroup>
 
   <ItemGroup>
