@@ -21,7 +21,7 @@ connection.on("SendContact", function (user, message) {
     var spanTime = document.createElement("span");
     var contentMessage = `${message["subject"]}`;
     if (contentMessage.length > 10) {
-        contentMessage = str.substring(0, 10);
+        contentMessage = contentMessage.substring(0, 10);
     }
 
     if (user == message["userName"]) {
@@ -42,14 +42,15 @@ connection.on("SendContact", function (user, message) {
         strongUserName.textContent = `${message["userName"]}`;
         divContent.appendChild(spanMessage);
         spanMessage.classList.add("block");
-        spanMessage.textContent = contentMessage;
+        //spanMessage.textContent = `Subject: ${contentMessage}`;
+        spanMessage.textContent = "Subject: " + contentMessage;
         divContent.appendChild(spanTime);
         spanTime.classList.add("time");
         spanTime.textContent = `${message["dateSent"]}`;
 
         var countNotiContact = document.getElementById(`countContacts`);
         if (countNotiContact.textContent == "") {
-            countNotiContact.classList.add("notification bg-secondary");
+            countNotiContact.classList.add("notification");
             countNotiContact.textContent = `1`;
         } else {
             countNotiContact.textContent = parseInt(countNotiContact.textContent) + 1;

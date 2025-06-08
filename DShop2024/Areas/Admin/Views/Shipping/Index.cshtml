@@ -17,7 +17,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label>Province or City</label>
-                <select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+                <select class="css_select w-50" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
                     <option value="0">Tỉnh Thành</option>
                 </select>
             </div>
@@ -87,8 +87,8 @@
                                 location.reload();
                                 Swal.fire("Add shipping successful");                            
                             }
-                            else if (result.duplicate) {
-                                Swal.fire("Duplicate data");
+                            else {
+                                Swal.fire(result.message);
                             }
                         }
                     });

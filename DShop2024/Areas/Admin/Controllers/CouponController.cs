@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using DShop2024.Repository;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -29,6 +30,7 @@ namespace DShop2024.Areas.Admin.Controllers
             IQueryable <CouponModel> listCoupon = _context.Coupons
                                 .Where(c => c.Status != 0)
                                 .Include(c => c.Promotion)
+                                .Where( p => p.Promotion.CategoryCouponName != DShopConst.NEW_CUSTOMER)
                                 .OrderByDescending(c => c.Id);
             var count = await listCoupon.CountAsync();
             if (count > 0)
@@ -96,40 +98,39 @@ namespace DShop2024.Areas.Admin.Controllers
                     if (couponCodeExit)
                     {
                         TempData[DShopConst.TEMPDATA_ERROR] = "Coupon Code already exists";
-                        return RedirectToAction(nameof(Create));
+                        return View();
                     }
 
                     var promotion = await _context.Promotions.FindAsync(couponModel.PromotionId);
 
                     if(couponModel.DateExpired < couponModel.DateStart)
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "DateExpired must >= date start";
-                        return RedirectToAction(nameof(Create));
+                        ModelState.AddModelError("", "DateExpired must >= date start");
+                        return View();
                     } 
                     if(couponModel.DateStart < DateTime.Now.Date)
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "Cannot choose date in the past";
-                        return RedirectToAction(nameof(Create));
+                        ModelState.AddModelError("Cannot choose date in the past");
+                        return View();
                     }
 
                     if(promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
                     { 
                         if(couponModel.Value < 1000)
                         {
-							TempData[DShopConst.TEMPDATA_ERROR] = $"{promotion.CategoryCouponName} must >= 1000";
-							return RedirectToAction(nameof(Create));
-						}						
+                            ModelState.AddModelError("", $"{promotion.CategoryCouponName} must >= 1000");
+                            return View();
+                        }						
 					}   
                     if(promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
                     {
                         if(couponModel.Value >100 || couponModel.Value <1)
                         {
-							TempData[DShopConst.TEMPDATA_ERROR] = $"{promotion.CategoryCouponName} must from 1% to 100%";
-							return RedirectToAction(nameof(Create));
-						}
+                            ModelState.AddModelError("", $"{promotion.CategoryCouponName} must from 1% to 100%");
+                            return View();
+                        }
 					}
-
-
+                    couponModel.CouponCode = couponModel.CouponCode.ToUpper();
                     couponModel.Status = 1;
                     _context.Add(couponModel);
                     await _context.SaveChangesAsync();
@@ -139,11 +140,11 @@ namespace DShop2024.Areas.Admin.Controllers
 				catch (Exception ex)
 				{
                     TempData[DShopConst.TEMPDATA_ERROR] = "Add coupon fail "+ ex.Message;
-                    return RedirectToAction(nameof(Create));
+                    return View();
                 }
             }
-            TempData[DShopConst.TEMPDATA_ERROR] = "Check all fields";
-            return RedirectToAction(nameof(Create));
+            TempData[DShopConst.TEMPDATA_ERROR] = "Please fill out all fields to create";
+            return View();
         }
 
 

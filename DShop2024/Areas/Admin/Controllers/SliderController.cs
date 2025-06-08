@@ -1,4 +1,6 @@
-﻿using DShop2024.EnumData;
+﻿using AutoMapper;
+using DShop2024.Areas.Admin.Models.Banner;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +14,14 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IMapper _mapper;
         private readonly string sidebar = "slider";
 
-        public SliderController(DShopContext context, IWebHostEnvironment webHostEnvironment)
+        public SliderController(DShopContext context, IWebHostEnvironment webHostEnvironment, IMapper mapper)
 		{
 			_context = context;
             _webHostEnvironment = webHostEnvironment;
+            _mapper = mapper;
         }
 
 		public async Task<IActionResult> Index()
@@ -37,13 +41,22 @@ namespace DShop2024.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BannerModel banner)
+        public async Task<IActionResult> Create(CreateBannerRequest banner)
         {
             ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var checkExit = await _context.Banners.Where( b => b.Status != 0 )
+                                                           .Where( p => p.BannerName == banner.BannerName )
+                                                          .AnyAsync();
+                    if( checkExit)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This banner already exists.";
+                        return View(banner);
+                    }
+
                     if (banner.ImageUpload != null)
                     {
                         string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/banners");
@@ -56,8 +69,9 @@ namespace DShop2024.Areas.Admin.Controllers
                         banner.Image = imageName;
 
                     }
-                    banner.Status = 1;
-                    await _context.Banners.AddAsync(banner);
+                    BannerModel bannerModel = _mapper.Map<BannerModel>(banner);
+                    bannerModel.Status = 1;
+                    await _context.Banners.AddAsync(bannerModel);
                     await _context.SaveChangesAsync();
 
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Add banner success";
@@ -82,7 +96,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            var bannerModel = await _context.Brands
+            BannerModel bannerModel = await _context.Banners
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (bannerModel == null)
             {
@@ -105,6 +119,15 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
+                var checkExit = await _context.Banners.Where(b => b.Status != 0)
+                                       .Where(p => p.BannerName == banner.BannerName)
+                                      .AnyAsync();
+                if (checkExit && banner.BannerName.ToLower() != exitedBanner.BannerName.ToLower())
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "This banner already exists.";
+                    return View(exitedBanner);
+                }
+
                 if (banner.ImageUpload != null)
                 {
                     string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/banners");
@@ -138,7 +161,6 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
                     exitedBanner.BannerName = banner.BannerName;
                     exitedBanner.Description = banner.Description;
-                    exitedBanner.Status = banner.Status;
                     _context.Update(exitedBanner);
                     await _context.SaveChangesAsync();
 

@@ -41,7 +41,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 if(existingShipping != null)
                 {
-                    return Ok(new { duplicate = true, message = "Duplicate data" });
+                    return Ok(new { success = false, message = "This province or city already exists" });
                 }
                 shippingModel.Province = tinh;
                 _context.Shippings.Add(shippingModel);

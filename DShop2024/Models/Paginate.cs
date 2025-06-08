@@ -15,7 +15,7 @@
         }
         public Paginate(int totalItems, int page, int pageSize = 10) 
         {
-            int totalPages = (int)Math.Ceiling((decimal)totalItems / (decimal)pageSize); //33/10 = 3.3 4 trang
+            int totalPages = (int)Math.Ceiling((decimal)totalItems / (decimal)pageSize); //33/10 = 3.3  => 4 page
 
             int currentPage = page; 
 

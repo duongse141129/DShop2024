@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using DShop2024.Repository;
+using System.Reflection;
 
 
 namespace DShop2024.Areas.Admin.Controllers
@@ -109,6 +111,20 @@ namespace DShop2024.Areas.Admin.Controllers
                 };
                 try
                 {
+                    var checkUserNameExit = await _userManager.FindByNameAsync(user.UserName);
+                    if (checkUserNameExit != null)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This username already exists.";
+                        return View(new CreateUserRequest());
+                    }
+                    var checkUserEmailExit = await _userManager.FindByEmailAsync(user.Email);
+                    if (checkUserEmailExit != null)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This email already exists.";
+                        return View(new CreateUserRequest());
+                    }
+
+
                     var createUserResult = await _userManager.CreateAsync(user, createUserRequest.Password);
                     if (createUserResult.Succeeded)
                     {
@@ -124,6 +140,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         TempData["success"] = "Create user successful";
                         return RedirectToAction("Index", "User");
                     }
+                    ModelState.AddModelError(createUserResult);
                     TempData[DShopConst.TEMPDATA_ERROR] = "Create user fail";
                     return View(new CreateUserRequest());
                 }
@@ -268,10 +285,11 @@ namespace DShop2024.Areas.Admin.Controllers
             var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
             if (!addPasswordResult.Succeeded)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = $"Set password user {user.UserName} fail"+ addPasswordResult.Errors.ToString();
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Set password user {user.UserName} fail";
+                ModelState.AddModelError(addPasswordResult);
                 return View(model);
             }
-            TempData["success"] = $"Set password user {user.UserName} successful";
+            TempData[DShopConst.TEMPDATA_SUCCESS] = $"Set password user {user.UserName} successful";
             return RedirectToAction("Index", "User");
         }
 

@@ -19,15 +19,21 @@
                         <div class="row">
                            <div class="col-md-12 col-lg-8">
                                 <div class="form-item w-100">
-                                    <input type="text" class="border-0 border-bottom rounded " placeholder="Coupon Code">
+                                <input type="text" class="form-control" id="coupon-value" placeholder="Coupon Code">
                                 </div>
                             </div>
                             <div class="col-md-12 col-lg-4">
                                 <div class="form-item w-100">
-                                    <button class="btn border-secondary rounded-pill  text-primary" type="button">Apply Coupon</button>
+                                <button class="btn btn-primary rounded-pill" id="btn-apply-coupon" type="button">Apply Coupon</button>
                                 </div>
-                            </div> 
-                        </div>
+                            </div>
+                            <div class="col-md-12">
+                                @foreach (var item in @Model.CouponsApply)
+                                {
+                                    <span class="text text-success">@item.CouponCode - @item.Description</span> <br />
+                                }
+                            </div>
+                    </div>
 
                         <div class="mt-5">
                             <h3>Infomation Delivery</h3>
@@ -216,8 +222,8 @@
     }
 
     <script>
-        $(".btn-apply-coupon").click(function () {
-            var couponCode = $(".coupon-value").val();
+        $("#btn-apply-coupon").click(function () {
+            var couponCode = $("#coupon-value").val();
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetCoupon", "Cart")",

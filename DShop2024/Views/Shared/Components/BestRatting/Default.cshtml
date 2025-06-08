@@ -9,7 +9,7 @@
             <h2 class="section-title">Featured products</h2>
 
             <div class="d-flex align-items-center">
-                <a asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Products →</a>
+                <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Products →</a>
                 <div class="swiper-buttons">
                     <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
                     <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
@@ -38,7 +38,7 @@
                             </a>
                         }
                         <figure>
-                            <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" title="Product Title">
+                            <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
                                 <img src="~/media/products/@item.Image" class="tab-image">
                             </a>
                         </figure>

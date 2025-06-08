@@ -11,9 +11,9 @@ namespace DShop2024.Models
         [Key]
         public int Id { get; set; }
         public DateTime DateSent { get; set; }
-        [Required(ErrorMessage = "Enter your subject")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Subject { get; set; }
-        [Required(ErrorMessage = "Enter your message")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Message { get; set; }
         public string UserId { get; set; }
         public int Status { get; set; }

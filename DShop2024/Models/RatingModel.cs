@@ -12,7 +12,10 @@ namespace DShop2024.Models
 		[Column(TypeName = "nvarchar")]
 		[StringLength(400)]
 		public string? Comment { get; set; }
-		public int Star { get; set; }
+
+        [Required(ErrorMessage = "The {0} field is required")]
+        [Range(1, 5, ErrorMessage = "Point from {1} to {2}")]
+        public int Star { get; set; }
 		public DateTime? RatingDateTime { get; set; }
 
 		public int ProductId { get; set; }

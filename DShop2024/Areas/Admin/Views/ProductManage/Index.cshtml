@@ -10,7 +10,7 @@
     <a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
     <br />
     <form asp-action="DeleteMultiple" asp-controller="ProductManage" class="py-2">
-        <input type="submit" class="btn btn-danger btn-sm confirmDeletion" value="Delete multiple products" />
+        <input type="submit" class="btn btn-danger btn-sm confirmDeletion" value="Delete multiple products" onclick="return confirm('Are you sure you want to delete these products?');" />
 
         <table class="table table-striped" id="myTable">
             <thead>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DShop2024.Controllers
 {
+	[Authorize]
 	public class RatingController : Controller
 	{
 		private readonly DShopContext _dataContext;

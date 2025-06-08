@@ -5,7 +5,7 @@ namespace DShop2024.Areas.Admin.Models.User
     public class SetPasswordUserRequest
     {
         [Required(ErrorMessage = "Input value {0}")]
-        [StringLength(100, ErrorMessage = "{0} from {2} to {1} characters", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "{0} must cointain from {2} to {1} characters", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "New Password", Prompt = "New Password")]
         public string NewPassword { get; set; }

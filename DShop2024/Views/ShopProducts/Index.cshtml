@@ -12,7 +12,7 @@
         <h1 class="mb-4">Fresh fruits shop</h1>
         <div class="row g-4">
             <div class="col-lg-12">
-                <form asp-action="Index" asp-controller="Product">
+				<form asp-action="Index" asp-controller="ShopProducts">
                     <partial name="_FilterProductsPartial" />
                 </form>
 
@@ -203,16 +203,17 @@
 		$(document).ready(function () {
 			$('.add-to-cart').click(function () {
 				var Id = $(this).data("product_id");
-
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("AddToCart", "Cart")",
 					data: { Id: Id },
-
 					success: function (result) {
-						if (result) {
+						if (result.success) {
 							Swal.fire("Add to cart successful");
 							loadQuantityCart();
+						}
+						else {
+							Swal.fire(result.message);
 						}
 
 					}
@@ -225,18 +226,17 @@
 		$(document).ready(function () {
 			$('.add-btn-wishlist').click(function () {
 				var Id = $(this).data("product_id");
-
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("AddToWishList", "Home")",
 					data: { Id: Id },
 
 					success: function (result) {
-						if (result) {
+						if (result.success) {
 							Swal.fire("Add to wishlist successful");
 						}
 						else {
-							Swal.fire("Add to wishlist fail duplicate product");
+							Swal.fire(result.message);
 						}
 
 					}

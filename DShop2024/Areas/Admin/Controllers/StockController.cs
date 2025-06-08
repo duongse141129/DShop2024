@@ -51,5 +51,25 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.pagingModel = pagingModel;
             return View(stockIns);
 		}
-	}
+
+        [HttpPost]
+        public async Task<IActionResult> SearchByProductId(int productId)
+        {
+            ViewBag.sidebar = sidebar;
+
+            var product = await _context.Products.FirstOrDefaultAsync( p => p.Id == productId);
+            if (product != null)
+            {
+                if(product.Status == 0)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "This product has been removed.";
+                    return RedirectToAction("Index");
+                }
+
+                return RedirectToAction("AddQuantity", "ProductManage",new { area = "Admin", Id = product.Id });
+            }
+            TempData[DShopConst.TEMPDATA_ERROR] = "Not found" ;
+            return RedirectToAction("Index");
+        }
+    }
 }

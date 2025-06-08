@@ -6,9 +6,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-
-
-
 <section class="py-5 mb-5" style="background-image: url('~home/images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
     <div class="container-fluid">
         <div class="row">
@@ -84,7 +81,7 @@
                     <h2 class="section-title">Categories</h2>
 
                     <div class="d-flex align-items-center">
-                        <a asp-action="Index" asp-controller="Product" class="btn-link text-decoration-none">View All Categories →</a>
+                        <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Categories →</a>
                         <div class="swiper-buttons">
                             <button class="swiper-prev category-carousel-prev btn btn-yellow">❮</button>
                             <button class="swiper-next category-carousel-next btn btn-yellow">❯</button>
@@ -101,7 +98,7 @@
                     <div class="swiper-wrapper">
                         @foreach (var item in ViewBag.Categories as IEnumerable<CategoryModel>)
                         {
-                            <a asp-action="Index" asp-controller="Product" asp-route-CategorySlug="@item.Slug" class="nav-link category-item swiper-slide">
+                            <a asp-area="" asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="@item.Slug" class="nav-link category-item swiper-slide">
                                 <img src="~/media/categories/@item.Image" alt="Category Thumbnail" width="100" height="100">
                                 <h3 class="category-title">@item.CategoryName</h3>
                             </a>
@@ -126,7 +123,7 @@
                     <h2 class="section-title"> Brands</h2>
 
                     <div class="d-flex align-items-center">
-                        <a asp-action="Index" asp-controller="Product" class="btn-link text-decoration-none">View All Brands →</a>
+                        <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Brands →</a>
                         <div class="swiper-buttons">
                             <button class="swiper-prev brand-carousel-prev btn btn-yellow">❮</button>
                             <button class="swiper-next brand-carousel-next btn btn-yellow">❯</button>
@@ -143,7 +140,7 @@
                     <div class="swiper-wrapper">
                         @foreach (var item in ViewBag.Brands as IEnumerable<BrandModel>)
                         {
-                            <a asp-action="Index" asp-controller="Product" asp-route-BrandSlug="@item.Slug" class="nav-link category-item swiper-slide">
+                            <a asp-area="" asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug" class="nav-link category-item swiper-slide">
                             <div class="swiper-slide">
                                 <div class="card mb-3 p-3 rounded-4 shadow border-0">
                                     <div class="row g-0">
@@ -197,7 +194,7 @@
                                                 </a>
                                             }                                     
                                             <figure>
-                                                <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" title="Product Title">
+                                                <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
                                                     <img src="~/media/products/@item.Image" class="tab-image">
                                                 </a>
                                             </figure>
@@ -321,17 +318,18 @@
 		$(document).ready(function () {
 			$('.add-to-cart').click(function () {
 				var Id = $(this).data("product_id");
-
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("AddToCart", "Cart")",
 					data: { Id: Id },
-
 					success: function (result) {
-						if (result) {
-							Swal.fire("Add to cart successful");
+                        if (result.success) {
                             loadQuantityCart();
-						}
+							Swal.fire("Add to cart successful");
+                        } 
+                        else {
+                            Swal.fire(result.message);
+                        }
 
 					}
 				});
@@ -350,11 +348,11 @@
 					data: { Id: Id },
 
 					success: function (result) {
-						if (result) {
+                        if (result.success) {
 							Swal.fire("Add to wishlist successful");
 						}
 						else {
-							Swal.fire("Add to wishlist fail duplicate product");
+                            Swal.fire(result.message);
 						}
 
 					}
@@ -385,10 +383,9 @@
 			});
 		});
 	</script>
-
     <script>
         function loadQuantityCart() {
-            $('#countContact').load("/AjaxContent/QuantityCart");
+            $('#cartQuantity').load("/AjaxContent/QuantityCart");
         }
     </script>
 }

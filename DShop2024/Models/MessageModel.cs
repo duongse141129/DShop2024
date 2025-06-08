@@ -8,7 +8,7 @@ namespace DShop2024.Models
     {
         [Key]
         public int Id { get; set; }
-        [Required, MaxLength(300, ErrorMessage = "Content message can not null and maximum 300 characters")]
+        [Required, MaxLength(300, ErrorMessage = "The {0} field is required and maximum 300 characters")]
         public string ContentMessage { get; set; }
         public DateTime Timestamp { get; set; }
         public string UserId { get; set; }

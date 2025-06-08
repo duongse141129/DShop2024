@@ -31,7 +31,7 @@ connection.on("ReceiveMessage", function (user, message) {
 
         var contentMessage = `${message["contentMessage"]}`;
         if (contentMessage.length > 10) {
-            contentMessage = str.substring(0, 10);
+            contentMessage = contentMessage.substring(0, 10);
         }
 
         if (userMessage != null) {

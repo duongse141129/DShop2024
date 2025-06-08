@@ -10,18 +10,18 @@ namespace DShop2024.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Enter your name shop")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string ShopName { get; set; }
 
-        [Required(ErrorMessage = "Enter your map")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Map { get; set; }
-        [Required(ErrorMessage = "Enter your local address")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Address { get; set; }
-        [Required(ErrorMessage = "Enter your hotline")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Phone { get; set; }
-        [Required(ErrorMessage = "Enter your email address")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Email { get; set; }
-        [Required(ErrorMessage = "Enter your description")]
+        [Required(ErrorMessage = "The {0} field is required")]
         public string Description { get; set; }
 
         public string LogoImg { get; set; }

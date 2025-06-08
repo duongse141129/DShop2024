@@ -10,6 +10,7 @@ namespace DShop2024.EnumData
     {
         public static string COUPON_EXPIRED = "Expired";
         public static string COUPON_TODAY = "Today";
+        public static string COUPON_NOT_YET = "Not yet";
 
         public enum StatusCoupon
         {

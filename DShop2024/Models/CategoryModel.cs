@@ -9,7 +9,7 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
-		[Required( ErrorMessage ="Name category's can not null")]
+		[Required( ErrorMessage = "The {0} field is required")]
 		public string CategoryName { get; set; }
 
 		public string? Description { get; set; }

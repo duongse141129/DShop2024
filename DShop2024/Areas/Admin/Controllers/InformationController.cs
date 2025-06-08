@@ -68,8 +68,26 @@ namespace DShop2024.Areas.Admin.Controllers
 						string imageName = Guid.NewGuid().ToString() + "_" + informationShop.ImageUpload.FileName;
 						string filePath = Path.Combine(uploadsDir, imageName);
 
+                        if (exitedInformationShop.LogoImg != null)
+                        {
+                            string oldFilePath = Path.Combine(uploadsDir, exitedInformationShop.LogoImg);
+                            try
+                            {
+                                if (System.IO.File.Exists(oldFilePath))
+                                {
+                                    System.IO.File.Delete(oldFilePath);
+                                }
 
-						FileStream fs = new FileStream(filePath, FileMode.Create);
+                            }
+                            catch (Exception ex)
+                            {
+                                TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the logo shop " + ex.Message;
+                                return View(exitedInformationShop);
+                            }
+                        }
+
+
+                        FileStream fs = new FileStream(filePath, FileMode.Create);
 						await informationShop.ImageUpload.CopyToAsync(fs);
 						fs.Close();
 						exitedInformationShop.LogoImg = imageName;

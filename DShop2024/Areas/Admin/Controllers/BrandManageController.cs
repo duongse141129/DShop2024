@@ -124,7 +124,7 @@ namespace DShop2024.Areas.Admin.Controllers
 					var slug = await _context.Brands.FirstOrDefaultAsync(s => s.Slug == brandModel.Slug);
 					if (slug != null && exitedBrand.BrandName.ToLower() != brandModel.BrandName.ToLower())
 					{
-                        TempData[DShopConst.TEMPDATA_ERROR] = "Can't same slug";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This brand already exists.";
                         return View(brandModel);
 					}
 

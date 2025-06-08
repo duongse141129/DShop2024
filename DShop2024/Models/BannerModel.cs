@@ -7,7 +7,7 @@ namespace DShop2024.Models
 	public class BannerModel
 	{
 		public int Id { get; set; }
-		[Required( ErrorMessage = "Name banner's can not null")]
+		[Required( ErrorMessage = "The {0} field is required")]
 		public string BannerName { get; set; }
 		public string? Description { get; set; }
 		public string Image { get; set; }
@@ -16,6 +16,6 @@ namespace DShop2024.Models
 
 		[NotMapped]
 		[FileExtension]
-		public IFormFile? ImageUpload { get; set; }
+        public IFormFile? ImageUpload { get; set; }
 	}
 }

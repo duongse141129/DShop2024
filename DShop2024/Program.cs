@@ -1,20 +1,14 @@
-using System.Configuration;
-using System;
 using Microsoft.EntityFrameworkCore;
-using DShop2024.Repository;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using DShop2024.Models;
 using DShop2024.Services.Momo;
 using DShop2024.Models.Momo;
 using DShop2024.Services.Vnpay;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 using DShop2024.Services;
 using DShop2024.Hubs;
 using DShop2024.AutoMapper;
 using Microsoft.Extensions.FileProviders;
-using System.Security.Policy;
-using System.Reflection.Metadata;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -95,6 +89,7 @@ builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(ProductMapper));
 builder.Services.AddAutoMapper(typeof(CouponMapper));
+builder.Services.AddAutoMapper(typeof(BannerMapper));
 
 var app = builder.Build();
 

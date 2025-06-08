@@ -184,7 +184,7 @@ namespace DShop2024.Controllers
 							.FirstOrDefaultAsync();
 		
 				List<ProductViewModel> relatedProducts = await _dataContext.Products
-										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id)
+										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id && p.Status != 0)
 										.Include (p => p.Brand)
 										.Include(p => p.Category)
 										.Include(p => p.Ratings)
@@ -259,36 +259,35 @@ namespace DShop2024.Controllers
 				bool isInCompare = false;
 				bool isFeedBack = false;
 
-				var count = await listRating.CountAsync();
-			
-
-				
-				if (count > 0)
+				if(listRating.Count() > 0)
 				{
 					pointAvarge = Math.Round(listRating.Average(p => p.Star), 1);
+				}
 
-					if (user != null)
+				if (user != null)
+				{
+					var checkOrder = await (from o in _dataContext.Orders
+											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+											where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
+											select o).FirstOrDefaultAsync();
+
+					if (checkOrder != null)
 					{
-						var checkOrder = await (from o in _dataContext.Orders
-												join od in _dataContext.OrderDetails on o.Id equals od.OrderId
-												where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
-												select o).FirstOrDefaultAsync();
-
-						if (checkOrder != null)
+						checkUserOrder = true;
+						myFeedback = await listRating.Where(u => u.UserId == user.Id && u.ProductId == Id).FirstOrDefaultAsync();
+						if (myFeedback != null)
 						{
-							checkUserOrder = true;
-							myFeedback = await listRating.Where(u => u.UserId == user.Id && u.ProductId == Id).FirstOrDefaultAsync();
-							if (myFeedback != null)
-							{
-								isFeedBack = true;
-								listRating = listRating.Where(u => u.UserId != user.Id);
-							}
+							isFeedBack = true;
+							listRating = listRating.Where(u => u.UserId != user.Id);
 						}
-						isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
-						isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
 					}
+					isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+					isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+				}
 
-					int totalRating = listRating.Count();
+				var totalRating = await listRating.CountAsync();
+				if (totalRating > 0)
+				{				
 					if (pagesSize <= 0)
 						pagesSize = 5;
 					int countPages = (int)Math.Ceiling((double)totalRating / 5);

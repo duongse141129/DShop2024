@@ -1,21 +1,17 @@
 using System.Data;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Encodings.Web;
 using App.Areas.Identity.Models.AccountViewModels;
 using App.Utilities;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace DShop2024.Areas.Identity.Controllers
 {
@@ -67,34 +63,51 @@ namespace DShop2024.Areas.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                if (_dataContext.Users.Any(x => x.UserName == model.UserNameOrEmail) || _dataContext.Users.Any(y => y.Email == model.UserNameOrEmail))
-                {
-                    var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
-                    AppUserModel user = null;
+                var checkUserNameExit = await _dataContext.Users.AnyAsync(x => x.UserName == model.UserNameOrEmail);
+                var checkEmailExit = await  _dataContext.Users.AnyAsync(y => y.Email == model.UserNameOrEmail);           
 
-                    if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
-                    {
-                        user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
-                        if (user != null)
-                        {
-                            result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
-                        }
-                    }
-                    else
+                if (checkUserNameExit|| checkEmailExit)
+                {
+                    AppUserModel user = null;
+                    user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
+                    if(user == null)
                     {
                         user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
                     }
+                    if(user.Status == 0)
+                    {
+                        ModelState.AddModelError("Account was deleted ");
+                        return View(model);
+                    }
+                    var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
+
+                    //var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
+                    //if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
+                    //{
+                    //    user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
+                    //    if (user != null)
+                    //    {
+                    //        if(user.Status == 0)
+                    //        {
+                    //            ModelState.AddModelError("Account was deleted ");
+                    //            return View(model);
+                    //        }
+                    //        result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
+                    //    if (user.Status == 0)
+                    //    {
+                    //        ModelState.AddModelError("Account was deleted ");
+                    //        return View(model);
+                    //    }
+                    //}
 
                     if (result.Succeeded)
                     {
                         _logger.LogInformation(1, "User logged in.");
-
-                        if (user.Status == 0)
-                        {
-                            ModelState.AddModelError("Account was deleted ");
-                            return View(model);
-                        }
-
                         var roleUser = await _userManager.GetRolesAsync(user);
                         if (roleUser.Count > 0)
                         {
@@ -108,7 +121,6 @@ namespace DShop2024.Areas.Identity.Controllers
                             }
                         }
                         return LocalRedirect(returnUrl);
-
                     }
                     if (result.RequiresTwoFactor)
                     {
@@ -146,7 +158,13 @@ namespace DShop2024.Areas.Identity.Controllers
         public async Task<IActionResult> LogOff()
         {
             await _signInManager.SignOutAsync();
+            
             _logger.LogInformation("User logoff");
+            HttpContext.Session.Clear();
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
             return RedirectToAction("Index", "Home", new {area = ""});
         }
         //
@@ -182,7 +200,7 @@ namespace DShop2024.Areas.Identity.Controllers
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Đã tạo user mới.");
+                    _logger.LogInformation("Create user successful");
 
                     try
                     {
@@ -870,7 +888,7 @@ namespace DShop2024.Areas.Identity.Controllers
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Mã sai.");
+                ModelState.AddModelError(string.Empty, "Wrong code.");
                 return View(model);
             }
         }

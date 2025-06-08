@@ -4,14 +4,14 @@ namespace DShop2024.Areas.Admin.Models.User
 {
 	public class CreateUserRequest
 	{
-		[Required(ErrorMessage = "Input value {0}")]
+		[Required(ErrorMessage = "The {0} field is required")]
 		[EmailAddress(ErrorMessage = "Wrong format Email")]
 		[Display(Name = "Email", Prompt = "Email")]
 		public string Email { get; set; }
 
-
-		[Required(ErrorMessage = "Input value {0}")]
-		[StringLength(100, ErrorMessage = "{0} from {2} to {1} characters", MinimumLength = 6)]
+		  
+		[Required(ErrorMessage = "The {0} field is required")]
+		[StringLength(100, ErrorMessage = "{0} must cointain from {2} to {1} characters", MinimumLength = 6)]
 		[DataType(DataType.Password)]
 		[Display(Name = "Password", Prompt = "Password")]
 		public string Password { get; set; }
@@ -24,8 +24,8 @@ namespace DShop2024.Areas.Admin.Models.User
 
 		[DataType(DataType.Text)]
 		[Display(Name = "User Name", Prompt = "User Name")]
-		[Required(ErrorMessage = "Input value {0}")]
-		[StringLength(100, ErrorMessage = "{0} from {2} to {1} characters.", MinimumLength = 3)]
+		[Required(ErrorMessage = "The {0} field is required")]
+		[StringLength(100, ErrorMessage = "{0} must cointain from {2} to {1} characters.", MinimumLength = 3)]
 		public string UserName { get; set; }
 
 		[DataType(DataType.Text)]

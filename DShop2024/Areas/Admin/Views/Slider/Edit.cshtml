@@ -19,21 +19,7 @@
             <textarea asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger" />
         </div>
-        <div class="form-group">
-            <label>Status</label>
-            <select asp-for="Status" class="form-control" asp-items="ViewBag.Brands">
-                @if(Model.Status == 1)
-                {
-                    <option selected value="1">Enable</option>
-                    <option value="-1">Disable</option>
-                }
-                @if (Model.Status == -1)
-                {
-                    <option value="1">Enable</option>
-                    <option selected value="-1">Disable</option>
-                }
-            </select>
-        </div>
+
         <div class="form-group">
             <label>Image</label>
             <input asp-for="ImageUpload" class="form-control" />
@@ -52,13 +38,13 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    @{
+        var summernote = new DShop2024.Models.Summernote("#Description");
+        @await Html.PartialAsync("_SummernotePartial", summernote);
+    }
     <script>
         $("#ImageUpload").change(function () {
             readURL(this);
         });
-    </script>
-    <script>
-        CKEDITOR.replace('Description');
     </script>
 }

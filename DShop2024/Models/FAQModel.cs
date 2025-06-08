@@ -8,9 +8,9 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
-		[Required(ErrorMessage = "Question can not null")]
+		[Required(ErrorMessage = "The {0} field is required")]
 		public string Question { get; set; }
-		[Required(ErrorMessage = "Answer can not null")]
+		[Required(ErrorMessage = "The {0} field is required")]
 		public string Answer { get; set; }
 		
 	}

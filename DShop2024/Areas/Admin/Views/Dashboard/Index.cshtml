@@ -2,13 +2,9 @@
     ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-<h1 class="text-primary">@ViewData["title"]</h1>
+<h1 class="fw-bold text-primary">@ViewData["title"]</h1>
 <div class="page-inner">
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-        <div>
-            <h3 class="fw-bold mb-3">Dashboard</h3>
-        </div>
-    </div>
+
     <div class="row">
         <div class="col-sm-6 col-md-3">
             <div class="card card-stats card-round">
@@ -118,7 +114,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                   <div class="chart-container" style="min-height: 600px">
+                   <div class="chart-container" style="min-height: 550px">
                         <div id="myfirstchart" style="height: 550px;"></div>                 
                     </div>
                 </div>
@@ -128,20 +124,20 @@
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row">
-                        <div class="card-title">Quantity of product's brand sold by percentage</div>
+                        <div class="card-title">Best Selling in brands by percentage</div>
                     </div>
                 </div>
                 <div class="card-body pb-0">                 
                      <div class="mb-4 mt-2">
-                        <div id="graphBrand" style="width: 250px;"> </div>
+                        <div id="graphBrand" style="width: 275px;"> </div>
                     </div>
                 </div>
             </div>
             <div class="card card-round">
                 <div class="card-body pb-0">
-                    <h4 class="mb-2">Quantity of product's category sold by percentage</h4>
+                    <h4 class="mb-2">Best Selling in categories by percentage</h4>
                     <div class="pull-in sparkline-fix">
-                        <div id="graphCategories" style="width: 250px;"> </div>
+                        <div id="graphCategories" style="width: 275px;"> </div>
                     </div>
                 </div>
             </div>

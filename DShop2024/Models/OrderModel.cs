@@ -14,11 +14,11 @@ namespace DShop2024.Models
 		public int Status { get; set; }
 		public decimal TotalPrice { get; set; }
 
-		[Required, MaxLength(300, ErrorMessage = "Address Delivery is required ")]
+		[Required, MaxLength(300, ErrorMessage = "The {0} field is required")]
 		public string AddressDelivery { get; set; }
-		[Required, MaxLength(100, ErrorMessage = "Phone Delivery is required ")]
+		[Required, MaxLength(100, ErrorMessage = "The {0} field is required")]
 		public string PhoneDelivery { get; set; }
-		[Required, MaxLength(100, ErrorMessage = "Consignee is required ")]
+		[Required, MaxLength(100, ErrorMessage = "The {0} field is required")]
 		public string Consignee { get; set; }
 
 		public decimal ShippingCost { get; set; }

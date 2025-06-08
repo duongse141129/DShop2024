@@ -75,7 +75,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
                     if (slug != null)
                     {
-                        ModelState.AddModelError("", "Can't same slug. Product Name is exited");
+                        ModelState.AddModelError("", "This product already exists.");
                         return View(product);
                     }
 
@@ -162,9 +162,9 @@ namespace DShop2024.Areas.Admin.Controllers
 
                     product.Slug = product.ProductName.ToLower().Replace(" ", "-");
                     var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
-                    if (slug != null && product.Slug != exitedProduct.Slug)
+                    if (slug != null && product.Slug.ToLower() != exitedProduct.Slug.ToLower())
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "Can't same slug";
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This product already exists.";
                         return View(product);
                     }
 
@@ -272,7 +272,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.sidebar = sidebar;
             if (IdProductsToDelete.Count == 0)
             {
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Select list product to delete mutiple" ;
+                TempData[DShopConst.TEMPDATA_ERROR] = "Select list product to delete mutiple" ;
                 return RedirectToAction("Index");
             }
             try

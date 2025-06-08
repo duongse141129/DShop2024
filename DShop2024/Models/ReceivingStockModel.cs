@@ -9,7 +9,8 @@ namespace DShop2024.Models
         [Key]
         public int Id { get; set; }
 
-        [Required, Range(1, int.MaxValue, ErrorMessage = "Please entering the quantity of the product received")]
+        [Required (ErrorMessage = "The {0} field is required")]
+        [Range(1,int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
         public int Quantity { get; set; }
         public int ProductId { get; set; }
         [DataType(DataType.DateTime)]

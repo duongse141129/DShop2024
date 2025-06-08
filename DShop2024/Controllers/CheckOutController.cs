@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
+	[Authorize]
 	public class CheckOutController : Controller
 	{
 		private readonly DShopContext _dataContext;
@@ -80,14 +81,13 @@ namespace DShop2024.Controllers
 								   .FirstOrDefaultAsync();
 				if (item.Quantity > product.Stock)
 				{
-					productOutOfStock += item.ProductName + " have "+ product.Stock + " left in stock," + "\n";
+					productOutOfStock += item.ProductName + " have "+ product.Stock + " left in stock," ;
 					
 				}
 			}
 			return productOutOfStock;
 		}
 
-		[Authorize]
 		public async Task<IActionResult> CheckOut(string payment)
 		{
 			if(string.IsNullOrEmpty(payment))
@@ -109,12 +109,12 @@ namespace DShop2024.Controllers
 			if (cartItems.Count == 0)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "Cart is empty";
-				return RedirectToAction("Index", DShopConst.CART_KEY);
+				return RedirectToAction("Index", "Cart");
 			}
 			if(info == null)
 			{
-				TempData[DShopConst.TEMPDATA_ERROR] = "Infomation delivery is null";
-				return RedirectToAction("Index", DShopConst.CART_KEY);
+				TempData[DShopConst.TEMPDATA_ERROR] = "Please fill out all fields of information delivery to checkout.";
+				return RedirectToAction("Index", "CheckOut");
 			}
 			foreach (var coupon in coupouns)
 			{
@@ -143,10 +143,10 @@ namespace DShop2024.Controllers
 						
 						if(cp.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING || cp.Promotion.CategoryCouponName == DShopConst.NEW_CUSTOMER)
 						{
-							return RedirectToAction("GetShipping", DShopConst.CART_KEY, new { informationDelivery = info });
+							return RedirectToAction("GetShipping", "Cart", new { informationDelivery = info });
 						}
 
-                        return RedirectToAction("Index", DShopConst.CART_KEY);
+                        return RedirectToAction("Index", "Cart");
                     }
 
 				}
@@ -181,7 +181,7 @@ namespace DShop2024.Controllers
 
 			}
 				
-			return RedirectToAction("Index", DShopConst.CART_KEY);
+			return RedirectToAction("Index", "Cart");
 		}
 
 
@@ -266,7 +266,7 @@ namespace DShop2024.Controllers
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
                 var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
-                //await _emailSender.SendEmailOrder(order, infoShop);
+                await _emailSender.SendEmailOrder(order, infoShop);
 				
 
 				HttpContext.Session.Remove(DShopConst.CART_KEY);
@@ -280,7 +280,7 @@ namespace DShop2024.Controllers
 			catch (Exception ex)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "CheckOut fail " +ex.Message;
-				return RedirectToAction("Index", DShopConst.CART_KEY);
+				return RedirectToAction("Index", "Cart");
 			}
 
 		}
@@ -300,7 +300,7 @@ namespace DShop2024.Controllers
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "MOMO", orderCode = orderCode });		
 			}
 			TempData[DShopConst.TEMPDATA_ERROR] = "Momo transaction canceled";
-			return RedirectToAction("Index", DShopConst.CART_KEY);
+			return RedirectToAction("Index", "Cart");
 
 
 
@@ -316,7 +316,7 @@ namespace DShop2024.Controllers
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "VNpay", orderCode = orderCode });
 			}
 			TempData[DShopConst.TEMPDATA_ERROR] = "VNpay transaction canceled";
-			return RedirectToAction("Index", DShopConst.CART_KEY);
+			return RedirectToAction("Index", "Cart");
 	
 		}
 	

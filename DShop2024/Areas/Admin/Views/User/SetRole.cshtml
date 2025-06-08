@@ -6,13 +6,14 @@
 
 <h1 class="text-primary">@ViewData["title"]</h1>
 
-<div class="container">
-    <form asp-action="SetRole" enctype="multipart/form-data" method="post">
+<div class="row">
+    <div class="col-md-4">
+    <form asp-action="SetRole" method="post">
         <h3>User: @Model.UserName</h3>
         <p>@Model.Email</p>
         <input type="hidden" name="userId"  value="@Model.Id"/>
         <div class="form-group">
-            <label class="control-label">Roles</label>
+            <label class="control-label">Role</label>
             <select name="roleId" class="form-control" asp-items="ViewBag.Roles">
             </select>
         </div>
@@ -20,10 +21,11 @@
             <button value="SetRole" class="btn btn-primary">SetRole</button>
         </div>
     </form>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
 </div>
 
 
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>

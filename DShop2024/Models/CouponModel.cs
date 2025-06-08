@@ -9,20 +9,22 @@ namespace DShop2024.Models
 	{
 		[Key]
 		public int Id { get; set; }
-		[Required, MaxLength(100, ErrorMessage = "Coupon code can not null")]
+		[Required, MaxLength(100, ErrorMessage = "The {0} field is required")]
 		public string CouponCode { get; set; }
 
-		[Required( ErrorMessage = "Coupon name can not null")]
+		[Required( ErrorMessage = "The {0} field is required")]
 		public string CouponName { get; set; }
-		[Required(ErrorMessage = "Value can not null ")]
+		[Required(ErrorMessage = "The {0} field is required")]
 		[Range(0, int.MaxValue, ErrorMessage = "Value > {1}")]
 		public decimal Value { get; set; }
 		public string? Description { get; set; }
-		public DateTime DateStart { get; set; }
-		public DateTime DateExpired{ get; set; }
-		public int Quantity { get; set; }
+        [Required(ErrorMessage = "The {0} field is required")]
+        public DateTime DateStart { get; set; }
+        [Required(ErrorMessage = "The {0} field is required")]
+        public DateTime DateExpired{ get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Please input a number greater than 1")]
+        public int Quantity { get; set; }
 		public int Status { get; set; }
-
 		public int PromotionId { get; set; }
 
 		[ForeignKey("PromotionId")]

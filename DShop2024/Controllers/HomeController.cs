@@ -99,8 +99,8 @@ namespace DShop2024.Controllers
 			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
-				TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list wishlist";
-                return Ok(new { success = false, Message = "Add to wishList fail "});
+				TempData[DShopConst.TEMPDATA_ERROR] = "The product is already in in your wishlist";
+                return Ok(new { success = false, Message = "Add to wishList fail. The product is already in in your wishlist" });
             }
 
             try

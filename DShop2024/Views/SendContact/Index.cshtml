@@ -7,9 +7,12 @@
 
 <section >
     <div class="container p-5 my-5 border ws">
-        <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-            @await Component.InvokeAsync("Contact")
-        </li>
+        <ul>
+            <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+                @await Component.InvokeAsync("Contact")
+            </li>
+        </ul>
+
         <div class="row">
             <div class="col-md-12">
 
@@ -62,8 +65,8 @@
                         <textarea asp-for="Message" class="form-control" rows="10"></textarea>
                         <span asp-validation-for="Message" class="text-danger"></span>
                     </div>
-                    <div class="form-group">
-                        <input type="submit" class="btn btn-primary sendContactButton" id="sendContactButton" value="Send Message" />
+                    <div class="form-group pt-2">
+                        <input type="submit" class="btn btn-primary sendContactButton" id="sendContactButton" value="Send contact" />
                     </div>
             </div>
         </div>

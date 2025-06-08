@@ -2,6 +2,7 @@
 using DShop2024.Models;
 using DShop2024.Repository;
 using DShop2024.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,47 +56,89 @@ namespace DShop2024.Controllers
 
 		}
 
-		public async Task<ActionResult> AddToCart(int? Id)
-		{
-			if (Id == null)
+        //public async Task<ActionResult> AddToCart(int? Id)
+        //{
+        //	if (Id == null)
+        //	{
+        //		return NotFound();
+        //	}
+        //	ProductModel product = await _dataContext.Products
+        //		.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+        //	if (product == null)
+        //	{
+        //		return NotFound();
+        //	}
+        //	List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+        //	CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
+        //	if (cartItem == null)
+        //	{
+        //		cart.Add(new CartItemModel(product));
+        //	}
+        //	else
+        //	{
+        //		if (product.Stock <= cartItem.Quantity)
+        //		{
+        //			TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
+
+        //		}
+        //		else
+        //		{
+        //			cartItem.Quantity += 1;
+        //			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
+        //		}
+
+
+        //	}
+        //	HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+        //	await GetValueByPercentCoupon();
+        //	TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
+        //	return Redirect(Request.Headers["Referer"].ToString());
+
+        //}
+
+
+        public async Task<ActionResult> AddToCart(int? Id)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            ProductModel product = await _dataContext.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+			if(product.Stock == 0)
 			{
-				return NotFound();
-			}
-			ProductModel product = await _dataContext.Products
-				.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-			if (product == null)
-			{
-				return NotFound();
-			}
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			if (cartItem == null)
-			{
-				cart.Add(new CartItemModel(product));
-			}
-			else
-			{
-				if (product.Stock <= cartItem.Quantity)
-				{
-					TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
+                return Ok(new { success = false, Message = "Add to wishList fail " + $" Item {product.ProductName} is out of ourder" });
+            }
+            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
+            if (cartItem == null)
+            {
+                cart.Add(new CartItemModel(product));
+            }
+            else
+            {
+                if (product.Stock <= cartItem.Quantity)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
+                    return Ok(new { success = false, Message = "Add to wishList fail " + $" Item {product.ProductName} only has {product.Stock} left" });
+                }
+                else
+                {
+                    cartItem.Quantity += 1;
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
+                }
+            }
+            HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+            await GetValueByPercentCoupon();
+            TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
+            return Ok(new { success = true, Message = $" Add Item {product.ProductName} to cart successfully" });
+        }
 
-				}
-				else
-				{
-					cartItem.Quantity += 1;
-					TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
-				}
-
-
-			}
-			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-			await GetValueByPercentCoupon();
-			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
-			return Redirect(Request.Headers["Referer"].ToString());
-
-		}
-
-		public async Task<ActionResult> Increase(int? Id)
+        public async Task<ActionResult> Increase(int? Id)
 		{
             if (Id == null)
             {
@@ -246,12 +289,21 @@ namespace DShop2024.Controllers
 
             var validCoupon = await _dataContext.Coupons
 									.Include(p => p.Promotion)
-									.FirstOrDefaultAsync(x => x.CouponCode == couponCode && x.Quantity >=1 && x.Status != 0);
+									.FirstOrDefaultAsync(x => x.CouponCode == couponCode);
 			
 			
 			if(validCoupon != null)
 			{
-				TimeSpan remainingTime = validCoupon.DateExpired.Date - DateTime.Today.Date;				
+				if(validCoupon.Status == 0)
+				{
+					return Ok(new { success = false, message = "Coupon code has been deleted" });
+				}
+                if (validCoupon.Quantity == 0)
+                {
+                    return Ok(new { success = false, message = "Coupon code is out of stock" });
+                }
+
+                TimeSpan remainingTime = validCoupon.DateExpired.Date - DateTime.Today.Date;				
 				TimeSpan continueTime = validCoupon.DateStart.Date - DateTime.Today.Date;
 				if(continueTime.Days > 0)
 				{
@@ -308,6 +360,10 @@ namespace DShop2024.Controllers
                         InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
                         if(info != null)
 						{
+							if(info.ShippingCost == 0)
+							{
+                                return Ok(new { success = false, message = "You got free shipping. Save this code for next time." });
+                            }
 							info.ShippingCost = 0;
                             HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
 							validCoupon.Value = 0;
@@ -322,7 +378,11 @@ namespace DShop2024.Controllers
 							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
 							if (info != null)
 							{
-								info.ShippingCost = 0;
+                                if (info.ShippingCost == 0)
+                                {
+                                    return Ok(new { success = false, message = "You got free shipping. Save this code for next time." });
+                                }
+                                info.ShippingCost = 0;
 								HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
 								validCoupon.Value = 0;
 							}

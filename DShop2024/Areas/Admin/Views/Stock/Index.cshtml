@@ -12,7 +12,8 @@
         <a asp-area="Admin" asp-action="Index" asp-controller="ProductManage" class="btn btn-primary">Add Quantity</a>
     </div>
     <div class="col-md-4 ">
-        <form asp-area="Admin" asp-action="AddQuantity" asp-controller="ProductManage" method="get">
+        @* <form asp-area="Admin" asp-action="AddQuantity" asp-controller="ProductManage" method="get"> *@
+        <form asp-area="Admin" asp-action="SearchByProductId" asp-controller="Stock" method="post">
             <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -20,7 +21,7 @@
                             <i class="fa fa-search search-icon"></i>
                         </button>
                     </div>
-                    <input type="text" placeholder="Search Product ID" class="form-control" name="Id" />
+                    <input type="text" placeholder="Search Product ID" class="form-control" name="productId" />
                 </div>
             </nav>
         </form>

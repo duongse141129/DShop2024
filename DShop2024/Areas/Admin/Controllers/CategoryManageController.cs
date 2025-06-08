@@ -123,7 +123,7 @@ namespace DShop2024.Areas.Admin.Controllers
 					var slug = await _context.Categories.FirstOrDefaultAsync(s => s.Slug == categoryModel.Slug);
 					if (slug != null && exitedCategory.CategoryName.ToLower() != categoryModel.CategoryName.ToLower())
 					{
-						ModelState.AddModelError("", "Can't same slug");
+						ModelState.AddModelError("", "This category already exists");
 						return View(categoryModel);
 					}
 
@@ -147,7 +147,7 @@ namespace DShop2024.Areas.Admin.Controllers
                             }
                             catch (Exception ex)
                             {
-                                ModelState.AddModelError("", "An error occurred while deleting the product image");
+                                TempData[DShopConst.TEMPDATA_SUCCESS] = "Update image's category fail. " + ex.Message;
                             }
                         }
 

@@ -42,6 +42,12 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
+                if (String.IsNullOrEmpty(roleModel.Name))
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "The role name field is required.";
+                    return View();
+                }
+
                 if (!_roleManager.RoleExistsAsync(roleModel.Name).GetAwaiter().GetResult())
                 {
                     var result = await _roleManager.CreateAsync(new IdentityRole(roleModel.Name));

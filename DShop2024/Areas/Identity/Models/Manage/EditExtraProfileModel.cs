@@ -11,6 +11,7 @@ namespace App.Areas.Identity.Models.ManageViewModels
 
           [Display(Name = "Email")]
           public string UserEmail { get; set; }
+
           [Display(Name = "Phone number")]
           [DataType(DataType.PhoneNumber)]
           public string PhoneNumber { get; set; }

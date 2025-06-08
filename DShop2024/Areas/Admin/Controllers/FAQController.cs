@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Models;
 using DShop2024.EnumData;
@@ -27,24 +25,6 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(await _context.FAQs.ToListAsync());
         }
 
-        // GET: Admin/FAQModels/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            ViewBag.sidebar = sidebar;
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var fAQModel = await _context.FAQs
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (fAQModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(fAQModel);
-        }
 
         [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
@@ -61,9 +41,29 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.sidebar = sidebar;
             if (ModelState.IsValid)
             {
-                _context.Add(fAQModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    var checkExit = await _context.FAQs
+                                       .Where(p => p.Question == fAQModel.Question)
+                                      .AnyAsync();
+                    if (checkExit)
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This question already exists.";
+                        return View(fAQModel);
+                    }
+
+
+                    _context.Add(fAQModel);
+                    await _context.SaveChangesAsync();
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Create FAQ successful ";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Create FAQ fail "+ ex.Message;
+                    return RedirectToAction(nameof(Create));
+                }
+
             }
             return View(fAQModel);
         }
@@ -95,15 +95,27 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+            var exitedFAQ = await _context.FAQs.FindAsync(id);
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(fAQModel);
+                    var checkExit = await _context.FAQs
+                       .Where(p => p.Question == fAQModel.Question)
+                      .AnyAsync();
+                    if (checkExit && fAQModel.Question.ToLower() != exitedFAQ.Question.ToLower())
+                    {
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This question already exists.";
+                        return View(exitedFAQ);
+                    }
+                    exitedFAQ.Question = fAQModel.Question;
+                    exitedFAQ.Answer = fAQModel.Answer;
+                    _context.Update(exitedFAQ);
                     await _context.SaveChangesAsync();
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Update FAQ successful ";
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException db)
                 {
                     if (!FAQModelExists(fAQModel.Id))
                     {
@@ -111,7 +123,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                     else
                     {
-                        throw;
+                        TempData[DShopConst.TEMPDATA_ERROR] = "Update FAQ fail "+db.Message;
+                        return View(fAQModel);
                     }
                 }
                 return RedirectToAction(nameof(Index));
