@@ -85,80 +85,6 @@
 <!-- Fruits Shop End-->
 
 
-
-
-
-
-
-@* <section>
-	<div class="container">
-		<div class="row">
-			<div class="col-sm-3">
-				<partial name="_SidebarPartial" />
-			</div>
-
-			<div class="col-sm-9 padding-right">
-				<form asp-action="Index" asp-controller="Product">
-					<partial name="_FilterProductsPartial" />
-				</form>
-				
-
-				<div class="features_items">
-					<!--features_items-->
-					<h2 class="title text-center">Features Items</h2>
-
-					@foreach (var item in Model)
-					{
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-
-									<div class="productinfo text-center">
-										<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
-											<img src="~/media/products/@item.Image" alt="@item.ProductName" width="100%" height="200px" />
-											<h2>@item.Price.ToString("#,##0 VND")</h2>
-											<p>@item.ProductName</p>
-											<p>Category: @item.Category.CategoryName</p>
-											<p>Brand: @item.Brand.BrandName</p>
-										</a>
-										@if (item.Stock > 0)
-										{
-											<button class="btn btn-default add-to-cart" data-product_id="@item.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
-										}
-										else
-										{
-											<button class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Out Of Order</button>
-										}
-
-									</div>
-
-								</div>
-
-
-
-								<div class="choose">
-									@if (User.Identity?.IsAuthenticated ?? false)
-									{
-										<ul class="nav nav-pills nav-justified">
-											<li>
-												<button class="btn btn-danger add-btn-wishlist" data-product_id="@item.Id">Add to Wishlist</button>
-											</li>
-											<li>
-												<button class="btn btn-info add-btn-compare" data-product_id="@item.Id">Add to Compare</button>
-											</li>
-										</ul>
-									}
-								</div>
-							</div>
-						</div>
-					}					
-				</div><!--features_items-->
-				<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
-			</div>
-		</div>
-	</div>
-</section>
- *@
 @section Scripts {
 	<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
     <script src="~/lib/jqueryui/jquery-ui.js"></script> 
@@ -170,8 +96,8 @@
 				$("#slider-range").slider({
 					range: true,
 					step: 50000,
-					min: 10000,
-					max: 5000000,
+					min: 0000,
+					max: 2000000,
 					// values: [100000, 300000],
 					values: [@(ViewBag.startprice != "" ? ViewBag.startprice : 50000) , @(ViewBag.endPrice != "" ? ViewBag.endPrice : 800000)],
 					slide: function (event, ui) {

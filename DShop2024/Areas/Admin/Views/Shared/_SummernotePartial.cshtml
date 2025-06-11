@@ -2,8 +2,11 @@
 
 @if (Model.LoadLibrary)
 {
-    <script src="~/lib/summernote/summernote-bs4.min.js"></script>
-    <link rel="stylesheet" href="~/lib/summernote/summernote-bs4.min.css" />
+    <link href="~/lib/summernote/summernote-bs5.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
+    <script type="text/javascript" src="cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/lib/summernote/summernote-bs5.js"></script>
 
     <link rel="stylesheet" href="~/lib/jqueryui/themes/base/theme.css" />
     <link rel="stylesheet" href="~/lib/jqueryui/themes/base/jquery-ui.css" />
@@ -37,7 +40,7 @@
                 context.memo('button.elfinder', function () {
                     var button = ui.button({
                         contents: '<i class="note-icon-picture"/> elFinder',
-                        tooltip: 'Quản lý file',
+                        tooltip: 'Manage file',
                         click: function () {
                             // Bấm vào nút bấm gọi hàm elfinderDialog
                             elfinderDialog(context);

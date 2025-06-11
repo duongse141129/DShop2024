@@ -1,8 +1,6 @@
 ﻿@{
 	int index = 0;
 }
-
-
 <section id="slider">
 	<!--slider-->
 	<div class="container">
@@ -16,7 +14,6 @@
 					</ol>
 
 					<div class="carousel-inner">
-
 						@foreach( var banner in ViewBag.Banners){
 							<div class="item @(index == 0 ? "active" : "")">
 								<div class="col-sm-12">
@@ -25,11 +22,7 @@
 							</div>
 							index++;
 						}
-
-
-
 					</div>
-
 					<a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
 						<i class="fa fa-angle-left"></i>
 					</a>
@@ -37,7 +30,6 @@
 						<i class="fa fa-angle-right"></i>
 					</a>
 				</div>
-
 			</div>
 		</div>
 	</div>

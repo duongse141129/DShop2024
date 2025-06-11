@@ -39,7 +39,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Status)
             </th>
-            <th></th>
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -60,8 +60,11 @@
                     <span class="text text-@((OrderEnumData.SpanStatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
                 </td>
                 <td>
-                    <a asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
-                    <a asp-action="CancelOrder" class="btn btn-danger mb-3 confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel</a>
+                    <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
+                    @if(item.Status != 4)
+                    {
+                        <a asp-action="CancelOrder" class="btn btn-danger confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel</a>
+                    }            
                 </td>
             </tr>
         }

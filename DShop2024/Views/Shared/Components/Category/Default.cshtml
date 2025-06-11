@@ -2,34 +2,20 @@
 
 <ul class="list-unstyled fruite-categorie list-group">
     <li>
-        <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == "" ? "active" : "")">
-            <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="">ALL</a>
-        </div>
+        <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="">
+            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == "" ? "active" : "")">
+               ALL
+            </div>
+        </a>
     </li>
     @foreach (var item in Model)
     {
         <li>
-            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == item.Slug ? "active" : "")">
-                <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="@item.Slug">@item.CategoryName</a>
-            </div>
+            <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="@item.Slug">
+                <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == item.Slug ? "active" : "")">
+                    @item.CategoryName
+                </div>
+            </a>
         </li>
     }
 </ul>
-
-
-
-@* <div class="panel panel-default">
-	<div class="panel-heading">
-		<h4 class="panel-title"><a asp-action="Index" asp-controller="Product" asp-route-CategorySlug="">ALL</a></h4>
-	</div>
-</div>
-
-@foreach(var item in Model)
-{
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h4 class="panel-title"><a asp-action="Index" asp-controller="Product" asp-route-CategorySlug="@item.Slug">@item.CategoryName</a></h4>
-		</div>
-	</div>
-}
- *@

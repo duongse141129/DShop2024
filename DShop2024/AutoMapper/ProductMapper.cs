@@ -13,6 +13,7 @@ namespace DShop2024.AutoMapper
                 .ForMember(dest => dest.Image, act => act.Ignore())
                 .ForMember(dest => dest.ImageUpload, act => act.Ignore())
                 .ForMember(dest => dest.Status, act => act.Ignore())
+                .ForMember(dest => dest.Stock, act => act.Ignore())
                 .ReverseMap();
         }
     }

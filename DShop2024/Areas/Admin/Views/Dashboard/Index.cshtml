@@ -93,10 +93,10 @@
                     <div class="row">
                         <div class="col-sm-4">
                             <p>Filter by date</p>
-                                <label>From: </label>
-                                <input type="date" name="dateStart" class="form-control" id="dateStart">
-                                <label>To: </label>
-                                <input type="date" name="dateEnd" class="form-control" id="dateEnd">
+                                <label for="from">From</label>
+                                <input autocomplete="off" class="form-control" type="text" id="dateStart" name="dateStart">
+                                <label for="to">to</label>
+                                <input autocomplete="off" class="form-control" type="text" id="dateEnd" name="dateEnd">
                                 <br/>
                                 <button type="button" class="btn btn-info btn-filter-date">Filter</button>
                         </div>
@@ -194,10 +194,12 @@
                                     <tr>
                                         <th>@item.Id</th>
                                         <th>
-                                            <div class="col-md-8">
+                                            <div class="col-md-12">
                                                 <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@item.Id">
                                                     @item.ProductName
                                                 </a>
+                                            </div>
+                                            <div class="col-md-12">
                                                 <img src="~/media/products/@item.Image" width="120" height="100" />
                                             </div>
                                         </th>
@@ -219,10 +221,41 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.js"></script>
 
     <script>
+        $(function () {
+            var dateFormat = "mm/dd/yy",
+                from = $("#dateStart")
+                    .datepicker({
+                        defaultDate: "+1w",
+                        changeMonth: true
+                    })
+                    .on("change", function () {
+                        to.datepicker("option", "minDate", getDate(this));
+                    }),
+                    to = $("#dateEnd").datepicker({
+                        defaultDate: "+1w",
+                        changeMonth: true
+                    })
+                    .on("change", function () {
+                        from.datepicker("option", "maxDate", getDate(this));
+                    });
 
+            function getDate(element) {
+                var date;
+                try {
+                    date = $.datepicker.parseDate(dateFormat, element.value);
+                } catch (error) {
+                    date = null;
+                }
+                return date;
+            }
+        });
+    </script>
+    <script>
         $(document).ready(function () {
             var chartData = [];
             var chart = new Morris.Line({

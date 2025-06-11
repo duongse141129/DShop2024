@@ -29,7 +29,7 @@
 
                         <div class="form-group">
                             <label asp-for="PhoneNumber"></label>
-                            <input asp-for="PhoneNumber" class="form-control"/>
+                            <input asp-for="PhoneNumber" placeholder="10 digits" class="form-control" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
                         <div class="form-group">
@@ -60,6 +60,9 @@
                             <span asp-validation-for="AvatarUpload" class="text-danger" />
                             <img src="~/media/avatar/@Model.Avatar" width="120" height="100" />
                         </div>
+                        <div class="form-group">
+                            <img id="imgpreview" />
+                        </div>
        
 
                         <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
@@ -76,7 +79,14 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $("#AvatarUpload").change(function () {
+            readURL(this);
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
 
 

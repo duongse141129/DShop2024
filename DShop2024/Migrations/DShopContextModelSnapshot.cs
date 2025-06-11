@@ -605,7 +605,7 @@ namespace DShop2024.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(8,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
@@ -748,13 +748,13 @@ namespace DShop2024.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Province")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Province")
-                        .IsUnique()
-                        .HasFilter("[Province] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Shipping");
                 });

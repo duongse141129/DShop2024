@@ -16,7 +16,7 @@ namespace DShop2024.Models
         public string? Description { get; set; }
 		[Required(ErrorMessage = "The {0} field is required")]
 		[Range(1000, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
-		[Column(TypeName ="decimal(8,2)")]
+		[Column(TypeName ="decimal(18,2)")]
 		public decimal Price { get; set; }
 		public int Stock {  get; set; }
 		[Required, Range(1, int.MaxValue, ErrorMessage ="Seclect a brand")]

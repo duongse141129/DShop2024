@@ -14,6 +14,7 @@ namespace App.Areas.Identity.Models.ManageViewModels
 
           [Display(Name = "Phone number")]
           [DataType(DataType.PhoneNumber)]
+          [RegularExpression("^([0-9]{10}$)", ErrorMessage ="Invalid phone number.")]
           public string PhoneNumber { get; set; }
 
 

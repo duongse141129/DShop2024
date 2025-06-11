@@ -26,7 +26,7 @@ namespace DShop2024.Services
             return new IdentityError()
             {
                 Code = er.Code,
-                Description = $"Role có tên {role} bị trùng"
+                Description = $"Role {role} already exits"
             };
 
         }

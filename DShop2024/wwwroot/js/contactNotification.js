@@ -42,7 +42,6 @@ connection.on("SendContact", function (user, message) {
         strongUserName.textContent = `${message["userName"]}`;
         divContent.appendChild(spanMessage);
         spanMessage.classList.add("block");
-        //spanMessage.textContent = `Subject: ${contentMessage}`;
         spanMessage.textContent = "Subject: " + contentMessage;
         divContent.appendChild(spanTime);
         spanTime.classList.add("time");
@@ -50,7 +49,7 @@ connection.on("SendContact", function (user, message) {
 
         var countNotiContact = document.getElementById(`countContacts`);
         if (countNotiContact.textContent == "") {
-            countNotiContact.classList.add("notification");
+            countNotiContact.classList.add("notificationContact");
             countNotiContact.textContent = `1`;
         } else {
             countNotiContact.textContent = parseInt(countNotiContact.textContent) + 1;

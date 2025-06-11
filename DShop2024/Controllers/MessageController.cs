@@ -49,7 +49,6 @@ namespace DShop2024.Controllers
 		}
 
 
-
         [HttpPost]
         public async Task<IActionResult> SendMessage(string messageInput)
         {

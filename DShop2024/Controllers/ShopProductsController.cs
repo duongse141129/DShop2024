@@ -19,7 +19,6 @@ namespace DShop2024.Controllers
 			_userManager = userManager;
 		}
 
-
         public async Task<IActionResult> Index(string CategorySlug = "", string BrandSlug = "",
                                                  string searchName = "",
                                             string sortBy = "", string startprice = "", string endPrice = "",
@@ -62,23 +61,23 @@ namespace DShop2024.Controllers
                 }
 
 
-                if (sortBy == "priceIncrease")
+                if (sortBy == "PriceIncrease")
                 {
                     listProduct = listProduct.OrderBy(p => p.Price);
                 }
-                else if (sortBy == "priceDecrease")
+                else if (sortBy == "PriceDecrease")
                 {
                     listProduct = listProduct.OrderByDescending(p => p.Price);
                 }
-                else if (sortBy == "newest")
+                else if (sortBy == "Newest")
                 {
                     listProduct = listProduct.OrderByDescending(p => p.Id);
                 }
-                else if (sortBy == "oldest")
+                else if (sortBy == "Oldest")
                 {
                     listProduct = listProduct.OrderBy(p => p.Id);
                 }
-                else if (startprice != "" && endPrice != "")
+                if (startprice != "" && endPrice != "")
                 {
                     decimal startPriceValue;
                     decimal endPriceValue;
@@ -159,10 +158,7 @@ namespace DShop2024.Controllers
                             AveragePoint = g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average(r => r.Star) : 0
                         })
                         .ToListAsync();
-
             ViewBag.pagingModel = pagingModel;
-
-
             return View(products);
         }
 
@@ -175,7 +171,6 @@ namespace DShop2024.Controllers
 				{
 					return NotFound();
 				}
-
 				var productById = await _dataContext.Products
 							.Where(p => p.Id == Id && p.Status != 0)
 							.Include(p => p.Brand)
@@ -338,8 +333,6 @@ namespace DShop2024.Controllers
 			}
 
 		}
-
-
         public async Task<IActionResult> GetDetailProductBySlug(string slug)
 		{
             if (String.IsNullOrEmpty(slug))
@@ -355,74 +348,6 @@ namespace DShop2024.Controllers
 			return RedirectToAction("Details", "ShopProducts", new { Id = productModelbySlug.Id });
 		
 		}
-
-
-
-
-		//[Authorize]
-		//[HttpPost]
-		//[ValidateAntiForgeryToken]
-		//public async Task<IActionResult> CommentProduct(RatingModel rating)
-		//{
-		//	if (ModelState.IsValid)
-		//	{
-		//		var user = await _userManager.GetUserAsync(this.User);
-		//		var ratingModel = new RatingModel
-		//		{
-		//			ProductId = rating.ProductId,
-		//			Comment = rating.Comment,
-		//			RatingDateTime = DateTime.Now,
-		//			Star = rating.Star,
-		//			UserId = user.Id,
-		//			Status = 1
-		//		};
-		//		try
-		//		{
-		//			_dataContext.Ratings.Add(ratingModel);
-		//			await _dataContext.SaveChangesAsync();
-
-		//			TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
-		//			return RedirectToAction("Details", new { Id = rating.ProductId });
-		//		}
-		//		catch (Exception ex)
-		//		{
-		//			TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product fail " + ex.Message;
-		//			return RedirectToAction("Details", new { Id = rating.ProductId });
-		//		}
-
-		//	}
-		//	return RedirectToAction("Details", new { Id = rating.ProductId });
-
-		//}
-
-
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CommentProduct(RatingModel rating)
-		{
-			if (ModelState.IsValid)
-			{
-				var user = await _userManager.GetUserAsync(this.User);
-				var ratingModel = new RatingModel
-				{
-					ProductId = rating.ProductId,
-					Comment = rating.Comment,
-					RatingDateTime = DateTime.Now,
-					Star = rating.Star,
-					UserId = user.Id,
-					Status = 1
-				};
-				_dataContext.Ratings.Add(ratingModel);
-				await _dataContext.SaveChangesAsync();
-
-				TempData["success"] = "Feedback product successfully";
-				return RedirectToAction("Details", new { Id = rating.ProductId });
-			}
-
-			return RedirectToAction("Details", new { Id = rating.ProductId });
-
-		}
-
 
 	}
 }

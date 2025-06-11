@@ -80,30 +80,10 @@ namespace DShop2024.Areas.Identity.Controllers
                         return View(model);
                     }
                     var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
-
-                    //var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);
-                    //if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
-                    //{
-                    //    user = await _userManager.FindByEmailAsync(model.UserNameOrEmail);
-                    //    if (user != null)
-                    //    {
-                    //        if(user.Status == 0)
-                    //        {
-                    //            ModelState.AddModelError("Account was deleted ");
-                    //            return View(model);
-                    //        }
-                    //        result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    user = await _userManager.FindByNameAsync(model.UserNameOrEmail);
-                    //    if (user.Status == 0)
-                    //    {
-                    //        ModelState.AddModelError("Account was deleted ");
-                    //        return View(model);
-                    //    }
-                    //}
+                    if ((!result.Succeeded) && AppUtilities.IsValidEmail(model.UserNameOrEmail))
+                    {
+                        result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, lockoutOnFailure: true);
+                    }
 
                     if (result.Succeeded)
                     {
@@ -370,11 +350,28 @@ namespace DShop2024.Areas.Identity.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
+            string externalEmail = null;
+            AppUserModel externalEmailUser = null;
+            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+            {
+                externalEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
+            }
+
+            if (externalEmail != null)
+            {
+                externalEmailUser = await _userManager.FindByEmailAsync(externalEmail);
+            }
+            if(externalEmailUser != null && externalEmailUser.Status == 0)
+            {
+                ModelState.AddModelError("Account was deleted ");
+                return View(nameof(Login));
+            }
+
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
             if (result.Succeeded)
             {
-                // Cập nhật lại token
+                // update token
                 await _signInManager.UpdateExternalAuthenticationTokensAsync(info);
 
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
@@ -420,7 +417,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 string externalEmail = null;
                 AppUserModel externalEmailUser = null;
                 
-                // Claim ~ Dac tinh mo ta mot doi tuong 
+                // Claim 
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
                 {
                     externalEmail = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -436,7 +433,7 @@ namespace DShop2024.Areas.Identity.Controllers
                     // externalEmail  == Input.Email
                     if (registeredUser.Id == externalEmailUser.Id)
                     {
-                        // Lien ket tai khoan, dang nhap
+                        // Link account, login
                         var resultLink = await _userManager.AddLoginAsync(registeredUser, info);
                         if (resultLink.Succeeded)
                         {
@@ -451,7 +448,7 @@ namespace DShop2024.Areas.Identity.Controllers
                             info => user1 (mail1@abc.com)
                                  => user2 (mail2@abc.com)
                         */
-                        ModelState.AddModelError(string.Empty, "Không liên kết được tài khoản, hãy sử dụng email khác");
+                        ModelState.AddModelError(string.Empty, "Account cannot be linked, please use another email");
                         return View();
                     }
                 }
@@ -459,7 +456,7 @@ namespace DShop2024.Areas.Identity.Controllers
 
                 if ((externalEmailUser != null) && (registeredUser == null))
                 {
-                    ModelState.AddModelError(string.Empty, "Không hỗ trợ tạo tài khoản mới - có email khác email từ dịch vụ ngoài");
+                    ModelState.AddModelError(string.Empty, "No support for creating new accounts - have different email from the external service");
                     return View();                    
                 }
 
@@ -494,7 +491,7 @@ namespace DShop2024.Areas.Identity.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("Không tạo được tài khoản mới");
+                        ModelState.AddModelError("Cannot create new account");
                         return View();   
                     }
                 }           
@@ -927,7 +924,7 @@ namespace DShop2024.Areas.Identity.Controllers
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Sai mã phục hồi.");
+                ModelState.AddModelError(string.Empty, "Wrong recovery code.");
                 return View(model);
             }
         }

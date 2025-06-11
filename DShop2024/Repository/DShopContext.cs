@@ -72,7 +72,7 @@ public class DShopContext : IdentityDbContext<AppUserModel>
 
 
 
-    public virtual DbSet<BrandModel> Brands { get; set; }
+        public virtual DbSet<BrandModel> Brands { get; set; }
 		public virtual DbSet<ProductModel> Products { get; set; }
 		public virtual DbSet<CategoryModel> Categories { get; set; }
 		public virtual DbSet<OrderModel> Orders { get; set; }

@@ -15,7 +15,6 @@
 
         <div class="row">
             <div class="col-md-12">
-
                 <h2>Frequently Asked Questions</h2>
 
                 @foreach (var item in ViewBag.FAQs as IEnumerable<FAQModel>)
@@ -32,21 +31,6 @@
                 </div>
 
                 }
-    
-@*             <h2>Frequently Asked Questions</h2>
-            @foreach (var item in ViewBag.FAQs as IEnumerable<DShop2024.Models.FAQModel>)
-            {
-                <p>
-                    <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample_@item.Id" role="button" aria-expanded="false" aria-controls="collapseExample_@item.Id">
-                        @item.Question
-                    </a>
-                </p>
-                <div class="collapse" id="collapseExample_@item.Id">
-                    <div class="card card-body">
-                        @item.Answer
-                    </div>
-                </div>
-            }       *@
     
         <br/>
 
@@ -85,7 +69,6 @@
                     success: function (result) {
                         if (result.success) {
                             Swal.fire(result.noti);
-                            // Swal.fire("Add to compare successful");
                         }
                         else {
                             Swal.fire(result.noti);

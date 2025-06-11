@@ -16,8 +16,9 @@
 
 		public string toolbar { get; set; } = @"
             [
-                ['style', ['style']],
-                ['font', ['bold', 'underline', 'clear']],
+                ['style', ['style']],   
+				['font', ['bold', 'underline', 'clear']],
+				['fontname', ['fontname']],
 				['color', ['color']],
                 ['para', ['ul', 'ol', 'paragraph']],
                 ['table', ['table']],

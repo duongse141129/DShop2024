@@ -28,7 +28,9 @@ namespace DShop2024.Areas.Admin.Controllers
             _userManager = userManager;
             _mapper = mapper;
         }
-		public async Task<IActionResult> Index()
+
+
+        public async Task<IActionResult> Index()
 		{
             ViewBag.sidebar = sidebar;
             var products =  await _dataContext.Products.Where(p => p.Status != 0)

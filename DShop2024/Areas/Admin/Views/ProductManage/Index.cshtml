@@ -7,6 +7,7 @@
 
 @if (User.IsInRole(RoleName.Administrator))
 {
+
     <a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
     <br />
     <form asp-action="DeleteMultiple" asp-controller="ProductManage" class="py-2">

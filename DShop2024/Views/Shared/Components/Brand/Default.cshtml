@@ -2,42 +2,25 @@
 @model IEnumerable<BrandViewModel>
 
 <ul class="list-unstyled fruite-categorie list-group">
+   
     <li>
-        <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.BrandSlug == "" ? "active" : "")">
-            <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="">ALL</a>
-        </div>
-    </li>
-    @foreach (var item in Model)
-    {
-        <li>
-            <div class="d-flex justify-content-between fruite-name list-group-item @(ViewBag.BrandSlug == item.Slug ? "active" : "") ">
-                <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug"> @item.BrandName</a>
-                <span>@item.CountProduct</span>
+         <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="">
+            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.BrandSlug == "" ? "active" : "")">
+                    ALL
             </div>
+        </a>
+    </li>
+ 
+    @foreach (var item in Model)
+    {     
+        <li>
+            <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug">
+                <div class="d-flex justify-content-between fruite-name list-group-item @(ViewBag.BrandSlug == item.Slug ? "active" : "") ">
+                    @item.BrandName
+                    <span>@item.CountProduct</span>
+                </div>
+            </a>
         </li>
     }
 </ul>
 
-
-
-@* <div class="brands-name">
-	<ul class="nav nav-pills nav-stacked">
-		<li>
-			<a asp-action="Index" asp-controller="Product" asp-route-BrandSlug="">ALL</a>
-		</li> 
-
-	</ul>
-</div>
-
-@foreach (var item in Model)
-{
-	<div class="brands-name">
-		<ul class="nav nav-pills nav-stacked">
-			<li>			
-				<a asp-action="Index" asp-controller="Product" asp-route-BrandSlug="@item.Slug"> <span class="pull-right">@item.CountProduct</span>@item.BrandName</a>
-			</li>
-
-
-		</ul>
-	</div>
-} *@

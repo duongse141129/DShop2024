@@ -41,10 +41,8 @@ builder.Services.AddSession(options =>{
 
 
 
-//builder.Services.AddIdentity<AppUserModel, IdentityRole>()
-//	.AddEntityFrameworkStores<DShopContext>().AddDefaultTokenProviders();
 
-// Dang ky Identity
+//  Identity
 builder.Services.AddIdentity<AppUserModel, IdentityRole>()
         .AddEntityFrameworkStores<DShopContext>()
         .AddDefaultTokenProviders();

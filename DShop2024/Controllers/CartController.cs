@@ -56,47 +56,6 @@ namespace DShop2024.Controllers
 
 		}
 
-        //public async Task<ActionResult> AddToCart(int? Id)
-        //{
-        //	if (Id == null)
-        //	{
-        //		return NotFound();
-        //	}
-        //	ProductModel product = await _dataContext.Products
-        //		.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-        //	if (product == null)
-        //	{
-        //		return NotFound();
-        //	}
-        //	List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-        //	CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-        //	if (cartItem == null)
-        //	{
-        //		cart.Add(new CartItemModel(product));
-        //	}
-        //	else
-        //	{
-        //		if (product.Stock <= cartItem.Quantity)
-        //		{
-        //			TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
-
-        //		}
-        //		else
-        //		{
-        //			cartItem.Quantity += 1;
-        //			TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
-        //		}
-
-
-        //	}
-        //	HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-        //	await GetValueByPercentCoupon();
-        //	TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
-        //	return Redirect(Request.Headers["Referer"].ToString());
-
-        //}
-
-
         public async Task<ActionResult> AddToCart(int? Id)
         {
             if (Id == null)
