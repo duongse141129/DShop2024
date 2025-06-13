@@ -5,6 +5,70 @@
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
+<div class="row row-card-no-pd">
+    @for (int i = 0; i < OrderEnumData.StatusOrderCount; i++)
+    {
+        <div class="col-sm-6 col-md-2">
+            <div class="card card-stats card-round">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="@OrderEnumData.IconStatusOrder[i] text-@((OrderEnumData.SpanStatusOrder) i)"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">@((OrderEnumData.StatusOrder)i)</p>
+                                <h4 class="card-title">
+                                @if(i == 0)
+                                {
+                                        @ViewBag.countCancelOrder
+                                }
+                                @if (i == 1)
+                                {
+                                        @ViewBag.countNewOrder
+                                }
+                                @if (i == 2)
+                                {
+                                        @ViewBag.countAcceptedOrder
+                                }
+                                @if (i == 3)
+                                {
+                                        @ViewBag.countDeliveryOrder
+                                }
+                                @if (i == 4)
+                                {
+                                        @ViewBag.countCompletedOrder
+                                }
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="col-sm-6 col-md-2">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="icon-big text-center">
+                            <i class="fas fa-luggage-cart text-secondary"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Total Order</p>
+                            <h4 class="card-title">@ViewBag.totalOrder</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="row py-5">
     <div class="col-md-8"></div>

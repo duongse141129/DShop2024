@@ -192,3 +192,100 @@ ul{
     align-content: center;
 
 }
+
+
+.bar-chart-legend {
+    display: inline-block;
+    right: 25px;
+    position: absolute;
+    top: 8px;
+    font-size: 10px;
+}
+
+    .bar-chart-legend .legend-item {
+        display: block;
+        font-size: 20px;
+    }
+
+    .bar-chart-legend .legend-color {
+        width: 25px;
+        height: 25px;
+        margin: 5px 5px;
+        display: inline-block;
+    }
+
+.donut-legend {
+    margin-top: 50px;
+}
+
+.donut-legend > span {
+    display: inline-block;
+    margin-right: 25px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+
+
+    .donut-legend > span > i {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        margin-right: 7px;
+        margin-top: -3px;
+        vertical-align: middle;
+        border-radius: 1px;
+    }
+
+.donutlegendbrand {
+    display: inline-block;
+    font-size: 10px;
+    margin-top: 50px;
+}
+
+    .donutlegendbrand > span {
+        display: block;
+        font-size: 12px;
+        margin-right: 0;
+    }
+
+        .donutlegendbrand > span > i {
+            width: 17px;
+            height: 17px;
+            margin: 5px 5px;
+            display: inline-block;
+        }
+
+
+
+/*.bar-chart-legend {
+    display: inline-block;
+    right: 25px;
+    position: absolute;
+    top: 8px;
+    font-size: 10px;
+}
+
+    .bar-chart-legend .legend-item {
+        display: block;
+    }
+
+    .bar-chart-legend .legend-color {
+        width: 12px;
+        height: 12px;
+        margin: 3px 5px;
+        display: inline-block;
+    }*/
+
+.scrollCustomer {
+    height: 767px;
+    overflow: auto;
+}
+.scrollContact {
+    height: 345px;
+    overflow: auto;
+}
+.scrollCoupon {
+    height: 377px;
+    overflow: auto;
+}

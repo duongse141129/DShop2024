@@ -15,7 +15,7 @@ namespace DShop2024.EnumData
         public enum StatusCoupon
         {
             Deleted,
-            New,
+            Created,
             Showing
 
         }

@@ -20,6 +20,20 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
             ViewBag.sidebar = sidebar;
+
+            var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
+            var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
+            var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
+            var countDeliveryOrder = _context.Orders.Where(p => p.Status == 3).Count();
+            var countCompletedOrder = _context.Orders.Where(p => p.Status == 4).Count();
+
+            ViewBag.countCancelOrder = countCancelOrder;
+            ViewBag.countNewOrder = countNewOrder;
+            ViewBag.countAcceptedOrder = countAcceptedOrder;
+            ViewBag.countDeliveryOrder = countDeliveryOrder;
+            ViewBag.countCompletedOrder = countCompletedOrder;
+
+
             IQueryable<OrderModel> listOrder = _context.Orders.Include(u => u.User).OrderByDescending(o => o.Id);
             var count = await listOrder.CountAsync();
             if (count > 0)
@@ -31,6 +45,7 @@ namespace DShop2024.Areas.Admin.Controllers
             }
             ViewBag.searchOrderCode = searchOrderCode;
             int totalOrder = listOrder.Count();
+            ViewBag.totalOrder = totalOrder;
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalOrder / 10);

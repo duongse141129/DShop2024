@@ -8,6 +8,7 @@ namespace DShop2024.ViewModels
 		public string Slug { get; set; }
 		public string Image { get; set; }
 		public decimal Price { get; set; }
+		public decimal OriginalPrice { get; set; }
 		public int Stock { get; set; }
 
 		public string BrandName { get; set; }

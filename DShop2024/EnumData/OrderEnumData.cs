@@ -2,15 +2,16 @@
 {
 	public class OrderEnumData
 	{
+        public static int StatusOrderCount = 5;
 		public enum StatusOrder
 		{
 			Cancel,
 			New,
 			Accepted,
 			Delivery,
-			Complete
+			Completed
 
-		}
+		} 
         public enum SpanStatusOrder
         {
             danger,
@@ -20,5 +21,6 @@
             success
 
         }
+        public static List<string> IconStatusOrder = new List<string> { "far fa-window-close", "fa fa-check", "fa fa-user", "fa fa-truck", "far fa-check-circle" };
     }
 }

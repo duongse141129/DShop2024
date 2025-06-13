@@ -1,4 +1,6 @@
-﻿﻿@{
+﻿@using DShop2024.ViewModels
+@model DataDashboardViewModel
+﻿@{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
@@ -18,7 +20,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Users</p>
-                                <h4 class="card-title">@ViewBag.CountUser</h4>
+                                <h4 class="card-title">@Model.CountUser</h4>
                             </div>
                         </div>
                     </div>
@@ -37,7 +39,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Available Products</p>
-                                <h4 class="card-title">@ViewBag.CountProduct</h4>
+                                <h4 class="card-title">@Model.CountProduct</h4>
                             </div>
                         </div>
                     </div>
@@ -56,7 +58,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Total Orders</p>
-                                <h4 class="card-title">@ViewBag.CountOrder</h4>
+                                <h4 class="card-title">@Model.CountOrder</h4>
                             </div>
                         </div>
                     </div>
@@ -75,7 +77,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Completed Orders</p>
-                                <h4 class="card-title">@ViewBag.CountCompletedOrder</h4>
+                                <h4 class="card-title">@Model.CountCompletedOrder</h4>
                             </div>
                         </div>
                     </div>
@@ -114,8 +116,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                   <div class="chart-container" style="min-height: 550px">
-                        <div id="myfirstchart" style="height: 550px;"></div>                 
+                   <div class="chart-container" style="min-height: 545px;">
+                        <div id="myfirstchart" style="height: 520px;"></div>
                     </div>
                 </div>
             </div>
@@ -124,20 +126,34 @@
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row">
-                        <div class="card-title">Best Selling in brands by percentage</div>
+                        <div class="card-title">The quantity of products sold for brands</div>
                     </div>
                 </div>
-                <div class="card-body pb-0">                 
-                     <div class="mb-4 mt-2">
-                        <div id="graphBrand" style="width: 275px;"> </div>
+                <div class="card-body pt-0">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div id="graphBrand" style="width: 275px;"> </div>
+                        </div>
+                        <div class="col-sm-5 ">
+                            <div id="brandchart" class="donutlegendbrand"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="card card-round">
-                <div class="card-body pb-0">
-                    <h4 class="mb-2">Best Selling in categories by percentage</h4>
-                    <div class="pull-in sparkline-fix">
-                        <div id="graphCategories" style="width: 275px;"> </div>
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title">The quantity of products sold for categories</div>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div id="graphCategories" style="width: 275px;"> </div>
+                        </div>
+                        <div class="col-sm-5">
+                            <div id="categorychart" class="donut-legend"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,13 +176,14 @@
                 <div class="card-body">
                     <div class="chart-container" style="min-height: 550px">
                         <div id="mybarchart" style="height: 500px;"></div>
+                        <div id="visitor_legend" class="bar-chart-legend"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-8">
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row card-tools-still-right">
@@ -189,7 +206,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in ViewBag.bestSaleProducts)
+                                @foreach (var item in Model.BestSaleProducts)
                                 {
                                     <tr>
                                         <th>@item.Id</th>
@@ -214,11 +231,175 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="col-md-12">
+                <div class="card card-round">
+                    <div class="card-body">
+                        <div class="card-head-row card-tools-still-right">
+                            <div class="card-title">Customers</div>
+                        </div>
+                        <div class="card-list py-4">
+                            <div class="scrollCustomer">
+
+
+                            @foreach (var item in Model.ListCustomer)
+                            {
+                                <div class="item-list">
+                                    <div class="avatar" >
+                                        <img src="~/media/avatar/@item.Avatar" alt="..." class="avatar-img rounded-circle">
+                                    </div>
+                                    <div class="info-user ms-3">
+                                        <div class="username">@item.UserName</div>
+                                    </div>
+                                    <a class="btn btn-icon btn-link op-8 me-1" asp-area="Admin" asp-controller="Chat" asp-action="ChatWithCustomer" asp-route-customerId="@item.Id"> 
+                                        <i class="far fa-envelope"></i>
+                                    </a>
+                                </div>
+                            }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>       
+        </div>
     </div>
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title">Support Tickets</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="scrollContact">
+                    @foreach (var item in Model.ListContact)
+                    {
+                        <div class="d-flex">
+                            <div class="avatar">
+                                <img src="~/media/avatar/@item.User.Avatar" alt="..." class="avatar-img rounded-circle">
+                            </div>
+                            <div class="flex-1 ms-3 pt-1">
+                                <h6 class="text-uppercase fw-bold mb-1">
+                                    @item.User.UserName
+                                    @if(item.Status == 2)
+                                    {
+                                        <span class="text-success ps-3">Completed</span>
+                                    }
+                                    else if (item.Status == 1)
+                                    {
+                                        <span class="text-warning ps-3">Pending</span>
+                                    }
+                         
+                                </h6>
+                                <span class="text-muted">
+                                    Subject: @item.Subject
+                                </span>
+                            </div>
+                            <div class="float-end pt-1">
+                                <small class="text-muted">@item.DateSent.ToString("MM/dd/yyyy h:mm tt")</small>
+                                @if(item.Status == 1)
+                                {
+                                    <a class="btn btn-icon btn-link op-8 me-1" asp-area="Admin" asp-action="Reply" asp-controller="Contact" asp-route-id="@item.Id">
+                                        <i class="fa fa-reply"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                        <div class="separator-dashed"></div>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Total Order: @Model.CountOrder</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ol class="activity-feed">
+                        @for (int i = 0; i < OrderEnumData.StatusOrderCount; i++)
+                        {
+                            <li class="feed-item feed-item-@( (OrderEnumData.SpanStatusOrder) i )">
+                                <time class="date" datetime="9-18"> <i class="@OrderEnumData.IconStatusOrder[i]"></i> @((OrderEnumData.StatusOrder)i)</time>
+                                <span class="text">                          
+                                    @if (i == 0)
+                                    {
+                                        @Model.CountCancelOrder
+                                    }
+                                    @if (i == 1)
+                                    {
+                                        @Model.CountNewOrder
+                                    }
+                                    @if (i == 2)
+                                    {
+                                        @Model.CountAcceptedOrder
+                                    }
+                                    @if (i == 3)
+                                    {
+                                        @Model.CountDeliveryOrder
+                                    }
+                                    @if (i == 4)
+                                    {
+                                        @Model.CountCompletedOrder
+                                    }
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                        <div class="card-title">Available Coupons</div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="scrollCoupon">
+                    <div class="table-responsive">
+                        <!-- Projects table -->
+                        <table class="table align-items-center mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th scope="col">Coupon Code</th>
+                                    <th scope="col" class="text-end">Date &amp; Time</th>
+                                    <th scope="col" class="text-end">Amount</th>
+                                    <th scope="col" class="text-end">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ListAvailableCouponVM )
+                                {
+                                        <tr>
+                                            <th scope="row">
+                                                @item.CouponCode
+                                            </th>
+                                            <td class="text-end">@item.DaysLeft</td>
+                                            <td class="text-end">@item.Quantity</td>
+                                            <td class="text-end">
+                                                <span class="badge @(item.Status == 2 ? "badge-success" : "badge-info") ">@((CouponEnumData.StatusCoupon)item.Status)</span>
+                                            </td>
+                                        </tr>
+                                }
+                             
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
-
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 
@@ -265,7 +446,8 @@
                 xkey: 'date',
                 xLabels: 'month',
                 ykeys: ['revenue', 'profit', 'orders', 'quantitysold'],
-                labels: ['Revenue', 'Profit', 'Orders', 'Quantity Sold']
+                labels: ['Revenue', 'Profit', 'Orders', 'Quantity Sold'],
+                resize: true
             });
             //filter all data chart
             $.ajax({
@@ -312,16 +494,16 @@
     </script>
     <script>
         $(document).ready(function () {
+            var color_array = ['#03658C', '#7CA69E', '#F2594A', '#F28C4B', '#7E6F6A', '#36AFB2', '#9c6db2', '#d24a67', '#89a958', '#00739a', '#BDBDBD'];
             var chartData = [];
             var chartB = new Morris.Donut({
                 element: 'graphBrand',
                 data: [0, 0],
                 backgroundColor: '#ccc',
                 labelColor: '#060',
-                colors: ['Maroon', 'Navy', 'Yellow', 'Olive', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Teal', 'Aqua', 'Silver', 'Gray'],
-                formatter: function (x) { return x + "%" }
-            }).on('click', function (i, row) {
-                console.log(i, row);
+                colors: color_array,
+                resize: true,
+                formatter: function (x) { return x  }
             });
             //filter all data chart
             $.ajax({
@@ -329,28 +511,42 @@
                 url: "@Url.Action("GetChartBrand", "Dashboard")",
                 success: function (data) {
                     chartB.setData(data);
+                    var i = 0;
+                    data.forEach(function (label) {
+                        var legendItem = document.createElement('span');
+                        $(legendItem).text(label.label + " " + label.value).prepend(`<i  style="background-color: ${color_array[i]} ">&nbsp;</i>`);
+                        $('#brandchart').append(legendItem);
+                        i++;
+                    });
                 }
             });
         });
 
         $(document).ready(function () {
+            var color_array = ['Teal', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Silver', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Aqua'];
             var chartData = [];
-            var chartB = new Morris.Donut({
+            var chartC = new Morris.Donut({
                 element: 'graphCategories',
                 data: [0, 0],
                 backgroundColor: '#ccc',
                 labelColor: '#060',
-                colors: ['Teal', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Silver', 'Red', 'Maroon', 'Fuchsia', 'Purple','Aqua'],
-                formatter: function (x) { return x + "%" }
-            }).on('click', function (i, row) {
-                console.log(i, row);
-            });
+                colors: color_array,
+                resize: true,
+                formatter: function (x) { return x  }
+            })
             //filter all data chart
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartCategories", "Dashboard")",
                 success: function (data) {
-                    chartB.setData(data);
+                    chartC.setData(data);
+                    var i = 0;
+                    data.forEach(function (label) {
+                        var legendItem = document.createElement('span');
+                        $(legendItem).text(label.label + " " + label.value).prepend(`<i  style="background-color: ${color_array[i]} ">&nbsp;</i>`);
+                        $('#categorychart').append(legendItem);
+                        i++;
+                    });
                 }
             });
 
@@ -370,11 +566,9 @@
                 barColors: ['#1fbba6', '#f8aa33', '#4da74d', '#afd8f8', '#edc240', '#cb4b4b', '#9440ed'],
                 gridTextColor: '#666',
                 grid: true,
-                barOpacity: 0.8
+                barOpacity: 0.8,
+                resize: true
             });
-
-
-
 
             //filter all data chart
             $.ajax({
@@ -385,16 +579,13 @@
                 }
             });
 
-
-            // var browsersChart = chart;
-
-            // // Legend for Bar chart
-            // browsersChart.options.labels.forEach(function (label, i) {
-            //     var legendItem = $('<span class="legend-item"></span>').text(label).prepend('<span class="legend-color">&nbsp;</span>');
-            //     legendItem.find('span')
-            //         .css('backgroundColor', browsersChart.options.barColors[i]);
-            //     $('#visitor_legend').append(legendItem)
-            // });
+            var browsersChart = chart;
+            browsersChart.options.labels.forEach(function (label, i) {
+                var legendItem = $('<span class="legend-item"></span>').text(label).prepend('<span class="legend-color">&nbsp;</span>');
+                legendItem.find('span')
+                    .css('backgroundColor', browsersChart.options.barColors[i]);
+                $('#visitor_legend').append(legendItem)
+            });
 
             //submit filter date in chart
             $(".filter-barchart").change(function () {
@@ -408,8 +599,6 @@
                     }
                 });
             })
-
-
 
         });
 

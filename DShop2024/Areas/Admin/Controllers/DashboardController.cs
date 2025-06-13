@@ -1,8 +1,11 @@
-﻿using DShop2024.EnumData;
+﻿using AutoMapper;
+using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -12,25 +15,27 @@ namespace DShop2024.Areas.Admin.Controllers
 	public class DashboardController : Controller
     {
         private readonly DShopContext _dataContext;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        private readonly IMapper _mapper;
         private readonly string sidebar = "dashboard";
 
-        public DashboardController(DShopContext context, IWebHostEnvironment webHostEnvironment)
+        public DashboardController(DShopContext context, IMapper mapper)
         {
             _dataContext = context;
-            _webHostEnvironment = webHostEnvironment;
+            _mapper = mapper;
         }
         public async Task<IActionResult> Index()
         {
             ViewBag.sidebar = sidebar;
-            var countProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock >0).Count();
-            var countOrder = _dataContext.Orders.Where(p => p.Status != 0).Count();
-            var CountCompletedOrder = _dataContext.Orders.Where(p => p.Status == 4).Count();
+            var countProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
             var countUser = _dataContext.Users.Where(p => p.Status != 0).Count();
-            ViewBag.CountProduct = countProduct;
-            ViewBag.CountUser = countUser;
-            ViewBag.CountOrder = countOrder;
-            ViewBag.CountCompletedOrder = CountCompletedOrder;
+            var countOrder = _dataContext.Orders.Where(p => p.Status != 0).Count();
+        
+            var countCancelOrder = _dataContext.Orders.Where(p => p.Status == 0).Count();
+            var countNewOrder = _dataContext.Orders.Where(p => p.Status == 1).Count();
+            var countAcceptedOrder = _dataContext.Orders.Where(p => p.Status == 2).Count();
+            var countDeliveryOrder = _dataContext.Orders.Where(p => p.Status == 3).Count();
+            var countCompletedOrder = _dataContext.Orders.Where(p => p.Status == 4).Count();
 
             var bestSaleProducts = await _dataContext.Products
                             .Where(p => p.Status != 0)
@@ -50,20 +55,54 @@ namespace DShop2024.Areas.Admin.Controllers
                                 x.p.OriginalPrice,
                                 x.p.Price
                             })
-                            .Select(g => new
+                            .Select(g => new ProductViewModel
                             {
-                                g.Key.Id,
-                                g.Key.ProductName,
-                                g.Key.Image,
-                                g.Key.OriginalPrice,
-                                g.Key.Price,
+                                Id = g.Key.Id,
+                                ProductName = g.Key.ProductName,
+                                Image = g.Key.Image,
+                                OriginalPrice = g.Key.OriginalPrice,
+                                Price = g.Key.Price,
                                 QuantitySold = g.Sum(x => x.od.Quantity)
                             })
                             .OrderByDescending(x => x.QuantitySold)
                             .Take(5)
                             .ToListAsync();
-            ViewBag.bestSaleProducts = bestSaleProducts;
-            return View();
+
+
+            var listCustomer = await (from u in _dataContext.Users
+                                      join ur in _dataContext.UserRoles on u.Id equals ur.UserId
+                                      join r in _dataContext.Roles on ur.RoleId equals r.Id
+                                      where r.Name == RoleName.Customer && u.Status != 0
+                                      select u).ToListAsync();
+
+            var listContact = await _dataContext.Contacts.Include(u => u.User).Where(c => c.Status != 0)
+                                                                                .OrderBy(c => c.Status)
+                                                                                .ThenByDescending(d => d.DateSent)
+                                                                                .ToListAsync();
+
+            var listCoupon = await _dataContext.Coupons
+                                    .Where(c => c.Status != 0 && c.Quantity > 0)
+                                    .Where(c => c.DateExpired.Date >= DateTime.Today.Date && c.DateStart <= DateTime.Today.Date)
+                                    .OrderByDescending(c => c.Status)
+                                    .ToListAsync();
+            var listAvailableCouponVM = _mapper.Map<List<CouponViewModel>>(listCoupon);
+
+            DataDashboardViewModel dataDashboard = new DataDashboardViewModel 
+            { 
+                CountProduct = countProduct,
+                CountUser = countUser,
+                CountOrder = countOrder,
+                CountCancelOrder = countCancelOrder,
+                CountNewOrder = countNewOrder,
+                CountAcceptedOrder = countAcceptedOrder,
+                CountDeliveryOrder = countDeliveryOrder,
+                CountCompletedOrder = countCompletedOrder,
+                BestSaleProducts = bestSaleProducts,
+                ListCustomer = listCustomer,
+                ListContact = listContact,
+                ListAvailableCouponVM = listAvailableCouponVM
+            };
+            return View(dataDashboard);
         }
 
 
@@ -185,7 +224,6 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("GetChartBrand")]
         public async Task<IActionResult> GetChartBrand()
         {
-
             var productsSoldByBrand = await _dataContext.Brands
                        .Where(b => b.Status != 0)
                        .Join(_dataContext.Products.Where(p => p.Status != 0),
@@ -206,27 +244,8 @@ namespace DShop2024.Areas.Admin.Controllers
                            label = g.Key,
                            value = g.Sum(x => x.od.Quantity)
                        })
-                       .ToListAsync();
-
-            var sum = productsSoldByBrand.Sum(n => n.value);
-            //foreach (var item in productsSoldByBrand)
-            //{
-            //    item.value = item.value * 100 / sum;
-            //}
-            int s = 0;
-            for (int i = 0; i < productsSoldByBrand.Count; i++)
-            {
-                if (i == productsSoldByBrand.Count - 1)
-                {
-                    productsSoldByBrand[i].value = 100 - s;
-                }
-                else
-                {
-                    int v = productsSoldByBrand[i].value * 100 / sum;
-                    productsSoldByBrand[i].value = v;
-                    s += v;
-                }
-            }
+                       .OrderByDescending( b => b.value)
+                       .ToListAsync();          
             return Json(productsSoldByBrand);
         }
 
@@ -255,22 +274,8 @@ namespace DShop2024.Areas.Admin.Controllers
                                      label = g.Key,
                                      value = g.Sum(x => x.od.Quantity)
                                  })
+                                 .OrderByDescending(b => b.value)
                                  .ToListAsync();
-            var sum = productsSoldByCategory.Sum(n => n.value);
-            int s = 0;
-            for (int i = 0; i < productsSoldByCategory.Count; i++)
-            {
-                if (i == productsSoldByCategory.Count - 1)
-                {
-                    productsSoldByCategory[i].value = 100 - s;
-                }
-                else
-                {
-                    int v = productsSoldByCategory[i].value * 100 / sum;
-                    productsSoldByCategory[i].value = v;
-                    s += v;
-                }
-            }
             return Json(productsSoldByCategory);
         }
 

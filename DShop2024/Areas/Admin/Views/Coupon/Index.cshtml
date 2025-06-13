@@ -91,10 +91,12 @@
                 }
             </tbody>
         </table>
+        <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
     </div>
+
 </div>
 
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+
 
 @section Scripts {
     @{

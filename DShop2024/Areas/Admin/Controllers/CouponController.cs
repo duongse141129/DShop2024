@@ -68,7 +68,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var couponViewModels = _mapper.Map<List<CouponViewModel>>(coupons);
             ViewBag.pagingModel = pagingModel;
             ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0), "Id", "CategoryCouponName");
-            return View(couponViewModels);
+            return View(couponViewModels.OrderByDescending(p => p.Id));
 		}
 
 
