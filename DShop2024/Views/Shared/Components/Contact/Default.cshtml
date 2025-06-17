@@ -39,14 +39,7 @@
                             <span class="subject"><strong>@item.User.UserName</strong></span>
                             <span class="block">
                                 <strong>Subject: </strong>
-                                @if (item.Subject.Length > 10)
-                                {
-                                    @item.Subject.Substring(1, 10)
-                                }
-                                else
-                                {
-                                    @item.Subject
-                                }
+                                @item.Subject
                             </span>
                             <span class="time">@item.DateSent.ToString("MM/dd/yyyy h:mm tt")</span>
                         </div>

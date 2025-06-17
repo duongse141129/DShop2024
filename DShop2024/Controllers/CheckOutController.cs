@@ -16,7 +16,7 @@ namespace DShop2024.Controllers
 	[Authorize]
 	public class CheckOutController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 
 		private readonly UserManager<AppUserModel> _userManager;
 		private readonly IEmailSender _emailSender;
@@ -24,7 +24,7 @@ namespace DShop2024.Controllers
 		private readonly IVnPayService _vnPayService;
         public CheckOutController(DShopContext context, UserManager<AppUserModel> userManager, IEmailSender emailSender, IMomoService momoService, IVnPayService vnPayService)
 		{
-			_dataContext = context;
+			_context = context;
 			_userManager = userManager;
 			_emailSender = emailSender;
 			_momoService = momoService;
@@ -76,7 +76,7 @@ namespace DShop2024.Controllers
 			string productOutOfStock = "";
 			foreach (var item in cartItems)
 			{
-				var product = await _dataContext.Products
+				var product = await _context.Products
 								   .Where(p => p.Id == item.ProductId)
 								   .FirstOrDefaultAsync();
 				if (item.Quantity > product.Stock)
@@ -118,7 +118,7 @@ namespace DShop2024.Controllers
 			}
 			foreach (var coupon in coupouns)
 			{
-				var cp = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == coupon.Id);
+				var cp = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == coupon.Id);
 				if(cp != null )
 				{
                     int quantityCoupon = cp.Quantity;
@@ -215,8 +215,8 @@ namespace DShop2024.Controllers
 					grandTotal = 0;
 				}
 				order.TotalPrice = grandTotal;
-				await _dataContext.Orders.AddAsync(order);
-				await _dataContext.SaveChangesAsync();
+				await _context.Orders.AddAsync(order);
+				await _context.SaveChangesAsync();
 
 
 				foreach (var item in cartItems)
@@ -232,19 +232,19 @@ namespace DShop2024.Controllers
 
 
 					};
-					var product = await _dataContext.Products.FindAsync(item.ProductId);
+					var product = await _context.Products.FindAsync(item.ProductId);
 					product.Stock -= item.Quantity;
-					_dataContext.Products.Update(product);
+					_context.Products.Update(product);
 
-					await _dataContext.OrderDetails.AddAsync(orderDetail);
-					await _dataContext.SaveChangesAsync();
+					await _context.OrderDetails.AddAsync(orderDetail);
+					await _context.SaveChangesAsync();
 				}
 
 				foreach (var item in coupouns)
 				{
-					CouponRedemptionModel couponRedemption = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
+					CouponRedemptionModel couponRedemption = await _context.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
 					couponRedemption.Status = 2;
-                    CouponModel couponModel = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
+                    CouponModel couponModel = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
                     couponModel.Quantity -= 1;
 					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, Status = 1 };
 
@@ -253,19 +253,19 @@ namespace DShop2024.Controllers
 						couponModel.Status = 0;
 					}
 
-					_dataContext.Coupons.Update(couponModel);
-					_dataContext.CouponRedemptions.Update(couponRedemption);
-					await _dataContext.OrderCouponss.AddAsync(orderCoupons);
-					await _dataContext.SaveChangesAsync();
+					_context.Coupons.Update(couponModel);
+					_context.CouponRedemptions.Update(couponRedemption);
+					await _context.OrderCouponss.AddAsync(orderCoupons);
+					await _context.SaveChangesAsync();
 				}
 
-				var orderSendGmail = await _dataContext.Orders
+				var orderSendGmail = await _context.Orders
 													.Include(u => u.User)
 													.Include(od => od.OrderDetails)
 													.ThenInclude(p => p.Product)
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
-                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
                 await _emailSender.SendEmailOrder(order, infoShop);
 				
 

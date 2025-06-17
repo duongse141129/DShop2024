@@ -1,6 +1,5 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
-using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DShop2024.Repository.Components

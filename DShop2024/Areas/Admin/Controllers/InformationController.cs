@@ -9,20 +9,20 @@ namespace DShop2024.Areas.Admin.Controllers
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
     public class InformationController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly string sidebar = "information";
 
         public InformationController(DShopContext context, IWebHostEnvironment webHostEnvironment)
 		{
-			_dataContext = context;
+			_context = context;
 			_webHostEnvironment = webHostEnvironment;
 
 		}
 		public IActionResult Index()
 		{
             ViewBag.sidebar = sidebar;
-            var info = _dataContext.InformationShops.FirstOrDefault();
+            var info = _context.InformationShops.FirstOrDefault();
 			return View(info);
 		}
 
@@ -36,7 +36,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            InformationShopModel info = await _dataContext.InformationShops.FindAsync(Id);
+            InformationShopModel info = await _context.InformationShops.FindAsync(Id);
             if (info == null)
             {
                 return NotFound();
@@ -56,7 +56,7 @@ namespace DShop2024.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			var exitedInformationShop = await _dataContext.InformationShops.FindAsync(Id);
+			var exitedInformationShop = await _context.InformationShops.FindAsync(Id);
 			if (ModelState.IsValid)
 			{
 				try
@@ -102,8 +102,8 @@ namespace DShop2024.Areas.Admin.Controllers
 					exitedInformationShop.PluginFacebook = informationShop.PluginFacebook;
 					exitedInformationShop.PluginYoutube = informationShop.PluginYoutube;
 
-					_dataContext.Update(exitedInformationShop);
-					await _dataContext.SaveChangesAsync();
+					_context.Update(exitedInformationShop);
+					await _context.SaveChangesAsync();
 
 					TempData[DShopConst.TEMPDATA_SUCCESS] = "Update Information shop successful";
 					return RedirectToAction("Index");

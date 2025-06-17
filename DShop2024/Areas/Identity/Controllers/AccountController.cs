@@ -24,21 +24,20 @@ namespace DShop2024.Areas.Identity.Controllers
         private readonly SignInManager<AppUserModel> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<AccountController> _logger;
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 
         public AccountController(
             UserManager<AppUserModel> userManager,
             SignInManager<AppUserModel> signInManager,
             IEmailSender emailSender,
             ILogger<AccountController> logger,
-            DShopContext context
-            )
+            DShopContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
-            _dataContext = context;
+            _context = context;
         }
 
         // GET: /Account/Login
@@ -63,8 +62,8 @@ namespace DShop2024.Areas.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var checkUserNameExit = await _dataContext.Users.AnyAsync(x => x.UserName == model.UserNameOrEmail);
-                var checkEmailExit = await  _dataContext.Users.AnyAsync(y => y.Email == model.UserNameOrEmail);           
+                var checkUserNameExit = await _context.Users.AnyAsync(x => x.UserName == model.UserNameOrEmail);
+                var checkEmailExit = await  _context.Users.AnyAsync(y => y.Email == model.UserNameOrEmail);           
 
                 if (checkUserNameExit|| checkEmailExit)
                 {
@@ -214,12 +213,12 @@ namespace DShop2024.Areas.Identity.Controllers
 
         public async Task SendPromotionToNewCustomer(AppUserModel user)
         {
-            var promotion = await _dataContext.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+            var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
             if (promotion == null)
             {
                 promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
-                await _dataContext.Promotions.AddAsync(promotion);
-                await _dataContext.SaveChangesAsync();
+                await _context.Promotions.AddAsync(promotion);
+                await _context.SaveChangesAsync();
             }
             CouponModel couponModel = new CouponModel
             {
@@ -236,10 +235,10 @@ namespace DShop2024.Areas.Identity.Controllers
 
             try
             {
-                await _dataContext.Coupons.AddAsync(couponModel);
-                await _dataContext.SaveChangesAsync();
+                await _context.Coupons.AddAsync(couponModel);
+                await _context.SaveChangesAsync();
 
-                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
                 await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
             }
             catch (Exception ex)
@@ -290,8 +289,8 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 
                 user.EmailConfirmed = true;
-                _dataContext.Update(user);
-                await _dataContext.SaveChangesAsync();
+                _context.Update(user);
+                await _context.SaveChangesAsync();
          
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Confirm email successful";
                 return View();
@@ -566,7 +565,7 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 return NotFound();
             }
-            var user = await _dataContext.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
                 return NotFound();
@@ -582,7 +581,7 @@ namespace DShop2024.Areas.Identity.Controllers
             {
                 return NotFound();
             }
-            var user = await _dataContext.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if(user == null) 
             {
                 return NotFound(); 
@@ -616,7 +615,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 SameSite = SameSiteMode.Strict,
             };
 
-            var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+            var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
             await _emailSender.SendEmailOTP(user, codeEmail.ToString(), typeService, infoShop);
 
             if (typeService == DShopConst.OTP_CONFIRM_EMAIL)
@@ -929,7 +928,7 @@ namespace DShop2024.Areas.Identity.Controllers
             }
         }
 
-        [Route("/accessdebied.html")]
+        //[Route("/accessdebied.html")]
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {

@@ -11,14 +11,14 @@ namespace DShop2024.Areas.Admin.Controllers
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
 	public class ContactController : Controller
     {
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 		private readonly IEmailSender _emailSender;
 		private readonly UserManager<AppUserModel> _userManager;
         private readonly string sidebar = "contact";
 
         public ContactController(DShopContext context, IEmailSender emailSender, UserManager<AppUserModel> userManager)
         {
-            _dataContext = context;
+            _context = context;
             _emailSender = emailSender;
             _userManager = userManager;
 
@@ -27,7 +27,7 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
         {
             ViewBag.sidebar = sidebar;
-            IQueryable<ContactModel> listContact = _dataContext.Contacts.Where(c => c.Status != 0)
+            IQueryable<ContactModel> listContact = _context.Contacts.Where(c => c.Status != 0)
                                                         .Include(u => u.User)
                                                         .Include(r => r.Respondent)
                                                         .OrderByDescending(d => d.DateSent);
@@ -68,7 +68,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var contactModel = await _dataContext.Contacts
+            var contactModel = await _context.Contacts
                 .Include(u => u.User)
 				.FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
 			if (contactModel == null)
@@ -87,23 +87,22 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 if (String.IsNullOrEmpty(replyMessage))
                 {
-                    TempData[DShopConst.TEMPDATA_ERROR] = "Message can't null";
+                    TempData[DShopConst.TEMPDATA_ERROR] = "The reply message field is required";
                     return RedirectToAction("Reply", "Contact", new { id = IdContact });
                 }
                 var user = await _userManager.GetUserAsync(this.User);
     
-                var contactModel = await _dataContext.Contacts
+                var contactModel = await _context.Contacts
                .Include(u => u.User)
                .FirstOrDefaultAsync(m => m.Id == IdContact);
 				contactModel.ReplyMessage = replyMessage;
                 contactModel.DateRespone = DateTime.Now;
                 contactModel.RespondentId = user.Id;
                 contactModel.Status = 2;
-                _dataContext.Update(contactModel);
-                await _dataContext.SaveChangesAsync();
-				//await _emailSender.SendEmailAsync(contactModel.User.Email, contactModel.Subject, replyMessage);
+                _context.Update(contactModel);
+                await _context.SaveChangesAsync();
 
-                var infoShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+                var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
 				await _emailSender.SendEmailContact(contactModel, infoShop);
 	
 
@@ -126,7 +125,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-			var contacModel = await _dataContext.Contacts
+			var contacModel = await _context.Contacts
 	                    .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
 			if (contacModel == null)
 			{
@@ -135,12 +134,12 @@ namespace DShop2024.Areas.Admin.Controllers
 
 			try
             {
-                var contactModel = await _dataContext.Contacts.FindAsync(id);
+                var contactModel = await _context.Contacts.FindAsync(id);
 				contactModel.Status = 0;
-				_dataContext.Update(contactModel);
-				await _dataContext.SaveChangesAsync();
+				_context.Update(contactModel);
+				await _context.SaveChangesAsync();
 				TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete contact successful";
-                await _dataContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

@@ -2,24 +2,22 @@
 using DShop2024.Models;
 using DShop2024.Repository;
 using DShop2024.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IO;
+
 
 
 namespace DShop2024.Controllers
 {
 	public class CartController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
 
         public CartController(DShopContext context, UserManager<AppUserModel> userManager)
 		{
-			_dataContext = context;
+			_context = context;
             _userManager = userManager;
         }
 		public  IActionResult Index()
@@ -42,7 +40,7 @@ namespace DShop2024.Controllers
 			{
 				foreach (CouponModel couponModel in coupouns)
 				{
-					var coupon = await _dataContext.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == couponModel.Id);
+					var coupon = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == couponModel.Id);
 					if (coupon.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
 					{
 						decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
@@ -62,7 +60,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -103,7 +101,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -135,7 +133,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -168,7 +166,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
 							.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -206,7 +204,7 @@ namespace DShop2024.Controllers
 			if (ModelState.IsValid)
 			{
 
-				var existingShipping = await _dataContext.Shippings
+				var existingShipping = await _context.Shippings
 											.FirstOrDefaultAsync(x => x.Province == informationDelivery.tinh);
 
 				if (existingShipping != null)
@@ -246,7 +244,7 @@ namespace DShop2024.Controllers
 			}
             
 
-            var validCoupon = await _dataContext.Coupons
+            var validCoupon = await _context.Coupons
 									.Include(p => p.Promotion)
 									.FirstOrDefaultAsync(x => x.CouponCode == couponCode);
 			
@@ -273,13 +271,13 @@ namespace DShop2024.Controllers
 				{
 					var user = await _userManager.GetUserAsync(this.User);
 
-                    var CheckUsed = await _dataContext.CouponRedemptions.FirstOrDefaultAsync(u => u.UserId == user.Id && u.CouponId == validCoupon.Id);
+                    var CheckUsed = await _context.CouponRedemptions.FirstOrDefaultAsync(u => u.UserId == user.Id && u.CouponId == validCoupon.Id);
 
 					if (CheckUsed == null)
 					{
 						CouponRedemptionModel couponRedemption = new CouponRedemptionModel { UserId = user.Id, CouponId = validCoupon.Id, Status = 1 };
-						await _dataContext.CouponRedemptions.AddAsync(couponRedemption);
-						await _dataContext.SaveChangesAsync();
+						await _context.CouponRedemptions.AddAsync(couponRedemption);
+						await _context.SaveChangesAsync();
 					}
 					if (CheckUsed != null && CheckUsed.Status == 2 )
 					{

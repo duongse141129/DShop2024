@@ -1,5 +1,4 @@
 ﻿using DShop2024.EnumData;
-using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,16 +6,16 @@ namespace DShop2024.Repository.Components
 {
     public class CouponViewComponent : ViewComponent
     {
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 
-        public CouponViewComponent(DShopContext dataContext)
+        public CouponViewComponent(DShopContext context)
         {
-            _dataContext = dataContext;
+            _context = context;
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
 
-            var coupons = await _dataContext.Coupons
+            var coupons = await _context.Coupons
              .Where(p => p.Status == (int)CouponEnumData.StatusCoupon.Showing && p.Quantity > 0 && p.DateExpired >= DateTime.Today)
              .Include(p => p.Promotion).ToListAsync();
             return View(coupons);

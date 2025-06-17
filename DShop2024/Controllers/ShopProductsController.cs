@@ -10,12 +10,12 @@ namespace DShop2024.Controllers
 {
 	public class ShopProductsController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
 
 		public ShopProductsController(DShopContext context, UserManager<AppUserModel> userManager)
 		{
-			_dataContext = context;
+			_context = context;
 			_userManager = userManager;
 		}
 
@@ -27,7 +27,7 @@ namespace DShop2024.Controllers
         {
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
-            IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
+            IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
                                                     .Include(p => p.Brand)
                                                     .Include(p => p.Category);
             var count = await listProduct.CountAsync();
@@ -111,7 +111,7 @@ namespace DShop2024.Controllers
             ViewBag.waterResistance = waterResistance;
             ViewBag.USBChargingPort = USBChargingPort;
 
-            var slider = _dataContext.Banners.Where(b => b.Status == 1).ToList();
+            var slider = _context.Banners.Where(b => b.Status == 1).ToList();
             ViewBag.Banners = slider;
 
             int totalProduct = listProduct.Count();
@@ -153,8 +153,8 @@ namespace DShop2024.Controllers
                             Image = g.Image,
                             Price = g.Price,
                             Stock = g.Stock,
-                            BrandName = _dataContext.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-                            CategoryName = _dataContext.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
+                            BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
+                            CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
                             AveragePoint = g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average(r => r.Star) : 0
                         })
                         .ToListAsync();
@@ -171,14 +171,17 @@ namespace DShop2024.Controllers
 				{
 					return NotFound();
 				}
-				var productById = await _dataContext.Products
+				var productById = await _context.Products
 							.Where(p => p.Id == Id && p.Status != 0)
 							.Include(p => p.Brand)
 							.Include(p => p.Category)
 							.Include(p => p.Ratings)
 							.FirstOrDefaultAsync();
-		
-				List<ProductViewModel> relatedProducts = await _dataContext.Products
+                if (productById == null)
+                {
+                    return NotFound();
+                }
+                List<ProductViewModel> relatedProducts = await _context.Products
 										.Where(p => p.Category.Id == productById.CategoryId && p.Id != productById.Id && p.Status != 0)
 										.Include (p => p.Brand)
 										.Include(p => p.Category)
@@ -190,8 +193,8 @@ namespace DShop2024.Controllers
 											Image = g.Image,
 											Price = g.Price,
 											Stock = g.Stock,
-											BrandName = _dataContext.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-											CategoryName = _dataContext.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
+											BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
+											CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
 											AveragePoint =  g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average( r => r.Star) : 0
 										})   
 										.ToListAsync();
@@ -218,8 +221,8 @@ namespace DShop2024.Controllers
 						Image = productById.Image,
 						Price = productById.Price,
 						Stock = productById.Stock,
-						BrandName = _dataContext.Brands.FirstOrDefault(b => b.Id == productById.BrandId).BrandName,
-						CategoryName = _dataContext.Categories.FirstOrDefault(c => c.Id == productById.CategoryId).CategoryName,
+						BrandName = _context.Brands.FirstOrDefault(b => b.Id == productById.BrandId).BrandName,
+						CategoryName = _context.Categories.FirstOrDefault(c => c.Id == productById.CategoryId).CategoryName,
 						AveragePoint = productById.Ratings.Any() ? productById.Ratings.Where(r => r.ProductId == productById.Id && r.Status != 0).Average(r => r.Star) : 0
 					});
 					if (recentlyViewedProducts.Count > 8)
@@ -240,7 +243,7 @@ namespace DShop2024.Controllers
 
 
 				var user = await _userManager.GetUserAsync(this.User);
-				IQueryable<RatingModel> listRating = _dataContext.Ratings
+				IQueryable<RatingModel> listRating = _context.Ratings
 										.Where(p => p.ProductId == Id)
 										.Where(r => r.Status != 0)
 										.Include(c => c.User);
@@ -261,8 +264,8 @@ namespace DShop2024.Controllers
 
 				if (user != null)
 				{
-					var checkOrder = await (from o in _dataContext.Orders
-											join od in _dataContext.OrderDetails on o.Id equals od.OrderId
+					var checkOrder = await (from o in _context.Orders
+											join od in _context.OrderDetails on o.Id equals od.OrderId
 											where o.UserId == user.Id && od.ProductId == Id && o.Status == 4
 											select o).FirstOrDefaultAsync();
 
@@ -276,8 +279,8 @@ namespace DShop2024.Controllers
 							listRating = listRating.Where(u => u.UserId != user.Id);
 						}
 					}
-					isInWishList = await _dataContext.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
-					isInCompare = await _dataContext.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+					isInWishList = await _context.WishLists.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
+					isInCompare = await _context.Compares.AnyAsync(w => w.UserId == user.Id && w.ProductId == Id);
 				}
 
 				var totalRating = await listRating.CountAsync();
@@ -339,7 +342,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            var productModelbySlug = await _dataContext.Products
+            var productModelbySlug = await _context.Products
                 .FirstOrDefaultAsync(m => m.Slug == slug  && m.Status != 0);
             if (productModelbySlug == null)
             {

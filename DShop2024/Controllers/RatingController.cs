@@ -9,11 +9,11 @@ namespace DShop2024.Controllers
 	[Authorize]
 	public class RatingController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
 		public RatingController(DShopContext context, UserManager<AppUserModel> userManager)
 		{
-			_dataContext = context;
+			_context = context;
 			_userManager = userManager;
 		}
 		public IActionResult Index()
@@ -39,8 +39,8 @@ namespace DShop2024.Controllers
 				};
 				try
 				{
-					_dataContext.Ratings.Add(ratingModel);
-					await _dataContext.SaveChangesAsync();
+					_context.Ratings.Add(ratingModel);
+					await _context.SaveChangesAsync();
 
 					TempData[DShopConst.TEMPDATA_SUCCESS] = "Feedback product successfully";
 					return RedirectToAction("Details", "ShopProducts", new { Id = rating.ProductId });

@@ -15,7 +15,7 @@ namespace DShop2024.Areas.Admin.Controllers
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
 	public class ProductManageController : Controller
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IMapper _mapper;
@@ -23,7 +23,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public ProductManageController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager, IMapper mapper)
 		{
-			_dataContext = context;
+			_context = context;
 			_webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
             _mapper = mapper;
@@ -33,7 +33,7 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
 		{
             ViewBag.sidebar = sidebar;
-            var products =  await _dataContext.Products.Where(p => p.Status != 0)
+            var products =  await _context.Products.Where(p => p.Status != 0)
                                                             .Include(p => p.Category)
                                                             .Include(p => p.Brand)
                                                             .OrderByDescending(p => p.Id).ToListAsync();
@@ -45,8 +45,8 @@ namespace DShop2024.Areas.Admin.Controllers
 		public IActionResult Create()
 		{
             ViewBag.sidebar = sidebar;
-            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName");
-			ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName");
+            ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName");
+			ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName");
 
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, "");
 
@@ -59,8 +59,8 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Create(CreateProductRequest product)
         {
             ViewBag.sidebar = sidebar;
-            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+            ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName", product.BrandId);
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket);
 
             if (ModelState.IsValid)
@@ -74,7 +74,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
 
                     product.Slug = product.ProductName.ToLower().Replace(" ", "-");
-                    var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
+                    var slug = await _context.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
                     if (slug != null)
                     {
                         ModelState.AddModelError("", "This product already exists.");
@@ -95,8 +95,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                     product.Status = 1;
                     ProductModel productModel = _mapper.Map<ProductModel>(product);
-                    await _dataContext.Products.AddAsync(productModel);
-                    await _dataContext.SaveChangesAsync();
+                    await _context.Products.AddAsync(productModel);
+                    await _context.SaveChangesAsync();
 
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Add product success";
                     return RedirectToAction("Index");
@@ -120,15 +120,15 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
                 return NotFound();
             }
 
-            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+            ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName", product.BrandId);
 
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket.ToString());
 
@@ -147,10 +147,10 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ViewBag.Categories = new SelectList(_dataContext.Categories.Where(c => c.Status == 1), "Id", "CategoryName", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands.Where(b => b.Status == 1), "Id", "BrandName", product.BrandId);
+            ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName", product.BrandId);
 
-			var exitedProduct = await _dataContext.Products.FindAsync(Id);
+			var exitedProduct = await _context.Products.FindAsync(Id);
 
             if (ModelState.IsValid)
             {
@@ -163,7 +163,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
 
                     product.Slug = product.ProductName.ToLower().Replace(" ", "-");
-                    var slug = await _dataContext.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
+                    var slug = await _context.Products.FirstOrDefaultAsync(s => s.Slug == product.Slug);
                     if (slug != null && product.Slug.ToLower() != exitedProduct.Slug.ToLower())
                     {
                         TempData[DShopConst.TEMPDATA_ERROR] = "This product already exists.";
@@ -202,8 +202,8 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
 
                     exitedProduct = _mapper.Map(product, exitedProduct);      
-                    _dataContext.Update(exitedProduct);
-                    await _dataContext.SaveChangesAsync();
+                    _context.Update(exitedProduct);
+                    await _context.SaveChangesAsync();
 
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Update product success";
                     return RedirectToAction("Index");
@@ -227,14 +227,33 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            var product = await _dataContext.Products
+            var product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
                 return NotFound();
             }
-			if(!string.Equals(product.Image, "noname.jpg"))
-			{
+            try
+            {
+                await DeleteProduct(product.Id);
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product successful";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product fail "+ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task DeleteProduct(int? Id)
+        {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+
+            if (!String.IsNullOrEmpty(product.Image))
+            {
                 string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
                 string oldFilePath = Path.Combine(uploadsDir, product.Image);
                 try
@@ -248,27 +267,22 @@ namespace DShop2024.Areas.Admin.Controllers
                 catch (Exception ex)
                 {
                     TempData[DShopConst.TEMPDATA_ERROR] = "Remove image product fail " + ex.Message;
-                    return RedirectToAction("Index");
                 }
             }
             try
             {
                 product.Status = 0;
-                _dataContext.Products.Update(product);
-                await _dataContext.SaveChangesAsync();
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product successful";
-                return RedirectToAction("Index");
+                _context.Products.Update(product);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product fail "+ex.Message;
-                return RedirectToAction("Index");
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product fail " + ex.Message;
             }
-
-
         }
 
-		[Authorize(Roles = RoleName.Administrator)]
+
+        [Authorize(Roles = RoleName.Administrator)]
 		public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
         {
             ViewBag.sidebar = sidebar;
@@ -281,10 +295,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 foreach (int idProduct in IdProductsToDelete)
                 {
-                    var product = await _dataContext.Products.FindAsync(idProduct);
-                    product.Status = 0;
-                    _dataContext.Products.Update(product);
-                    await _dataContext.SaveChangesAsync();
+                    await DeleteProduct(idProduct);
                 }
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Multiple product success";
                 return RedirectToAction("Index");
@@ -306,14 +317,14 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            var productModel = await _dataContext.Products
+            var productModel = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (productModel == null)
             {
                 return NotFound();
             }
 
-            var receivingStockList = await _dataContext.ReceivingStocks.Where(x => x.ProductId == Id && x.Status != 0)
+            var receivingStockList = await _context.ReceivingStocks.Where(x => x.ProductId == Id && x.Status != 0)
                                                 .Include(p => p.Product)
                                                 .Include(r => r.User)
                                                 .ToListAsync();
@@ -330,7 +341,7 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> StoreProductQuantity(ReceivingStockModel receivingStock)
         {
             ViewBag.sidebar = sidebar;
-            var product = await _dataContext.Products.FirstOrDefaultAsync(m => m.Id == receivingStock.ProductId && m.Status != 0);
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == receivingStock.ProductId && m.Status != 0);
             if (product == null)
             {
                 return NotFound();
@@ -349,8 +360,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 receivingStock.UserId = user.Id;
                 receivingStock.Status = 1;
 
-                _dataContext.ReceivingStocks.Add(receivingStock);
-                await _dataContext.SaveChangesAsync();
+                _context.ReceivingStocks.Add(receivingStock);
+                await _context.SaveChangesAsync();
                 TempData[DShopConst.TEMPDATA_SUCCESS] = $"Add quantity product: {product.ProductName} successful";
                 return RedirectToAction("AddQuantity", "ProductManage", new { Id = receivingStock.ProductId });
             }
@@ -371,7 +382,7 @@ namespace DShop2024.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			var productModel = await _dataContext.Products.Include( b => b.Brand).Include( c => c.Category)
+			var productModel = await _context.Products.Include( b => b.Brand).Include( c => c.Category)
                 .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
             if (productModel == null)
 			{
@@ -379,7 +390,7 @@ namespace DShop2024.Areas.Admin.Controllers
 			}
 
 
-			var listRating =  _dataContext.Ratings
+			var listRating =  _context.Ratings
 						.Where(p => p.ProductId == id)
 						.Where(r => r.Status == 1)
 						.Include(c => c.User);

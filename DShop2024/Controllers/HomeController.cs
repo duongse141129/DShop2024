@@ -1,11 +1,9 @@
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.ViewModels;
-using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
@@ -14,14 +12,14 @@ namespace DShop2024.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
 		private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger, DShopContext context,UserManager<AppUserModel> userManager)
         {
             _logger = logger;
-            _dataContext = context;
+            _context = context;
 			_userManager = userManager;
 
 		}
@@ -33,7 +31,7 @@ namespace DShop2024.Controllers
         {
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
-			IQueryable<ProductModel> listProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0)
+			IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
                                                     .Include(p => p.Brand)
                                                     .Include(p => p.Category)
                                                     .Include(r => r.Ratings);
@@ -45,19 +43,19 @@ namespace DShop2024.Controllers
                             Image = g.Image,
                             Price = g.Price,
                             Stock = g.Stock,
-                            BrandName = _dataContext.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-                            CategoryName = _dataContext.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
+                            BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
+                            CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
                             AveragePoint =  g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average( r => r.Star) : 0
                         })                     
                         .ToListAsync();
 
-            var slider = await _dataContext.Banners.Where(b => b.Status != 0).ToListAsync();
+            var slider = await _context.Banners.Where(b => b.Status != 0).ToListAsync();
             ViewBag.Banners = slider;
 
-            var categories = await _dataContext.Categories.Where(b => b.Status != 0).ToListAsync();
+            var categories = await _context.Categories.Where(b => b.Status != 0).ToListAsync();
             ViewBag.Categories = categories;
 
-            var brands = await _dataContext.Brands.Where(b => b.Status != 0).ToListAsync();
+            var brands = await _context.Brands.Where(b => b.Status != 0).ToListAsync();
             ViewBag.Brands = brands;
 
             return View(products);
@@ -72,15 +70,14 @@ namespace DShop2024.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(int statuscode)
         {
-            if(statuscode == 404)
+            if (statuscode == 404)
             {
                 return View("NotFound");
             }
-
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-		[Authorize]
+        [Authorize]
 		[HttpPost]
         public async Task<IActionResult> AddToWishList(int? Id)
 		{
@@ -88,7 +85,7 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -96,7 +93,7 @@ namespace DShop2024.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
-			var chechExit = await (_dataContext.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
+			var chechExit = await (_context.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "The product is already in in your wishlist";
@@ -110,9 +107,9 @@ namespace DShop2024.Controllers
                     ProductId = product.Id,
                     UserId = user.Id
                 };
-                _dataContext.WishLists.Add(wishList);
+                _context.WishLists.Add(wishList);
 
-                await _dataContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return Ok(new {success = true, Message = "Add to wishList successful"});
             }
             catch (Exception ex)
@@ -130,7 +127,7 @@ namespace DShop2024.Controllers
                 //return NotFound();
 				return Ok(new { success = false, Message = "NotFound" });
 			}
-            ProductModel product = await _dataContext.Products
+            ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -140,7 +137,7 @@ namespace DShop2024.Controllers
 
             var user = await _userManager.GetUserAsync(User);
 
-            var countConpare = await (_dataContext.Compares.Where(co => co.UserId == user.Id)).CountAsync();
+            var countConpare = await (_context.Compares.Where(co => co.UserId == user.Id)).CountAsync();
             if(countConpare == 5)
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Maximum 5 product in your list compare";
@@ -148,7 +145,7 @@ namespace DShop2024.Controllers
 				return Ok(new { success = false, Message = "Maximum 5 product in your list compare" });
 			}
 
-            var chechExit = await (_dataContext.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
+            var chechExit = await (_context.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
             if(chechExit != null)
             {                
                 TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list compare";
@@ -162,8 +159,8 @@ namespace DShop2024.Controllers
                     ProductId = product.Id,
                     UserId = user.Id
                 };
-                _dataContext.Compares.Add(compare);
-                await _dataContext.SaveChangesAsync();
+                _context.Compares.Add(compare);
+                await _context.SaveChangesAsync();
 				return Ok(new { success = true, Message = "Add to compare successful" });
 			}
 			catch (Exception ex)
@@ -176,8 +173,8 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> WishList()
 		{
 			var user = await _userManager.GetUserAsync(this.User);
-            List<ProductModel> wishListProduct = await (from p in _dataContext.Products
-                                                       join w in _dataContext.WishLists on p.Id equals w.ProductId
+            List<ProductModel> wishListProduct = await (from p in _context.Products
+                                                       join w in _context.WishLists on p.Id equals w.ProductId
                                                        where w.UserId == user.Id
                                                        select p)
                                                        .Include(b => b.Brand)
@@ -190,8 +187,8 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> Compare()
 		{
             var user = await _userManager.GetUserAsync(this.User);
-            List<ProductModel> compareProduct = await (from p in _dataContext.Products
-                                        join co in _dataContext.Compares on p.Id equals co.ProductId
+            List<ProductModel> compareProduct = await (from p in _context.Products
+                                        join co in _context.Compares on p.Id equals co.ProductId
                                         where  co.UserId == user.Id 
                                         select p).ToListAsync();
             return View(compareProduct);
@@ -205,14 +202,14 @@ namespace DShop2024.Controllers
                 return NotFound();
             }
             var user = await _userManager.GetUserAsync(this.User);
-            CompareModel compare = await _dataContext.Compares.Where( co => co.ProductId == Id )
+            CompareModel compare = await _context.Compares.Where( co => co.ProductId == Id )
                                                                 .Where(co => co.UserId == user.Id)
                                                                 .FirstOrDefaultAsync();
 
             try
             {
-                _dataContext.Compares.Remove(compare);
-                await _dataContext.SaveChangesAsync();
+                _context.Compares.Remove(compare);
+                await _context.SaveChangesAsync();
 
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove compare success";
                 return RedirectToAction("Compare");
@@ -229,7 +226,7 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> DeleteAllCompare()
         {
             var user = await _userManager.GetUserAsync(this.User);
-            List<CompareModel> compareProduct = await (from co in _dataContext.Compares
+            List<CompareModel> compareProduct = await (from co in _context.Compares
                                                        where co.UserId == user.Id
                                                        select co).ToListAsync();
 
@@ -237,8 +234,8 @@ namespace DShop2024.Controllers
             {
                 foreach (var compare in compareProduct)
                 {
-                    _dataContext.Compares.Remove(compare);
-                    await _dataContext.SaveChangesAsync();
+                    _context.Compares.Remove(compare);
+                    await _context.SaveChangesAsync();
                 }
 
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Clear all compare success";
@@ -261,7 +258,7 @@ namespace DShop2024.Controllers
                 return NotFound();
             }
             var user = await _userManager.GetUserAsync(this.User);
-            WishListModel wishList = await _dataContext.WishLists.Where(co => co.ProductId == Id)
+            WishListModel wishList = await _context.WishLists.Where(co => co.ProductId == Id)
                                                                 .Where(co => co.UserId == user.Id)
                                                                 .FirstOrDefaultAsync();
             if (wishList == null)
@@ -270,8 +267,8 @@ namespace DShop2024.Controllers
             }
             try
             {
-                _dataContext.WishLists.Remove(wishList);
-                await _dataContext.SaveChangesAsync();
+                _context.WishLists.Remove(wishList);
+                await _context.SaveChangesAsync();
 
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove wishList success";
                 return RedirectToAction("WishList");
@@ -289,7 +286,7 @@ namespace DShop2024.Controllers
         public async Task<IActionResult> DeleteAllWishList()
         {
             var user = await _userManager.GetUserAsync(this.User);
-            List<WishListModel> wishlistModels = await (from co in _dataContext.WishLists
+            List<WishListModel> wishlistModels = await (from co in _context.WishLists
                                                        where co.UserId == user.Id
                                                        select co).ToListAsync();
 
@@ -297,8 +294,8 @@ namespace DShop2024.Controllers
             {
                 foreach (var wishlist in wishlistModels)
                 {
-                    _dataContext.WishLists.Remove(wishlist);
-                    await _dataContext.SaveChangesAsync();
+                    _context.WishLists.Remove(wishlist);
+                    await _context.SaveChangesAsync();
                 }
 
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Clear all wishlist success";
@@ -315,7 +312,7 @@ namespace DShop2024.Controllers
 
         public async Task<IActionResult> AboutUs()
         {
-            var infomationShop = await _dataContext.InformationShops.FirstOrDefaultAsync();
+            var infomationShop = await _context.InformationShops.FirstOrDefaultAsync();
             return View(infomationShop);
         }
 

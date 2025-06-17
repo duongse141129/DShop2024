@@ -6,18 +6,18 @@ namespace DShop2024.Repository.Components
 {
 	public class BestRattingViewComponent : ViewComponent
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 
-		public BestRattingViewComponent(DShopContext dataContext)
+		public BestRattingViewComponent(DShopContext context)
 		{
-			_dataContext = dataContext;
+			_context = context;
 		}
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
 
-			var bestRatingProducts = await _dataContext.Products
+			var bestRatingProducts = await _context.Products
 			 .Where(p => p.Status != 0)
-			 .Join(_dataContext.Ratings.Where(r => r.Status != 0),
+			 .Join(_context.Ratings.Where(r => r.Status != 0),
 			 p => p.Id,
 			 r => r.ProductId,
 			 (p, r) => new { p, r })
@@ -39,8 +39,8 @@ namespace DShop2024.Repository.Components
 				 Image = g.Key.Image,
 				 Price = g.Key.Price,
 				 Stock = g.Key.Stock,
-				 BrandName = _dataContext.Brands.FirstOrDefault(b => b.Id == g.Key.BrandId).BrandName,
-				 CategoryName = _dataContext.Categories.FirstOrDefault(c => c.Id == g.Key.CategoryId).CategoryName,
+				 BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.Key.BrandId).BrandName,
+				 CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.Key.CategoryId).CategoryName,
 				 AveragePoint = g.Average(x => x.r.Star)
 			 })
 			 .OrderByDescending(x => x.AveragePoint)

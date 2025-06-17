@@ -79,23 +79,11 @@
                             {
                                 <p><b>USB Charging Port</b> </p>
                             }
-                        <div class="input-group quantity mb-5" style="width: 100px;">
-                            <div class="input-group-btn">
-                                <button class="btn btn-sm btn-minus rounded-circle bg-light border">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                            </div>
-							<input type="text" class="form-control form-control-sm text-center border-0" min="1" value="1" max="10" step="1" readonly >
-                            <div class="input-group-btn">
-                                <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
+
 							@if (Model.ProductDetail.Stock > 0)
 							{
 
-								<button class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary add-to-cart" data-product_id="@Model.ProductDetail.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
+								<button class="btn border border-primary rounded-pill px-4 py-2 mb-4 text-primary add-to-cart" data-product_id="@Model.ProductDetail.Id"><i class="fa fa-shopping-cart"></i>Add to Cart</button>
 
 							}
 							else
@@ -149,7 +137,7 @@
                         <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
 							@foreach (var item in Model.listRating)
 							{
-								<div class="d-flex">
+								<div class="d-flex bg-white py-2 rounded-5">
 									<img src="~/media/avatar/@item.User.Avatar" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
 									<div class="">
 										<p class="mb-2" style="font-size: 14px;">@item.RatingDateTime?.ToShortDateString()</p>

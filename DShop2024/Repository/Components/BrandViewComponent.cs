@@ -6,17 +6,17 @@ namespace DShop2024.Repository.Components
 {
 	public class BrandViewComponent : ViewComponent
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 
-		public BrandViewComponent(DShopContext dataContext)
+		public BrandViewComponent(DShopContext context)
 		{
-			_dataContext = dataContext;
+			_context = context;
 		}
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
-			var brands = await _dataContext.Brands
+			var brands = await _context.Brands
 								.Where(b => b.Status != 0)
-								.Join(_dataContext.Products.Where(p => p.Status != 0),
+								.Join(_context.Products.Where(p => p.Status != 0),
 								b => b.Id,
 								p => p.BrandId,
 								(b, p) => new { b, p })

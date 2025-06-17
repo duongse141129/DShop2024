@@ -45,15 +45,7 @@
                                 <div class="notif-content">
                                     <span class="subject"><strong>@item.UserName</strong></span>
                                     <span id="notiContentMessage_@item.UserName" class="block">
-                                        @if (item.ContentMessage.Length > 15)
-                                        {
-                                            @item.ContentMessage.Substring(0, 15)
-                                        }
-                                        else
-                                        {
-                                            @item.ContentMessage
-                                          
-                                        }
+                                        @item.ContentMessage
                                     </span>
                                     <span id="notiTimespan_@item.UserName" class="time">@item.Timestamp</span>
                                 </div>

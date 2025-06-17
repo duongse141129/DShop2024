@@ -6,21 +6,21 @@ namespace DShop2024.Repository.Components
 {
 	public class BestSellerViewComponent : ViewComponent
 	{
-		private readonly DShopContext _dataContext;
+		private readonly DShopContext _context;
 
-		public BestSellerViewComponent(DShopContext dataContext)
+		public BestSellerViewComponent(DShopContext context)
 		{
-			_dataContext = dataContext;
+			_context = context;
 		}
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
-			var bestSaleProducts = await _dataContext.Products
+			var bestSaleProducts = await _context.Products
 			 .Where(p => p.Status != 0)
-			 .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+			 .Join(_context.OrderDetails.Where(od => od.Status != 0),
 			 p => p.Id,
 			 od => od.ProductId,
 			 (p, od) => new { p, od })
-			 .Join(_dataContext.Orders.Where(o => o.Status != 0),
+			 .Join(_context.Orders.Where(o => o.Status != 0),
 			 pod => pod.od.OrderId,
 			 o => o.Id,
 			 (pod, o) => new { pod.p, pod.od, o })
@@ -41,8 +41,8 @@ namespace DShop2024.Repository.Components
 				 Image = g.Key.Image,
 				 Stock = g.Key.Stock,	
 				 Price = g.Key.Price,
-				 BrandName = _dataContext.Brands.FirstOrDefault( b => b.Id == g.Key.BrandId).BrandName,
-				 CategoryName = _dataContext.Categories.FirstOrDefault( b => b.Id == g.Key.CategoryId).CategoryName,
+				 BrandName = _context.Brands.FirstOrDefault( b => b.Id == g.Key.BrandId).BrandName,
+				 CategoryName = _context.Categories.FirstOrDefault( b => b.Id == g.Key.CategoryId).CategoryName,
 				 QuantitySold = g.Sum(x => x.od.Quantity)
 			 })
 			 .OrderByDescending(x => x.QuantitySold)

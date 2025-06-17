@@ -1,5 +1,4 @@
-﻿using DShop2024.Repository.Components;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace DShop2024.Controllers
 {

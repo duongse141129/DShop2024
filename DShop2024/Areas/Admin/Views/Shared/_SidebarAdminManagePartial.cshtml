@@ -128,6 +128,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item  @( ViewBag.sidebar == "shipping" ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Shipping" asp-action="Index">
+                        <i class="fas fa-shipping-fast"></i>
+                        <p>Shipping</p>
+                    </a>
+                </li>
+
                 @if (User.IsInRole(RoleName.Administrator))
                 {
                     <li class="nav-item  @( ViewBag.sidebar == "user" ? "active" : "")">
@@ -175,14 +182,6 @@
                     </li>
                 }
 
-
-                <li class="nav-item  @( ViewBag.sidebar == "shipping" ? "active" : "")">
-                    <a asp-area="Admin" asp-controller="Shipping" asp-action="Index">
-                        <i class="fas fa-shipping-fast"></i>
-                        <p>Shipping</p>                 
-                    </a>
-                </li>
-
                 <li class="nav-item  @( ViewBag.sidebar == "coupon" ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#coupon">
                         <i class="fas fa-money-check-alt"></i>
@@ -208,6 +207,13 @@
                     </div>
                 </li>
 
+                <li class="nav-item  @( ViewBag.sidebar == "promotion" ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Promotion" asp-action="Index">
+                        <i class="far fa-file-alt"></i>
+                        <p>Promotion</p>
+                    </a>
+                </li>
+
                 <li class="nav-item  @( ViewBag.sidebar == "slider" ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#slider">
                         <i class="far fa-image"></i>
@@ -231,14 +237,6 @@
                             }
                         </ul>
                     </div>
-                </li>
-
-                <li class="nav-item  @( ViewBag.sidebar == "promotion" ? "active" : "")">
-                    <a asp-area="Admin" asp-controller="Promotion" asp-action="Index">
-                        <i class="far fa-file-alt"></i>
-                        <p>Promotion</p>
-                        <span class="caret"></span>
-                    </a>
                 </li>
 
                 <li class="nav-item  @( ViewBag.sidebar == "faq" ? "active" : "")">

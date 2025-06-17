@@ -18,7 +18,6 @@ namespace DShop2024.Areas.Admin.Models.Product
         [Range(1000, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
         [Column(TypeName = "decimal(8,2)")]
         public decimal Price { get; set; }
-        public int Stock { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a brand")]
         public int BrandId { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a brand")]
@@ -26,7 +25,6 @@ namespace DShop2024.Areas.Admin.Models.Product
         public BrandModel Brand { get; set; }
         public CategoryModel Category { get; set; }
         public RatingModel Rating { get; set; }
-        public int Status { get; set; }
 
         [Required(ErrorMessage = "The {0} field is required ")]
         [Range(1000, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]

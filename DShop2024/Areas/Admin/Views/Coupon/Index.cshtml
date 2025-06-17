@@ -7,10 +7,10 @@
 }
 
 <h1 class="text-primary">@ViewData["title"]</h1>
-<hr />
 
-<div class="container">
-    <div class="row py-5">
+
+
+    <div class="row pb-5">
         <div class="col-md-8">
             @if (User.IsInRole(RoleName.Administrator))
             {
@@ -33,7 +33,6 @@
         </div>
     </div>
 
-    <div class="col-md-12">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -43,6 +42,7 @@
                     <th>Date Start</th>
                     <th>Date Expired</th>
                     <th>Quantity</th>
+                    <th>Value</th>
                     <th>Promotion</th>
                     <th>Status</th>
                     <th></th>
@@ -59,6 +59,21 @@
                         <td>@item.DateStart.ToString("dd-MM-yyyy")</td>
                         <td>@item.DateExpired.ToString("dd-MM-yyyy")</td>
                         <td>@item.Quantity</td>
+                        <td>
+                            @if (item.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
+                            {
+                                <p> @item.Value %</p>
+
+                            }
+                            else if (item.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
+                            {
+                                <p> @item.Value.ToString("#,##0 VND")</p>
+                            }
+                            else if (item.CategoryCouponName == DShopConst.FREE_SHIPPING)
+                            {
+                                <p> @DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND")</p>
+                            }
+                        </td>
                         <td>@item.CategoryCouponName</td>
                         <td>
                             @((CouponEnumData.StatusCoupon)item.Status)
@@ -92,9 +107,9 @@
             </tbody>
         </table>
         <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
-    </div>
+   
 
-</div>
+
 
 
 

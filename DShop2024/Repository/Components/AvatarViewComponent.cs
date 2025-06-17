@@ -1,9 +1,7 @@
-﻿using DShop2024.Areas.Admin.Models.User;
-using DShop2024.Areas.Identity.Controllers;
-using DShop2024.Models;
+﻿using DShop2024.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace DShop2024.Repository.Components
 {

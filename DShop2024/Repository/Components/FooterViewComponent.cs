@@ -5,16 +5,16 @@ namespace DShop2024.Repository.Components
 {
     public class FooterViewComponent : ViewComponent
     {
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 
-        public FooterViewComponent(DShopContext dataContext)
+        public FooterViewComponent(DShopContext context)
         {
-            _dataContext = dataContext;
+            _context = context;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var informationShop = await _dataContext.InformationShops               
+            var informationShop = await _context.InformationShops               
                                 .FirstOrDefaultAsync();
 
             return View(informationShop);

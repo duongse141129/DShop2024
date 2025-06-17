@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DShop2024.Repository;
-using System.Reflection;
 
 
 namespace DShop2024.Areas.Admin.Controllers

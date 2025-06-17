@@ -277,6 +277,7 @@ ul{
         display: inline-block;
     }*/
 
+
 .scrollCustomer {
     height: 767px;
     overflow: auto;
@@ -288,4 +289,11 @@ ul{
 .scrollCoupon {
     height: 377px;
     overflow: auto;
+}
+
+
+.block {
+    overflow: clip;
+    width: 170px;
+    height: 20px;
 }

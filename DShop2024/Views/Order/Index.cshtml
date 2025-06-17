@@ -92,8 +92,7 @@
                                                                 <th scope="row">@i</th>
                                                                 <td>@od.ProductId</td>
                                                                 <td>
-                                                                    <p>@od.Product.ProductName</p>
-
+                                                                    <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.Product.ProductName</a>
                                                                     <img src="~/media/products/@od.Product.Image" width="120" height="100" />
                                                                 </td>
                                                                 <td>@od.Quantity</td>

@@ -14,36 +14,36 @@ namespace DShop2024.Areas.Admin.Controllers
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
 	public class DashboardController : Controller
     {
-        private readonly DShopContext _dataContext;
+        private readonly DShopContext _context;
 
         private readonly IMapper _mapper;
         private readonly string sidebar = "dashboard";
 
         public DashboardController(DShopContext context, IMapper mapper)
         {
-            _dataContext = context;
+            _context = context;
             _mapper = mapper;
         }
         public async Task<IActionResult> Index()
         {
             ViewBag.sidebar = sidebar;
-            var countProduct = _dataContext.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
-            var countUser = _dataContext.Users.Where(p => p.Status != 0).Count();
-            var countOrder = _dataContext.Orders.Where(p => p.Status != 0).Count();
+            var countProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
+            var countUser = _context.Users.Where(p => p.Status != 0).Count();
+            var countOrder = _context.Orders.Where(p => p.Status != 0).Count();
         
-            var countCancelOrder = _dataContext.Orders.Where(p => p.Status == 0).Count();
-            var countNewOrder = _dataContext.Orders.Where(p => p.Status == 1).Count();
-            var countAcceptedOrder = _dataContext.Orders.Where(p => p.Status == 2).Count();
-            var countDeliveryOrder = _dataContext.Orders.Where(p => p.Status == 3).Count();
-            var countCompletedOrder = _dataContext.Orders.Where(p => p.Status == 4).Count();
+            var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
+            var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
+            var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
+            var countDeliveryOrder = _context.Orders.Where(p => p.Status == 3).Count();
+            var countCompletedOrder = _context.Orders.Where(p => p.Status == 4).Count();
 
-            var bestSaleProducts = await _dataContext.Products
+            var bestSaleProducts = await _context.Products
                             .Where(p => p.Status != 0)
-                            .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+                            .Join(_context.OrderDetails.Where(od => od.Status != 0),
                             p => p.Id,
                             od => od.ProductId,
                             (p, od) => new { p, od })
-                            .Join(_dataContext.Orders.Where(o => o.Status != 0),
+                            .Join(_context.Orders.Where(o => o.Status != 0),
                             pod => pod.od.OrderId,
                             o => o.Id,
                             (pod, o) => new { pod.p, pod.od, o })
@@ -69,18 +69,18 @@ namespace DShop2024.Areas.Admin.Controllers
                             .ToListAsync();
 
 
-            var listCustomer = await (from u in _dataContext.Users
-                                      join ur in _dataContext.UserRoles on u.Id equals ur.UserId
-                                      join r in _dataContext.Roles on ur.RoleId equals r.Id
+            var listCustomer = await (from u in _context.Users
+                                      join ur in _context.UserRoles on u.Id equals ur.UserId
+                                      join r in _context.Roles on ur.RoleId equals r.Id
                                       where r.Name == RoleName.Customer && u.Status != 0
                                       select u).ToListAsync();
 
-            var listContact = await _dataContext.Contacts.Include(u => u.User).Where(c => c.Status != 0)
+            var listContact = await _context.Contacts.Include(u => u.User).Where(c => c.Status != 0)
                                                                                 .OrderBy(c => c.Status)
                                                                                 .ThenByDescending(d => d.DateSent)
                                                                                 .ToListAsync();
 
-            var listCoupon = await _dataContext.Coupons
+            var listCoupon = await _context.Coupons
                                     .Where(c => c.Status != 0 && c.Quantity > 0)
                                     .Where(c => c.DateExpired.Date >= DateTime.Today.Date && c.DateStart <= DateTime.Today.Date)
                                     .OrderByDescending(c => c.Status)
@@ -119,7 +119,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NoContent();
             }
 
-            var chartDataRangeDay = await _dataContext.Orders
+            var chartDataRangeDay = await _context.Orders
                             .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
                             .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
                             .GroupBy(x => x.o.CreatedDate.Date)
@@ -174,7 +174,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("getDataByMonth")]
         public async Task<List<StatisticalViewModel>> getDataByMonth(int month, int year)
         {
-            var chartDataYear = await _dataContext.Orders
+            var chartDataYear = await _context.Orders
                 .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
                 .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
                 .GroupBy(x => x.o.CreatedDate.Day)
@@ -193,7 +193,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("getDataByYear")]
         public async Task<List<StatisticalViewModel>> getDataByYear(int year)
         {
-            var chartDataYear= await _dataContext.Orders
+            var chartDataYear= await _context.Orders
                 .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
                 .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
                 .GroupBy(x => x.o.CreatedDate.Month)
@@ -224,17 +224,17 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("GetChartBrand")]
         public async Task<IActionResult> GetChartBrand()
         {
-            var productsSoldByBrand = await _dataContext.Brands
+            var productsSoldByBrand = await _context.Brands
                        .Where(b => b.Status != 0)
-                       .Join(_dataContext.Products.Where(p => p.Status != 0),
+                       .Join(_context.Products.Where(p => p.Status != 0),
                        b => b.Id,
                        p => p.BrandId,
                        (b, p) => new { b, p })
-                       .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+                       .Join(_context.OrderDetails.Where(od => od.Status != 0),
                        bp => bp.p.Id,
                        od => od.ProductId,
                        (bp, od) => new { bp.b, bp.p, od })
-                       .Join(_dataContext.Orders.Where(o => o.Status != 0),
+                       .Join(_context.Orders.Where(o => o.Status != 0),
                        bpo => bpo.od.OrderId,
                        o => o.Id,
                        (bpo, o) => new { bpo.b, bpo.od })
@@ -254,17 +254,17 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("GetChartCategories")]
         public async Task<IActionResult> GetChartCategories()
         {
-            var productsSoldByCategory = await _dataContext.Categories
+            var productsSoldByCategory = await _context.Categories
                                  .Where(c => c.Status != 0)
-                                 .Join(_dataContext.Products.Where(p => p.Status != 0),
+                                 .Join(_context.Products.Where(p => p.Status != 0),
                                  b => b.Id,
                                  p => p.CategoryId,
                                  (b, p) => new { b, p })
-                                 .Join(_dataContext.OrderDetails.Where(od => od.Status != 0),
+                                 .Join(_context.OrderDetails.Where(od => od.Status != 0),
                                  bp => bp.p.Id,
                                  od => od.ProductId,
                                  (bp, od) => new { bp.b, bp.p, od })
-                                 .Join(_dataContext.Orders.Where(o => o.Status != 0),
+                                 .Join(_context.Orders.Where(o => o.Status != 0),
                                  bpo => bpo.od.OrderId,
                                  o => o.Id,
                                  (bpo, o) => new { bpo.b, bpo.od })
@@ -289,11 +289,11 @@ namespace DShop2024.Areas.Admin.Controllers
             for (int i = 1; i <= month; i++)
             {
 
-                var stockIn = await _dataContext.ReceivingStocks
+                var stockIn = await _context.ReceivingStocks
                             .Where(r => r.DateReceive.Year == year && r.DateReceive.Month == i && r.Status != 0)
                             .SumAsync(x => x.Quantity);
 
-                var stockOut = await _dataContext.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                var stockOut = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
                                         .SelectMany(o => o.OrderDetails)
                                         .Where(od => od.Status != 0)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;
@@ -329,11 +329,11 @@ namespace DShop2024.Areas.Admin.Controllers
             for (int i = 1; i <= month; i++)
             {
 
-                var stockIn = await _dataContext.ReceivingStocks
+                var stockIn = await _context.ReceivingStocks
                             .Where(r => r.DateReceive.Year == year && r.DateReceive.Month == i && r.Status != 0)
                             .SumAsync(x => x.Quantity);
 
-                var stockOut = await _dataContext.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                var stockOut = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
                                         .SelectMany(o => o.OrderDetails)
                                         .Where(od => od.Status != 0)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;

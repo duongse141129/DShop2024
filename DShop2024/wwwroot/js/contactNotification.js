@@ -20,14 +20,11 @@ connection.on("SendContact", function (user, message) {
     var spanMessage = document.createElement("span");
     var spanTime = document.createElement("span");
     var contentMessage = `${message["subject"]}`;
-    if (contentMessage.length > 10) {
-        contentMessage = contentMessage.substring(0, 10);
-    }
 
     if (user == message["userName"]) {
         var idListContact = `listContactnotification`;
         var contacs = document.getElementById(idListContact);
-        contacs.appendChild(linkA);
+        contacs.prepend(linkA);
         linkA.href = `${message["linkContact"]}`;
         linkA.appendChild(divImg);
         divImg.classList.add("notif-img");

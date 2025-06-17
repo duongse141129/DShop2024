@@ -28,25 +28,23 @@ connection.on("ReceiveMessage", function (user, message) {
     if (user == message["userName"] && message["receiver"] == null) {
         var idUserMessage = `notiMessage_${message["userName"]}`;
         var userMessage = document.getElementById(idUserMessage);
-
         var contentMessage = `${message["contentMessage"]}`;
-        if (contentMessage.length > 10) {
-            contentMessage = contentMessage.substring(0, 10);
-        }
 
         if (userMessage != null) {
-            var idNotiContentMessage = `notiContentMessage_${message["userName"]}`;
-            var notiContentMessage = document.getElementById(idNotiContentMessage);
-            notiContentMessage.textContent = contentMessage
-
-            var idNotiRimespan = `notiTimespan_${message["userName"]}`;
-            var notiRimespan = document.getElementById(idNotiRimespan);
-            notiRimespan.textContent = `${message["daysLeftTime"]}`
+            userMessage.remove();
+        } else {
+            var countNotiM = document.getElementById(`countNotiMessage`);
+            if (countNotiM.textContent == "") {
+                countNotiM.classList.add("notification");
+                countNotiM.textContent = `1`;
+            } else {
+                countNotiM.textContent = parseInt(countNotiM.textContent) + 1;
+            }
         }
-        else {
+ 
             var idnoti = `listNotiMessage`;
             var listNotiM = document.getElementById(idnoti);
-            listNotiM.appendChild(linkA);
+            listNotiM.prepend(linkA);
             linkA.href = `${message["pathUser"]}`;
             linkA.id = `notiMessage_${message["userName"]}`;
             linkA.appendChild(divImg);
@@ -71,14 +69,8 @@ connection.on("ReceiveMessage", function (user, message) {
             spanTime.textContent = `${message["daysLeftTime"]}`;
             spanTime.id = `notiTimespan_${message["userName"]}`;
 
-            var countNotiM = document.getElementById(`countNotiMessage`);
-            if (countNotiM.textContent == "") {
-                countNotiM.classList.add("notification");
-                countNotiM.textContent = `1`;
-            } else {
-                countNotiM.textContent = parseInt(countNotiM.textContent) + 1;
-            }
-        }
+
+
     } 
 });
 
