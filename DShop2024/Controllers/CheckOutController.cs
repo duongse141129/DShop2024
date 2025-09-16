@@ -266,8 +266,7 @@ namespace DShop2024.Controllers
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
                 var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
-                await _emailSender.SendEmailOrder(order, infoShop);
-				
+                await _emailSender.SendEmailOrder(order, infoShop);			
 
 				HttpContext.Session.Remove(DShopConst.CART_KEY);
 				HttpContext.Session.Remove(DShopConst.INFO_CUSTOMER_DELIVERY);

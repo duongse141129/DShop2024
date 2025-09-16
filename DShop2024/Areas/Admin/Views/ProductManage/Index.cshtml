@@ -19,6 +19,7 @@
                     <th></th>
                     <th scope="col">Stt</th>
                     <th scope="col">Image</th>
+                    <th scope="col">Product ID</th>
                     <th scope="col">Product Name</th>
                     <th scope="col">Original Price</th>
                     <th scope="col">Price</th>
@@ -40,6 +41,7 @@
                         <th> <input type="checkbox" name="IdProductsToDelete" value="@item.Id" /> </th>
                         <th scope="row">@i</th>
                         <td><img src="~/media/products/@item.Image" width="120" height="100" /></td>
+                        <td>@item.Id</td>
                         <td>@item.ProductName</td>
                         <td>@item.OriginalPrice.ToString("#,##0 VND")</td>
                         <td>@item.Price.ToString("#,##0 VND")</td>

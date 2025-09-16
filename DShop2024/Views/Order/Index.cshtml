@@ -89,7 +89,7 @@
                                                         @foreach (var od in item.OrderDetails)
                                                         {
                                                             <tr>
-                                                                <th scope="row">@i</th>
+                                                                <td scope="row">@i</td>
                                                                 <td>@od.ProductId</td>
                                                                 <td>
                                                                     <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.Product.ProductName</a>

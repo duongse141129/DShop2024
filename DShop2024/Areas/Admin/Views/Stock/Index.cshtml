@@ -10,6 +10,11 @@
 <div class="row py-5">
     <div class="col-md-8">
         <a asp-area="Admin" asp-action="Index" asp-controller="ProductManage" class="btn btn-primary">Add Quantity</a>
+        <br />
+        <a asp-area="Admin" asp-action="ImportFromFIle" asp-controller="Stock" class="btn btn-primary py-2">
+            Import From File    
+            <i class="fas fa-file-excel"></i>
+        </a>
     </div>
     <div class="col-md-4 ">
         <form asp-area="Admin" asp-action="SearchByProductId" asp-controller="Stock" method="post">

@@ -49,7 +49,7 @@ connection.on("ReceiveMessage", function (user, message) {
             linkA.id = `notiMessage_${message["userName"]}`;
             linkA.appendChild(divImg);
             divImg.classList.add("notif-img");
-            divImg.appendChild(avatar)
+            divImg.appendChild(avatar);
             avatar.src = `${message["pathImage"]}`;
 
             linkA.appendChild(divContent);

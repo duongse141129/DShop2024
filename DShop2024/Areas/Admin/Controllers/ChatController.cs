@@ -32,14 +32,43 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             ViewBag.sidebar = sidebar;
-            var customers = await (from u in _context.Users
-                                       join ur in _context.UserRoles on u.Id equals ur.UserId
-                                       join r in _context.Roles on ur.RoleId equals r.Id
-                                       where r.Name == RoleName.Customer && u.Status != 0
-                                       orderby u.Id descending
-                                       select  u ).ToListAsync();
 
-            return View(customers);
+            var customers = await (from u in _context.Users
+                                   join ur in _context.UserRoles on u.Id equals ur.UserId
+                                   join r in _context.Roles on ur.RoleId equals r.Id
+                                   where r.Name == RoleName.Customer && u.Status != 0
+                                   orderby u.Id descending
+                                   select  new CustomerAndMessageViewModel { UserId = u.Id, UserName = u.UserName, Avatar = u.Avatar} ).ToListAsync();
+
+            foreach ( var customer in customers )
+            {
+                var latestMessagesOfCustomer = await (from t in _context.Messages
+                                                join tm in (
+                                                    from t2 in _context.Messages
+                                                    group t2 by t2.UserId into g
+                                                    select new
+                                                    {
+                                                        UserId = g.Key,
+                                                        date = g.Max(x => x.Timestamp)
+                                                    }
+                                                ) on new { t.UserId, t.Timestamp } equals new { UserId = tm.UserId, Timestamp = tm.date }
+                                                where t.UserId == customer.UserId
+                                                select new
+                                                {
+                                                    t.Id,
+                                                    t.ContentMessage,
+                                                    t.Timestamp,
+                                                    t.IsRead
+                                                }).FirstOrDefaultAsync();
+
+                if (latestMessagesOfCustomer != null)
+                {
+                    customer.LatestMessage = latestMessagesOfCustomer.ContentMessage ?? "";
+                    customer.Timestamp = latestMessagesOfCustomer.Timestamp.ToString();
+                    customer.IsRead = latestMessagesOfCustomer.IsRead ?? false;
+                }
+            }
+            return View(customers.OrderByDescending(c => c.Timestamp));
         }
         public async Task<IActionResult> SearchUserName(string userName)
         {
@@ -98,7 +127,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task ReadMessage(string customerId)
         {
-            //string targetUserId = "asd";
+            //string targetUserId = "111";
 
             //var latestMessagesOfCustomer = (from t in _context.Messages
             //              join tm in (

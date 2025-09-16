@@ -330,7 +330,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                                 .ToListAsync();
             ViewBag.receivingStockList = receivingStockList;
             ViewBag.totalQuantity = receivingStockList.Sum(r => r.Quantity);
-            ViewBag.totalOriginalPrice = receivingStockList.Sum(r => r.Product.OriginalPrice);
+            ViewBag.totalOriginalPrice = receivingStockList.Sum(r => r.Quantity) * productModel.OriginalPrice;
             ViewBag.product = productModel;
 
             return View();

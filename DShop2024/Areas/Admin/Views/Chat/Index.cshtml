@@ -1,5 +1,5 @@
-﻿
-@model IEnumerable<AppUserModel>
+﻿@using DShop2024.ViewModels
+@model IEnumerable<CustomerAndMessageViewModel>
 
 @{
     ViewData["title"] = "List Chatting Customer ";
@@ -31,13 +31,14 @@
             <thead>
                 <tr>
                     <th>User Name</th>
+                    <th>Messages</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="ChatWithCustomer">
                 @foreach (var item in Model)
                 {
-                    <tr>
+                    <tr id="row_@item.UserName">
                         <td>
                             <div class="col-sm-12">
                                 @item.UserName
@@ -45,12 +46,24 @@
                             <div class="col-sm-12">
                                 <img src="~/media/avatar/@item.Avatar" width="100" height="100" />
                             </div>
-
                         </td>
                         <td>
-                            <a id="chat_@item.UserName" class="btn btn-success btn-sm sendMessageButton" asp-action="ChatWithCustomer" asp-controller="Chat" asp-route-customerId="@item.Id">
+                            @if (item.IsRead != true && item.LatestMessage != "")
+                            {
+                                <div class="sNewMessage" id="snewMessage_@item.UserName">
+                                    New message
+                                </div>
+                            }
+                            <span>
+                                @item.Timestamp
+                            </span>
+                            <p>
+                                @item.LatestMessage
+                            </p>
+                        </td>
+                        <td>
+                            <a id="chat_@item.UserName" class="sendMessageButton" asp-action="ChatWithCustomer" asp-controller="Chat" asp-route-customerId="@item.UserId">
                                 Chat
-                                <span class="badge badge-light spancustomer" id="spanuser_@item.UserName">New message</span>
                             </a>
                         </td>
                     </tr>
@@ -63,13 +76,5 @@
 
 @section Scripts {
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/chatnoti.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.sendMessageButton').click(function () {
-                $(".spancustomer").hide();
-            });
-        });
-
-    </script>
+    <script src="~/js/chatPageAdmin.js"></script>
 }

@@ -40,12 +40,12 @@
 												}
                                                 <figure>
 													<a asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
-               
-                                                        <img src="~/media/products/@item.Image" class="tab-image">
+
+														<img src="~/media/products/@item.Image" class="img-fluid">
                                                     </a>
                                                 </figure>
                                                 <h3>@item.ProductName</h3>
-												<span class="qty">Point</span><span class="rating"> @item.AveragePoint</span>
+												<span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
 												<div class="d-flex mb-2">
 													<i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
 													<i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>

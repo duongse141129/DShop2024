@@ -25,7 +25,9 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.sidebar = sidebar;
             var shippingList = await _context.Shippings.ToListAsync();
             ViewBag.Shippings = shippingList;
-			return View();
+            ViewBag.DefaultShipping = DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND");
+
+            return View();
 		}
 
         [Authorize(Roles = RoleName.Administrator)]

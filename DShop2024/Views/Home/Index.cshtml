@@ -21,7 +21,7 @@
                                 {
                                     <div class="swiper-slide">
                                         <div class="row banner-content p-5">
-                                            <div class="categories my-3">@item.BannerName</div>
+                                            <h3 class="banner-title text-primary">@item.BannerName</h3>
                                             <img src="~/media/banners/@item.Image" class="img-fluid">
                                         </div>
                                     </div>
@@ -145,7 +145,7 @@
                                 <div class="card mb-3 p-3 rounded-4 shadow border-0">
                                     <div class="row g-0">
                                         <div class="col-md-4">
-                                            <img src="~/media/brands/@item.Image"  alt="Card title" height="100" width="100">
+                                        <img src="~/media/brands/@item.Image"  alt="Card title" height="100" width="100">
                                         </div>
                                         <div class="col-md-8">
                                             <div class="card-body py-0">
@@ -195,11 +195,11 @@
                                             }                                     
                                             <figure>
                                                 <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
-                                                    <img src="~/media/products/@item.Image" class="tab-image">
+                                                    <img src="~/media/products/@item.Image" class="img-fluid">
                                                 </a>
                                             </figure>
                                             <h3>@item.ProductName</h3>
-                                            <span class="qty">Point</span><span class="rating"> @item.AveragePoint</span> 
+                                            <span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
                                             <div class="d-flex mb-2">
                                                 <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
                                                 <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>

@@ -125,7 +125,7 @@
                 </td>
                 <td>
                     <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
-                    @if(item.Status != 4)
+                    @if(item.Status != 4 && item.Status != 0)
                     {
                         <a asp-action="CancelOrder" class="btn btn-danger confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel</a>
                     }            

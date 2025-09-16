@@ -7,6 +7,9 @@
 }
 <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
     @await Component.InvokeAsync("NotificationMessage")
+    <tbody id="ChatWithCustomer">
+        <tr id="row_@UserManager.GetUserName(User)"></tr>
+    </tbody>
 </li>
 
 <section>
@@ -72,7 +75,8 @@
 @section Scripts {
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/chat.js"></script>
-    <script src="~/js/chatnotification.js"></script>
+    <script src="~/js/chatNotification.js"></script>
+    <script src="~/js/chatPageAdmin.js"></script>
     <script>
         $(document).ready(function () {
             $('.sendMessageButton').click(function () {

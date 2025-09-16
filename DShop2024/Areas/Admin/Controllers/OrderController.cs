@@ -34,7 +34,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.countCompletedOrder = countCompletedOrder;
 
 
-            IQueryable<OrderModel> listOrder = _context.Orders.Include(u => u.User).OrderByDescending(o => o.Id);
+            IQueryable<OrderModel> listOrder = _context.Orders.Include(u => u.User).OrderByDescending(o => o.CreatedDate);
             var count = await listOrder.CountAsync();
             if (count > 0)
             {
@@ -139,6 +139,11 @@ namespace DShop2024.Areas.Admin.Controllers
             if (order == null)
             {
                 return NotFound();
+            }
+            if (order.Status == 0)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Deleted order";
+                return RedirectToAction("Index");
             }
             if (order.Status == 4)
             {

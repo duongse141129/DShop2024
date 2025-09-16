@@ -297,3 +297,31 @@ ul{
     width: 170px;
     height: 20px;
 }
+
+
+.sNewMessage {
+    padding-right: 2px;
+    text-align: right;
+    color: green;
+    font-size:15px;
+}
+
+.sendMessageButton {
+    background-color: green;
+    color: white;
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 400;
+    padding: 4px 15px;
+}
+
+    .sendMessageButton:hover {
+        background-color: #7ef705;
+        color: white;
+        text-decoration: none;
+    }
+
+
+.swiper-slide > h3{
+    height: 50px;
+}

@@ -11,7 +11,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("Admin/Dashboard")]
-	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+	[Authorize(Roles = RoleName.Administrator )]
 	public class DashboardController : Controller
     {
         private readonly DShopContext _context;

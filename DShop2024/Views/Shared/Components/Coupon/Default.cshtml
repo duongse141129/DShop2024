@@ -17,7 +17,7 @@
                     }
                     @if (item.Promotion.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
                     {
-                        <div class="categories text-primary fs-3 fw-bold">Discount @item.Value</div>
+                        <div class="categories text-primary fs-3 fw-bold">Discount @item.Value.ToString("#,##0 VND")</div>
                     }
                    
                     <h3 class="banner-title">Coupon Name: @item.CouponName</h3>

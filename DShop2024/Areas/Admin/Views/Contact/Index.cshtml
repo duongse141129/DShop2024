@@ -27,7 +27,7 @@
 				<div class="mb-4 pb-4 border-bottom ">
 					<p>Subject: <strong>@item.Subject</strong></p>
 					<p class="mb-0">
-						@Html.Raw(@item.Message)
+						@Html.Raw(item.Message)
 					</p>
 				</div>
 			</div>
@@ -57,13 +57,13 @@
 							<p class="m-0 pb-3">@item.Respondent.Email</p>
 							<ul class="sinlge-post-meta">
 								<li><i class="far fa-clock"></i>@item.DateRespone.ToShortTimeString()</li>
-								<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortTimeString()</li>
+								<li><i class="fa fa-calendar"></i>@item.DateRespone.ToShortDateString()</li>
 							</ul>
 						</div>
 					</div>
 					<div class="mb-4 pb-4 border-bottom ">
 						<p class="mb-0">
-							@Html.Raw(@item.ReplyMessage)
+							@Html.Raw(item.ReplyMessage)
 						</p>
 
 					</div>
