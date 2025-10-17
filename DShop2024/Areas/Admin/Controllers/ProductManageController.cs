@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -95,15 +96,42 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                     product.Status = 1;
                     ProductModel productModel = _mapper.Map<ProductModel>(product);
-                    await _context.Products.AddAsync(productModel);
+                    var createdProduct = await _context.Products.AddAsync(productModel);
                     await _context.SaveChangesAsync();
+
+                    if(createdProduct != null && product.ImageFiles.Count > 0)
+                    {
+                        string imgagePath = $"media/imageProduct/productId{productModel.Id}";
+                        var uploadDirectory = Path.Combine(_webHostEnvironment.WebRootPath, imgagePath);
+                        if (!Directory.Exists(uploadDirectory))
+                        {
+                            Directory.CreateDirectory(uploadDirectory);
+                        }
+                        foreach (var file in product.ImageFiles)
+                        {
+                            string imageProductName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                            var filePath = Path.Combine(uploadDirectory, imageProductName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+                            ProductImageModel productImage = new ProductImageModel {
+                                ImagePath = imgagePath + "/" +imageProductName,
+                                ProductId = productModel.Id,
+                            };
+                            await _context.ProductImages.AddAsync(productImage);
+                            await _context.SaveChangesAsync();
+                        }
+
+                    }
 
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Add product success";
                     return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while deleting the product image " + ex.Message);
+                    ModelState.AddModelError("", "An error occurred while creating the product " + ex.Message);
                 }
 				
 			}
@@ -121,6 +149,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
             ProductModel product = await _context.Products
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
@@ -133,6 +162,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket.ToString());
 
             UpdateProductRequest updateProduct = _mapper.Map<UpdateProductRequest>(product);
+            updateProduct.ExistingImages = product.Images.ToList();
             return View(updateProduct);
             
 		}
@@ -273,6 +303,15 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 product.Status = 0;
                 _context.Products.Update(product);
+                var listImage = await _context.ProductImages.Where( p => p.ProductId == product.Id ).ToListAsync();
+                if(listImage.Count > 0)
+                {
+                    foreach (var item in listImage)
+                    {
+                        await DeleteImage(item.Id);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -347,7 +386,6 @@ namespace DShop2024.Areas.Admin.Controllers
                 return NotFound();
             }
 
-
             try
             {
                 product.Stock += receivingStock.Quantity;
@@ -382,13 +420,15 @@ namespace DShop2024.Areas.Admin.Controllers
 				return NotFound();
 			}
 
-			var productModel = await _context.Products.Include( b => b.Brand).Include( c => c.Category)
-                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+			var productModel = await _context.Products
+                                        .Include( b => b.Brand)
+                                        .Include( c => c.Category)
+                                        .Include( d => d.Images)
+                                        .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
             if (productModel == null)
 			{
 				return NotFound();
 			}
-
 
 			var listRating =  _context.Ratings
 						.Where(p => p.ProductId == id)
@@ -437,13 +477,116 @@ namespace DShop2024.Areas.Admin.Controllers
 			{
 				ProductDetail = productModel,
 				Point = pointAvarge,
-				listRating = ratings
-			};
+				listRating = ratings,
+                ExistingImages = productModel.Images.Select(i => i.ImagePath).ToList()
+            };
 
 
 			return View(viewModel);
 		}
 
 
-	}
+        [Authorize(Roles = RoleName.Administrator)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddImages(int productId, List<IFormFile> ImageFiles)
+        {
+            ViewBag.sidebar = sidebar;
+            ProductModel product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(m => m.Id == productId && m.Status != 0);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName", product.CategoryId);
+            ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName", product.BrandId);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+
+                    if ( ImageFiles.Count > 0)
+                    {
+                        string imgagePath = $"media/imageProduct/productId{product.Id}";
+                        var uploadDirectory = Path.Combine(_webHostEnvironment.WebRootPath, imgagePath);
+                        if (!Directory.Exists(uploadDirectory))
+                        {
+                            Directory.CreateDirectory(uploadDirectory);
+                        }
+                        foreach (var file in ImageFiles)
+                        {
+                            string imageProductName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                            var filePath = Path.Combine(uploadDirectory, imageProductName);
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+                            ProductImageModel productImage = new ProductImageModel
+                            {
+                                ImagePath = imgagePath + "/" + imageProductName,
+                                ProductId = product.Id,
+                            };
+                            await _context.ProductImages.AddAsync(productImage);
+                            await _context.SaveChangesAsync();                        
+                        }
+                        return RedirectToAction("Edit", new { Id = product.Id });
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Add images product fail " + ex.Message;
+                    return RedirectToAction("Edit", new { Id = product.Id });
+                }
+            }
+
+            return RedirectToAction("Edit", new { Id = product.Id});
+        }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> DeleteImage(int? Id)
+        {
+            ViewBag.sidebar = sidebar;
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var productImage = await _context.ProductImages.FindAsync(Id);
+            if (productImage == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                if (!String.IsNullOrEmpty(productImage.ImagePath))
+                {
+                    string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, productImage.ImagePath);
+                    if (System.IO.File.Exists(uploadsDir))
+                    {
+                        System.IO.File.Delete(uploadsDir);
+                    }
+                }
+
+                _context.ProductImages.Remove(productImage);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Remove product's image successful";
+                return RedirectToAction("Edit", new { Id = productImage.ProductId });
+            }
+            catch (IOException io)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product's image file fail. " + io.Message;
+                return RedirectToAction("Edit", new { Id = productImage.ProductId });
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Remove product's image fail " + ex.Message;
+                return RedirectToAction("Edit", new { Id = productImage.ProductId });
+            }
+        }
+
+    }
 }

@@ -101,9 +101,57 @@
         </div>
 
         <div class="form-group">
-            <button class="btn btn-primary">Edit</button>
+            <button class="btn btn-primary btn-lg">Edit</button>
         </div>
     </form>
+
+    <div class="col-md-6">
+        <div class="card mt-3">
+            <div class="card-header">
+                <div class="card-title">Product's images </div>
+            </div>
+            <div class="card-body">
+                @if (Model.ExistingImages.Count > 0)
+                {
+                    <table class="table table-head-bg-primary mt-4">
+                        <thead>
+                            <tr>
+                                <th scope="col">Image</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ExistingImages)
+                            {
+                                <tr>
+                                    <td> <img src="~/@item.ImagePath" width="120" height="100" /> </td>
+                                    <td> <a asp-action="DeleteImage" class="btn btn-danger btn-md confirmDeletion" asp-controller="ProductManage" asp-route-Id="@item.Id">Delete</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <form asp-action="AddImages" method="post" enctype="multipart/form-data">
+                    <div class="container">
+                        <h2>Add more images</h2>
+                        <input type="hidden" name="productId" value="@Model.Id" multiple class="form-control" />
+                        <input type="file" asp-for="ImageFiles" id="file-input" multiple class="form-control"  onchange="preview()" >
+                        <span asp-validation-for="ImageFiles" class="text-danger" />
+                        <label for="file-input" id="lbfile" class="text-white">
+                            <i class="fas fa-upload"></i> &nbsp; Choose A Photo
+                        </label>
+                        <p id="num-of-files" style="display: none;">No Files Chosen</p>
+                        <div id="previewImages"></div>
+                    </div>
+                    <input type="submit" class="btn btn-primary btn-md" value="AddImages">
+                </form>
+
+            </div>
+        </div>
+    </div>
+    
+
     <a asp-action="Index">Back to list product  </a>
 </div>
 

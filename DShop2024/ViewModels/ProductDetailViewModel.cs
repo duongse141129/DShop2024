@@ -18,6 +18,7 @@ namespace DShop2024.ViewModels
 		public bool IsInWishlist { get; set; }
 		public bool IsInCompare { get; set; }
 
-
-	}
+        public List<string> ExistingImages { get; set; } = new();
+    }
 }
+ 

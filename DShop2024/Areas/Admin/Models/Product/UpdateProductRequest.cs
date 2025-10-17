@@ -55,5 +55,13 @@ namespace DShop2024.Areas.Admin.Models.Product
         [FileExtension]
         public IFormFile? ImageUpload { get; set; }
 
+        [NotMapped]
+        [FileExtension]
+        public List<ProductImageModel> ExistingImages { get; set; } = new();
+
+        [NotMapped]
+        [FileExtension]
+        public List<IFormFile> ImageFiles { get; set; } = new();
+
     }
 }

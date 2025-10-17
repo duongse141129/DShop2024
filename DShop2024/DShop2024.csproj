@@ -48,6 +48,7 @@
     <Folder Include="wwwroot\css\" />
     <Folder Include="wwwroot\media\banners\" />
     <Folder Include="wwwroot\media\brands\" />
+    <Folder Include="wwwroot\media\imageProduct\" />
     <Folder Include="wwwroot\media\products\" />
   </ItemGroup>
 

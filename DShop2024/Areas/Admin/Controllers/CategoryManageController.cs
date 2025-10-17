@@ -219,7 +219,7 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                     catch (Exception ex)
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the banner image " + ex.Message;
+                        TempData[DShopConst.TEMPDATA_ERROR] = "An error occurred while deleting the category image " + ex.Message;
                         return RedirectToAction("Index");
                     }
                 }

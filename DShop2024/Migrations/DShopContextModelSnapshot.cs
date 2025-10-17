@@ -562,6 +562,27 @@ namespace DShop2024.Migrations
                     b.ToTable("Order");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.ProductImageModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImage");
+                });
+
             modelBuilder.Entity("DShop2024.Models.ProductModel", b =>
                 {
                     b.Property<int>("Id")
@@ -1037,6 +1058,17 @@ namespace DShop2024.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.ProductImageModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.ProductModel", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("DShop2024.Models.ProductModel", b =>
                 {
                     b.HasOne("DShop2024.Models.BrandModel", "Brand")
@@ -1167,6 +1199,8 @@ namespace DShop2024.Migrations
 
             modelBuilder.Entity("DShop2024.Models.ProductModel", b =>
                 {
+                    b.Navigation("Images");
+
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Ratings");

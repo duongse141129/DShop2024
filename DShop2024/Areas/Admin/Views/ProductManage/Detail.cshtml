@@ -14,23 +14,44 @@
 <section>
 	<div class="container">
 		<div class="row">
-			<div class="col-sm-9">
+			<div class="col-sm-12">
 				<div class="blog-post-area">
-					<h1>@Model.ProductDetail.ProductName</h1>
-					<h2 class="title text-center">Detail Product</h2>
-					<div class="single-blog-post">					
-							<a>
+					<h2 class="title text-center">@Model.ProductDetail.ProductName</h2>
+					<div class="single-blog-post pt-3">			
+						<div class="row">
+							<div class="col-lg-12">
 								<img src="~/media/products/@Model.ProductDetail.Image" width="500" height="500" alt="">
-							</a>
-							
 
-						<h2 class="title text-center">Description Product</h2>
-						<dl class="row">
-							<dd class="col-sm-10">
+								<div class="card mt-5">
+									<div class="card-header">
+										<div class="card-title">Images product</div>
+									</div>
+									<div class="card-body">
+										<div class="row">
+											@foreach (var item in Model.ExistingImages)
+											{
+												<div class="col-6 col-sm-2">
+													<label class="imagecheck mb-4">
+															<img src="~/@item" width="100" height="150" class="img-fluid rounded">
+													</label>
+												</div>
+											}						
+										</div>
+									</div>
+								</div>
 								
-								@Html.Raw(@Model.ProductDetail.Description)
-							</dd>
-						</dl>
+							</div>
+						</div>
+						<h2 class="title text-center">Description Product</h2>
+						<div class="card">
+							
+							<div class="card-body">
+								<div class="col-md-12">
+									@Html.Raw(@Model.ProductDetail.Description)
+								</div>
+							</div>
+						</div>
+
 						<h2 class="title text-center">Item specifics</h2>
 						<table class="table table-bordered table-striped">
 							<thead class="thead-dark">
@@ -124,7 +145,7 @@
 						{
 							<div class="row pb-2">
 								<div class="col-sm-2 ps-5">
-									<img class="avatar-img rounded" src="~/media/avatar/@item.User.Avatar" width="120" alt="">
+									<img class="avatar-img rounded" src="~/media/avatar/@item.User.Avatar" width="120" height="120" alt="">
 								</div>
 								<div class="col-md-10">
 									<ul class="sinlge-post-meta">

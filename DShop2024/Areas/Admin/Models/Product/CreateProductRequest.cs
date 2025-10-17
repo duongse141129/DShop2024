@@ -7,8 +7,7 @@ namespace DShop2024.Areas.Admin.Models.Product
 {
     public class CreateProductRequest
     {
-        [Key]
-        public int Id { get; set; }
+
         [Required, MinLength(4, ErrorMessage = "The {0} field is required and must contain at least {1} characters")]
         public string ProductName { get; set; }
         public string Slug { get; set; }
@@ -58,5 +57,8 @@ namespace DShop2024.Areas.Admin.Models.Product
         [Required(ErrorMessage = "The {0} field is required")]
         public IFormFile? ImageUpload { get; set; }
 
+        [NotMapped]
+        [FileExtension]
+        public List<IFormFile> ImageFiles { get; set; } = new();
     }
 }

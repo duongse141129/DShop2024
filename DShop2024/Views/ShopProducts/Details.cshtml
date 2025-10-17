@@ -5,6 +5,7 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
 <section class="py-5">
 <!-- Single Product Start -->
 <div class="container-fluid bg-light py-5 mt-5">
@@ -15,13 +16,33 @@
              </div>
             <div class="col-lg-8 col-xl-9">
                 <div class="row g-4">
-                    <div class="col-lg-6">
-                        <div class="border rounded">
-                            <a href="#">
-                                <img src="~/media/products/@Model.ProductDetail.Image" class="img-fluid rounded" alt="Image">
-                            </a>
-                        </div>
-						<div class="mt-5 py-5">
+                  
+                    <div class="col-lg-7">
+                            <div id="content-wrapper">
+                                <div class="column">
+									<img id=featured src="~/media/products/@Model.ProductDetail.Image" class="img-fluid rounded">
+
+                                    <div id="slide-wrapper">
+                                        <img id="slideLeft" class="arrow" src="~/img/arrow-left.png">
+
+                                        <div id="slider">
+                                            <img class="thumbnail active" src="~/media/products/@Model.ProductDetail.Image">
+											<img class="thumbnail" src="~/img/product-2.png" class="img-fluid rounded">
+											<img class="thumbnail" src="~/img/product-3.png" class="img-fluid rounded">
+
+											<img class="thumbnail" src="~/img/product-4.png" class="img-fluid rounded">
+											<img class="thumbnail" src="~/img/product-5.png" class="img-fluid rounded">
+											<img class="thumbnail" src="~/img/product-6.png" class="img-fluid rounded">
+											<img class="thumbnail" src="~/img/product-7.png" class="img-fluid rounded">
+                                        </div>
+
+                                        <img id="slideRight" class="arrow" src="~/img/arrow-right.png">
+                                    </div>
+                                </div>
+
+                            </div>
+   
+						<div class="py-2">
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
 									<ul class="nav nav-pills nav-justified">
@@ -46,8 +67,8 @@
 
 
 					</div>
-                    <div class="col-lg-6">
-                        <h4 class="fw-bold mb-3">@Model.ProductDetail.ProductName</h4>
+                    <div class="col-lg-5">
+                        <h2 class="fw-bold mb-3">@Model.ProductDetail.ProductName</h2>
                             <p class="mb-3"> <b>Category:</b> @Model.ProductDetail.Category.CategoryName</p>
                             <p class="mb-3"> <b>Brand:</b> @Model.ProductDetail.Brand.BrandName</p>
 
@@ -236,9 +257,6 @@
           
         </div>
         <h1 class="fw-bold mb-0">Related products</h1>
-
-
-  
 
         <div class="vesitable">
             <div class="owl-carousel vegetable-carousel justify-content-center">
@@ -498,9 +516,6 @@
 			$('#cartQuantity').load("/AjaxContent/QuantityCart");
 		}
 	</script>
-
-
-
 
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");

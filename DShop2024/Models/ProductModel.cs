@@ -60,5 +60,7 @@ namespace DShop2024.Models
         public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }
         public virtual ICollection<RatingModel> Ratings { get; set; }
 
+        public virtual ICollection<ProductImageModel> Images { get; set; }
+
     }
 }

@@ -91,5 +91,6 @@ public class DShopContext : IdentityDbContext<AppUserModel>
 		public virtual DbSet<OrderCouponsModel> OrderCouponss { get; set; }
 		public virtual DbSet<PromotionModel> Promotions { get; set; }
 		public virtual DbSet<FAQModel> FAQs { get; set; }
+		public virtual DbSet<ProductImageModel> ProductImages { get; set; }
 }
 
