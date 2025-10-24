@@ -83,7 +83,7 @@
                                             <td>@item.ProductId</td>
                                             <td>
                                                 <a asp-area="Admin" asp-controller="ProductManage" asp-action="Detail" asp-route-Id="@item.ProductId">@item.Product.ProductName</a>
-                                                <img src="~/media/products/@item.Product.Image" width="120" height="100" />
+                                                <img src="~/media/products/@item.Product.MainImage" width="120" height="100" />
                                             </td>
                                             <td>@item.Quantity</td>
                                             <td class="text-end">@item.Price</td>

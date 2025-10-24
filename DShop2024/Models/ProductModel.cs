@@ -12,7 +12,7 @@ namespace DShop2024.Models
 		[Required, MinLength(4, ErrorMessage = "The {0} field is required and contain at least 4 characters")]
 		public string ProductName { get; set; }
 		public string Slug { get; set; }
-        public string Image { get; set; }
+        public string MainImage { get; set; }
         public string? Description { get; set; }
 		[Required(ErrorMessage = "The {0} field is required")]
 		[Range(1000, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]

@@ -1,0 +1,45 @@
+﻿@model DShop2024.Models.Blog.SubjectModel
+
+@{
+    ViewData["Title"] = "Detail subject";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1 class="text-primary">@ViewData["title"]</h1>
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-body">
+   
+            <dl class="row">
+                <dt class="col-sm-2">
+                    Title
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.Raw(Model.Title)
+                </dd>
+
+                <dt class="col-sm-2">
+                    Content
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.Raw(Model.SubjectContent)
+                </dd>
+
+                <dt class="col-sm-2">
+                    Url
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Slug)
+                </dd>
+            </dl>
+        </div> 
+    </div>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-round btn-warning">Edit</a> 
+</div>
+<div class="mt-2">
+    <a asp-action="Index">List subject</a>
+</div>
+
+

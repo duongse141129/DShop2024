@@ -24,7 +24,7 @@
 			Price = product.Price;
             OriginalPrice = product.OriginalPrice;
 			Quantity = 1;
-			Image = product.Image;
+			Image = product.MainImage;
 		}
 
 	}

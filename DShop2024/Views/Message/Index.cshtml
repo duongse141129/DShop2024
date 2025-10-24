@@ -91,6 +91,7 @@
                     success: function (result) {
                         if (result.success) {
                             loadNotifiMessage();
+                            $('#messageInput').val("");
                         }
                     }
                 });

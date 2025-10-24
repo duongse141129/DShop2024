@@ -1,0 +1,89 @@
+﻿@model AppMvc.Areas.Blog.Models.CreatePostModel
+
+@{
+    ViewData["Title"] = "Update post";
+    var list = ViewData["Subjects"] as MultiSelectList;
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="SubjectIDs" class="control-label"></label>
+                <select asp-for="SubjectIDs" multiple="multiple" asp-items="list" class="w-100"></select>
+                <span asp-validation-for="SubjectIDs" class="text-danger"></span>
+            </div>
+                      
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShortDescription" class="control-label"></label>
+                <textarea rows="3" asp-for="ShortDescription" class="form-control"></textarea>
+                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Slug" class="control-label"></label>
+                <input asp-for="Slug" readonly class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="PostContent" class="control-label"></label>
+                <textarea rows="10" asp-for="PostContent" class="form-control"></textarea>
+                <span asp-validation-for="PostContent" class="text-danger"></span>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Image</label>
+                <input asp-for="ImageUpload" class="form-control" />
+                <span asp-validation-for="ImageUpload" class="text-danger" />
+                <img src="~/media/post/@Model.Image" width="120" height="100" />
+            </div>
+            <div class="form-group">
+                <img id="imgpreview" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Edit" class="btn btn-primary btn-lg" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to list post</a>
+</div>
+
+
+@section Scripts {
+
+    <link rel="stylesheet" href="~/lib/multiple-select/multiple-select.min.css" />
+    <script src="~/lib/multiple-select/multiple-select.min.js"></script>
+
+    <script>
+        $("#SubjectIDs").multipleSelect({
+            selectAll: false,
+            keepOpen: false,
+            isOpen: false,
+        });
+    </script>
+
+    @{
+        var summernote = new DShop2024.Models.Summernote("#PostContent");
+        @await Html.PartialAsync("_SummernotePartial", summernote);
+    }
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+
+
+
+

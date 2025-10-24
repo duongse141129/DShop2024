@@ -1,0 +1,78 @@
+﻿@model List<PostModel>
+@using DShop2024.Components
+@using DShop2024.Models.Blog
+@{
+    List<SubjectModel> subjects = ViewBag.subjects as List<SubjectModel>;
+    SubjectModel subject = ViewBag.Subject as SubjectModel;
+    ViewData["Title"] = (subject != null) ? subject.Title : "Blog";
+    Layout = "~/Areas/Blog/Views/ViewPost/_LayoutBlog.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="container mt-5">
+  <div class="post-container">
+      @await Component.InvokeAsync("PinPost")
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-outline-primary" onclick="prevSlide()">←</button>
+    <button class="btn btn-outline-primary" onclick="nextSlide()">→</button>
+  </div>
+
+  <div class="pagination-controls" id="pagination"></div>
+</div>
+
+
+                @if(subject != null){
+                    <p>@subject.SubjectContent</p>
+                }
+                else
+                {
+                    <p>List posts in subjects</p>
+                }
+                <hr/>
+
+                <!-- Nested row for non-featured blog posts-->
+                <div class="row">
+                @foreach (var post in Model)
+                {
+                    <div class="col-lg-6">
+                        <!-- Blog post-->
+                        <div class="card mb-4">
+                            <img class="card-img-top" src="~/media/post/@post.Image" alt="...">
+                            <div class="card-body">
+                                <div class="small text-muted">@post.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</div>
+                                <h2 class="card-title h4">@post.Title</h2>
+                                <div>
+                                    Subject:
+                                    <strong class="text-danger">
+                                        @string.Join(", ", post.PostSubjects.Select(pc => pc.Subject.Title))
+                                    </strong> 
+                                </div>
+                                <p class="card-text">@post.ShortDescription</p>
+                                <a class="btn btn-info" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@post.Slug">Read more →</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                </div>
+                <!-- Pagination-->
+                <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+         
+
+
+
+
+                @section Sidebar{
+                   @await Component.InvokeAsync("DShop2024.Components.SubjectSidebar",
+                            new SubjectSidebar.SubjectSidebarData{
+                                    Subjects =subjects,
+                                    level= 0,
+                                    subjectSlug= ViewBag.subjectSlug
+                   })
+                }
+
+
+

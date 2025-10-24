@@ -150,7 +150,7 @@ namespace DShop2024.Controllers
                         {
                             Id = g.Id,
                             ProductName = g.ProductName,
-                            Image = g.Image,
+                            MainImage = g.MainImage,
                             Price = g.Price,
                             Stock = g.Stock,
                             BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
@@ -190,7 +190,7 @@ namespace DShop2024.Controllers
 										.Select( g => new ProductViewModel {
 											Id = g.Id,
 											ProductName = g.ProductName,
-											Image = g.Image,
+											MainImage = g.MainImage,
 											Price = g.Price,
 											Stock = g.Stock,
 											BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
@@ -218,7 +218,7 @@ namespace DShop2024.Controllers
 					{
 						Id = productById.Id,
 						ProductName = productById.ProductName,
-						Image = productById.Image,
+						MainImage = productById.MainImage,
 						Price = productById.Price,
 						Stock = productById.Stock,
 						BrandName = _context.Brands.FirstOrDefault(b => b.Id == productById.BrandId).BrandName,

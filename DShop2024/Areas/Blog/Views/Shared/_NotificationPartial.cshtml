@@ -1,0 +1,12 @@
+﻿@if (TempData[DShopConst.TEMPDATA_SUCCESS] != null)
+{
+    <div class="alert alert-success notification">
+        @TempData[DShopConst.TEMPDATA_SUCCESS];
+    </div>
+}
+@if (TempData[DShopConst.TEMPDATA_ERROR] != null)
+{
+    <div class="alert alert-dangerer notification">
+        @TempData[DShopConst.TEMPDATA_ERROR];
+    </div>
+}

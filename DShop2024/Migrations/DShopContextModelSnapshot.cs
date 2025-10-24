@@ -133,6 +133,110 @@ namespace DShop2024.Migrations
                     b.ToTable("Banners");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.Blog.PostModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPin")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PostContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShortDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<string>("UserIdCreate")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserIdCreate");
+
+                    b.ToTable("Post");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.PostSubjectModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("PostSubject");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.SubjectModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ParentSubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Slug")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubjectContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentSubjectId");
+
+                    b.ToTable("Subject");
+                });
+
             modelBuilder.Entity("DShop2024.Models.BrandModel", b =>
                 {
                     b.Property<int>("Id")
@@ -608,11 +712,11 @@ namespace DShop2024.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Image")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal?>("LaptopPocket")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MainImage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MainPocket")
                         .HasColumnType("int");
@@ -936,6 +1040,43 @@ namespace DShop2024.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("DShop2024.Models.Blog.PostModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.AppUserModel", "CreateBy")
+                        .WithMany()
+                        .HasForeignKey("UserIdCreate");
+
+                    b.Navigation("CreateBy");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.PostSubjectModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.Blog.PostModel", "Post")
+                        .WithMany("PostSubjects")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DShop2024.Models.Blog.SubjectModel", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.SubjectModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.Blog.SubjectModel", "ParentSubject")
+                        .WithMany("SubjectChildren")
+                        .HasForeignKey("ParentSubjectId");
+
+                    b.Navigation("ParentSubject");
+                });
+
             modelBuilder.Entity("DShop2024.Models.CompareModel", b =>
                 {
                     b.HasOne("DShop2024.Models.ProductModel", "Product")
@@ -1188,6 +1329,16 @@ namespace DShop2024.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.PostModel", b =>
+                {
+                    b.Navigation("PostSubjects");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.Blog.SubjectModel", b =>
+                {
+                    b.Navigation("SubjectChildren");
                 });
 
             modelBuilder.Entity("DShop2024.Models.OrderModel", b =>

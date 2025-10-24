@@ -1,0 +1,45 @@
+﻿@using DShop2024.Components
+@model DShop2024.Components.SubjectSidebar.SubjectSidebarData
+@{ 
+    int level = Model.level;
+}
+@if (Model.Subjects.Count > 0)
+{
+    @if (level == 0)
+    {
+        @Html.Raw("<div class=\"subjectsidebar\">");
+        <h3>
+            <a asp-area="Blog" asp-controller="ViewPost" asp-action="Index" asp-route-subjectSlug="">
+            All subjects
+            </a>
+        </h3>    
+    }
+    <ul>
+        @foreach (var subject in Model.Subjects)
+        {
+            if(subject.Status != 0)
+            {
+                var cssActive = (subject.Slug == Model.subjectSlug) ? "active" : null;
+                <li class="mitems">
+                    <a class="@cssActive" asp-controller="ViewPost" asp-action="Index" asp-route-subjectSlug="@subject.Slug">
+                        @subject.Title
+                    </a>
+                    @if (subject.SubjectChildren?.Count > 0)
+                    {
+                        @await Component.InvokeAsync("DShop2024.Components.SubjectSidebar",
+                        new SubjectSidebar.SubjectSidebarData()
+                        {
+                            Subjects = subject.SubjectChildren.ToList(),
+                            level = level + 1,
+                            subjectSlug = ViewBag.subjectslug
+                        })
+                }
+                </li>
+            }
+        }
+    </ul>
+    @if (level == 0)
+    {
+        @Html.Raw("</div>");
+    }
+}

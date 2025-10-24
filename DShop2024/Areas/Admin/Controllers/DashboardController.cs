@@ -51,7 +51,7 @@ namespace DShop2024.Areas.Admin.Controllers
                             {
                                 x.p.Id,
                                 x.p.ProductName,
-                                x.p.Image,
+                                x.p.MainImage,
                                 x.p.OriginalPrice,
                                 x.p.Price
                             })
@@ -59,7 +59,7 @@ namespace DShop2024.Areas.Admin.Controllers
                             {
                                 Id = g.Key.Id,
                                 ProductName = g.Key.ProductName,
-                                Image = g.Key.Image,
+                                MainImage = g.Key.MainImage,
                                 OriginalPrice = g.Key.OriginalPrice,
                                 Price = g.Key.Price,
                                 QuantitySold = g.Sum(x => x.od.Quantity)

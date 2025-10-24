@@ -5,6 +5,7 @@ using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,8 +26,9 @@ namespace DShop2024.Controllers
         }
 		public async Task<IActionResult> Index()
 		{
-            var FAQs = await _context.FAQs.ToListAsync();
-            ViewBag.FAQs = FAQs;
+            var faqs = await _context.FAQs.ToListAsync();
+            ViewBag.Subjects = new SelectList(ContactEnumData.typeSubject.ToList());
+            ViewBag.FAQs = faqs;    
 			return View();
 		}
 

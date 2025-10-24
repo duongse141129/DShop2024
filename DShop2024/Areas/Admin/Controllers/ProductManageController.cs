@@ -91,7 +91,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
                         fs.Close();
-                        product.Image = imageName;
+                        product.MainImage = imageName;
 
                     }
                     product.Status = 1;
@@ -207,9 +207,9 @@ namespace DShop2024.Areas.Admin.Controllers
                         string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
                         string filePath = Path.Combine(uploadsDir, imageName);
 
-                        if(exitedProduct.Image != null)
+                        if(exitedProduct.MainImage != null)
                         {
-                            string oldFilePath = Path.Combine(uploadsDir, exitedProduct.Image);
+                            string oldFilePath = Path.Combine(uploadsDir, exitedProduct.MainImage);
                             try
                             {
                                 if (System.IO.File.Exists(oldFilePath))
@@ -227,7 +227,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
                         fs.Close();
-                        exitedProduct.Image = imageName;
+                        exitedProduct.MainImage = imageName;
 
                     }
 
@@ -282,10 +282,10 @@ namespace DShop2024.Areas.Admin.Controllers
             var product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
 
-            if (!String.IsNullOrEmpty(product.Image))
+            if (!String.IsNullOrEmpty(product.MainImage))
             {
                 string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-                string oldFilePath = Path.Combine(uploadsDir, product.Image);
+                string oldFilePath = Path.Combine(uploadsDir, product.MainImage);
                 try
                 {
                     if (System.IO.File.Exists(oldFilePath))

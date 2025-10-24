@@ -594,7 +594,7 @@ h1,h2,h3,h4,h5,h6 {
   color: #fff;
 }
 
-.product-item .btn-compare {
+.postItem .btn-compare {
         position: absolute;
         top: 20px;
         left: 20px;

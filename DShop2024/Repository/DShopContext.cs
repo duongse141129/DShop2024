@@ -1,4 +1,5 @@
 ﻿using DShop2024.Models;
+using DShop2024.Models.Blog;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -92,5 +93,8 @@ public class DShopContext : IdentityDbContext<AppUserModel>
 		public virtual DbSet<PromotionModel> Promotions { get; set; }
 		public virtual DbSet<FAQModel> FAQs { get; set; }
 		public virtual DbSet<ProductImageModel> ProductImages { get; set; }
+		public virtual DbSet<PostModel> Posts { get; set; }
+		public virtual DbSet<PostSubjectModel> PostSubjects { get; set; }
+		public virtual DbSet<SubjectModel> Subjects { get; set; }
 }
 

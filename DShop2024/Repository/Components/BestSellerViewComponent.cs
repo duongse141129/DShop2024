@@ -28,7 +28,7 @@ namespace DShop2024.Repository.Components
 			 {
 				 x.p.Id,
 				 x.p.ProductName,
-				 x.p.Image,
+				 x.p.MainImage,
 				 x.p.Price,
 				 x.p.Stock,
 				 x.p.BrandId,
@@ -38,7 +38,7 @@ namespace DShop2024.Repository.Components
 			 {
 				 Id = g.Key.Id,
 				 ProductName = g.Key.ProductName,
-				 Image = g.Key.Image,
+				 MainImage = g.Key.MainImage,
 				 Stock = g.Key.Stock,	
 				 Price = g.Key.Price,
 				 BrandName = _context.Brands.FirstOrDefault( b => b.Id == g.Key.BrandId).BrandName,

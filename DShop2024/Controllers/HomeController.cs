@@ -40,7 +40,7 @@ namespace DShop2024.Controllers
                         .Select( g => new ProductViewModel {
                             Id = g.Id,
                             ProductName = g.ProductName,
-                            Image = g.Image,
+                            MainImage = g.MainImage,
                             Price = g.Price,
                             Stock = g.Stock,
                             BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,

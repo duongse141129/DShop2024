@@ -47,6 +47,8 @@
     <link href="~/custom/css/styleorder.css" rel="stylesheet" />
     <link href="~/custom/css/gallery.css" rel="stylesheet" />
 
+    <link href="~/custom/css/slider.css" rel="stylesheet" />
+
 </head>
 
 <body>
@@ -80,6 +82,7 @@
                     <div class="navbar-nav mx-auto">
                         <a class="nav-item nav-link active" asp-area="" asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i>Home</a>
                         <a class="nav-item nav-link" asp-area="" asp-action="Index" asp-controller="ShopProducts"><i class="fas fa-th-list"></i>Shop</a>
+                        <a class="nav-item nav-link" asp-area="Blog" asp-action="Index" asp-controller="ViewPost"><i class="fab fa-blogger"></i>Blog</a>
                         <a class="nav-item nav-link" asp-area="" asp-action="Index" asp-controller="Message"><i class="far fa-comments"></i>Chat</a>
 
                         <div class="nav-item dropdown">
@@ -141,6 +144,7 @@
 
     <script src="~/custom/js/site.js"></script>
     <script type="text/javascript" src="~/custom/js/gallery.js"></script>
+    <script src="~/custom/js/slider.js"></script>
     <script>
         $(function () {
             var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';

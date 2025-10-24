@@ -1,0 +1,43 @@
+﻿.post-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin: auto;
+}
+
+.post-wrapper {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.cardPost {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 6px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .dot.active {
+        background-color: #007bff;
+    }
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}

@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "_Layout";
+}
+<section class="py-5">
+    <div class="container-fluid bg-light  py-5">
+        <div class ="row">
+            <div class="col-md-8">
+                @RenderBody()
+            </div>
+            <div class="col-md-4">
+                <!-- Search widget-->
+                <div class="card mb-4">
+                    <form asp-action="Index" asp-area="Blog" asp-controller="ViewPost">
+                        <div class="card-header">Search</div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input class="form-control" type="text" name="search" placeholder="Enter search term" aria-label="Enter search term" aria-describedby="button-search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
+                                <input class="btn btn-primary" id="button-search" type="submit" value="search">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Categories widget-->
+                <div class="card mb-4">
+                    <div class="card-header">Subject</div>
+                    <div class="card-body">
+                        <div class="row">
+                            @RenderSection("Sidebar", false)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
