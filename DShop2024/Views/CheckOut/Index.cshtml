@@ -5,10 +5,18 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+
+<section class="pt-2 my-3">
+    <div class="container-fluid py-5 ws">
+          @await Component.InvokeAsync("AvailableCoupon")
+    </div>
+</section>
+
+
 <div class="container-fluid py-5">
     <div class="container py-5 ws">
         <div class="p-5 rounded ws">
-            <h1 class="mb-4">Billing details</h1>
+            <h1 class="mb-4">@ViewData["Title"]</h1>
       
                 <div class="row g-5">
 
@@ -213,14 +221,13 @@
         </div>
     </div>
 </div>
-<section class="py-5">
-    <div class="container-fluid">
-        @await Component.InvokeAsync("Coupon")
-    </div>
-</section>
+
 
 
 @section Scripts {
+    <link href="~/custom/css/couponSlider.css" rel="stylesheet" />
+    <script src="~/custom/js/couponSlider.js"></script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

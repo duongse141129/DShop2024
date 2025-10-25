@@ -44,7 +44,14 @@
         {
             <tr>
                 <td class="bg-primary" >@userWithRoles.User.Id</td>
-                <td>@userWithRoles.User.UserName</td>
+                <td>
+                    <div class="row">
+                        @userWithRoles.User.UserName
+                    </div>
+                    <div class="avatar">
+                        <img src="~/media/avatar/@userWithRoles.User.Avatar" alt="avatar user" class="avatar-img rounded">
+                    </div>
+                </td>
                 <td>@userWithRoles.User.Email</td>
                 <td>@userWithRoles.User.PhoneNumber</td>
                 <td>

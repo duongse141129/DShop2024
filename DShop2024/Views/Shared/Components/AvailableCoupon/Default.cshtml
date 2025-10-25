@@ -1,0 +1,41 @@
+﻿@model IEnumerable<CouponModel>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="section-title">Available Coupons</h2>
+        <div class="section-header d-flex flex-wrap flex-wrap justify-content-between mb-5">
+            <div class="slider-container-coupon">
+                <button class="nav-coupon left" onclick="slideLeftCoupon()">&#10094;</button>
+                <div class="slidercoupon">
+                    @foreach (var item in Model)
+                    {
+                        <div class="card card-coupon">
+                            <div class="card-body">
+                                @if (item.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING)
+                                {
+                                    <h5 class="card-title text-primary fs-3 fw-bold">FREE SHIPPING</h5>
+                                }
+                                @if (item.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
+                                {
+                                    <h5 class="card-title text-primary fs-3 fw-bold">@item.Value %</h5>
+                                }
+                                @if (item.Promotion.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
+                                {
+                                    <h5 class="card-title text-primary fs-3 fw-bold">@item.Value.ToString("#,##0 VND")</h5>
+                                }
+                                <p class="pt-1">Quantity: @item.Quantity</p>
+                                <p class="pt-1">Expired: @item.DateExpired.ToString("MM/dd/yyyy")</p>
+                                <span class="card-title bg-primary text-white px-3 py-3">@item.CouponCode</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button class="nav-coupon right" onclick="slideRightCoupon()">&#10095;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

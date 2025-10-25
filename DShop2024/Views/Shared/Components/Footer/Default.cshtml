@@ -36,13 +36,15 @@
             <a class="linkFooter" asp-action="Index" asp-controller="SendContact">Contact Us</a>
             <a class="linkFooter" asp-action="Index" asp-controller="SendContact">FAQs</a>
             <a class="linkFooter" asp-action="Index" asp-controller="Message">Chat</a>
+            <a class="linkFooter" asp-action="Index" asp-controller="ViewPost" asp-area="Blog">Blog</a>
+            <a class="linkFooter" asp-action="Privacy" asp-controller="Home">Privacy Policy</a>
         </div>
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="d-flex flex-column text-start footer-item">
             <h4 class="text-light mb-3">Account</h4>
             <a class="linkFooter" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile">My Account</a>
-            <a class="linkFooter" asp-action="Index" asp-controller="ShopProducts">Shop details</a>
+            <a class="linkFooter" asp-action="Index" asp-controller="ShopProducts">Shop Products</a>
             <a class="linkFooter" asp-action="Index" asp-controller="Cart">Shopping Cart</a>
             <a class="linkFooter" asp-action="Index" asp-controller="CheckOut">Check Out</a>
             <a class="linkFooter" asp-action="WishList" asp-controller="Home">Wishlist</a>
@@ -57,8 +59,9 @@
             <p>Email: @Model.Email</p>
             <p>Phone: @Model.Phone</p>
             <p>Payment Accepted</p>
-            <img class="img-fluid" src="~/media/payment/momo_logo.png" width="50" alt="" />
-            <img class="img-fluid" src="~/media/payment/vnpaylogo.png" width="50" alt="" />
+            <img class="img-fluid" src="~/media/payment/codpayment.png" height="50" width="50" alt="" />
+            <img class="img-fluid" src="~/media/payment/momo_logo.png" height="50"  width="50" alt="" />
+            <img class="img-fluid" src="~/media/payment/vnpaylogo.png" height="50" width="50" alt="" />
         </div>
     </div>
 </div>

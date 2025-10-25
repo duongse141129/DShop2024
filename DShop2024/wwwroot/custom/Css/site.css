@@ -349,3 +349,7 @@ ul{
 }
 
 
+.card-coupon {
+    border: 3px solid #e28743;
+    border-radius: 5%;
+}

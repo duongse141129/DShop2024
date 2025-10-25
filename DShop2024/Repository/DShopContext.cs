@@ -96,5 +96,6 @@ public class DShopContext : IdentityDbContext<AppUserModel>
 		public virtual DbSet<PostModel> Posts { get; set; }
 		public virtual DbSet<PostSubjectModel> PostSubjects { get; set; }
 		public virtual DbSet<SubjectModel> Subjects { get; set; }
+        public virtual DbSet<PolicyModel> Policies { get; set; }
 }
 

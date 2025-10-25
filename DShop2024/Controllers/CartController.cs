@@ -32,7 +32,7 @@ namespace DShop2024.Controllers
 			return View(cartItemViewModel);
 		}
 
-		public async Task GetValueByPercentCoupon()
+		private async Task GetValueByPercentCoupon()
 		{
 			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();

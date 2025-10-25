@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Repository.Components
 {
-    public class CouponViewComponent : ViewComponent
+    public class ShowingCouponViewComponent : ViewComponent
     {
         private readonly DShopContext _context;
 
-        public CouponViewComponent(DShopContext context)
+        public ShowingCouponViewComponent(DShopContext context)
         {
             _context = context;
         }

@@ -127,28 +127,6 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task ReadMessage(string customerId)
         {
-            //string targetUserId = "111";
-
-            //var latestMessagesOfCustomer = (from t in _context.Messages
-            //              join tm in (
-            //                  from t2 in _context.Messages
-            //                  group t2 by t2.UserId into g
-            //                  select new
-            //                  {
-            //                      UserId = g.Key,
-            //                      date = g.Max(x => x.Timestamp)
-            //                  }
-            //              ) on new { t.UserId, t.Timestamp } equals new { UserId = tm.UserId, Timestamp = tm.date }
-            //              where t.UserId == targetUserId
-            //              select new
-            //              {
-            //                  t.Id,
-            //                  t.ContentMessage,
-            //                  t.Timestamp,
-            //                  t.IsRead
-            //              }).FirstOrDefaultAsync();
-
-
             try
             {
                 var latestMessages = _context.Messages

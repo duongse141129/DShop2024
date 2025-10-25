@@ -88,7 +88,7 @@ namespace DShop2024.Controllers
         }
 
 
-        public static string GetDayLeft(DateTime dateTime)
+        private static string GetDayLeft(DateTime dateTime)
         {
             var d = DateTime.Today.Date - dateTime.Date;
             if (d.Days < 1)

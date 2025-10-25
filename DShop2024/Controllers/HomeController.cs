@@ -62,9 +62,9 @@ namespace DShop2024.Controllers
         }
         #endregion
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Privacy()
         {
-            return View();
+            return View(await _context.Policies.Where(p => p.Status != 0).ToListAsync());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

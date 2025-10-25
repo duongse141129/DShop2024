@@ -70,7 +70,7 @@ namespace DShop2024.Controllers
 			return View(cartItemViewModel);
 		}
 
-		public async Task<string> CheckAllStock()
+		private async Task<string> CheckAllStock()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			string productOutOfStock = "";

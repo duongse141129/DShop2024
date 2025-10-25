@@ -45,9 +45,10 @@
 
     <link href="~/custom/css/site.css" rel="stylesheet" />
     <link href="~/custom/css/styleorder.css" rel="stylesheet" />
-    <link href="~/custom/css/gallery.css" rel="stylesheet" />
 
-    <link href="~/custom/css/slider.css" rel="stylesheet" />
+
+
+
 
 </head>
 
@@ -69,6 +70,7 @@
                     }
                 </div>
                 <div class="top-link pe-2">
+                    <a asp-area="" asp-action="Privacy" asp-controller="Home" class="text-white"><small class="text-white mx-2">Privacy Policy</small>/</a>
                     <a asp-area="" asp-action="Index" asp-controller="SendContact" class="text-white"><small class="text-white mx-2">Contact</small>/</a>
                     <a asp-area="" asp-action="AboutUs" asp-controller="Home" class="text-white"><small class="text-white ms-2">About Us</small></a>
                 </div>
@@ -143,8 +145,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
 
     <script src="~/custom/js/site.js"></script>
-    <script type="text/javascript" src="~/custom/js/gallery.js"></script>
-    <script src="~/custom/js/slider.js"></script>
+
+
+
     <script>
         $(function () {
             var message = '@TempData[DShopConst.TEMPDATA_SUCCESS]';

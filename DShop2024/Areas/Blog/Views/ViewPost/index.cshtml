@@ -12,6 +12,7 @@
 
 <div class="container mt-5">
   <div class="post-container">
+      <h3>Featured news</h3>
       @await Component.InvokeAsync("PinPost")
   </div>
 
@@ -74,5 +75,8 @@
                    })
                 }
 
-
+@section Scripts {
+     <link href="~/custom/css/slider.css" rel="stylesheet" />
+      <script src="~/custom/js/slider.js"></script> 
+}
 
