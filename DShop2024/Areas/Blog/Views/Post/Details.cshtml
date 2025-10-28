@@ -2,14 +2,17 @@
 
 @{
     ViewData["Title"] = "Detail post";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 <div class="col-md-8">
     <div class="card">
         <div class="card-body">
             <div class="card card-post card-round post-item">
-                <img class="card-img-top w-100" src="~/media/post/@Model.Image"  height="500" alt="Card image cap">
+                @if (Model.Image != null)
+                {
+                    <img class="card-img-top w-100" src="~/media/post/@Model.Image" height="500" alt="Card image cap">
+                }
                 <a asp-action="PinPostDetail" asp-area="Blog" asp-controller="Post" asp-route-id="@Model.Id" class="btn-pin @( Model.IsPin == true ? "bg-warning text-white" : "")">
                     <i class="fas fa-thumbtack"></i>
                 </a>

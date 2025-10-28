@@ -48,7 +48,7 @@ namespace DShop2024.Repository.Components
                             }
                         ) on new { m.UserId, m.Timestamp } equals new { tm.UserId, Timestamp = tm.date }
                         where u.Status != 0 && r.Name == RoleName.Customer
-                        group new { u, m } by new { u.Id, u.Avatar, u.UserName, m.ContentMessage, m.IsRead} into g
+                        group new { u, m } by new { u.Id, u.Avatar, u.UserName, m.ContentMessage, m.IsRead, m.IsImage} into g
                         where g.Max(x => x.m.Timestamp) > DateTime.Today.AddDays(-2)
                         orderby g.Min(x => x.m.Timestamp) descending
                         select new MessageViewModel
@@ -58,7 +58,8 @@ namespace DShop2024.Repository.Components
                             UserName = g.Key.UserName,
                             ContentMessage = g.Key.ContentMessage,
                             Timestamp =  GetDayLeft(g.Max(x => x.m.Timestamp)),
-                            IsRead = g.Key.IsRead
+                            IsRead = g.Key.IsRead,
+                            IsImage = g.Key.IsImage
                         }).ToListAsync() ;
   
             return View(latestMessagePerUser2daysAgo);

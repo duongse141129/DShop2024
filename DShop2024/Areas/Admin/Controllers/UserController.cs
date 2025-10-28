@@ -19,7 +19,6 @@ namespace DShop2024.Areas.Admin.Controllers
 		private UserManager<AppUserModel> _userManager;
 		private RoleManager<IdentityRole> _roleManager;
         private readonly DShopContext _context;
-        private readonly string sidebar = "user";
 
         public UserController(UserManager<AppUserModel> userManager, RoleManager<IdentityRole> roleManager, DShopContext context)
         {
@@ -31,7 +30,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             IQueryable<UserWithRoleViewModel> userWithRole = _userManager.Users.OrderByDescending(u => u.Status)
                                         .Select(u => new UserWithRoleViewModel { User = u });
 
@@ -85,7 +84,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             var user = new CreateUserRequest();
@@ -96,7 +95,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserRequest createUserRequest)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             if (ModelState.IsValid)
@@ -157,7 +156,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(string Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -191,7 +190,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> RecoverAccount(string Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -226,7 +225,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SetPassword(string id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -261,7 +260,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetPassword(string id, SetPasswordUserRequest model)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -297,7 +296,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SetRole(string id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -334,7 +333,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetRole(string userId, string roleId)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.User;
             if (string.IsNullOrEmpty(userId))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";

@@ -41,7 +41,11 @@
                     <div class="col-lg-6">
                         <!-- Blog post-->
                         <div class="card mb-4">
-                            <img class="card-img-top" src="~/media/post/@post.Image" alt="...">
+                        @if(post.Image!= null)
+                        {
+                             <img class="card-img-top" src="~/media/post/@post.Image" alt="...">
+                        }
+ 
                             <div class="card-body">
                                 <div class="small text-muted">@post.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</div>
                                 <h2 class="card-title h4">@post.Title</h2>

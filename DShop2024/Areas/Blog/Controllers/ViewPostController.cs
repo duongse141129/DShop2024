@@ -1,4 +1,5 @@
-﻿using DShop2024.Models;
+﻿using DShop2024.EnumData;
+using DShop2024.Models;
 using DShop2024.Models.Blog;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Route("/post/{subjectSlug?}")]
         public async Task<IActionResult> Index(string search,string subjectSlug,[FromQuery(Name ="p")] int currentPage, int pagesSize)
         {
+            ViewBag.sidebar = Menu.Home.Blog;
             var Subjects = GetSubjects();
             ViewBag.Subjects = Subjects;
             ViewBag.subjectSlug = subjectSlug;
@@ -39,7 +41,7 @@ namespace AppMvc.Areas.Blog.Controllers
             }
 
 
-            IQueryable<PostModel> posts = _context.Posts
+            IQueryable<PostModel> posts = _context.Posts.Where(p => p.Status != 0)
                                 .Include(P => P.CreateBy)
                                 .Include(P => P.PostSubjects)
                                 .ThenInclude(p => p.Subject)
@@ -85,7 +87,7 @@ namespace AppMvc.Areas.Blog.Controllers
                 })
             };
 
-            var postsInPage = posts.Skip((currentPage - 1) * pagesSize)
+            var postsInPage = posts.Skip((currentPage - 1) * pagesSize).OrderByDescending(p => p.DateUpdated)
                         .Take(pagesSize);
 
             ViewBag.pagingModel = pagingModel;
@@ -102,6 +104,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Route("/post/{postslug}.html")]
         public IActionResult Detail(string postslug)
         {
+            ViewBag.sidebar = Menu.Home.Blog;
             var Subjects = GetSubjects();
             ViewBag.Subjects = Subjects;
 

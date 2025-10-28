@@ -395,6 +395,9 @@ namespace DShop2024.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("MinimumAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("PromotionId")
                         .HasColumnType("int");
 
@@ -525,6 +528,9 @@ namespace DShop2024.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsImage")
+                        .HasColumnType("bit");
 
                     b.Property<bool?>("IsRead")
                         .HasColumnType("bit");

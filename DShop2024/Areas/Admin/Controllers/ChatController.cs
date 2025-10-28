@@ -19,8 +19,6 @@ namespace DShop2024.Areas.Admin.Controllers
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly string sidebar = "chat";
-
         public ChatController(DShopContext context, UserManager<AppUserModel> userManager, IHubContext<ChatHub> hubContext, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
@@ -31,7 +29,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Chat;
 
             var customers = await (from u in _context.Users
                                    join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -72,7 +70,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> SearchUserName(string userName)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Chat;
             ViewBag.searchUserName = userName;
             if (String.IsNullOrEmpty(userName))
             {
@@ -91,7 +89,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ChatWithCustomer(string customerId)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Chat;
             if (String.IsNullOrEmpty(customerId))
             {
                 return NotFound();
@@ -183,9 +181,9 @@ namespace DShop2024.Areas.Admin.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> SendMessage(string receiver, string messageInput)
+        public async Task<IActionResult> SendMessage(string receiverId, string messageInput)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Chat;
             var user = await _userManager.GetUserAsync(this.User);
             if (!String.IsNullOrEmpty(messageInput))
             {
@@ -194,14 +192,15 @@ namespace DShop2024.Areas.Admin.Controllers
                     ContentMessage = messageInput,
                     Timestamp = DateTime.Now,
                     UserId = user.Id,
-                    ReceiverId = receiver,
+                    ReceiverId = receiverId,
                     IsRead = false,
+                    IsImage = false
                 };
                 await _context.Messages.AddAsync(model);
                 await _context.SaveChangesAsync();
                 var role = await _userManager.GetRolesAsync(user);
 
-                var reciver = await _userManager.FindByIdAsync(receiver);
+                var receiver = await _userManager.FindByIdAsync(receiverId);
 
                 MessageViewModel modelVM = new MessageViewModel
                 {
@@ -209,9 +208,10 @@ namespace DShop2024.Areas.Admin.Controllers
                     Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
                     UserName = user.UserName,
                     RoleName = role.FirstOrDefault(),
-                    Receiver = reciver.UserName,
+                    Receiver = receiver.UserName,
                     Avatar = user.Avatar,
-                    PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}"
+                    IsImage = false,
+                    PathImage = $"/media/avatar/{user.Avatar}"
                 };
 
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
@@ -221,5 +221,60 @@ namespace DShop2024.Areas.Admin.Controllers
             TempData[DShopConst.TEMPDATA_ERROR] = "Messages are empty";
             return Ok(new { success = false, Message = "Send message fail" });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] string receiverId)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.GetUserAsync(this.User);
+                var role = await _userManager.GetRolesAsync(user);
+                var receiver = await _userManager.FindByIdAsync(receiverId);
+                var fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+                var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, $"media/message/{receiver}");
+                var filePath = Path.Combine(folderPath, fileName);
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                string htmlImage = string.Format(
+                    "<img src=\"/media/message/{0}/{1}\" class=\"post-image\">", receiver.UserName, fileName);
+
+                MessageModel model = new MessageModel
+                {
+                    ContentMessage = htmlImage,
+                    Timestamp = DateTime.Now,
+                    UserId = user.Id,
+                    ReceiverId = receiverId,
+                    IsRead = false,
+                    IsImage = true
+                };
+                await _context.Messages.AddAsync(model);
+                await _context.SaveChangesAsync();
+
+                MessageViewModel modelVM = new MessageViewModel
+                {
+                    ContentMessage = htmlImage,
+                    Timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"),
+                    UserName = user.UserName,
+                    UserId = user.Id,
+                    RoleName = role.FirstOrDefault(),
+                    Receiver = receiver.UserName,
+                    Avatar = user.Avatar,
+                    IsImage = true,
+                    PathImage = $"/media/avatar/{user.Avatar}",
+                };
+
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
+                return Ok(new { success = true, Message = "Send message successful" });
+            }
+            return Ok(new { success = false, Message = "Send message fail" });
+        }
+
+
     }
 }

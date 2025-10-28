@@ -17,7 +17,6 @@ namespace DShop2024.Areas.Admin.Controllers
         private readonly DShopContext _context;
 
         private readonly IMapper _mapper;
-        private readonly string sidebar = "dashboard";
 
         public DashboardController(DShopContext context, IMapper mapper)
         {
@@ -26,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Dashboard;
             var countProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
             var countUser = _context.Users.Where(p => p.Status != 0).Count();
             var countOrder = _context.Orders.Where(p => p.Status != 0).Count();

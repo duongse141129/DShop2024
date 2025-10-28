@@ -15,6 +15,7 @@ namespace DShop2024.ViewModels
         public string PathImage { get; set; }
         public string UserId { get; set; }
         public bool? IsRead { get; set; }
+        public bool IsImage { get; set; }
         public int MessageId { get; set; }
         public string PathUser { get; set; }
         public string DaysLeftTime { get; set; }

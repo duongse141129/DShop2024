@@ -29,6 +29,11 @@ connection.on("ReceiveMessage", function (user, message) {
         var idUserMessage = `notiMessage_${message["userName"]}`;
         var userMessage = document.getElementById(idUserMessage);
         var contentMessage = `${message["contentMessage"]}`;
+        var isImage = `${message["isImage"]}`;
+        if (isImage == "true") {
+            contentMessage = `send a image.`
+        }
+
 
         if (userMessage != null) {
             userMessage.remove();

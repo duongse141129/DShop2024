@@ -15,7 +15,6 @@ namespace DShop2024.Areas.Admin.Controllers
 		private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
-        private readonly string sidebar = "slider";
 
         public SliderController(DShopContext context, IWebHostEnvironment webHostEnvironment, IMapper mapper)
 		{
@@ -26,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
             return View(await _context.Banners.Where(p => p.Status != 0).ToListAsync());
 
 		}
@@ -34,7 +33,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
 
             return View();
         }
@@ -43,7 +42,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateBannerRequest banner)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
             if (ModelState.IsValid)
             {
                 try
@@ -91,7 +90,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
             if (Id == null)
             {
                 return NotFound();
@@ -109,7 +108,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, BannerModel banner)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
             if (Id != banner.Id)
             {
                 return NotFound();
@@ -180,7 +179,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Slider;
             if (Id == null)
             {
                 return NotFound();

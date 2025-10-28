@@ -11,7 +11,6 @@ namespace DShop2024.Areas.Admin.Controllers
     public class FAQController : Controller
     {
         private readonly DShopContext _context;
-        private readonly string sidebar = "faq";
 
         public FAQController(DShopContext context)
         {
@@ -21,7 +20,7 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/FAQModels
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             return View(await _context.FAQs.ToListAsync());
         }
 
@@ -29,7 +28,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             return View();
         }
 
@@ -38,7 +37,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Question,Answer")] FAQModel fAQModel)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             if (ModelState.IsValid)
             {
                 try
@@ -71,7 +70,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             if (id == null)
             {
                 return NotFound();
@@ -90,7 +89,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer")] FAQModel fAQModel)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             if (id != fAQModel.Id)
             {
                 return NotFound();
@@ -136,7 +135,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Faq;
             if (id == null)
             {
                 return NotFound();

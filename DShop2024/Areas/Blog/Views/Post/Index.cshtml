@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Manage post";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var currentUrl = Url.ActionContext.HttpContext.Request.Path;
 }
 
@@ -59,7 +59,10 @@
             {
                 <div class="col-md-4">
                     <div class="card card-post card-round post-item">
-                        <img class="card-img-top" src="~/media/post/@item.Image" width="500" height="350" alt="Card image cap">
+                        @if(item.Image!= null)
+                        {
+                            <img class="card-img-top" src="~/media/post/@item.Image" width="500" height="350" alt="Card image cap">
+                        }
                         <a asp-action="PinPost" asp-area="Blog" asp-controller="Post" asp-route-id="@item.Id" class="btn-pin @( item.IsPin == true ? "bg-warning text-white" : "")">
                             <i class="fas fa-thumbtack"></i>
                         </a>

@@ -2,7 +2,6 @@
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.ViewModels;
-using System;
 
 namespace DShop2024.AutoMapper
 {

@@ -96,6 +96,7 @@ a{
     padding: 5px;
     margin-right: 3px;
     margin-bottom: 3px;
+    margin-left: 100px;
     color: #54442f;
     border-radius: 10px;
     background-color: #ffad46;
@@ -103,11 +104,25 @@ a{
 .spcontent-toreciever {
     font-size: smaller;
     padding: 5px;
-    margin-right: 3px;
+    margin-right: 100px;
     margin-bottom: 3px;
+    margin-left: 3px;
     color: #40456c;
     border-radius: 10px;
     background-color: #e9ecef;
+}
+.spcontent-customer > img{
+    width: 200px;
+    height: 200px;
+}
+
+.spcontent-toreciever > img {
+    width: 200px;
+    height: 200px;
+}
+.lastestMessageCutomer > img {
+    width: 150px;
+    height: 150px;
 }
 
 #cpnCode {
@@ -353,3 +368,19 @@ ul{
     border: 3px solid #e28743;
     border-radius: 5%;
 }
+
+#uploadfile {
+    display: none;
+}
+
+#iconfile {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    #iconfile > i {
+        color: #025bee;
+        font-size: 60px;
+    }

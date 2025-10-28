@@ -25,6 +25,7 @@ namespace DShop2024.Controllers
                                             string laptopPocket = "", string waterResistance = "", string USBChargingPort = "",
                                             [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 9)
         {
+            ViewBag.sidebar = Menu.Home.Shop;
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
             IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
@@ -165,7 +166,8 @@ namespace DShop2024.Controllers
 
         public async Task<IActionResult> Details(int? Id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
-			try
+            ViewBag.sidebar = Menu.Home.Shop;
+            try
 			{
 				if (Id == null)
 				{
@@ -257,7 +259,7 @@ namespace DShop2024.Controllers
 				bool isInCompare = false;
 				bool isFeedBack = false;
 
-				if(listRating.Count() > 0)
+				if (listRating.Count() > 0)
 				{
 					pointAvarge = Math.Round(listRating.Average(p => p.Star), 1);
 				}
@@ -338,6 +340,7 @@ namespace DShop2024.Controllers
 		}
         public async Task<IActionResult> GetDetailProductBySlug(string slug)
 		{
+            ViewBag.sidebar = Menu.Home.Shop;
             if (String.IsNullOrEmpty(slug))
             {
                 return NotFound();

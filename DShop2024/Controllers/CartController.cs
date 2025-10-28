@@ -264,7 +264,7 @@ namespace DShop2024.Controllers
 				TimeSpan continueTime = validCoupon.DateStart.Date - DateTime.Today.Date;
 				if(continueTime.Days > 0)
 				{
-					return Ok(new { success = false, message = "Can't use this coupon now too soon" });
+					return Ok(new { success = false, message = "Can't use this coupon now. Too soon" });
 				}
 				int daysRemaining = remainingTime.Days;
 				if(daysRemaining >= 0)
@@ -295,14 +295,22 @@ namespace DShop2024.Controllers
 							}
 						}
 					}
-					
-					if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
+                    List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+                    decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
+					if( sumPirceItemsCart > 0 && cartItems.Count > 0)
+					{
+						if(sumPirceItemsCart < validCoupon.MinimumAmount)
+						{
+                            return Ok(new { success = false, message = "You do not satisfy the minimum purchase amount. Please purchase additional items." });
+                        }
+					}
+
+                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
 					{
 						validCoupon.Value = validCoupon.Value;
                     }
                     if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
                     {
-                        List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 						if(cartItems.Count > 0 )
 						{
                             decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);

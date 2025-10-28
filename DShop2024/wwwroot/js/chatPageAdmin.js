@@ -59,9 +59,10 @@ connection.on("ReceiveMessage", function (user, message) {
             divNewMessage.textContent = `New message`;
             divNewMessage.id = `snewMessage_${message["userName"]}`;
             tdMessage.appendChild(spanTimestamp);
-            spanTimestamp.textContent = `${message["timeStamp"]}`;
+            spanTimestamp.textContent = `${message["timestamp"]}`;
             tdMessage.appendChild(pContentMessage);
-            pContentMessage.textContent = `${message["contentMessage"]}`;
+            pContentMessage.classList.add("lastestMessageCutomer");
+            pContentMessage.innerHTML = `${message["contentMessage"]}`;
 
             rowUser.appendChild(tdButtonChat);
             tdButtonChat.appendChild(aButtonChat);

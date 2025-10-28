@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Create post";
     var list = ViewData["Subjects"] as MultiSelectList;
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 
@@ -39,9 +39,7 @@
                 <label>Image</label>
                 <input asp-for="ImageUpload" class="form-control" />
                 <span asp-validation-for="ImageUpload" class="text-danger" />
-            </div>
-            <div class="form-group">
-                <img id="imgpreview" />
+                <img id="imgpreview" class="pt-2" />
             </div>
 
             <div class="form-group">
@@ -60,6 +58,11 @@
 
     <link rel="stylesheet" href="~/lib/multiple-select/multiple-select.min.css" />
     <script src="~/lib/multiple-select//multiple-select.min.js"></script>
+    <script>
+        $("#ImageUpload").change(function () {
+            readURL(this);
+        });
+    </script>
 
     <script>
         $("#SubjectIDs").multipleSelect({

@@ -15,6 +15,7 @@ namespace DShop2024.Areas.Blog.Controllers
     public class SubjectController : Controller
     {
         private readonly DShopContext _context;
+        private readonly string sidebar = "blog";
 
         public SubjectController(DShopContext context)
         {
@@ -23,7 +24,7 @@ namespace DShop2024.Areas.Blog.Controllers
 
         public async Task<IActionResult> Index()
         {
-
+            ViewBag.sidebar = Menu.Admin.Blog;
             var qr = (from c in _context.Subjects select c).Where(c => c.Status != 0)
                 .Include(c => c.ParentSubject)
                 .Include(c => c.SubjectChildren);
@@ -37,6 +38,7 @@ namespace DShop2024.Areas.Blog.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -55,7 +57,8 @@ namespace DShop2024.Areas.Blog.Controllers
 
         public async Task<IActionResult> SearchTitle(String search)
         {
-            if(String.IsNullOrEmpty(search))
+            ViewBag.sidebar = Menu.Admin.Blog;
+            if (String.IsNullOrEmpty(search))
             {
                 return RedirectToAction("Index");
             }
@@ -95,6 +98,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> CreateAsync()
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             var qr = (from c in _context.Subjects select c)
                 .Where(s => s.Status != 0)
                 .Include(c => c.ParentSubject)
@@ -123,6 +127,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,SubjectContent,ParentSubjectId")] SubjectModel subject)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (ModelState.IsValid)
             {
                 try
@@ -171,6 +176,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -210,6 +216,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,SubjectContent,Status,ParentSubjectId")] SubjectModel subject)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id != subject.Id)
             {
                 return NotFound();
@@ -314,6 +321,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();

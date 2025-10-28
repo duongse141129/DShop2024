@@ -45,8 +45,9 @@
                                 <div class="notif-content">
                                     <span class="subject"><strong>@item.UserName</strong></span>
                                     <span id="notiContentMessage_@item.UserName" class="block">
-                                        @item.ContentMessage
-                                    </span>
+                                        @( item.IsImage == true ? "send a image." : item.ContentMessage)
+                                    </span>             
+
                                     <span id="notiTimespan_@item.UserName" class="time">@item.Timestamp</span>
                                 </div>
                             </a>

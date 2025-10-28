@@ -12,7 +12,6 @@ namespace DShop2024.Areas.Admin.Controllers
     public class ShippingController : Controller
 	{
         private readonly DShopContext _context;
-        private readonly string sidebar = "shipping";
 
         public ShippingController(DShopContext context)
         {
@@ -22,7 +21,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("Index")]
         public async Task<IActionResult> Index()
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Shipping;
             var shippingList = await _context.Shippings.ToListAsync();
             ViewBag.Shippings = shippingList;
             ViewBag.DefaultShipping = DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND");
@@ -35,7 +34,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("StoreShipping")]
         public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, decimal price)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Shipping;
             shippingModel.Price = price;       
             try
             {
@@ -62,7 +61,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("Delete")]
         public async Task<IActionResult> Delete(int? Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Shipping;
             if (Id == null)
             {
                 return NotFound();

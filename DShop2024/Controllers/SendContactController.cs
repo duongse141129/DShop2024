@@ -57,8 +57,8 @@ namespace DShop2024.Controllers
                         Avatar = user.Avatar,
                         DateSent = contactModel.DateSent.ToString("MM/dd/yyyy h:mm tt"),
                         Subject = contactModel.Subject,
-                        PathImage = $" {DShopConst.SEVER_ADDRESS}/media/avatar/{user.Avatar}",
-                        LinkContact = $" {DShopConst.SEVER_ADDRESS}/Admin/Contact/Reply/{contactModel.Id}"
+                        PathImage = $"/media/avatar/{user.Avatar}",
+                        LinkContact = $"/Admin/Contact/Reply/{contactModel.Id}"
                     };
                     await _hubContext.Clients.All.SendAsync("SendContact", user.UserName, contactViewModel);
                     return Ok(new { success = true, noti = "Send contact successful "});

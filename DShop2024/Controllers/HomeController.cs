@@ -29,6 +29,7 @@ namespace DShop2024.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.sidebar = Menu.Home.Home;
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
 			IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)

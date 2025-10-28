@@ -15,7 +15,7 @@ namespace DShop2024.Models
 		[Required( ErrorMessage = "The {0} field is required")]
 		public string CouponName { get; set; }
 		[Required(ErrorMessage = "The {0} field is required")]
-		[Range(0, int.MaxValue, ErrorMessage = "Value > {1}")]
+		[Range(0, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
 		public decimal Value { get; set; }
 		public string? Description { get; set; }
         [Required(ErrorMessage = "The {0} field is required")]
@@ -25,6 +25,9 @@ namespace DShop2024.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please input a number greater than 1")]
         public int Quantity { get; set; }
 		public int Status { get; set; }
+		[Required(ErrorMessage = "The {0} field is required")]
+		[Range(0, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
+		public decimal MinimumAmount { get; set; }
 		public int PromotionId { get; set; }
 
 		[ForeignKey("PromotionId")]

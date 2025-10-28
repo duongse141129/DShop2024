@@ -3,7 +3,6 @@
 
 @{
     ViewData["Title"] = "Manage coupon";
-    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 
 <h1 class="text-primary">@ViewData["title"]</h1>
@@ -43,6 +42,7 @@
                     <th>Date Expired</th>
                     <th>Quantity</th>
                     <th>Value</th>
+                    <th>Minimum purchase amount</th>
                     <th>Promotion</th>
                     <th>Status</th>
                     <th></th>
@@ -74,6 +74,7 @@
                                 <p> @DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND")</p>
                             }
                         </td>
+                        <td>@item.MinimumAmount.ToString("#,##0 VND")</td>
                         <td>@item.CategoryCouponName</td>
                         <td>
                             @((CouponEnumData.StatusCoupon)item.Status)

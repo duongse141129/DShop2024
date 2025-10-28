@@ -13,7 +13,6 @@ namespace DShop2024.Areas.Admin.Controllers
     {
         private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly string sidebar = "category";
 
         public CategoryManageController(DShopContext context , IWebHostEnvironment webHostEnvironment)
         {
@@ -23,7 +22,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(int pg =1)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             return View(await _context.Categories.Where(p => p.Status != 0).ToListAsync());
         }
 
@@ -33,7 +32,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             return View();
         }
 
@@ -43,7 +42,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             if (ModelState.IsValid)
             {
                 categoryModel.Slug = categoryModel.CategoryName.ToLower().Replace(" ", "-");
@@ -89,7 +88,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             if (id == null)
             {
                 return NotFound();
@@ -109,7 +108,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             if (id != categoryModel.Id)
             {
                 return NotFound();
@@ -190,7 +189,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Category;
             if (id == null)
             {
                 return NotFound();

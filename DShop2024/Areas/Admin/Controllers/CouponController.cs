@@ -16,7 +16,6 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _context;
         private readonly IMapper _mapper;
-        private readonly string sidebar = "coupon";
 
 
         public CouponController(DShopContext context, IMapper mapper)
@@ -26,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 		public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             IQueryable <CouponModel> listCoupon = _context.Coupons
                                 .Where(c => c.Status != 0)
                                 .Include(c => c.Promotion)
@@ -76,7 +75,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
 		public IActionResult Create()
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 			return View();
 		}
@@ -87,7 +86,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create( CouponModel couponModel)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             ViewBag.listPromotion = new SelectList(_context.Promotions.Where(b => b.Status != 0 && b.CategoryCouponName != DShopConst.NEW_CUSTOMER), "Id", "CategoryCouponName");
 
 			if (ModelState.IsValid)
@@ -151,7 +150,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             if (id == null)
 			{
 				return NotFound();
@@ -182,7 +181,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> ShowCoupon(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             if (id == null)
             {
                 return NotFound();
@@ -224,7 +223,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> HideCoupon(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Coupon;
             if (id == null)
             {
                 return NotFound();

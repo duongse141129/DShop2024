@@ -11,7 +11,6 @@ namespace DShop2024.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
-        private readonly string sidebar = "order";
 
         public OrderController(DShopContext context)
         {
@@ -19,7 +18,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Order;
 
             var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
             var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
@@ -76,7 +75,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ViewOrder(int? Id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Order;
             if (Id == null)
             {
                 return NotFound();
@@ -93,7 +92,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> UpdateStatusOrder(int? orderId)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Order;
             if (orderId == null)
             {
                 return NotFound();
@@ -128,7 +127,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> CancelOrder(int? orderId)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Order;
             if (orderId == null)
             {
                 return NotFound();

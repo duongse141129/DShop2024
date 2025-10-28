@@ -240,9 +240,10 @@
                 url: "@Url.Action("GetCoupon", "Cart")",
                 data: { couponCode: couponCode },
                 success: function (result) {
-                    if (result.success) {
-                        location.reload();
-                        Swal.fire(result.message);
+                    if (result.success) {                 
+                        Swal.fire(result.message).then(function(){
+                                                    location.reload();
+                                                });
                     } else {
                         Swal.fire(result.message);
                     }
@@ -270,8 +271,9 @@
                         data: { tinh: tinh, quan: quan, phuong: phuong, street: street, PhoneDelivery: phonedelevery, consignee: consignee },
                         success: function (result) {
                             if (result.success) {
-                                location.reload();
-                                Swal.fire(result.message.text);
+                                Swal.fire(result.message.text).then(function(){
+                                                    location.reload();
+                                                });
 
                             } else {
                                 Swal.fire(result.message.text);

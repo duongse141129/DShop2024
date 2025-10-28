@@ -5,14 +5,10 @@ using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Models.Blog;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Primitives;
-using static DShop2024.EnumData.ProductEnumData;
 
 namespace AppMvc.Areas.Blog.Controllers
 {
@@ -23,6 +19,7 @@ namespace AppMvc.Areas.Blog.Controllers
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string sidebar = "blog";
 
         public PostController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager)
         {
@@ -33,6 +30,7 @@ namespace AppMvc.Areas.Blog.Controllers
 
         public async Task<IActionResult> Index(string search,string subject_by, [FromQuery(Name = "p")]int currentPage, int pagesSize)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             IQueryable<PostModel> posts = _context.Posts.Where(p => p.Status!= 0)
                                         .Include(p => p.CreateBy)
                                         .Include(p => p.PostSubjects)
@@ -96,6 +94,7 @@ namespace AppMvc.Areas.Blog.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -117,6 +116,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> CreateAsync()
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             var Subjects = await _context.Subjects.Where(s=> s.Status != 0).ToArrayAsync();
 
             ViewData["Subjects"] = new MultiSelectList(Subjects, "Id", "Title");
@@ -129,6 +129,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,ShortDescription,PostContent,SubjectIDs,ImageUpload")] CreatePostModel post)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             var Subjects = await _context.Subjects.Where(s => s.Status != 0).ToListAsync();
             ViewData["Subjects"] = new MultiSelectList(Subjects,"Id","Title");
 
@@ -193,6 +194,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -232,6 +234,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ShortDescription,PostContent,SubjectIDs,ImageUpload")] CreatePostModel post)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id != post.Id)
             {
                 return NotFound();
@@ -338,6 +341,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -388,6 +392,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> PinPost(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();
@@ -432,6 +437,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> PinPostDetail(int? id)
         {
+            ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
             {
                 return NotFound();

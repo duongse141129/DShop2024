@@ -2,7 +2,7 @@
 @inject UserManager<AppUserModel> UserManager
 @model IEnumerable<DShop2024.ViewModels.MessageViewModel>
 @{
-    ViewData["Title"] = "Chat";
+    ViewData["Title"] = "Chat page";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
@@ -14,7 +14,7 @@
 
 <section>
     <div class="container py-5 ws">
-
+        <h1 class="mb-4">@ViewData["Title"] </h1>
         <div class="scroll-container p-3" data-bs-spy="scroll" id="messagesList_@UserManager.GetUserName(User)">
             @foreach (var item in Model)
             {
@@ -28,7 +28,7 @@
                     <div class="stylecontent-customer">
                         <div>
                             <p class="spcontent-customer">
-                                @item.ContentMessage
+                                @Html.Raw(item.ContentMessage)                             
                             </p>
                         </div>
                         <img src="~/media/avatar/@item.Avatar"
@@ -47,7 +47,7 @@
                              alt="avatar 1" class="message-img">
                         <div>
                             <p class="spcontent-toreciever">
-                                @item.ContentMessage
+                                @Html.Raw(item.ContentMessage)
                             </p>
                         </div>
                     </div>
@@ -63,11 +63,33 @@
             <div class="col-1">Message</div>
             <div class="col-5"><input name="messageInput" class="w-100" type="text" id="messageInput" maxlength="300" /></div>
         </div>
-        <div class="row p-1">
+@*         <div class="row p-1">
             <div class="col-6 text-end">
                 <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
             </div>
+        </div> *@
+        @*         <div class="row p-1">
+            <div class="col-md-6 ">
+                <form asp-action="Upload" asp-controller="Message" method="post" enctype="multipart/form-data" id="uploadform">
+                    <label for="uploadfile" > <i class="far fa-image"></i>  </label>
+                    <input type="file" id="uploadfile" name="file" accept=".jpg,.png,.jpeg"  />
+                 </form>
+            </div>
+        </div> *@
+        <div class="row p-1">
+            <div class="col-md-4 text-end ">
+                <form asp-action="Upload" asp-controller="Message" method="post" enctype="multipart/form-data" id="uploadform">
+                    <label for="uploadfile" id="iconfile"> <i class="far fa-image"></i>  </label>
+                    <p id="num-of-files" style="display: none;">No Files Chosen</p>
+                    <input type="file" id="uploadfile" name="file" accept=".jpg,.png,.jpeg" />
+                </form>
+            </div>
+            <div class="col-md-2 mt-2 text-end ">
+                <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
+            </div>
         </div>
+
+
 
     </div>
 </section> 
@@ -77,10 +99,10 @@
     <script src="~/js/chat.js"></script>
     <script src="~/js/chatNotification.js"></script>
     <script src="~/js/chatPageAdmin.js"></script>
+
     <script>
         $(document).ready(function () {
             $('.sendMessageButton').click(function () {
-                //var messageInput = $(this).data("userInput");
                 var messageInput = $('#messageInput').val();
 
                 $.ajax({
@@ -98,6 +120,28 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            var form = document.getElementById("uploadform");
+            $('#uploadfile').change(function () {
+                  console.log("Image selected!");
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Upload", "Message")",
+                    data: new FormData(form),
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#uploadfile').val("");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
     <script>
         function loadNotifiMessage() {
             $('#notiComponent').load("/AjaxContent/ReloadNotificationMessage");

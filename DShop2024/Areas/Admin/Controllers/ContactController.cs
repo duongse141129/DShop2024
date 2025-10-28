@@ -14,8 +14,6 @@ namespace DShop2024.Areas.Admin.Controllers
         private readonly DShopContext _context;
 		private readonly IEmailSender _emailSender;
 		private readonly UserManager<AppUserModel> _userManager;
-        private readonly string sidebar = "contact";
-
         public ContactController(DShopContext context, IEmailSender emailSender, UserManager<AppUserModel> userManager)
         {
             _context = context;
@@ -26,7 +24,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
         public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Contact;
             IQueryable<ContactModel> listContact = _context.Contacts.Where(c => c.Status != 0)
                                                         .Include(u => u.User)
                                                         .Include(r => r.Respondent)
@@ -62,7 +60,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Reply(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Contact;
             if (id == null)
             {
                 return NotFound();
@@ -82,7 +80,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Reply(int IdContact, string replyMessage)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Contact;
             try
             {
                 if (String.IsNullOrEmpty(replyMessage))
@@ -120,7 +118,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[Authorize(Roles = RoleName.Administrator)]
 		public async Task<IActionResult> Remove(int? id)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Contact;
             if (id == null)
             {
                 return NotFound();

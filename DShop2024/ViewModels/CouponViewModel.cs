@@ -15,8 +15,8 @@ namespace DShop2024.ViewModels
 		public DateTime DateExpired { get; set; }
 		public int Quantity { get; set; }
 		public int Status { get; set; }
-
-		public string CategoryCouponName { get; set; }
+        public decimal MinimumAmount { get; set; }
+        public string CategoryCouponName { get; set; }
 		public string DaysLeft { get; set; }
 
 	}

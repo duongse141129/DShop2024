@@ -25,7 +25,7 @@
             <ul class="nav nav-secondary">
                 @if (User.IsInRole(RoleName.Administrator))
                 {
-                <li class="nav-item @( ViewBag.sidebar == "dashboard" ? "active" : "")">
+                <li class="nav-item @( ViewBag.sidebar == Menu.Admin.Dashboard ? "active" : "")">
                     <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                         <i class="fas fa-chart-bar"></i>
                         <p>Dashboard</p>
@@ -47,7 +47,7 @@
                     <h4 class="text-section">Components</h4>
                 </li>
 
-                <li class="nav-item @( ViewBag.sidebar == "brand" ? "active" : "")">
+                <li class="nav-item @( ViewBag.sidebar == Menu.Admin.Brand ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#brand">
                         <i class="fas fa-layer-group"></i>
                         <p>Brand</p>
@@ -73,7 +73,7 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "category" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Category ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#category">
                         <i class="fas fa-archive"></i>
                         <p>Category</p>
@@ -99,7 +99,7 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "product" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Product ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#product">
                         <i class="fas fa-boxes"></i>
                         <p>Product</p>
@@ -124,14 +124,14 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "order" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Order ? "active" : "")">
                     <a asp-area="Admin" asp-controller="Order" asp-action="Index">
                         <i class="fas fa-cart-plus"></i>
                         <p>Order</p>
                     </a>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "shipping" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Shipping ? "active" : "")">
                     <a asp-area="Admin" asp-controller="Shipping" asp-action="Index">
                         <i class="fas fa-shipping-fast"></i>
                         <p>Shipping</p>
@@ -140,7 +140,7 @@
 
                 @if (User.IsInRole(RoleName.Administrator))
                 {
-                    <li class="nav-item  @( ViewBag.sidebar == "user" ? "active" : "")">
+                    <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.User ? "active" : "")">
                         <a data-bs-toggle="collapse" href="#user">
                             <i class="fas fa-address-card"></i>
                             <p>User</p>
@@ -162,7 +162,7 @@
                         </div>
                     </li>
 
-                    <li class="nav-item  @( ViewBag.sidebar == "role" ? "active" : "")">
+                    <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Role ? "active" : "")">
                         <a data-bs-toggle="collapse" href="#role">
                             <i class="fas fa-user-tag"></i>
                             <p>Role</p>
@@ -185,7 +185,7 @@
                     </li>
                 }
 
-                <li class="nav-item  @( ViewBag.sidebar == "coupon" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Coupon ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#coupon">
                         <i class="fas fa-money-check-alt"></i>
                         <p>Coupon</p>
@@ -210,14 +210,14 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "promotion" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Promotion ? "active" : "")">
                     <a asp-area="Admin" asp-controller="Promotion" asp-action="Index">
                         <i class="far fa-file-alt"></i>
                         <p>Promotion</p>
                     </a>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "slider" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Slider ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#slider">
                         <i class="far fa-image"></i>
                         <p>Slider</p>
@@ -242,7 +242,7 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "faq" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Faq ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#faq">
                         <i class="fas fa-question-circle"></i>
                         <p>FAQ</p>
@@ -267,21 +267,21 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "contact" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Contact ? "active" : "")">
                     <a  asp-area="Admin" asp-controller="Contact" asp-action="Index">
                         <i class="fas fa-list"></i>
                         <p>Contact</p>
                     </a>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "chat" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Chat ? "active" : "")">
                     <a asp-area="Admin" asp-controller="Chat" asp-action="Index">
                         <i class="fab fa-weixin"></i>
                         <p>Chat</p>
                     </a>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "information" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Information ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#information">
                         <i class="fas fa-archive"></i>
                         <p>Information Shop</p>
@@ -303,14 +303,14 @@
                     </div>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "stockIn" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Stock ? "active" : "")">
                     <a  asp-area="Admin" asp-controller="Stock" asp-action="Index">
                         <i class="fas fa-exchange-alt"></i>
                         <p>Stock</p>
                     </a>
                 </li>
 
-                <li class="nav-item  @( ViewBag.sidebar == "blog" ? "active" : "")">
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Blog ? "active" : "")">
                     <a data-bs-toggle="collapse" href="#blog">
                         <i class="fas fa-boxes"></i>
                         <p>Blog</p>

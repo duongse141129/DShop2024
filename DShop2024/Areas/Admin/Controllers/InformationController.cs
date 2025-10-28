@@ -11,7 +11,6 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly string sidebar = "information";
 
         public InformationController(DShopContext context, IWebHostEnvironment webHostEnvironment)
 		{
@@ -21,7 +20,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
 		public IActionResult Index()
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Information;
             var info = _context.InformationShops.FirstOrDefault();
 			return View(info);
 		}
@@ -30,7 +29,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
 		public async Task<IActionResult> Edit(int? Id)
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Information;
             if (Id == null)
             {
                 return NotFound();
@@ -50,7 +49,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int Id, InformationShopModel informationShop)
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Information;
             if (Id != informationShop.Id)
 			{
 				return NotFound();

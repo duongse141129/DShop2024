@@ -16,7 +16,6 @@ namespace DShop2024.Areas.Admin.Controllers
 	{
 		private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
-        private readonly string sidebar = "stockIn";
 
         public StockController(DShopContext context, UserManager<AppUserModel> userManager)
 		{
@@ -25,7 +24,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 		public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Stock;
             IQueryable<ReceivingStockModel> listStockIn =  _context.ReceivingStocks
                             .Where(s => s.Status != 0)
                             .Include(p => p.Product)
@@ -62,7 +61,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchByProductId(int productId)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Stock;
 
             var product = await _context.Products.FirstOrDefaultAsync( p => p.Id == productId);
             if (product != null)
@@ -82,14 +81,14 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public  IActionResult ImportFromFIle()
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Stock;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> ImportFromFile(IFormFile file)
         {
-            ViewBag.sidebar = sidebar;     
+            ViewBag.sidebar = Menu.Admin.Stock;     
             if (file != null && file.Length > 0)
             {
                 var uploadDirectory = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Uploads";
@@ -162,7 +161,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public  async Task<IActionResult> Save( List<NameAndValueVM> items)
         {
-            ViewBag.sidebar = sidebar;
+            ViewBag.sidebar = Menu.Admin.Stock;
             var user = await _userManager.GetUserAsync(this.User);
             try
             {
