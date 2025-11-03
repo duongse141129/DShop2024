@@ -1,18 +1,15 @@
-﻿@using DShop2024.ViewModels
-@model IEnumerable<ProductViewModel>
-
-<div class="row">
+﻿<div class="row">
     <div class="col-md-12">
 
         <div class="section-header d-flex justify-content-between">
 
-            <h2 class="section-title">Featured products</h2>
+            <h2 class="section-title">Best rating products</h2>
 
             <div class="d-flex align-items-center">
                 <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="btn-link text-decoration-none">View All Products →</a>
                 <div class="swiper-buttons">
-                    <button class="swiper-prev products-carousel-prev btn btn-primary">❮</button>
-                    <button class="swiper-next products-carousel-next btn btn-primary">❯</button>
+                    <button class="swiper-prev rating-products-carousel-prev btn btn-primary">❮</button>
+                    <button class="swiper-next rating-products-carousel-next btn btn-primary">❯</button>
                 </div>
             </div>
         </div>
@@ -22,7 +19,7 @@
 <div class="row">
     <div class="col-md-12">
 
-        <div class="products-carousel swiper">
+        <div class="rating-products-carousel swiper">
             <div class="swiper-wrapper">
 
                 @foreach (var item in Model)
@@ -39,7 +36,7 @@
                         }
                         <figure>
                             <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
-                                <img src="~/media/products/@item.MainImage" class="img-fluid" style="height : 200px">
+                                <img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage">
                             </a>
                         </figure>
                         <h3>@item.ProductName</h3>
@@ -54,16 +51,28 @@
                         <span class="price">@item.Price.ToString("#,##0 VND")</span>
                         <span class="qty">@item.BrandName</span><br />
                         <span class="qty">@item.CategoryName</span>
-                        <div class="d-flex align-items-center justify-content-between">
-                            @if (item.Stock > 0)
-                            {
-                                <button class="btn btn-primary add-to-cart" data-product_id="@item.Id">Add to Cart</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-primary add-to-cart">Out Of Order</button>
-                            }
+                        <form asp-area="" asp-action="AddQuantityToCart" asp-controller="Cart" method="post" id="form-bestRating-@item.Id">
+                        <div class="d-flex align-items-center justify-content-between">                          
+                            <input type="hidden" class="form-control input-number" name="productId" value="@item.Id">
+                            <div class="input-group product-qty">
+                                <span class="input-group-btn">
+                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </span>
+                                <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" step="1">
+                               
+                                <span class="input-group-btn">
+                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </span>
+                            </div>                 
                         </div>
+                        </form>
+                        <button class="btn btn-primary btn-md add-to-cart-quantity " id="bestRating-@item.Id">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
                     </div>
                 }
 

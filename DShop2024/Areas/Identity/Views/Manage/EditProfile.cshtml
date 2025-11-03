@@ -33,6 +33,11 @@
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
                         <div class="form-group">
+                            <label asp-for="Address"></label>
+                            <input asp-for="Address" class="form-control" readonly />
+                            <a asp-action="EditAddress">Edit Address </a>                         
+                        </div>
+                        <div class="form-group">
                             <label asp-for="BirthDate"></label>
                             <input asp-for="BirthDate" type="date" class="form-control" />
                             <span asp-validation-for="BirthDate" class="text-danger"></span>
@@ -49,10 +54,8 @@
                                 <input id="Gender" name="Gender" value="True"  type="radio" @(Model.Gender == true ? "checked" : "")>
                                 <label>Female</label>
                                 <input id="Gender" name="Gender" value="False" type="radio" @(Model.Gender == false ? "checked" : "")>
-                            </inputRadioGroup>
-               
+                            </inputRadioGroup>              
                         </div>
-
 
                         <div class="form-group">
                             <label>Image</label>

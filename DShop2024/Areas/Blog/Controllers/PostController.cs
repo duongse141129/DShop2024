@@ -554,5 +554,84 @@ namespace AppMvc.Areas.Blog.Controllers
             TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful " ;
             return RedirectToAction("Index");
         }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedWishList()
+        {
+            try
+            {
+                var customers = await (from u in _context.Users
+                                       join ur in _context.UserRoles on u.Id equals ur.UserId
+                                       join r in _context.Roles on ur.RoleId equals r.Id
+                                       where r.Name == RoleName.Customer
+                                       select u).ToListAsync();
+                //var products = await _context.Products.Where(p => p.Status != 0 && p.Stock >0).Select(g => new { id = g.Id }).ToListAsync();
+                Random rnd = new Random();
+                foreach (var cus in customers)
+                {
+                    for (int i = 0; i < 10; i++)
+                    {
+                        int productId = rnd.Next(32, 82);
+                        var check = await _context.WishLists.Where(u => u.UserId == cus.Id && u.ProductId == productId).AnyAsync();
+                        if (check != true)
+                        {
+                            WishListModel wish = new WishListModel
+                            {
+                                UserId = cus.Id,
+                                ProductId = productId,
+                            };
+                            await _context.WishLists.AddAsync(wish);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
+                }
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail "+ ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedCreateProduct()
+        {
+            try
+            {
+                var products = await _context.Products.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
+                Random rnd = new Random();
+                DateTime dateTime = new DateTime(2024, 1, 1);
+                foreach (var product in products)
+                {
+                    dateTime = dateTime.AddDays(rnd.Next(1,20));
+                    if(dateTime > DateTime.Now)
+                    {
+                        dateTime = DateTime.Now;
+                    }
+                    product.CreateDate = dateTime;
+                    _context.Products.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
+
+
     }
 }

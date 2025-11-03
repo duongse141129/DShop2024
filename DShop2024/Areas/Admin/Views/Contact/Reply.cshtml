@@ -5,9 +5,9 @@
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 
-<div class="replay-box">
+<div>
 	<div class="row">
-		<div class="col-sm-4">
+		<div class="col-md-4">
 
 			<h4>@Model.User.UserName</h4>
 			<img src="~/media/avatar/@Model.User.Avatar" width="150" height="150" alt="">
@@ -16,17 +16,13 @@
 			<p><strong>Subject:</strong> @Model.Subject</p>
 			<p>@Model.Message</p>
 		</div>
-		<div class="col-sm-8">
-			<h2>Leave a replay</h2>
+		<div class="col-md-8">
+			<h2 class="text-warning">Leave a replay</h2>
 			<form asp-action="Reply" method="post" asp-controller="Contact">
 				<input type="hidden" name="IdContact" value="@Model.Id" />
-				<div class="text-area">
-					<div class="blank-arrow">
-						<label>Reply Message</label>
-					</div>
-					<textarea id="replyMessage" name="replyMessage" class="col-sm-12 bg-white" rows="11"></textarea>
-				</div>
-				<input class="btn btn-primary" type="submit" value="REPLY" />
+				<label for="replyMessageCus">Reply Message</label>
+				<textarea id="replyMessageCus" name="replyMessage" class="bg-white" rows="30"></textarea>
+				<input class="btn btn-primary btn-lg" type="submit" value="Reply Contact" />
 			</form>
 		</div>
 	</div>
@@ -36,3 +32,16 @@
 	<a asp-action="Index">Back to List</a>
 </div>
 
+@section Scripts {
+
+    @{
+		var summernote = new DShop2024.Models.Summernote("#replyMessageCus");
+        @await Html.PartialAsync("_SummernotePartial", summernote);
+    }
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

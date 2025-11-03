@@ -30,18 +30,18 @@
         }
     }(function ($) {
         $.extend($.summernote.plugins, {
-            // Tạo plugin tên elfinder
+            // Create plugin elfinder
             'elfinder': function (context) {
                 var self = this;
                 // ui has renders to build ui elements.
                 var ui = $.summernote.ui;
-                // Tạo nút bấm
+                // Create button
                 context.memo('button.elfinder', function () {
                     var button = ui.button({
                         contents: '<i class="note-icon-picture"/> elFinder',
                         tooltip: 'Manage file',
                         click: function () {
-                            // Bấm vào nút bấm gọi hàm elfinderDialog
+                            // call elfinderDialog
                             elfinderDialog(context);
                         }
                     });

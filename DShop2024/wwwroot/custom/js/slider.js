@@ -28,6 +28,8 @@ function prevSlide() {
 function nextSlide() {
     if (currentIndex < totalCards - 1) {
         goToSlide(currentIndex + 1);
+    } else {
+        goToSlide(0); 
     }
 }
 function startAutoSlide() {
@@ -40,3 +42,4 @@ function stopAutoSlide() {
 
 startAutoSlide();
 updatePagination();
+

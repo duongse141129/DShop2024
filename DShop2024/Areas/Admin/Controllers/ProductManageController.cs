@@ -94,6 +94,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
                     }
                     product.Status = 1;
+                    product.CreateDate = DateTime.Now;
                     ProductModel productModel = _mapper.Map<ProductModel>(product);
                     var createdProduct = await _context.Products.AddAsync(productModel);
                     await _context.SaveChangesAsync();
@@ -226,7 +227,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
                         fs.Close();
-                        exitedProduct.MainImage = imageName;
+                        product.MainImage = imageName;
 
                     }
 

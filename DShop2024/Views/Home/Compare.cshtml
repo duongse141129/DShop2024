@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DShop2024.Models.ProductModel>
+﻿@model IEnumerable<ProductModel>
 @{
     ViewData["Title"] = "Compare Products";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -28,6 +28,25 @@ else
         </tr>
     </thead>
     <tbody >
+        <tr>
+            <td>Rating Point</td>
+            @foreach (var item in Model)
+            {
+                var averagePoint = item.Ratings.Any() ? item.Ratings.Where(r => r.ProductId == item.Id && r.Status != 0).Average(r => r.Star) : 0;
+               <td>
+                            <span>@averagePoint.ToString("#.##")</span>
+                            <div class="d-flex mb-2">
+                                <i class="fa fa-star @( averagePoint >= 1 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( averagePoint >= 2 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( averagePoint >= 3 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( averagePoint >= 4 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( averagePoint >= 5 ? "text-primary " :  "")"></i>
+                            </div>
+
+               </td>
+            }
+        </tr>
+
         <tr>
             <td>Price</td>
             @foreach (var item in Model)

@@ -1,7 +1,9 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace DShop2024.ViewModels
 {
-	public class ProductViewModel
+	public class ProductViewModel 
 	{
 		public int Id { get; set; }
 		public string ProductName { get; set; }
@@ -11,10 +13,15 @@ namespace DShop2024.ViewModels
 		public decimal OriginalPrice { get; set; }
 		public int Stock { get; set; }
 
-		public string BrandName { get; set; }
-		public string CategoryName { get; set; }
+        public int BrandId { get; set; }
+        public string BrandName { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
 
 		public double AveragePoint { get; set; }
 		public int QuantitySold { get; set; }
-	}
+		public DateTime? ViewAt { get; set; }
+        public int WishlistCount { get; set; }
+
+    }
 }

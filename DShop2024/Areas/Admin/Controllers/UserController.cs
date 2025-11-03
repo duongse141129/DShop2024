@@ -31,8 +31,13 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
             ViewBag.sidebar = Menu.Admin.User;
-            IQueryable<UserWithRoleViewModel> userWithRole = _userManager.Users.OrderByDescending(u => u.Status)
-                                        .Select(u => new UserWithRoleViewModel { User = u });
+
+            IQueryable<UserWithRoleViewModel> userWithRole =  from u in _context.Users
+                                                           join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                           join r in _context.Roles on ur.RoleId equals r.Id
+                                                           orderby u.Status descending
+                                                           select new UserWithRoleViewModel { User=u, RoleName=r.Name };
+
 
             var count = await userWithRole.CountAsync();
             if (count > 0)
@@ -69,12 +74,6 @@ namespace DShop2024.Areas.Admin.Controllers
                         .Take(pagesSize).ToListAsync();
 
             ViewBag.pagingModel = pagingModel;
-
-            foreach (var user in listUserWithRole)
-            {
-                var roles = await _userManager.GetRolesAsync(user.User);
-                user.RoleName = roles.FirstOrDefault();
-            }
 
             var userWithRoleVM = listUserWithRole.OrderBy(u => u.RoleName);
 

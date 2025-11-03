@@ -47,10 +47,9 @@ namespace DShop2024.Models
         [Range(1, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
         public int MainPocket { get; set; }
         public bool WaterResistance { get; set; }
-        public bool USBChargingPort { get; set; }
-
-      
+        public bool USBChargingPort { get; set; }   
         public decimal? LaptopPocket { get; set; }
+        public DateTime CreateDate { get; set; }
 
 
         [NotMapped]

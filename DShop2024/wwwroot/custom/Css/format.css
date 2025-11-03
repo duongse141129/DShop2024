@@ -1,0 +1,45 @@
+﻿.quantityDetail {
+    text-align: center;
+    width: 50px;
+    height: 40px;
+    border: none;
+}
+.buttonQuantityMinus {
+    border: 3px solid #acb3bf;
+    border-radius: 50%;
+}
+.buttonQuantityPlus {
+    border: 3px solid #acb3bf;
+    border-radius: 50%;
+}
+.relatedCompare {
+    border: 3px solid #0e60ed;
+    border-radius: 50%;
+    padding: 8px;
+}
+    .relatedCompare:hover {
+        background-color: #0e60ed;
+        color: white;
+    }
+.relatedWishlist {
+    border: 3px solid #ed0e33;
+    border-radius: 50%;
+    padding: 8px;
+}
+    .relatedWishlist:hover {
+        background-color: #ed0e33;
+        color:white;
+    }
+
+#usemyinfo {
+    border: 3px solid #acb3bf;
+    padding: 10px;
+    margin-right: 10px;
+}
+.product-mainImage {
+    object-fit: fill;
+    height: 210px;
+    max-width: auto;
+    object-position: center;
+
+}

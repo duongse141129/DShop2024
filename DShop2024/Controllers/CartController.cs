@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 
 
+
 namespace DShop2024.Controllers
 {
 	public class CartController : Controller
@@ -54,46 +55,55 @@ namespace DShop2024.Controllers
 
 		}
 
-        public async Task<ActionResult> AddToCart(int? Id)
+        [HttpPost]
+        public async Task<ActionResult> AddQuantityToCart([FromForm] int quantity, [FromForm] int? productId)
         {
-            if (Id == null)
+            if (productId == null)
             {
                 return NotFound();
             }
+            if (quantity < 1)
+            {
+                return Ok(new { success = false, Message = $" Input quantity >= 1" });
+            }
             ProductModel product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+                .FirstOrDefaultAsync(m => m.Id == productId && m.Status != 0);
             if (product == null)
             {
                 return NotFound();
             }
-			if(product.Stock == 0)
-			{
-                return Ok(new { success = false, Message = "Add to wishList fail " + $" Item {product.ProductName} is out of ourder" });
+            if (product.Stock == 0)
+            {
+                return Ok(new { success = false, Message =  $" Item {product.ProductName} is out of ourder" });
             }
+            if (product.Stock < quantity)
+            {
+                return Ok(new { success = false, Message =  $" Item {product.ProductName} only has  {product.Stock} quantities left" });
+            }
+
             List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-            CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
+            CartItemModel cartItem = cart.Where(c => c.ProductId == productId).FirstOrDefault();
             if (cartItem == null)
             {
+                product.Stock = quantity;
                 cart.Add(new CartItemModel(product));
             }
             else
             {
-                if (product.Stock <= cartItem.Quantity)
+                if (product.Stock < cartItem.Quantity + quantity)
                 {
-                    TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
-                    return Ok(new { success = false, Message = "Add to wishList fail " + $" Item {product.ProductName} only has {product.Stock} left" });
+                    return Ok(new { success = false, Message = $"Item {product.ProductName} only has {product.Stock} left" });
                 }
                 else
                 {
-                    cartItem.Quantity += 1;
-                    TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
+                    cartItem.Quantity += quantity;
                 }
             }
             HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
             await GetValueByPercentCoupon();
-            TempData[DShopConst.TEMPDATA_SUCCESS] = $" Add Item {product.ProductName} to cart successfully";
             return Ok(new { success = true, Message = $" Add Item {product.ProductName} to cart successfully" });
         }
+
 
         public async Task<ActionResult> Increase(int? Id)
 		{
@@ -243,12 +253,10 @@ namespace DShop2024.Controllers
 				return Ok(new { success = false, message = "Please enter your coupon code to apply coupon" });
 			}
             
-
             var validCoupon = await _context.Coupons
 									.Include(p => p.Promotion)
 									.FirstOrDefaultAsync(x => x.CouponCode == couponCode);
-			
-			
+					
 			if(validCoupon != null)
 			{
 				if(validCoupon.Status == 0)
@@ -371,7 +379,47 @@ namespace DShop2024.Controllers
 		}
 
 
+        [HttpPost]
+        public async Task<ActionResult> UseMyInformation(bool checkInfo)
+        {
+			if(!checkInfo)
+			{
+                InformationDelivery informationDelivery = new InformationDelivery();
+                HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
+                return Ok(new { success = false, message = "Remove shipping information." });
+            }
+			try
+			{
+                var user = await _userManager.GetUserAsync(this.User);
+                if (String.IsNullOrEmpty(user.PhoneNumber))
+                {
+                    return Ok(new { success = false, message = "Go to profile and add your phone number" });
+                }
+                if (String.IsNullOrEmpty(user.Address))
+                {
+                    return Ok(new { success = false, message = "Go to profile and add your address" });
+                }
+                string[] address = user.Address.Split("_");
+                InformationDelivery info = new InformationDelivery();
+                info.tinh = address[address.Count() - 1];
+                info.quan = address[address.Count() - 2];
+                info.phuong = address[address.Count() - 3];
+                info.Street = address[address.Count() - 4];
+                info.PhoneDelivery = user.PhoneNumber;
+                info.Consignee = user.UserName;
+                info.IsUseMyInfo = true;
+                var result = await GetShipping(info);
+                if (result != null)
+                {
+                    return Ok(new { success = true, message = "Use information successful to get shipping successful" });
+                }
+                return Ok(new { success = false, message = "Use information to get shipping fail." });
+            }
+			catch (Exception ex)
+			{
+                return Ok(new { success = false, message = "Use information to get shipping fail. " + ex.Message });
+            }
+        }
 
-
-	}
+    }
 }

@@ -39,6 +39,10 @@ namespace App.Areas.Identity.Models.ManageViewModels
 
         public string LoginType { get; set; }
 
+
+        [StringLength(500)]
+        public string Address { get; set; }
+
         [NotMapped]
         [FileExtension]
         public IFormFile? AvatarUpload { get; set; }

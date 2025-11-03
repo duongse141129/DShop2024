@@ -1,4 +1,5 @@
-﻿@model IEnumerable<DShop2024.Models.ProductModel>
+﻿@using DShop2024.ViewModels
+@model IEnumerable<ProductViewModel>
 @{
     ViewData["title"] = "Wishlist Product";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -9,7 +10,7 @@
 
 @if(Model.Count() == 0)
 {
-    <h4>List compare is empty</h4>
+    <h4>List wish list is empty</h4>
 }
 else
 {
@@ -22,6 +23,7 @@ else
                 <th scope="col">Stt</th>
                 <th scope="col">Image</th>
                 <th scope="col">Product Name</th>
+                <th scope="col">Rating Point</th>
                 <th scope="col">Brand</th>
                 <th scope="col">Category</th>
                 <th scope="col">Price</th>
@@ -38,9 +40,21 @@ else
             <tr>
                 <th scope="row">@i</th>
                 <td><img src="~/media/products/@item.MainImage" width="120" height="100" /></td>
-                <td>@item.ProductName</td>
-                <td>@item.Brand.BrandName</td>
-                <td>@item.Category.CategoryName</td>
+                <td>
+                    <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@item.Id">@item.ProductName</a>
+                </td>
+                <td>
+                                <span class="rating"> @item.AveragePoint.ToString("#.##")</span>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+                                </div>
+                </td>
+                <td>@item.BrandName</td>
+                <td>@item.CategoryName</td>
                 <td>@item.Price.ToString("#,##0 VND")</td>
                 <td>
 
@@ -48,16 +62,13 @@ else
                 </td>
 
             </tr>
-
-
             i++;
-
         }
 
         </tbody>
 
     </table>
-
+            <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
 }
     </div>
 

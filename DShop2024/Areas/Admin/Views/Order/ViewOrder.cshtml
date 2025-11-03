@@ -16,7 +16,13 @@
                     <div class="col-md-12">
                         @if(Model.Status == 0)
                         {
-                            <h4>Invoice has been cancelled</h4>
+                            <div >
+                                <h4>Invoice has been cancelled by @Model.UpdateBy.UserName</h4>
+                                <div class="avatar avatar-md">
+                                    <img src="~/media/avatar/@Model.UpdateBy.Avatar" class="avatar-img rounded">
+                                </div>
+                                <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
+                            </div>
                         }
                         else
                         {
@@ -26,8 +32,14 @@
                                 <div class="step @(Model.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
                                 <div class="step @(Model.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
                             </div>
+                            <div>
+                                <h4>Update by @Model.UpdateBy.UserName</h4>
+                                <div class="avatar avatar-md">
+                                    <img src="~/media/avatar/@Model.UpdateBy.Avatar" class="avatar-img rounded">
+                                </div>
+                                <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
+                            </div>
                         }
-                        
                         <hr>
                     </div>
                 </div>
@@ -66,10 +78,9 @@
                                 <thead>
                                     <tr>
                                         <th scope="col" class="text-uppercase">Stt</th>
-                                        <th scope="col" class="text-uppercase">ProductId</th>
                                         <th scope="col" class="text-uppercase">Product Name</th>
                                         <th scope="col" class="text-uppercase">Quantity</th>
-                                        <th scope="col" class="text-uppercase text-end">Unit Price</th>
+                                        <th scope="col" class="text-uppercase text-end">Price</th>
                                         <th scope="col" class="text-uppercase text-end">Amount</th>
                                     </tr>
                                 </thead>
@@ -79,41 +90,38 @@
                                     {
                                         <tr>
                                             <td scope="row">@i</td>
-                                            <td>@item.ProductId</td>
                                             <td>
                                                 <a asp-area="Admin" asp-controller="ProductManage" asp-action="Detail" asp-route-Id="@item.ProductId">@item.Product.ProductName</a>
                                                 <img src="~/media/products/@item.Product.MainImage" width="120" height="100" />
                                             </td>
                                             <td>@item.Quantity</td>
-                                            <td class="text-end">@item.Price</td>
-                 
-                                            <td class="text-end">@(item.Quantity * item.Price)</td>
+                                            <td class="text-end">@item.Price.ToString("#,##0 VND")</td>                             
+                                            @{
+                                                var subsum = item.Quantity * item.Price;
+                                            }
+                                            <td class="text-end">@subsum.ToString("#,##0 VND")</td>
                                         </tr>
                                         i++;
                                     }
                                     <tr >
-                                         <td></td>
                                         <td></td>
                                         <td colspan="3" class="text-end">Subtotal</td>
-                                        <td class="text-end">@Model.OrderDetails.Sum(od => od.Quantity * od.Price)</td>
+                                        <td class="text-end">@Model.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND")</td>
                                     </tr>
                                     <tr>
-                                        <td></td>
                                         <td></td>
                                         <td colspan="3" class="text-end">coupon</td>
-                                        <td class="text-end">-@Model.ValueCoupon</td>
+                                        <td class="text-end">-@Model.ValueCoupon.ToString("#,##0 VND")</td>
                                     </tr>
                                     <tr>
-                                        <td></td>
                                         <td></td>
                                         <td colspan="3" class="text-end">Shipping Cost</td>
-                                        <td class="text-end">+@Model.ShippingCost</td>
+                                        <td class="text-end">+@Model.ShippingCost.ToString("#,##0 VND")</td>
                                     </tr>
                                     <tr>
                                         <td></td>
-                                        <td></td>
                                         <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
-                                        <td class="text-end">@Model.TotalPrice</td>
+                                        <td class="text-end">@Model.TotalPrice.ToString("#,##0 VND")</td>
                                     </tr>
 
                                 </tbody>

@@ -1,0 +1,87 @@
+﻿@using DShop2024.ViewModels
+@model IEnumerable<ProductViewModel>
+
+@if(Model.Count() > 0)
+{
+	
+<div class="row">
+	<div class="col-md-12">
+		<div class="section-header d-flex justify-content-between">
+			<h2 class="section-title">Recently Viewed products</h2>
+			<div class="d-flex align-items-center">
+				<div class="swiper-buttons">
+					<button class="swiper-prev recentView-products-carousel-prev btn btn-primary">❮</button>
+					<button class="swiper-next recentView-products-carousel-next btn btn-primary">❯</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+
+		<div class="recentView-products-carousel swiper">
+			<div class="swiper-wrapper">
+				@foreach (var item in Model)
+				{
+					<div class="product-item swiper-slide">
+						@if (User.Identity?.IsAuthenticated ?? false)
+						{
+							<a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+								<i class="fas fa-retweet"></i>
+							</a>
+							<a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+								<i class="far fa-heart"></i>
+							</a>
+						}
+						<figure>
+							<a asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
+								<img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage">
+							</a>
+						</figure>
+						<h3>@item.ProductName</h3>
+						<span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
+						<div class="d-flex mb-2">
+							<i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+							<i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+							<i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+							<i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+							<i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+						</div>
+						<span class="price">@item.Price.ToString("#,##0 VND")</span>
+						<span class="qty">@item.BrandName</span><br />
+						<span class="qty">@item.CategoryName</span>
+							<form asp-area="" asp-action="AddQuantityToCart" asp-controller="Cart" method="post" id="form-recentlyview-@item.Id">
+								<div class="d-flex align-items-center justify-content-between">
+									<input type="hidden" class="form-control input-number" name="productId" value="@item.Id">
+									<div class="input-group product-qty">
+										<span class="input-group-btn">
+											<button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+												<i class="fas fa-minus"></i>
+											</button>
+										</span>
+										<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" step="1">
+
+										<span class="input-group-btn">
+											<button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+												<i class="fas fa-plus"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</form>
+							<button class="btn btn-primary btn-md add-to-cart-quantity " id="recentlyview-@item.Id">
+								<i class="fas fa-cart-plus"></i> Add to Cart
+							</button>
+					</div>
+				}
+
+
+			</div>
+		</div>
+
+	</div>
+</div>
+
+}

@@ -1,4 +1,5 @@
-﻿using DShop2024.EnumData;
+﻿using AutoMapper;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -6,18 +7,22 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+
 namespace DShop2024.Controllers
 {
 	public class ShopProductsController : Controller
 	{
 		private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
+        private readonly IMapper _mapper;
 
-		public ShopProductsController(DShopContext context, UserManager<AppUserModel> userManager)
+        public ShopProductsController(DShopContext context, UserManager<AppUserModel> userManager, IMapper mapper)
 		{
 			_context = context;
 			_userManager = userManager;
-		}
+			_mapper = mapper;
+
+        }
 
         public async Task<IActionResult> Index(string CategorySlug = "", string BrandSlug = "",
                                                  string searchName = "",
@@ -60,7 +65,6 @@ namespace DShop2024.Controllers
                 {
                     listProduct = listProduct.Where(c => c.USBChargingPort == true);
                 }
-
 
                 if (sortBy == "PriceIncrease")
                 {
@@ -144,23 +148,16 @@ namespace DShop2024.Controllers
                     USBChargingPort = USBChargingPort
                 })
             };
-
-            var products = await listProduct.Skip((currentPage - 1) * pagesSize)
-                        .Take(pagesSize)
-						.Select(g => new ProductViewModel
-                        {
-                            Id = g.Id,
-                            ProductName = g.ProductName,
-                            MainImage = g.MainImage,
-                            Price = g.Price,
-                            Stock = g.Stock,
-                            BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-                            CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
-                            AveragePoint = g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average(r => r.Star) : 0
-                        })
-                        .ToListAsync();
             ViewBag.pagingModel = pagingModel;
-            return View(products);
+            var products = await listProduct.Skip((currentPage - 1) * pagesSize)
+                                            .Include(p => p.Ratings)
+                                            .AsSplitQuery()
+                                            .AsNoTracking()
+                                           .Take(pagesSize)
+                                           .ToListAsync();
+            var productVMs = _mapper.Map<List<ProductViewModel>>(products);
+            return View(productVMs);
+
         }
 
 
@@ -188,20 +185,13 @@ namespace DShop2024.Controllers
 										.Include (p => p.Brand)
 										.Include(p => p.Category)
 										.Include(p => p.Ratings)
+										.Include(p => p.Images)
 										.Take(5)
-										.Select( g => new ProductViewModel {
-											Id = g.Id,
-											ProductName = g.ProductName,
-											MainImage = g.MainImage,
-											Price = g.Price,
-											Stock = g.Stock,
-											BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-											CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
-											AveragePoint =  g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average( r => r.Star) : 0
-										})   
+										.Select( g => _mapper.Map<ProductViewModel>(g))   
 										.ToListAsync();
 				ViewBag.relatedProducts = relatedProducts;
 
+                
 				var rvproduct = Request.Cookies["RecentlyViewedProducts"];
 				List<ProductViewModel> recentlyViewedProducts;
 				if (rvproduct == null)
@@ -216,35 +206,23 @@ namespace DShop2024.Controllers
 				var checkAdd = recentlyViewedProducts.Any(p => p.Id == productById.Id);
 				if (!checkAdd)
 				{
-					recentlyViewedProducts.Add(new ProductViewModel
-					{
-						Id = productById.Id,
-						ProductName = productById.ProductName,
-						MainImage = productById.MainImage,
-						Price = productById.Price,
-						Stock = productById.Stock,
-						BrandName = _context.Brands.FirstOrDefault(b => b.Id == productById.BrandId).BrandName,
-						CategoryName = _context.Categories.FirstOrDefault(c => c.Id == productById.CategoryId).CategoryName,
-						AveragePoint = productById.Ratings.Any() ? productById.Ratings.Where(r => r.ProductId == productById.Id && r.Status != 0).Average(r => r.Star) : 0
-					});
-					if (recentlyViewedProducts.Count > 8)
-					{
-						recentlyViewedProducts.RemoveAt(0);
-					}
+              
+                    ProductViewModel pvm = _mapper.Map<ProductViewModel>(productById);
+                    pvm.ViewAt= DateTime.Now;
+                    recentlyViewedProducts.Add(pvm);
 				}
 				var recentProducts = JsonConvert.SerializeObject(recentlyViewedProducts, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore });
 				var cookieOptionss = new CookieOptions
 				{
 					HttpOnly = true,
-					Expires = DateTime.UtcNow.AddMinutes(1),
+					Expires = DateTime.UtcNow.AddMinutes(2),
 					Secure = true,
 					SameSite = SameSiteMode.Strict,
 				};
 				Response.Cookies.Append("RecentlyViewedProducts", recentProducts, cookieOptionss);
-				ViewBag.recentlyViewedProducts = recentlyViewedProducts;
+                
 
-
-				var user = await _userManager.GetUserAsync(this.User);
+                var user = await _userManager.GetUserAsync(this.User);
 				IQueryable<RatingModel> listRating = _context.Ratings
 										.Where(p => p.ProductId == Id)
 										.Where(r => r.Status != 0)
@@ -324,9 +302,10 @@ namespace DShop2024.Controllers
 					Feedback = myFeedback,
 					IsInCompare = isInCompare,
 					IsInWishlist = isInWishList,
-					IsFeedback = isFeedBack
-					
-				};
+					IsFeedback = isFeedBack,
+                    ExistingImages = productById.Images != null ?  productById.Images.Select( p => p.ImagePath).ToList() : new List<string>()
+
+                };
 
 				return View(viewModel);
 			}

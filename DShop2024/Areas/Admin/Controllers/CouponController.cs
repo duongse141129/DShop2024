@@ -104,7 +104,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
                     if(couponModel.DateExpired < couponModel.DateStart)
                     {
-                        ModelState.AddModelError("", "DateExpired must >= date start");
+                        ModelState.AddModelError("Date expired must >= date start");
                         return View();
                     } 
                     if(couponModel.DateStart < DateTime.Now.Date)

@@ -26,9 +26,12 @@ namespace DShop2024.Models
         [StringLength(100)]
         public string LoginType { get; set; }
 
+        [Column(TypeName = "nvarchar")]
+        [StringLength(500)]
+        public string Address { get; set; }
 
 
-		[NotMapped]
+        [NotMapped]
 		[FileExtension]
 		public IFormFile? ImageUpload { get; set; }
 

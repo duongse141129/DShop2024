@@ -90,6 +90,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 Avatar = user.Avatar,
                 Gender = user.Gender,
                 LoginType = user.LoginType,
+                Address = user.Address,
                 RoleName = roles.FirstOrDefault()
             };
             return View(model);
@@ -147,6 +148,26 @@ namespace DShop2024.Areas.Identity.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditAddress()
+        {
+            var user = await GetCurrentUserAsync();
+            ViewBag.address = user.Address;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditAddress(string tinh, string quan, string phuong, string street)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await GetCurrentUserAsync();
+                user.Address = $"{street}_{phuong}_{quan}_{tinh}";
+                await _userManager.UpdateAsync(user);
+                return Ok(new { success = false, Message = "Edit address successful " });
+            }
+            return Ok(new { success = false, Message = "Edit address fail " });
+        }
 
     }
 }

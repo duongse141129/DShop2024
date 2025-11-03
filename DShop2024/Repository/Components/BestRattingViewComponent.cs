@@ -1,4 +1,5 @@
-﻿using DShop2024.ViewModels;
+﻿using AutoMapper;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,7 @@ namespace DShop2024.Repository.Components
 	{
 		private readonly DShopContext _context;
 
-		public BestRattingViewComponent(DShopContext context)
+        public BestRattingViewComponent(DShopContext context)
 		{
 			_context = context;
 		}

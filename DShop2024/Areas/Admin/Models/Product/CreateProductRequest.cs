@@ -47,9 +47,8 @@ namespace DShop2024.Areas.Admin.Models.Product
         public int MainPocket { get; set; }
         public bool WaterResistance { get; set; }
         public bool USBChargingPort { get; set; }
-
-
         public decimal? LaptopPocket { get; set; }
+        public DateTime CreateDate { get; set; }
 
 
         [NotMapped]

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace DShop2024.Controllers
@@ -32,7 +33,7 @@ namespace DShop2024.Controllers
 
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
@@ -41,9 +42,16 @@ namespace DShop2024.Controllers
 			if(cartItems.Count == 0)
 			{
 				return RedirectToAction("Index", "Cart");
-			}
+            }
+            string checkStock = await CheckAllStock();
+            if (!string.IsNullOrEmpty(checkStock))
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = checkStock;
+                return RedirectToAction("Index", "Cart");
+            }
 
-			decimal shippingPrice = 0;
+
+            decimal shippingPrice = 0;
 			if (info.ShippingCost != 0)
 			{
 				shippingPrice = info.ShippingCost;
@@ -67,7 +75,8 @@ namespace DShop2024.Controllers
 				InfoDelivery = info
 			};
 
-			return View(cartItemViewModel);
+
+            return View(cartItemViewModel);
 		}
 
 		private async Task<string> CheckAllStock()
@@ -90,13 +99,13 @@ namespace DShop2024.Controllers
 
 		public async Task<IActionResult> CheckOut(string payment)
 		{
-			if(string.IsNullOrEmpty(payment))
+			if (string.IsNullOrEmpty(payment))
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "Please select payment method";
 				return RedirectToAction("Index");
 			}
 			string checkStock = await CheckAllStock();
-			if(!string.IsNullOrEmpty(checkStock))
+			if (!string.IsNullOrEmpty(checkStock))
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = checkStock;
 				return RedirectToAction("Index");
@@ -104,14 +113,14 @@ namespace DShop2024.Controllers
 
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-            List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
-            var user = await _userManager.GetUserAsync(this.User);
+			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+			var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "Cart is empty";
 				return RedirectToAction("Index", "Cart");
 			}
-			if(info == null)
+			if (info == null || String.IsNullOrEmpty(info.tinh) || String.IsNullOrEmpty(info.quan) || String.IsNullOrEmpty(info.phuong) || String.IsNullOrEmpty(info.Street) || String.IsNullOrEmpty(info.PhoneDelivery) || String.IsNullOrEmpty(info.Consignee))
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "Please fill out all fields of information delivery to checkout.";
 				return RedirectToAction("Index", "CheckOut");
@@ -199,12 +208,14 @@ namespace DShop2024.Controllers
 				order.OrderCode = orderCode;
 				order.UserId = user.Id;
 				order.CreatedDate = DateTime.Now;
+				order.DateUpdate = DateTime.Now;
+				order.UserIdUpdate = user.Id;
 				order.PaymentMethod = paymentMethod;
 				order.Status = 1;
 				order.Consignee = info.Consignee;
 				order.ShippingCost = info.ShippingCost;
 				order.PhoneDelivery = info.PhoneDelivery;
-				order.AddressDelivery = $" {info.Street} - {info.phuong} - {info.quan} - {info.tinh} ";
+				order.AddressDelivery = $" {info.Street}_{info.phuong}_{info.quan}_{info.tinh} ";
 				if (coupouns != null)
 				{
 					order.ValueCoupon = coupouns.Sum(c => c.Value);

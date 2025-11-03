@@ -17,15 +17,15 @@
 			
 		}
 
-		public CartItemModel(ProductModel product)
-		{
-			ProductId = product.Id;
-			ProductName = product.ProductName;
-			Price = product.Price;
+        public CartItemModel(ProductModel product)
+        {
+            ProductId = product.Id;
+            ProductName = product.ProductName;
+            Price = product.Price;
             OriginalPrice = product.OriginalPrice;
-			Quantity = 1;
-			Image = product.MainImage;
-		}
+            Quantity = product.Stock;
+            Image = product.MainImage;
+        }
 
-	}
+    }
 }

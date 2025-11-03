@@ -56,15 +56,15 @@ builder.Services.Configure<IdentityOptions>(options =>
 	options.Password.RequireUppercase = false;
 	options.Password.RequiredLength = 4;
 
-	// Lockout settings.
-	//options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-	//options.Lockout.MaxFailedAccessAttempts = 5;
-	//options.Lockout.AllowedForNewUsers = true;
+    // Lockout settings.
+    //options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    //options.Lockout.MaxFailedAccessAttempts = 5;
+    //options.Lockout.AllowedForNewUsers = true;
 
-	// User settings.
-	//options.User.AllowedUserNameCharacters =
-	//"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-	options.User.RequireUniqueEmail = true;
+    // User settings.
+    options.User.AllowedUserNameCharacters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = true;
 	options.SignIn.RequireConfirmedEmail = true;
 	options.SignIn.RequireConfirmedAccount = true;
 });
@@ -130,12 +130,12 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/category/{CategorySlug?}",
-    defaults: new { controller = "Product", action = "Index" });
+    defaults: new { controller = "ShopProducts", action = "Index" });
 
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/brand/{BrandSlug?}",
-    defaults: new { controller = "Product", action = "Index" });
+    defaults: new { controller = "ShopProducts", action = "Index" });
 
 app.MapControllerRoute(
     name: "Areas",

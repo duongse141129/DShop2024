@@ -16,7 +16,7 @@ namespace DShop2024.Repository.Components
 		{
 			var brands = await _context.Brands
 								.Where(b => b.Status != 0)
-								.Join(_context.Products.Where(p => p.Status != 0),
+								.Join(_context.Products.Where(p => p.Status != 0 && p.Stock > 0),
 								b => b.Id,
 								p => p.BrandId,
 								(b, p) => new { b, p })

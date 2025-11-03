@@ -75,10 +75,9 @@
                                                     <thead>
                                                         <tr>
                                                             <th scope="col" class="text-uppercase">Stt</th>
-                                                            <th scope="col" class="text-uppercase">ProductId</th>
                                                             <th scope="col" class="text-uppercase">Product Name</th>
                                                             <th scope="col" class="text-uppercase">Quantity</th>
-                                                            <th scope="col" class="text-uppercase text-end">Unit Price</th>
+                                                            <th scope="col" class="text-uppercase text-end">Price</th>
                                                             <th scope="col" class="text-uppercase text-end">Amount</th>
                                                         </tr>
                                                     </thead>
@@ -90,44 +89,39 @@
                                                         {
                                                             <tr>
                                                                 <td scope="row">@i</td>
-                                                                <td>@od.ProductId</td>
                                                                 <td>
                                                                     <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.Product.ProductName</a>
                                                                     <img src="~/media/products/@od.Product.MainImage" width="120" height="100" />
                                                                 </td>
                                                                 <td>@od.Quantity</td>
-                                                                <td class="text-end">@od.Price</td>
+                                                                <td class="text-end">@od.Price.ToString("#,##0 VND")</td>
                                                                 @{
-                                                                    var x = od.Quantity * od.Price;
+                                                                    var subsum = od.Quantity * od.Price;
                                                                 }
-                                                                <td class="text-end">@(od.Quantity * od.Price)</td>
+                                                                <td class="text-end">@subsum.ToString("#,##0 VND")</td>
                                                             </tr>
                                                             i++;
                                                         }
 
                                                         <tr>
                                                             <td></td>
-                                                            <td></td>
                                                             <td colspan="3" class="text-end">Subtotal</td>
-                                                            <td class="text-end">@item.OrderDetails.Sum(od => od.Quantity * od.Price)</td>
+                                                            <td class="text-end">@item.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND")</td>
                                                         </tr>
                                                         <tr>
-                                                            <td></td>
                                                             <td></td>
                                                             <td colspan="3" class="text-end">coupon</td>
-                                                            <td class="text-end">- @item.ValueCoupon</td>
+                                                            <td class="text-end">- @item.ValueCoupon.ToString("#,##0 VND")</td>
                                                         </tr>
                                                         <tr>
-                                                            <td></td>
                                                             <td></td>
                                                             <td colspan="3" class="text-end">Shipping Cost</td>
-                                                            <td class="text-end">+ @item.ShippingCost</td>
+                                                            <td class="text-end">+ @item.ShippingCost.ToString("#,##0 VND")</td>
                                                         </tr>
                                                         <tr>
                                                             <td></td>
-                                                            <td></td>
                                                             <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
-                                                            <td class="text-end">@item.TotalPrice</td>
+                                                            <td class="text-end">@item.TotalPrice.ToString("#,##0 VND")</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -136,10 +130,21 @@
                                     </div>
 
                                 </div>
+
+    
                             </div>
+                            @if (item.Status == 1)
+                            {
+                                <div class="row">
+                                    <div class="col-md-4">
+                                    <a class="btn btn-danger btn-md confirmDeletion" asp-action="CancelOder" asp-controller="Order" asp-area="" asp-route-id="@item.Id">Cancel order</a>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     </section>
                     <hr>
+                  
                 }
                 <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
             }

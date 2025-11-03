@@ -27,7 +27,15 @@ namespace DShop2024.Models
 		[ForeignKey("UserId")]
 		public virtual AppUserModel User { get; set; }
 
-		public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }
+        public DateTime DateUpdate { set; get; }
+
+        public string UserIdUpdate{ get; set; }
+
+        [ForeignKey("UserIdUpdate")]
+        public virtual AppUserModel UpdateBy { get; set; }
+
+
+        public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }
 		public virtual ICollection<OrderCouponsModel> OrderCoupons { get; set; }
 	}
 }

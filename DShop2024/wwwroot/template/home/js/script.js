@@ -28,7 +28,12 @@
       pagination: {
         el: ".swiper-pagination",
         clickable: true,
-      },
+        },
+        autoplay: {
+            delay: 3000, 
+            disableOnInteraction: false, 
+        },
+        loop: true, 
     });
 
     var category_swiper = new Swiper(".category-carousel", {
@@ -102,6 +107,128 @@
         },
       }
     });
+
+      var rating_products_swiper = new Swiper(".rating-products-carousel", {
+          slidesPerView: 5,
+          spaceBetween: 30,
+          speed: 500,
+          navigation: {
+              nextEl: ".rating-products-carousel-next",
+              prevEl: ".rating-products-carousel-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 1,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1500: {
+                  slidesPerView: 6,
+              },
+          }
+      });
+
+
+      var bestseller_products_swiper = new Swiper(".bestseller-products-carousel", {
+          slidesPerView: 5,
+          spaceBetween: 30,
+          speed: 500,
+          navigation: {
+              nextEl: ".bestseller-products-carousel-next",
+              prevEl: ".bestseller-products-carousel-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 1,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1500: {
+                  slidesPerView: 6,
+              },
+          }
+      });
+
+      var recentView_products_swiper = new Swiper(".recentView-products-carousel", {
+          slidesPerView: 5,
+          spaceBetween: 30,
+          speed: 500,
+          navigation: {
+              nextEl: ".recentView-products-carousel-next",
+              prevEl: ".recentView-products-carousel-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 1,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1500: {
+                  slidesPerView: 6,
+              },
+          }
+      });
+
+      var recommend_products_swiper = new Swiper(".recommend-products-carousel", {
+          slidesPerView: 5,
+          spaceBetween: 30,
+          speed: 500,
+          navigation: {
+              nextEl: ".recommend-products-carousel-next",
+              prevEl: ".recommend-products-carousel-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 1,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1500: {
+                  slidesPerView: 6,
+              },
+          }
+      });
+
+      var favious_products_swiper = new Swiper(".favious-products-carousel", {
+          slidesPerView: 5,
+          spaceBetween: 30,
+          speed: 500,
+          navigation: {
+              nextEl: ".favious-products-carousel-next",
+              prevEl: ".favious-products-carousel-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 1,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1500: {
+                  slidesPerView: 6,
+              },
+          }
+      });
+
   }
 
   var initProductQty = function(){
@@ -120,7 +247,7 @@
       $el_product.find('.quantity-left-minus').click(function(e){
           e.preventDefault();
           var quantity = parseInt($el_product.find('#quantity').val());
-          if(quantity>0){
+          if(quantity>1){
             $el_product.find('#quantity').val(quantity - 1);
           }
       });

@@ -29,6 +29,10 @@ namespace DShop2024.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("Avatar")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar");
@@ -635,6 +639,9 @@ namespace DShop2024.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateUpdate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(450)");
 
@@ -658,6 +665,9 @@ namespace DShop2024.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("UserIdUpdate")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("ValueCoupon")
                         .HasColumnType("decimal(18,2)");
 
@@ -668,6 +678,8 @@ namespace DShop2024.Migrations
                         .HasFilter("[OrderCode] IS NOT NULL");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserIdUpdate");
 
                     b.ToTable("Order");
                 });
@@ -733,6 +745,9 @@ namespace DShop2024.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -1225,6 +1240,12 @@ namespace DShop2024.Migrations
                     b.HasOne("DShop2024.Models.AppUserModel", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "UpdateBy")
+                        .WithMany()
+                        .HasForeignKey("UserIdUpdate");
+
+                    b.Navigation("UpdateBy");
 
                     b.Navigation("User");
                 });

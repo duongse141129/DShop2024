@@ -1,3 +1,4 @@
+using AutoMapper;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.ViewModels;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Drawing.Printing;
 
 
 namespace DShop2024.Controllers
@@ -14,18 +16,19 @@ namespace DShop2024.Controllers
     {
         private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
-		private readonly ILogger<HomeController> _logger;
+        private readonly IMapper _mapper;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, DShopContext context,UserManager<AppUserModel> userManager)
+        public HomeController(ILogger<HomeController> logger, DShopContext context,UserManager<AppUserModel> userManager, IMapper mapper)
         {
             _logger = logger;
             _context = context;
 			_userManager = userManager;
+            _mapper = mapper;
 
-		}
 
+        }
 
-        #region
 
         public async Task<IActionResult> Index()
         {
@@ -36,18 +39,9 @@ namespace DShop2024.Controllers
                                                     .Include(p => p.Brand)
                                                     .Include(p => p.Category)
                                                     .Include(r => r.Ratings);
-            var products = await listProduct.OrderByDescending(p => p.Id)
+            var products = await listProduct.OrderByDescending(p => p.CreateDate)
                         .Take(10)
-                        .Select( g => new ProductViewModel {
-                            Id = g.Id,
-                            ProductName = g.ProductName,
-                            MainImage = g.MainImage,
-                            Price = g.Price,
-                            Stock = g.Stock,
-                            BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.BrandId).BrandName,
-                            CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.CategoryId).CategoryName,
-                            AveragePoint =  g.Ratings.Any() ? g.Ratings.Where(r => r.ProductId == g.Id && r.Status != 0).Average( r => r.Star) : 0
-                        })                     
+                        .Select( g => _mapper.Map<ProductViewModel>(g))                     
                         .ToListAsync();
 
             var slider = await _context.Banners.Where(b => b.Status != 0).ToListAsync();
@@ -61,7 +55,7 @@ namespace DShop2024.Controllers
 
             return View(products);
         }
-        #endregion
+
 
         public async Task<IActionResult> Privacy()
         {
@@ -142,7 +136,6 @@ namespace DShop2024.Controllers
             if(countConpare == 5)
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Maximum 5 product in your list compare";
-				//return NoContent();
 				return Ok(new { success = false, Message = "Maximum 5 product in your list compare" });
 			}
 
@@ -150,7 +143,6 @@ namespace DShop2024.Controllers
             if(chechExit != null)
             {                
                 TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list compare";
-                //return NoContent();
 				return Ok(new { success = false, Message = "Add to compare fail. The product already exists in your list compare" });
 			}
 			try
@@ -171,17 +163,41 @@ namespace DShop2024.Controllers
 		}
 
 		[Authorize]
-		public async Task<IActionResult> WishList()
+		public async Task<IActionResult> WishList([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
 			var user = await _userManager.GetUserAsync(this.User);
-            List<ProductModel> wishListProduct = await (from p in _context.Products
-                                                       join w in _context.WishLists on p.Id equals w.ProductId
-                                                       where w.UserId == user.Id
-                                                       select p)
-                                                       .Include(b => b.Brand)
-                                                       .Include(c => c.Category)
-                                                       .ToListAsync();
-            return View(wishListProduct);
+            IQueryable<ProductModel> wishListProduct = from p in _context.Products
+                                                           join w in _context.WishLists on p.Id equals w.ProductId
+                                                           where w.UserId == user.Id
+                                                           select p;
+            int totalWishlistProduct = wishListProduct.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalWishlistProduct / 10);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("WishList", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize
+                })
+            };
+            var products = await wishListProduct.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize)
+                        .Include(p => p.Brand)
+                        .Include(p => p.Category)
+                        .Include(p => p.Ratings)
+                        .Select( g => _mapper.Map<ProductViewModel>(g))
+                        .ToListAsync();
+            ViewBag.pagingModel = pagingModel;
+            return View(products);
 		}
 
 		[Authorize]
@@ -189,9 +205,11 @@ namespace DShop2024.Controllers
 		{
             var user = await _userManager.GetUserAsync(this.User);
             List<ProductModel> compareProduct = await (from p in _context.Products
-                                        join co in _context.Compares on p.Id equals co.ProductId
-                                        where  co.UserId == user.Id 
-                                        select p).ToListAsync();
+                                                       join co in _context.Compares on p.Id equals co.ProductId
+                                                       where co.UserId == user.Id
+                                                       select p)
+                                        .Include(p => p.Ratings)
+                                        .ToListAsync();
             return View(compareProduct);
 		}
 

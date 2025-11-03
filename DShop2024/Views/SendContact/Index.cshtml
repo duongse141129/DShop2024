@@ -31,8 +31,7 @@
                             </div>
                         </div>
                     </div>
-           
-
+          
                 }
     
         <br/>
@@ -72,10 +71,11 @@
                     data: { message: messageInput, subject: subjectInput },
                     success: function (result) {
                         if (result.success) {
-                            Swal.fire(result.noti);
+                            Swal.fire(result.message);
+                            $('#Message').val("");
                         }
                         else {
-                            Swal.fire(result.noti);
+                            Swal.fire(result.message);
                         }
 
                     }

@@ -37,7 +37,7 @@ namespace DShop2024.Controllers
         {
             if(string.IsNullOrEmpty(subject) || string.IsNullOrEmpty(message))
             {
-                return Ok(new { success = false, noti = "Please fill all inputs " });
+                return Ok(new { success = false, message = "Please fill all inputs " });
             }
                 try
                 {
@@ -61,11 +61,11 @@ namespace DShop2024.Controllers
                         LinkContact = $"/Admin/Contact/Reply/{contactModel.Id}"
                     };
                     await _hubContext.Clients.All.SendAsync("SendContact", user.UserName, contactViewModel);
-                    return Ok(new { success = true, noti = "Send contact successful "});
+                    return Ok(new { success = true, message = "Send contact successful "});
                 }
                 catch (Exception ex)
                 {
-                    return Ok(new { success = false, noti = "Send contact fail " + ex.Message });
+                    return Ok(new { success = false, message = "Send contact fail " + ex.Message });
                 }
 
         }

@@ -1,6 +1,7 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,12 @@ namespace DShop2024.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
+        private readonly UserManager<AppUserModel> _userManager;
 
-        public OrderController(DShopContext context)
+        public OrderController(DShopContext context, UserManager<AppUserModel> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
@@ -85,6 +88,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   .ThenInclude(p => p.Product)
                                                   .Include(c => c.OrderCoupons)
                                                   .ThenInclude(c => c.Coupon)
+                                                  .Include(c => c.UpdateBy)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
             return View(order);
 
@@ -106,10 +110,13 @@ namespace DShop2024.Areas.Admin.Controllers
             }
             try
             {
+                var user = await _userManager.GetUserAsync(this.User);
                 if (order.Status != 4)
                 {
                     order.Status += 1;
                 }
+                order.DateUpdate = DateTime.Now;
+                order.UserIdUpdate = user.Id;
                 _context.Orders.Update(order);
                 await _context.SaveChangesAsync();
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Update Status order successful";
@@ -164,8 +171,10 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                 }
 
-
+                var user = await _userManager.GetUserAsync(this.User);
                 order.Status = 0;
+                order.UserIdUpdate = user.Id;
+                order.DateUpdate = DateTime.Now;
                 _context.Orders.Update(order);
                 await _context.SaveChangesAsync();
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Cancle order successful";

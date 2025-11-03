@@ -3,7 +3,7 @@
 namespace DShop2024.ViewModels
 {
 	public class InformationDelivery
-	{
+	{ 
 		[Required( ErrorMessage = "Street is required ")]
 		public string Street { get; set; }
 		[Required(ErrorMessage = "Ward is required ")]
@@ -20,5 +20,7 @@ namespace DShop2024.ViewModels
 		public string PhoneDelivery { get; set; }
 		[Required(ErrorMessage = "Consignee is required ")]
 		public string Consignee { get; set; }
+
+		public bool IsUseMyInfo { get; set; } = false;
 	}
 }

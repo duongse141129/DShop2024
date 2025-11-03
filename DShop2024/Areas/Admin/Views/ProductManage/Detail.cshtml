@@ -112,7 +112,12 @@
 									<th>USBChargingPort</th>
 									<td>@(Model.ProductDetail.USBChargingPort == true ? "Yes" : "No")</td>
 								</tr>
-						
+								<tr>
+									<th>Create at</th>
+									<td>@Model.ProductDetail.CreateDate.ToString("MM/dd/yyyy h:mm tt")</td>
+								</tr>
+
+
 							</tbody>
 						</table>
 						

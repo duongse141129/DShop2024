@@ -19,7 +19,6 @@
             <h1 class="mb-4">@ViewData["Title"]</h1>
       
                 <div class="row g-5">
-
                     <div class="col-md-12 col-lg-6 col-xl-7">
                         <div class="mt-5">
                             <h3>Coupon</h3>
@@ -41,46 +40,48 @@
                                     <span class="text text-success">@item.CouponCode - @item.Description</span> <br />
                                 }
                             </div>
-                    </div>
+                        </div>
 
                         <div class="mt-5">
                             <h3>Infomation Delivery</h3>
                         </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="usemyinfo" class="form-check-input" id="usemyinfo" asp-for="@Model.InfoDelivery.IsUseMyInfo">
+                            <label class="form-check-label" for="usemyinfo">   Use my information</label>
+                        </div>
                         <div class="form-item">
-                        <label class="form-label my-3">Province or City</label>
+                            <label class="form-label my-3">Province or City</label>
                             <select class="form-control css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
                                 <option value="">Tỉnh Thành</option>
                             </select>
-
                         </div>
 
                         <div class="form-item">
-                        <label class="form-label my-3">District</label>
+                            <label class="form-label my-3">District</label>
                             <select class="form-control css_select" id="quan" name="quan" title="Chọn Quận Huyện">
                                 <option value="">Quận Huyện</option>
                             </select>
-
                         </div>
 
                         <div class="form-item">
-                        <label class="form-label my-3">Ward</label>
+                            <label class="form-label my-3">Ward</label>
                             <select class="form-control css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
                                 <option value="">Phường Xã</option>
                             </select>
-
                         </div>
+
                         <div class="form-item">
-                        <label asp-for="@Model.InfoDelivery.Street" class="form-label my-3"></label>
+                            <label asp-for="@Model.InfoDelivery.Street" class="form-label my-3"></label>
                             <input name="Street" id="Street" class="form-control" />
-
                         </div>
+
                         <div class="form-item">
-                        <label asp-for="@Model.InfoDelivery.PhoneDelivery" name="PhoneDelivery" class="form-label my-3"></label>
+                            <label asp-for="@Model.InfoDelivery.PhoneDelivery" name="PhoneDelivery" class="form-label my-3"></label>
                             <input name="PhoneDelivery" id="PhoneDelivery" class="form-control" />
 
                         </div>
                         <div class="form-item">
-                        <label asp-for="@Model.InfoDelivery.Consignee" name="Consignee" class="form-label my-3"></label>
+                            <label asp-for="@Model.InfoDelivery.Consignee" name="Consignee" class="form-label my-3"></label>
                             <input name="Consignee" id="Consignee" class="form-control" />
 
                         </div>
@@ -93,7 +94,7 @@
                                 <h2>Confirm delivery information</h2>
                                 <p>Consignee: @Model.InfoDelivery.Consignee</p>
                                 <p>PhoneDelivery: @Model.InfoDelivery.PhoneDelivery </p>
-                                <p>Adress: @Model.InfoDelivery.Street - @Model.InfoDelivery.phuong - @Model.InfoDelivery.quan - @Model.InfoDelivery.tinh</p>
+                                <p>Adress: @Model.InfoDelivery.Street _ @Model.InfoDelivery.phuong _ @Model.InfoDelivery.quan _ @Model.InfoDelivery.tinh</p>
                             </div>
                         }
 
@@ -192,7 +193,7 @@
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                                 <div class="col-12">
                                     <td class="py-5">
-                                        <p class="mb-0 text-dark py-4">Payment method</p>
+                                        <h3 class="mb-0 text-dark py-2">Payment method</h3>
                                     </td>
                                     <div class="form-check text-start my-3">
                                         <input type="radio" class="form-check-input bg-primary border-0" id="paymentCOD" name="payment" value="COD" checked>
@@ -214,7 +215,7 @@
                                 <button type="submit" class="btn btn-primary border-secondary py-3 px-4 text-uppercase w-100">Place Order</button>
                             </div>
 
-                    </form>
+                        </form>
                     </div>
                 </div>
         
@@ -231,6 +232,32 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $("#usemyinfo").change(function () {
+            if($(this).prop("checked")){
+                $(this).val(true);
+            }else{
+                $(this).val(false);
+            }
+                var checkInfo = $("#usemyinfo").val();
+                $.ajax({
+                type: "POST",
+                url: "@Url.Action("UseMyInformation", "Cart")",
+                data: { checkInfo: checkInfo },
+                success: function (result) {
+                        if (result.success) {                 
+                            Swal.fire(result.message).then(function(){
+                                    location.reload();
+                            });
+                        } else {
+                            location.reload();
+                        }
+                    }
+                });
+
+        });
+
+    </script>
 
     <script>
         $("#btn-apply-coupon").click(function () {
@@ -271,12 +298,12 @@
                         data: { tinh: tinh, quan: quan, phuong: phuong, street: street, PhoneDelivery: phonedelevery, consignee: consignee },
                         success: function (result) {
                             if (result.success) {
-                                Swal.fire(result.message.text).then(function(){
+                                Swal.fire(result.message).then(function(){
                                                     location.reload();
                                                 });
 
                             } else {
-                                Swal.fire(result.message.text);
+                                Swal.fire(result.message);
                             }
 
                         }
