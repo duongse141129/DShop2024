@@ -60,7 +60,13 @@
     <None Include="wwwroot\js\contactNotification.js" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<Content Include="Uploads\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
     <Content Update="Views\Shared\Components\NotificationMessage\Default.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

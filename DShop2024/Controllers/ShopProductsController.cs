@@ -219,7 +219,7 @@ namespace DShop2024.Controllers
 				var cookieOptionss = new CookieOptions
 				{
 					HttpOnly = true,
-					Expires = DateTime.UtcNow.AddMinutes(2),
+					Expires = DateTime.UtcNow.AddMinutes(30),
 					Secure = true,
 					SameSite = SameSiteMode.Strict,
 				};
