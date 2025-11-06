@@ -332,19 +332,6 @@
 	<script type="text/javascript" src="~/custom/js/gallery.js"></script>
 
 	<script>
-		function increaseQty() {
-		  let qty = document.getElementById("quantityaaa");
-		  qty.value = parseInt(qty.value) + 1;
-		}
-
-		function decreaseQty() {
-		  let qty = document.getElementById("quantityaaa");
-		  if (parseInt(qty.value) > 1) {
-			qty.value = parseInt(qty.value) - 1;
-		  }
-		}
-	</script>
-	<script>
 		$(document).ready(function () {
 			$('.add-to-cart-quantity').click(function () {
 				var formId  ="form-"+ $(this).attr('id');
@@ -391,10 +378,20 @@
 
 					success: function (result) {
 						if (result.success) {
-							Swal.fire("Add to wishlist successful");
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
 						}
 						else {
-							Swal.fire(result.message);
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to wishlist fail",
+							  text: result.message
+							});
 						}
 
 					}
@@ -413,10 +410,20 @@
 					data: { Id: Id },
 					success: function (result) {
 						if (result.success) {
-							Swal.fire("Add to compare successful");
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
 						}
 						else {
-							Swal.fire(result.message);
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to compare fail",
+							  text: result.message
+							});
 						}
 
 					}
@@ -436,14 +443,22 @@
 
 					success: function (result) {
 						if (result) {
-							Swal.fire("Add to wishlist successful");
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
 							$('.add-btn-detail-wishlist').hide();
-							loadQuantityCart();
 						}
 						else {
-							Swal.fire("Add to wishlist fail duplicate product");
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to wishlist fail",
+							  text: result.message
+							});
 						}
-
 					}
 				});
 			});
@@ -458,14 +473,23 @@
 					type: "POST",
 					url: "@Url.Action("AddToCompare", "Home")",
 					data: { Id: Id },
-
 					success: function (result) {
 						if (result.success) {
-							Swal.fire("Add to compare successful");
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
 							$('.add-btn-detail-compare').hide();
 						}
 						else {
-							Swal.fire(result.message);
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to compare fail",
+							  text: result.message
+							});
 						}
 					}
 				});

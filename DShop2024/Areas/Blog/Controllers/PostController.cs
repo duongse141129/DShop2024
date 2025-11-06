@@ -1,6 +1,7 @@
 ﻿using App.Utilities;
 using AppMvc.Areas.Blog.Models;
 using Bogus;
+using DShop2024.Areas.Admin.Models.User;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Models.Blog;
@@ -272,7 +273,7 @@ namespace AppMvc.Areas.Blog.Controllers
                             string oldFilePath = Path.Combine(uploadsDir, postUpdate.Image);
                             try
                             {
-                                if (System.IO.File.Exists(oldFilePath))
+                                if (System.IO.File.Exists(oldFilePath) && post.Image != PostEnumData.IMAGE_DEFAULT)
                                 {
                                     System.IO.File.Delete(oldFilePath);
                                 }
@@ -361,7 +362,7 @@ namespace AppMvc.Areas.Blog.Controllers
                     string oldFilePath = Path.Combine(uploadsDir, post.Image);
                     try
                     {
-                        if (System.IO.File.Exists(oldFilePath))
+                        if (System.IO.File.Exists(oldFilePath) && post.Image != PostEnumData.IMAGE_DEFAULT)
                         {
                             System.IO.File.Delete(oldFilePath);
                         }
@@ -555,71 +556,76 @@ namespace AppMvc.Areas.Blog.Controllers
             return RedirectToAction("Index");
         }
 
-
         [Authorize(Roles = RoleName.Administrator)]
-        public async Task<IActionResult> SeedWishList()
+        public async Task<IActionResult> SeedOrder()
         {
             try
             {
-                var customers = await (from u in _context.Users
-                                       join ur in _context.UserRoles on u.Id equals ur.UserId
-                                       join r in _context.Roles on ur.RoleId equals r.Id
-                                       where r.Name == RoleName.Customer
-                                       select u).ToListAsync();
-                //var products = await _context.Products.Where(p => p.Status != 0 && p.Stock >0).Select(g => new { id = g.Id }).ToListAsync();
+                List<AppUserModel> user = await (from u in _context.Users
+                                join ur in _context.UserRoles on u.Id equals ur.UserId
+                                join r in _context.Roles on ur.RoleId equals r.Id
+                                where r.Name == RoleName.Customer
+                                where u.Status != 0
+                                select u).ToListAsync();
+
+                List<ProductModel> products = await _context.Products.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
                 Random rnd = new Random();
-                foreach (var cus in customers)
+                DateTime dateTime = new DateTime(2025, 11, 1);
+                DateTime startDate = new DateTime(2025, 11, 1); 
+                DateTime endDate = new DateTime(2025, 11, 5); 
+                int range = (endDate - startDate).Days;
+                for (int i = 0; i < 4; i++)
                 {
-                    for (int i = 0; i < 10; i++)
+                    DateTime randomDate = dateTime.AddDays(rnd.Next(range+1));
+                    var u = user[rnd.Next(user.Count)];
+                    OrderModel orderModel = new OrderModel
                     {
-                        int productId = rnd.Next(32, 82);
-                        var check = await _context.WishLists.Where(u => u.UserId == cus.Id && u.ProductId == productId).AnyAsync();
-                        if (check != true)
+                        OrderCode = Guid.NewGuid().ToString(),
+                        UserId = u.Id,
+                        CreatedDate = randomDate,
+                        PaymentMethod = "COD",
+                        Status = 4,
+                        AddressDelivery = "78 lang man_Xã Trác Văn_Thị xã Duy Tiên_Tỉnh Hà Nam",
+                        PhoneDelivery = "0987654321",
+                        Consignee = u.UserName,
+                        ShippingCost = 50000,
+                        ValueCoupon = 0,
+                        DateUpdate = randomDate.AddDays(7),
+                        UserIdUpdate = "57a1ccc4-504c-43f1-bdc2-a9b7f5c8dbbc"                    
+                    };
+                    await _context.Orders.AddAsync(orderModel);
+                    await _context.SaveChangesAsync();
+                    List<OrderDetailModel> orderDetails = new List<OrderDetailModel>();
+                    for (int j = 0; j < 4; j++)
+                    {
+                        var p = products[rnd.Next(products.Count)];
+                        OrderDetailModel od = new OrderDetailModel
                         {
-                            WishListModel wish = new WishListModel
-                            {
-                                UserId = cus.Id,
-                                ProductId = productId,
-                            };
-                            await _context.WishLists.AddAsync(wish);
-                            await _context.SaveChangesAsync();
-                        }
+                            Quantity = rnd.Next(1, 6),
+                            Price = p .Price,
+                            ProductId = p .Id,
+                            Status = 1,
+                            OriginalPrice = p.OriginalPrice,
+                            OrderId = orderModel.Id
+                        };
+                        orderDetails.Add(od);
                     }
-
-                }
-                await _context.SaveChangesAsync();
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail "+ ex.Message;
-                return RedirectToAction("Index");
-            }
-
-        }
-
-        [Authorize(Roles = RoleName.Administrator)]
-        public async Task<IActionResult> SeedCreateProduct()
-        {
-            try
-            {
-                var products = await _context.Products.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
-                Random rnd = new Random();
-                DateTime dateTime = new DateTime(2024, 1, 1);
-                foreach (var product in products)
-                {
-                    dateTime = dateTime.AddDays(rnd.Next(1,20));
-                    if(dateTime > DateTime.Now)
-                    {
-                        dateTime = DateTime.Now;
-                    }
-                    product.CreateDate = dateTime;
-                    _context.Products.Update(product);
+                    await _context.OrderDetails.AddRangeAsync(orderDetails);
+                    await _context.SaveChangesAsync();
+                    var grandTotal = orderDetails.Sum(s => s.Quantity * s.Price) + orderModel.ShippingCost;
+                    orderModel.TotalPrice = grandTotal;
+                    _context.Orders.Update(orderModel);
                     await _context.SaveChangesAsync();
                 }
+
+
                 await _context.SaveChangesAsync();
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -629,8 +635,6 @@ namespace AppMvc.Areas.Blog.Controllers
             }
 
         }
-
-
 
 
     }

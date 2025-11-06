@@ -175,6 +175,9 @@ namespace DShop2024.Controllers
 							.Include(p => p.Brand)
 							.Include(p => p.Category)
 							.Include(p => p.Ratings)
+							.Include(p => p.Images)
+                            .AsSplitQuery()
+                            .AsNoTracking()
 							.FirstOrDefaultAsync();
                 if (productById == null)
                 {
@@ -185,8 +188,9 @@ namespace DShop2024.Controllers
 										.Include (p => p.Brand)
 										.Include(p => p.Category)
 										.Include(p => p.Ratings)
-										.Include(p => p.Images)
-										.Take(5)
+                                        .AsSplitQuery()
+                                        .AsNoTracking()
+                                        .Take(5)
 										.Select( g => _mapper.Map<ProductViewModel>(g))   
 										.ToListAsync();
 				ViewBag.relatedProducts = relatedProducts;

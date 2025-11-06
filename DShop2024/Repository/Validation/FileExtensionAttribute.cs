@@ -17,7 +17,7 @@ namespace DShop2024.Repository.Validation
 
                 if (!result)
                 {
-                    return new ValidationResult("Allowed extensions are jpg or png or jpeg");
+                    return new ValidationResult($"Allowed extensions are {string.Join(", ", extensions)} ");
                 }
             }
             return ValidationResult.Success;

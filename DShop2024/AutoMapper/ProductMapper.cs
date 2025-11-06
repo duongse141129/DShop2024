@@ -13,7 +13,8 @@ namespace DShop2024.AutoMapper
 
             CreateMap<CreateProductRequest, ProductModel>();
             CreateMap<UpdateProductRequest, ProductModel>()
-                .ReverseMap();
+                               .ForMember(dest => dest.MainImage, act => act.Ignore())
+                                .ReverseMap();
 
             CreateMap<ProductModel, ProductViewModel>()
                 .ForMember(pv => pv.BrandName, p => p.MapFrom(p => p.Brand.BrandName) )

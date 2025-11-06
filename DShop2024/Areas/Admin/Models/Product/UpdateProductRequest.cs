@@ -22,7 +22,7 @@ namespace DShop2024.Areas.Admin.Models.Product
         public int BrandId { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a brand")]
         public int CategoryId { get; set; }
-        public BrandModel Brand { get; set; }
+        public BrandModel Brand { get; set; } 
         public CategoryModel Category { get; set; }
         public RatingModel Rating { get; set; }
 

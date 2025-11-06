@@ -79,17 +79,14 @@ namespace DShop2024.Areas.Blog.Controllers
             string prefix = string.Concat(Enumerable.Repeat("----", level));
             foreach (var subject in source)
             {
-                if(subject.Status != 0)
+                des.Add(new SubjectModel()
                 {
-                    des.Add(new SubjectModel()
-                    {
-                        Id = subject.Id,
-                        Title = prefix + " " + subject.Title
-                    });
-                    if (subject.SubjectChildren?.Count > 0)
-                    {
-                        CreateSelectItems(subject.SubjectChildren.ToList(), des, level + 1);
-                    }
+                    Id = subject.Id,
+                    Title = prefix + " " + subject.Title
+                });
+                if (subject.SubjectChildren?.Count > 0)
+                {
+                    CreateSelectItems(subject.SubjectChildren.Where(s => s.Status!=0).ToList(), des, level + 1);
                 }
 
             }
@@ -104,10 +101,9 @@ namespace DShop2024.Areas.Blog.Controllers
                 .Include(c => c.ParentSubject)
                 .Include(c => c.SubjectChildren);
 
-            var subjects = (await qr.ToListAsync())
-                            .Where(c => c.ParentSubject == null)
-                            .Where(s => s.Status != 0)
-                            .ToList();
+            var subjects = (await qr.Where(s => s.Status != 0).ToListAsync())
+                                    .Where(c => c.ParentSubject == null)
+                                    .ToList();
             subjects.Insert(0, new SubjectModel()
             {
                 Id = -1,
@@ -193,7 +189,8 @@ namespace DShop2024.Areas.Blog.Controllers
                 .Include(c => c.ParentSubject)
                 .Include(c => c.SubjectChildren);
 
-            var subjects = (await qr.ToListAsync()).Where(s => s.Status != 0)
+            var subjects = (await qr.Where(s => s.Status != 0)
+                            .ToListAsync())
                             .Where(c => c.ParentSubject == null)
                             .ToList();
             subjects.Insert(0, new SubjectModel()

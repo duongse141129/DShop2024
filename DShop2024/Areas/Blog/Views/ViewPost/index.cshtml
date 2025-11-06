@@ -4,29 +4,14 @@
 @{
     List<SubjectModel> subjects = ViewBag.subjects as List<SubjectModel>;
     SubjectModel subject = ViewBag.Subject as SubjectModel;
-    ViewData["Title"] = (subject != null) ? subject.Title : "Blog";
+    ViewData["Title"] = (subject != null) ? subject.Title : "Post";
     Layout = "~/Areas/Blog/Views/ViewPost/_LayoutBlog.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<div class="container mt-5">
-  <div class="post-container">
-      <h3>Featured news</h3>
-      @await Component.InvokeAsync("PinPost")
-  </div>
-
-  <div class="nav-buttons">
-    <button class="btn btn-outline-primary" onclick="prevSlide()">←</button>
-    <button class="btn btn-outline-primary" onclick="nextSlide()">→</button>
-  </div>
-
-  <div class="pagination-controls" id="pagination"></div>
-</div>
-
+                <h1>@ViewData["Title"]</h1>
 
                 @if(subject != null){
-                    <p>@subject.SubjectContent</p>
+                    <p>@Html.Raw(subject.SubjectContent)</p>
                 }
                 else
                 {
@@ -38,7 +23,7 @@
                 <div class="row">
                 @foreach (var post in Model)
                 {
-                    <div class="col-lg-6">
+                    <div class="col-lg-4">
                         <!-- Blog post-->
                         <div class="card mb-4">
                         @if(post.Image!= null)
@@ -79,8 +64,5 @@
                    })
                 }
 
-@section Scripts {
-     <link href="~/custom/css/slider.css" rel="stylesheet" />
-      <script src="~/custom/js/slider.js"></script> 
-}
+
 

@@ -45,8 +45,8 @@ namespace AppMvc.Areas.Blog.Controllers
                                 .Include(P => P.CreateBy)
                                 .Include(P => P.PostSubjects)
                                 .ThenInclude(p => p.Subject)
+                                .OrderByDescending(p => p.DateUpdated)
                                 .AsQueryable();
-            posts.OrderByDescending(p => p.DateUpdated);
 
             var count = await posts.CountAsync();
             if (count > 0)
@@ -68,8 +68,8 @@ namespace AppMvc.Areas.Blog.Controllers
 
             int totalPosts = posts.Count();
             if (pagesSize <= 0)
-                pagesSize = 10;
-            int countPages = (int)Math.Ceiling((double)totalPosts / 10);
+                pagesSize = 9;
+            int countPages = (int)Math.Ceiling((double)totalPosts / 9);
 
             if (currentPage > countPages)
                 currentPage = countPages;
@@ -87,7 +87,7 @@ namespace AppMvc.Areas.Blog.Controllers
                 })
             };
 
-            var postsInPage = posts.Skip((currentPage - 1) * pagesSize).OrderByDescending(p => p.DateUpdated)
+            var postsInPage = posts.Skip((currentPage - 1) * pagesSize)
                         .Take(pagesSize);
 
             ViewBag.pagingModel = pagingModel;

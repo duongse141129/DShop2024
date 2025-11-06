@@ -1,37 +1,57 @@
 ﻿@{
     Layout = "_Layout";
+    ViewData["Title"] = "Blog";
 }
+<link href="~/custom/css/slider.css" rel="stylesheet" />
+
 <section class="py-5">
-    <div class="container-fluid bg-light  py-5">
+    <div class="container-fluid bg-light py-5">
         <div class ="row">
-            <div class="col-md-8">
-                @RenderBody()
-            </div>
-            <div class="col-md-4">
-                <!-- Search widget-->
-                <div class="card mb-4">
-                    <form asp-action="Index" asp-area="Blog" asp-controller="ViewPost">
-                        <div class="card-header">Search</div>
-                        <div class="card-body">
-                            <div class="input-group">
-                                <input class="form-control" type="text" name="search" placeholder="Enter search term" aria-label="Enter search term" aria-describedby="button-search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
-                                <input class="btn btn-primary" id="button-search" type="submit" value="search">
-                            </div>
+                <h1>@ViewData["Title"]</h1>
+                <div class="col-md-8">
+                    <div class="container mt-2">
+                        <div class="post-container">
+                            <h3>Featured news</h3>
+                            @await Component.InvokeAsync("PinPost")
                         </div>
-                    </form>
-                </div>
-                <!-- Categories widget-->
-                <div class="card mb-4">
-                    <div class="card-header">Subject</div>
-                    <div class="card-body">
-                        <div class="row">
-                            @RenderSection("Sidebar", false)
+                        <div class="nav-buttons">
+                            <button class="btn btn-outline-primary" onclick="prevSlide()">←</button>
+                            <button class="btn btn-outline-primary" onclick="nextSlide()">→</button>
                         </div>
+                        <div class="pagination-controls" id="pagination"></div>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <!-- Search widget-->
+                    <div class="card mb-4">
+                        <form asp-action="Index" asp-area="Blog" asp-controller="ViewPost">
+                            <div class="card-header">Search</div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" name="search" placeholder="Enter search term" aria-label="Enter search term" aria-describedby="button-search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
+                                    <input class="btn btn-primary" id="button-search" type="submit" value="search">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">Subject</div>
+                        <div class="card-body">
+                            <div class="row">
+                                @RenderSection("Sidebar", false)
+                            </div>
+                        </div>
+                    </div>
+
+                </div>     
+
+            <div class="col-md-12">
+                @RenderBody()
             </div>
+
         </div>
     </div>
 </section>
 
+<script src="~/custom/js/slider.js"></script>
 @await RenderSectionAsync("Scripts", required: false)

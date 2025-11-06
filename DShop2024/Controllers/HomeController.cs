@@ -78,23 +78,21 @@ namespace DShop2024.Controllers
 		{
             if (Id == null)
             {
-                return NotFound();
+                return Ok(new { success = false, Message = "NotFound" });
             }
             ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
-                return NotFound();
+                return Ok(new { success = false, Message = "NotFound" });
             }
 
             var user = await _userManager.GetUserAsync(User);
 			var chechExit = await (_context.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
-				TempData[DShopConst.TEMPDATA_ERROR] = "The product is already in in your wishlist";
-                return Ok(new { success = false, Message = "Add to wishList fail. The product is already in in your wishlist" });
+                return Ok(new { success = false, Message = "The product is already in in your wishlist" });
             }
-
             try
             {
                 WishListModel wishList = new WishListModel
@@ -109,7 +107,7 @@ namespace DShop2024.Controllers
             }
             catch (Exception ex)
             {
-                return Ok(new { success = false, Message = "Add to wishList fail "+ex.Message });
+                return Ok(new { success = false, Message = ex.Message });
             }
 		}
 
@@ -119,14 +117,12 @@ namespace DShop2024.Controllers
 		{
             if (Id == null)
             {
-                //return NotFound();
 				return Ok(new { success = false, Message = "NotFound" });
 			}
             ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
-                //return NotFound();
 				return Ok(new { success = false, Message = "NotFound" });
 			}
 
@@ -135,15 +131,13 @@ namespace DShop2024.Controllers
             var countConpare = await (_context.Compares.Where(co => co.UserId == user.Id)).CountAsync();
             if(countConpare == 5)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Maximum 5 product in your list compare";
 				return Ok(new { success = false, Message = "Maximum 5 product in your list compare" });
 			}
 
             var chechExit = await (_context.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
             if(chechExit != null)
-            {                
-                TempData[DShopConst.TEMPDATA_ERROR] = "Product is exit in your list compare";
-				return Ok(new { success = false, Message = "Add to compare fail. The product already exists in your list compare" });
+            {   
+				return Ok(new { success = false, Message = "The product already exists in your list compare" });
 			}
 			try
 			{
@@ -158,7 +152,7 @@ namespace DShop2024.Controllers
 			}
 			catch (Exception ex)
 			{
-                return Ok(new { success = false, Message = "Add to compare fail " + ex.Message });
+                return Ok(new { success = false, Message = ex.Message });
 			}
 		}
 

@@ -178,6 +178,26 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
+        public async Task<IActionResult> Detail(int? id)
+        {
+            ViewBag.sidebar = Menu.Admin.Coupon;
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var couponModel = await _context.Coupons.Include(c => c.Promotion)    
+                                .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
+            if (couponModel == null)
+            {
+                return NotFound();
+            }
+            var couponViewModel = _mapper.Map<CouponViewModel>(couponModel);
+            return View(couponViewModel);
+        }
+
+
+
+
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> ShowCoupon(int? id)
         {
@@ -234,7 +254,6 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
             try
             {
                 couponModel.Status = 1;

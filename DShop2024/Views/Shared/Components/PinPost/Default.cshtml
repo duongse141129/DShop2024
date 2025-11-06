@@ -5,7 +5,7 @@
     @foreach (var item in Model)
     {
         <div class="card cardPost">
-            <img class="card-img-top" src="~/media/post/@item.Image" alt="...">
+            <img class="card-img-top" height="600" src="~/media/post/@item.Image" alt="..." >
             <div class="card-body">
                 <div class="small text-muted">@item.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</div>
                 <h2 class="card-title">@item.Title</h2>

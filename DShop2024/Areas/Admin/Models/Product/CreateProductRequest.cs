@@ -52,8 +52,8 @@ namespace DShop2024.Areas.Admin.Models.Product
 
 
         [NotMapped]
-        [FileExtension]
         [Required(ErrorMessage = "The {0} field is required")]
+        [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? ImageUpload { get; set; }
 
         [NotMapped]

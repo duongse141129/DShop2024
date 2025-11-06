@@ -279,29 +279,6 @@
             });
         });
     </script>
-
-	<script>
-		$(document).ready(function () {
-			$('.add-to-cart').click(function () {
-				var Id = $(this).data("product_id");
-				$.ajax({
-					type: "POST",
-					url: "@Url.Action("AddToCart", "Cart")",
-					data: { Id: Id },
-					success: function (result) {
-                        if (result.success) {
-                            loadQuantityCart();
-							Swal.fire("Add to cart successful");
-                        } 
-                        else {
-                            Swal.fire(result.message);
-                        }
-
-					}
-				});
-			});
-		});
-	</script>
 	
 	<script>
 		$(document).ready(function () {
@@ -315,10 +292,20 @@
 
 					success: function (result) {
                         if (result.success) {
-							Swal.fire("Add to wishlist successful");
+                            Swal.fire({
+                              position: "top-end",
+                              icon: "success",
+                              title: result.message,
+                              showConfirmButton: false,
+                              timer: 500
+                            });
 						}
 						else {
-                            Swal.fire(result.message);
+                            Swal.fire({
+                              icon: "error",
+                              title: "Add to wishlist fail",
+                              text: result.message
+                            });
 						}
 
 					}
@@ -338,10 +325,20 @@
 					data: { Id: Id },
 					success: function (result) {
                         if (result.success) {
-                            Swal.fire("Add to compare successful");
+                            Swal.fire({
+                              position: "top-end",
+                              icon: "success",
+                              title: result.message,
+                              showConfirmButton: false,
+                              timer: 500
+                            });
 						}
 						else {
-                            Swal.fire(result.message);
+                            Swal.fire({
+                              icon: "error",
+                              title: "Add to compare fail",
+                              text: result.message
+                            });
 						}
 
 					}

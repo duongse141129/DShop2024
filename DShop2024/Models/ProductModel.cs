@@ -23,7 +23,7 @@ namespace DShop2024.Models
 		public int BrandId { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a category")]
         public int CategoryId { get; set; }
-		public BrandModel Brand { get; set; }
+		public BrandModel Brand { get; set; } 
 		public CategoryModel Category { get; set; }
 
 		public int Status { get; set; }

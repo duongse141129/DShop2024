@@ -227,7 +227,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
                         fs.Close();
-                        product.MainImage = imageName;
+                        exitedProduct.MainImage = imageName;
 
                     }
 
@@ -424,6 +424,8 @@ namespace DShop2024.Areas.Admin.Controllers
                                         .Include( b => b.Brand)
                                         .Include( c => c.Category)
                                         .Include( d => d.Images)
+                                        .AsSplitQuery()
+                                        .AsNoTracking()
                                         .FirstOrDefaultAsync(m => m.Id == id && m.Status != 0);
             if (productModel == null)
 			{
@@ -532,6 +534,7 @@ namespace DShop2024.Areas.Admin.Controllers
                             await _context.ProductImages.AddAsync(productImage);
                             await _context.SaveChangesAsync();                        
                         }
+                        TempData[DShopConst.TEMPDATA_SUCCESS] = "Add images product successful ";
                         return RedirectToAction("Edit", new { Id = product.Id });
                     }
 

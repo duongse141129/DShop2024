@@ -37,7 +37,6 @@
                 <tr>
                     <th>Coupon Code</th>
                     <th>Name</th>
-                    <th>Description</th>
                     <th>Date Start</th>
                     <th>Date Expired</th>
                     <th>Quantity</th>
@@ -54,8 +53,9 @@
                 {
                     <tr>
                         <td>@item.CouponCode</td>
-                        <td>@item.CouponName</td>
-                        <td>@item.Description</td>
+                        <td>
+                            <a asp-action="Detail" asp-route-id="@item.Id">@item.CouponName</a>                         
+                        </td>
                         <td>@item.DateStart.ToString("dd-MM-yyyy")</td>
                         <td>@item.DateExpired.ToString("dd-MM-yyyy")</td>
                         <td>@item.Quantity</td>

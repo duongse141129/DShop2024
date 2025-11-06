@@ -463,7 +463,6 @@ namespace DShop2024.Areas.Identity.Controllers
                 {
                     var userName = externalEmail.Split('@');
 
-                    // Chua co Account -> Tao Account, lien ket, dang nhap
                     var newUser = new AppUserModel() {
                         UserName = userName[0],
                         Email = externalEmail,

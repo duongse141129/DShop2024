@@ -1,0 +1,106 @@
+﻿@using DShop2024.ViewModels
+@model CouponViewModel
+
+@{
+    ViewData["Title"] = "Detail coupon";
+}
+
+<h1 class="text-primary">@ViewData["title"]</h1>
+<div class="col-md-8">
+    <div class="card">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Coupon</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>CouponCode</td>
+                    <td>@Model.CouponCode</td>
+                </tr>
+                <tr>
+                    <td>CouponName</td>
+                    <td>@Model.CouponName</td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>@Model.Description</td>
+                </tr>
+                <tr>
+                    <td>Value</td>
+                    <td>
+                        @if (Model.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
+                        {
+                            <p> @Model.Value %</p>
+
+                        }
+                        else if (Model.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
+                        {
+                            <p> @Model.Value.ToString("#,##0 VND")</p>
+                        }
+                        else if (Model.CategoryCouponName == DShopConst.FREE_SHIPPING)
+                        {
+                            <p> @DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND")</p>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Date Start</td>
+                    <td>@Model.DateStart.ToString("dd-MM-yyyy")</td>
+                </tr>
+                                <tr>
+                    <td>Date Expired</td>
+                    <td>@Model.DateExpired.ToString("dd-MM-yyyy")</td>
+                </tr>
+                 <tr>
+                    <td>Quantity</td>
+                    <td>@Model.Quantity</td>
+                </tr>
+                <tr>
+                    <td>MinimumAmount</td>
+                    <td>@Model.MinimumAmount.ToString("#,##0 VND")</td>
+                </tr>
+                <tr>
+                    <td>Category coupon</td>
+                    <td>@Model.CategoryCouponName</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>@((CouponEnumData.StatusCoupon)Model.Status)</td>
+                </tr>
+                <tr>
+                    <td>Days Left</td>
+                    <td>
+                        @if (Model.DaysLeft == CouponEnumData.COUPON_EXPIRED)
+                        {
+                            <span class="text text-danger">@Model.DaysLeft</span>
+                        }
+                        else
+                        {
+                            <span class="text text-success">@Model.DaysLeft</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        @if (Model.Status == 1 && Model.Quantity > 0 && Model.DaysLeft != CouponEnumData.COUPON_EXPIRED)
+                        {
+                            <a asp-action="ShowCoupon" class="btn btn-success btn-sm" asp-route-id="@Model.Id">Show</a>
+                        }
+                        @if (Model.Status == 2)
+                        {
+                            <a asp-action="HideCoupon" class="btn btn-warning btn-sm" asp-route-id="@Model.Id">Hide</a>
+                        }
+                    </td>
+                </tr>               
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<div class="mt-3">
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -17,45 +17,45 @@
         <div class="form-group">
             <label>Description</label>
             <textarea rows="15" asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label>Original Price (VND)</label>
             <input asp-for="OriginalPrice" class="form-control" />
-            <span asp-validation-for="OriginalPrice" class="text-danger" />
+            <span asp-validation-for="OriginalPrice" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Price (VND)</label>
             <input asp-for="Price" class="form-control" />
-            <span asp-validation-for="Price" class="text-danger" />
+            <span asp-validation-for="Price" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label>Capacity (L)</label>
             <input asp-for="Capacity" class="form-control"  />
-            <span asp-validation-for="Capacity" class="text-danger" />
+            <span asp-validation-for="Capacity" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Weight (KG)</label>
             <input asp-for="Weight" class="form-control" />
-            <span asp-validation-for="Weight" class="text-danger" />
+            <span asp-validation-for="Weight" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Main pocket</label>
             <input asp-for="MainPocket" class="form-control" />
-            <span asp-validation-for="MainPocket" class="text-danger" />
+            <span asp-validation-for="MainPocket" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label>Dimension (CM)</label>
             <input asp-for="Dimension" class="form-control" />
-            <span asp-validation-for="Dimension" class="text-danger" />
+            <span asp-validation-for="Dimension" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Material</label>
             <input asp-for="Material" class="form-control" />
-            <span asp-validation-for="Material" class="text-danger" />
+            <span asp-validation-for="Material" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Laptop pocket (INCH)</label>
@@ -67,12 +67,12 @@
         <div class="form-group">
             <label>Water Resistance</label>
             <input type="checkbox" asp-for="WaterResistance" class="form-check-input form-control-lg" />
-            <span asp-validation-for="WaterResistance" class="text-danger" />
+            <span asp-validation-for="WaterResistance" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>USB Chargin gPort</label>
             <input type="checkbox" asp-for="USBChargingPort" class="form-check-input form-control-lg" />
-            <span asp-validation-for="USBChargingPort" class="text-danger" />
+            <span asp-validation-for="USBChargingPort" class="text-danger"></span>
         </div>
 
         <div class="form-group">
@@ -80,19 +80,19 @@
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
                 <option>--Choose a category</option>
             </select>
-            <span asp-validation-for="CategoryId" class="text-danger" />
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Brand</label>
             <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
                 <option>--Choose a brand</option>
             </select>
-            <span asp-validation-for="BrandId" class="text-danger" />
+            <span asp-validation-for="BrandId" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Image</label>
-            <input asp-for="ImageUpload" class="form-control" accept=".jpg,.png,.jpeg" />
-            <span asp-validation-for="ImageUpload" class="text-danger" />
+            <input asp-for="ImageUpload" class="form-control"  />
+            <span asp-validation-for="ImageUpload" class="text-danger"></span>
             <img src="~/media/products/@Model.MainImage" width="120" height="100" />
         </div>
         <div class="form-group">
@@ -136,14 +136,14 @@
                         <h2>Add more images</h2>
                         <input type="hidden" name="productId" value="@Model.Id" multiple class="form-control" />
                         <input type="file" asp-for="ImageFiles" id="file-input" multiple class="form-control" accept=".jpg,.png,.jpeg" onchange="preview()">
-                        <span asp-validation-for="ImageFiles" class="text-danger" />
+                        <span asp-validation-for="ImageFiles" class="text-danger"></span>
                         <label for="file-input" id="lbfile" class="text-white">
                             <i class="fas fa-upload"></i> &nbsp; Choose A Photo
                         </label>
                         <p id="num-of-files" style="display: none;">No Files Chosen</p>
                         <div id="previewImages"></div>
                     </div>
-                    <input type="submit" class="btn btn-primary btn-md" value="AddImages">
+                    <input type="submit" class="btn btn-primary btn-md" value="Add Images">
                 </form>
 
             </div>

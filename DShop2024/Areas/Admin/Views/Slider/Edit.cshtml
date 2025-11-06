@@ -11,18 +11,18 @@
         <div class="form-group">
             <label>Banner Name</label>
             <input asp-for="BannerName" class="form-control" />
-            <span asp-validation-for="BannerName" class="text-danger" />
+            <span asp-validation-for="BannerName" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Description</label>
             <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label>Image</label>
             <input asp-for="ImageUpload" class="form-control" />
-            <span asp-validation-for="ImageUpload" class="text-danger" />
+            <span asp-validation-for="ImageUpload" class="text-danger"></span>
             <img src="~/media/banners/@Model.Image" width="350" height="180" />
         </div>
         <div class="form-group">

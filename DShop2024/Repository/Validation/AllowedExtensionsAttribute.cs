@@ -18,11 +18,11 @@ namespace DShop2024.Repository.Validation
                 var extension = Path.GetExtension(file.FileName);
                 if (!_allowedExtensions.Contains(extension.ToLower()))
                 {
-                    return new ValidationResult(ErrorMessage ?? $"File extension '{extension}' is not allowed. Allowed extensions are: {string.Join(", ", _allowedExtensions)}.");
+                    return new ValidationResult($"Only {string.Join(", ", _allowedExtensions)} files are allowed.");
                 }
             }
-            return ValidationResult.Success;
+
+            return ValidationResult.Success!;
         }
-        //[AllowedExtensions(new string[] { ".jpg", ".png", ".gif" }, ErrorMessage = "Only JPG, PNG, and GIF files are allowed.")]
     }
 }
