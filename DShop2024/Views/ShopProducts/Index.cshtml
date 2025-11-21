@@ -98,11 +98,13 @@
 <div class="container-fluid ">
 	@await Component.InvokeAsync("FavouriteProduct")
 </div>
-<div class="container-fluid ">
-	@await Component.InvokeAsync("RecentlyViewedProduct")
-</div>
+
 <div class="container-fluid ">
 	@await Component.InvokeAsync("RecommendProduct")
+</div>
+
+<div class="container-fluid ">
+	@await Component.InvokeAsync("RecentlyViewedProduct")
 </div>
 
 @section Scripts {

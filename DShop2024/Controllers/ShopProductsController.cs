@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Services.Recommend;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,14 @@ namespace DShop2024.Controllers
 		private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
         private readonly IMapper _mapper;
+        private readonly IRecommendationService _rec;
 
-        public ShopProductsController(DShopContext context, UserManager<AppUserModel> userManager, IMapper mapper)
+        public ShopProductsController(DShopContext context, UserManager<AppUserModel> userManager, IMapper mapper, IRecommendationService rec)
 		{
 			_context = context;
 			_userManager = userManager;
 			_mapper = mapper;
+            _rec = rec;
 
         }
 
@@ -195,45 +198,18 @@ namespace DShop2024.Controllers
 										.ToListAsync();
 				ViewBag.relatedProducts = relatedProducts;
 
-                
-				var rvproduct = Request.Cookies["RecentlyViewedProducts"];
-				List<ProductViewModel> recentlyViewedProducts;
-				if (rvproduct == null)
-				{
-					recentlyViewedProducts = new List<ProductViewModel>();
-				}
-				else
-				{
-					recentlyViewedProducts = JsonConvert.DeserializeObject<List<ProductViewModel>>(rvproduct);
-				}
-
-				var checkAdd = recentlyViewedProducts.Any(p => p.Id == productById.Id);
-				if (!checkAdd)
-				{
-              
-                    ProductViewModel pvm = _mapper.Map<ProductViewModel>(productById);
-                    pvm.ViewAt= DateTime.Now;
-                    recentlyViewedProducts.Add(pvm);
-				}
-				var recentProducts = JsonConvert.SerializeObject(recentlyViewedProducts, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore });
-				var cookieOptionss = new CookieOptions
-				{
-					HttpOnly = true,
-					Expires = DateTime.UtcNow.AddMinutes(30),
-					Secure = true,
-					SameSite = SameSiteMode.Strict,
-				};
-				Response.Cookies.Append("RecentlyViewedProducts", recentProducts, cookieOptionss);
-                
-
                 var user = await _userManager.GetUserAsync(this.User);
 				IQueryable<RatingModel> listRating = _context.Ratings
 										.Where(p => p.ProductId == Id)
 										.Where(r => r.Status != 0)
-										.Include(c => c.User);
+										.Include(c => c.User)
+                                        .OrderByDescending(r => r.RatingDateTime);
 
 
-				double pointAvarge = 0.0;
+                _rec.AddRecentlyViewedProductAsync(productById.Id);
+                //var recom = await _rec.RecommendForRecentlyViewedAsync(topN: 8);
+
+                double pointAvarge = 0.0;
 				bool checkUserOrder = false;
 				RatingModel myFeedback = new RatingModel();
 				List<RatingModel> ratings = new List<RatingModel>();
@@ -338,5 +314,79 @@ namespace DShop2024.Controllers
 		
 		}
 
-	}
+
+
+        // List with optional recommendations block
+        //public async Task<IActionResult> Index(int? userId)
+        //{
+        //    var items = await _db.Backpacks.AsNoTracking().ToListAsync();
+
+        //    IReadOnlyList<Backpack> recs = Array.Empty<Backpack>();
+        //    if (userId.HasValue)
+        //        recs = await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 8);
+
+        //    return View(new BackpacksIndexVm { Items = items, Recommendations = recs });
+        //}
+
+        // Detail page marks as recently viewed
+        //public async Task<IActionResult> Details(int id, int? userId)
+        //{
+        //    var item = await _db.Backpacks.FindAsync(id);
+        //    if (item == null) return NotFound();
+
+        //    if (userId.HasValue)
+        //        await _rec.AddRecentlyViewedAsync(userId.Value, id);
+
+        //    var recs = userId.HasValue
+        //        ? await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 6)
+        //        : Array.Empty<Backpack>();
+
+        //    return View(new BackpackDetailsVm { Item = item, Recommendations = recs });
+        //}
+
+
+
+
+        //public async Task<IActionResult> Index(int? userId)
+        //{
+        //    var items = await _context.Products.Where(p => p.Status != 0).AsNoTracking().ToListAsync();
+
+        //    IReadOnlyList<ProductModel> recs = Array.Empty<ProductModel>();
+        //    if (userId.HasValue)
+        //        recs = await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 8);
+
+        //    return View(new BackpacksIndexVm { Items = items, Recommendations = recs });
+        //}
+
+        //public async Task<IActionResult> Details(int id, int? userId)
+        //{
+        //    var item = await _context.Products.Where(p => p.Status != 0 & p.Id == id).FirstOrDefaultAsync();
+        //    if (item == null) return NotFound();
+
+        //    if (userId.HasValue)
+        //        await _rec.AddRecentlyViewedAsync(userId.Value, id);
+
+        //    var recs = userId.HasValue
+        //        ? await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 6)
+        //        : Array.Empty<ProductModel>();
+
+        //    return View(new BackpackDetailsVm { Item = item, Recommendations = recs });
+        //}
+
+    }
+
+
+
+
+    public class BackpacksIndexVm
+    {
+        public IEnumerable<ProductModel> Items { get; set; } = Enumerable.Empty<ProductModel>();
+        public IReadOnlyList<ProductModel> Recommendations { get; set; } = Array.Empty<ProductModel>();
+    }
+
+    public class BackpackDetailsVm
+    {
+        public ProductModel Item { get; set; } = default!;
+        public IReadOnlyList<ProductModel> Recommendations { get; set; } = Array.Empty<ProductModel>();
+    }
 }

@@ -40,7 +40,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(products);
 		}
 
-		[Authorize(Roles = RoleName.Administrator)]
+        [Authorize(Roles = RoleName.Administrator)]
 		[HttpGet]
 		public IActionResult Create()
 		{
@@ -435,7 +435,9 @@ namespace DShop2024.Areas.Admin.Controllers
 			var listRating =  _context.Ratings
 						.Where(p => p.ProductId == id)
 						.Where(r => r.Status == 1)
-						.Include(c => c.User);
+						.Include(c => c.User)
+						.Include(c => c.ReplyBy)
+                        .OrderByDescending(c => c.RatingDateTime);
 			var pointAvarge = 0.0;
             List<RatingModel> ratings = new List<RatingModel>();
 
@@ -591,5 +593,133 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ManageRating([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
+        {
+            var ListRating =  _context.Ratings.Where( r => r.Status != 0)
+                                    .Include(r => r.Product)
+                                    .Include(r => r.User)
+                                    .Include(r => r.ReplyBy)
+                                    .OrderByDescending(r => r.RatingDateTime);
+            int totalRating = ListRating.Count();
+            ViewBag.totalOrder = totalRating;
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalRating / 10);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("ManageRating", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize
+                })
+            };
+
+            var ratings = await ListRating.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+
+            ViewBag.pagingModel = pagingModel;
+            return View(ratings);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPopUpReplyRating(int? Id)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var ratingModel = await _context.Ratings
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (ratingModel == null)
+            {
+                return NotFound();
+            }
+            return PartialView("_ModalReplyRatingPartial", ratingModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReplyRating(int? Id, string ReplyMessage)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var ratingModel = await _context.Ratings
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (ratingModel == null)
+            {
+                return NotFound();
+            }
+            if (String.IsNullOrEmpty(ReplyMessage))
+            {
+                return Ok(new { success = false, Message = "Input reply message " });
+            }
+            try
+            {
+                var user = await _userManager.GetUserAsync(this.User);
+                ratingModel.ReplyMessage = ReplyMessage;
+                ratingModel.UserIdReply = user.Id;
+                _context.Ratings.Update(ratingModel);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, Message = "Reply rating successful" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, Message = "Reply rating fail " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RemoveRatingPopup(int? Id)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var ratingModel = await _context.Ratings
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (ratingModel == null)
+            {
+                return NotFound();
+            }
+            return PartialView("_ModalRemoveRatingPartial", ratingModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveRating(int? Id)
+        {
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var ratingModel = await _context.Ratings
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (ratingModel == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                var user = await _userManager.GetUserAsync(this.User);
+                ratingModel.Status = 0;
+                _context.Ratings.Update(ratingModel);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, Message = "Remove rating successful" });
+
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, Message = "Remove rating fail " + ex.Message });
+            }
+        }
     }
 }

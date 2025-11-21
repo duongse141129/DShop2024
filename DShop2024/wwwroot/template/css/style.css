@@ -22,8 +22,9 @@
     height: 45px;
     align-items: center;
     justify-content: center;
-    transition: 0.5s;
+    transition: 0.3s;
     z-index: 99;
+    margin-bottom: 100px;
 }
 /*** Spinner End ***/
 

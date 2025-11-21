@@ -52,7 +52,7 @@
     <Folder Include="wwwroot\media\imageProduct\" />
     <Folder Include="wwwroot\media\message\" />
     <Folder Include="wwwroot\media\products\" />
-    <Folder Include="wwwroot\Uploads\" />
+    <Folder Include="wwwroot\importStocks\" />
   </ItemGroup>
 
   <ItemGroup>

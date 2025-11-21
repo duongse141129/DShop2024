@@ -193,15 +193,22 @@
 }
 
 .response-area .media {
-    border: 1px solid #F7F7F0;
+    border: 3px solid #b4b8b5;
     padding: 18px 18px 18px 0;
-    margin-bottom: 27px
+    margin-bottom: 27px;
+    border-radius: 15px;
 }
 
-    .response-area .media img {
+    .response-area .media .media-object {
         height: 102px;
         width: 100%;
     }
+
+    .response-area .media .media-product {
+        height: 150px;
+        width: 100%;
+    }
+
 
     .response-area .media .pull-left {
         margin-right: 25px

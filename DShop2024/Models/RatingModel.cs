@@ -24,15 +24,19 @@ namespace DShop2024.Models
 		public int Status { get; set; }
 
 
+        public string? ReplyMessage { get; set; }
+        public string UserIdReply { get; set; }
 
-		[ForeignKey("ProductId")]
+
+
+        [ForeignKey("ProductId")]
 		public virtual ProductModel Product { get; set; }
-
 
 		[ForeignKey("UserId")]
 		public virtual AppUserModel User { get; set; }
 
-
-	}
+        [ForeignKey("UserIdReply")]
+        public virtual AppUserModel ReplyBy { get; set; }
+    }
 
 }

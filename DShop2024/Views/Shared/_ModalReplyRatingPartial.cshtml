@@ -1,0 +1,55 @@
+﻿@model RatingModel
+﻿@{
+    ViewData["Title"] = "Replay Feedback";
+    Layout = null;
+}
+
+    <div class="modal-header">
+    <h5 class="modal-title">@ViewData["Title"]</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+<form id="formData">
+    <div class="modal-body">
+        <input type="hidden" asp-for="Id" />
+        <p>
+            @Model.Comment
+        </p>
+        <div class="mb-3">
+            <label asp-for="ReplyMessage" class="form-label"></label>
+            <textarea asp-for="ReplyMessage" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="ReplyMessage" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Replay</button>
+    </div>
+</form>
+
+<script>
+$("#formData").submit(function (e) {
+    e.preventDefault();
+    $.ajax({
+        method: "POST",
+        url: "@Url.Action("ReplyRating", "ProductManage")",
+        data: $(this).serialize(),
+            success: function (result) {
+                if (result.success) {                                       
+                    Swal.fire(
+                            {
+                                  position: "top-end",
+                                  icon: "success",
+                                  title: result.message,
+                                  showConfirmButton: false,
+                                  timer: 500
+                            }
+                    ).then(function(){
+                             location.reload();
+                    });
+                } else {
+                        $("#mainModal .modal-content").html(result);
+                }
+        }
+    });
+});
+</script>

@@ -4,8 +4,12 @@
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 
+<a asp-action="ManageRating" class="btn btn-success btn-md" id="btnModalPopup">Feedback</a>
+<a asp-action="AllInfoProduct" class="btn btn-success btn-md" id="btnModalPopup">data</a>
+<br />
 @if (User.IsInRole(RoleName.Administrator))
 {
+
 
     <a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
     <br />
@@ -119,7 +123,6 @@ else
         </tbody>
     </table>
 }
-
 
 
 

@@ -1,12 +1,13 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using DShop2024.Models;
-using DShop2024.Services.Momo;
-using DShop2024.Models.Momo;
-using DShop2024.Services.Vnpay;
-using DShop2024.Services;
-using DShop2024.Hubs;
 using DShop2024.AutoMapper;
+using DShop2024.Hubs;
+using DShop2024.Models;
+using DShop2024.Models.Momo;
+using DShop2024.Services;
+using DShop2024.Services.Momo;
+using DShop2024.Services.Recommend;
+using DShop2024.Services.Vnpay;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 
@@ -22,6 +23,9 @@ builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("Mo
 builder.Services.AddScoped<IMomoService, MomoService>();
 
 builder.Services.AddScoped<IVnPayService, VnPayService>();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+
+
 
 builder.Services.AddDbContext<DShopContext>(options =>
 {
@@ -88,6 +92,7 @@ builder.Services.AddSignalR();
 builder.Services.AddAutoMapper(typeof(ProductMapper));
 builder.Services.AddAutoMapper(typeof(CouponMapper));
 builder.Services.AddAutoMapper(typeof(BannerMapper));
+
 
 var app = builder.Build();
 

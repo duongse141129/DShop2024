@@ -1,0 +1,98 @@
+﻿@model IEnumerable<DShop2024.Models.RatingModel>
+
+@{
+    ViewData["Title"] = "Feedback";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+
+
+<div class="card col-md-8">
+    <div class="response-area mx-3">
+	    <ul class="media-list">
+            @foreach (var item in Model)
+            {
+                <li class="media">
+                    <div class="pull-left mx-2">
+                        <img class="media-object" src="~/media/avatar/@item.User.Avatar" alt="">
+                    </div>
+                    <div class="media-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <ul class="sinlge-post-meta">
+                                    <li><i class="fa fa-user"></i>@item.User.UserName</li>
+                                    <li><i class="fa fa-clock"></i>@item.RatingDateTime</li>
+                                </ul>
+                                <div class="rating-area">
+                                    <ul class="ratings">
+                                        <li class="rate-this">Rate this item:</li>
+                                        <li>
+                                            <i class="fa fa-star @( item.Star >= 1 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Star >= 2 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Star >= 3 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Star >= 4 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Star >= 5 ? "color" : "")"></i>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <p>@item.Comment</p>
+                                @if (item.ReplyBy == null)
+                                {
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Id')">
+                                        <i class="fa fa-reply"></i>
+                                        Replay
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-danger pull-right"
+                                        onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Id')">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Remove
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="row">
+                                    <a class="pull-right" asp-action="Detail" asp-route-id="@item.Product.Id">
+                                        @item.Product.ProductName
+                                    </a>
+                                    <img src="~/media/products/@item.Product.MainImage" class="media-product" alt="">
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                @if(item.ReplyBy != null)
+                {
+                    <li class="media second-media">
+                        <div class="pull-left mx-2">
+                            <img class="media-object" src="~/media/avatar/@item.ReplyBy.Avatar" alt="">
+                        </div>
+                        <div class="media-body">
+                            <ul class="sinlge-post-meta">
+                                <li><i class="fa fa-user"></i>@item.ReplyBy.UserName</li>
+                            </ul>
+                            <h5>Reply message</h5>
+                            <p>@item.ReplyMessage</p>
+                        </div>
+                    </li>
+                }
+            }
+
+
+
+	    </ul>
+    </div>
+</div>
+<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="mainModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/custom/js/popup.js"></script>
+}
+

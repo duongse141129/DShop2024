@@ -120,7 +120,7 @@
 							</button>
 
                     </div>
-                    <div class="col-lg-12">
+                    <div class="card col-lg-12">
                         <nav>
                             <div class="nav nav-tabs mb-3">
                                 <button class="nav-link active border-white border-bottom-0" type="button" role="tab"
@@ -158,37 +158,51 @@
                                 </div>
                         </div>
                     </div>
-						<h4>List feedback</h4>
-						<p> <b>Average Point:</b> @Model.Point </p>
-                        <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
-							@foreach (var item in Model.listRating)
-							{
-								<div class="d-flex bg-white py-2 rounded-5">
-									<img src="~/media/avatar/@item.User.Avatar" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
-									<div class="">
-										<p class="mb-2" style="font-size: 14px;">@item.RatingDateTime?.ToShortDateString()</p>
-										<h5>@item.User.UserName</h5>
-										<p> Point: @item.Star </p>
-										<div class="d-flex justify-content-between">
-											<div class="d-flex mb-3">
-												<i class="@( item.Star >= 1 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
-												<i class="@( item.Star >= 2 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
-												<i class="@( item.Star >= 3 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
-												<i class="@( item.Star >= 4 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
-												<i class="@( item.Star >= 5 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+						<h4>Feedback </h4>
+						<span> <strong>Average Point:</strong> @Model.Point </span>
+						<div class="response-area">
+							<div class="media-list">
+								@foreach (var item in Model.listRating)
+								{
+									<div class="card col-md-8 mt-2">
+										<div class="row pb-2 mt-2 me-4 ms-2">
+											<div class="col-sm-3 ">
+												<img class="media-object" src="~/media/avatar/@item.User.Avatar" width="100" style="height:100px" alt="">
 											</div>
+											<div class="col-md-9">
+												<ul class="sinlge-post-meta">
+													<li><i class="fa fa-user"></i>@item.User.UserName</li>
+													<li><i class="far fa-clock"></i>@item.RatingDateTime?.ToShortTimeString()</li>
+													<li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
+												</ul>
+												<div class="d-flex justify-content-between">
+													<div class="d-flex mb-2">
+														<i class="@( item.Star >= 1 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+														<i class="@( item.Star >= 2 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+														<i class="@( item.Star >= 3 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+														<i class="@( item.Star >= 4 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+														<i class="@( item.Star >= 5 ? "fa fa-star text-primary " :  "fa fa-star")"></i>
+													</div>
+												</div>
+												<p>@item.Comment</p>
+		
+											</div>
+											@if (item.ReplyMessage != null)
+											{
+												<div class="row pb-2 ms-2 ws">
+													<strong>Response to customer feedback</strong>
+													<p>@item.ReplyMessage</p>
+												</div>
+											}
 										</div>
-										<p>@Html.Raw(@item.Comment)</p>
 									</div>
-								</div>
-								<br/>
-							}
-							@if (ViewBag.pagingmodel != null)
-							{
-								<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
-							}
-							
-                        </div>
+								}
+							</div>
+						</div>
+						@if (ViewBag.pagingmodel != null)
+						{
+							<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+						}
 						@if (User.Identity?.IsAuthenticated ?? false)
 						{
 							<h4>Your feekback</h4>
@@ -319,6 +333,7 @@
     <div class="container-fluid ">
 			@await Component.InvokeAsync("RecentlyViewedProduct")
     </div>
+
 </div>
 <!-- Single Product End -->
 

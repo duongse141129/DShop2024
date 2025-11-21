@@ -30,9 +30,11 @@ namespace DShop2024.Repository.Components
 				 x.p.Price,
 				 x.p.Stock,
 				 x.p.BrandId,
-				 x.p.CategoryId
+				 x.p.CategoryId,
+				 countRating = x.p.Ratings.Count()
 
 			 })
+			 .Where( x=> x.Key.countRating > 10)
 			 .Select(g => new ProductViewModel
 			 {
 				 Id = g.Key.Id,

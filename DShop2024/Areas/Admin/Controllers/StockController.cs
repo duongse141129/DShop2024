@@ -91,7 +91,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.sidebar = Menu.Admin.Stock;     
             if (file != null && file.Length > 0)
             {
-                var uploadDirectory = $"{Directory.GetCurrentDirectory()}\\wwwroot\\Uploads";
+                var uploadDirectory = $"{Directory.GetCurrentDirectory()}\\wwwroot\\importStocks";
 
                 if (!Directory.Exists(uploadDirectory))
                 {

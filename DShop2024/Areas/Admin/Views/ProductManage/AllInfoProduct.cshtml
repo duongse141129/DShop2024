@@ -1,0 +1,54 @@
+﻿@model IEnumerable<ProductModel>
+@{
+    ViewData["title"] = "Manage Products";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+
+<a asp-area="Admin" asp-action="Create" asp-controller="ProductManage" class="btn btn-primary">Add Product</a>
+<br />
+<form asp-action="DeleteMultiple" asp-controller="ProductManage" class="py-2">
+    <input type="submit" class="btn btn-danger btn-md confirmDeletion" value="Delete multiple products" onclick="return confirm('Are you sure you want to delete these products?');" />
+
+    <table class="table table-striped" id="myTable">
+        <thead>
+            <tr>
+@*                 <th scope="col">Product Id</th> *@
+                <th scope="col">Product Name</th>
+@*                 <th scope="col">Price</th>
+                <th scope="col">Category</th>
+                <th scope="col">Brand</th> *@
+                <th scope="col">Rating points</th>
+                <th scope="col">Capacity (L)</th>
+                <th scope="col">Dimension (cm)</th>
+                <th scope="col">Weight (kg)</th>
+                <th scope="col">Material</th>
+                <th scope="col">Water Resistance</th>
+                <th scope="col">USB Charging Port</th>
+                <th scope="col">Laptop Pocket Inch)</th>
+
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+@*                     <td>@item.Id</td> *@
+                    <td>@item.ProductName</td>
+@*                     <td>@item.Price.ToString("#,##0 VND")</td>
+                    <td>@item.Category.CategoryName</td>
+                    <td>@item.Brand.BrandName</td> *@
+                    <td>@item.Ratings.Average(r => r.Star).ToString("#.##")</td>
+                    <td>@item.Capacity</td>
+                    <td>@item.Dimension</td>
+                    <td>@item.Weight</td>
+                    <td>@item.Material</td>
+                    <td>@item.WaterResistance</td>
+                    <td>@item.USBChargingPort</td>
+                    <td>@item.LaptopPocket</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</form>
