@@ -8,6 +8,7 @@ using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -39,7 +40,9 @@ namespace DShop2024.Controllers
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
 			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 
-			if(cartItems.Count == 0)
+			var patments = await _context.Payments.Where(p => p.Status != 0).ToListAsync();
+
+            if (cartItems.Count == 0)
 			{
 				return RedirectToAction("Index", "Cart");
             }
@@ -72,7 +75,8 @@ namespace DShop2024.Controllers
 				SumCouponValue = sumCouponValue,
 				GrandTotal = grandTotal,
 				CouponsApply = coupouns,
-				InfoDelivery = info
+				InfoDelivery = info,
+				Payments = patments
 			};
 
 
@@ -163,7 +167,7 @@ namespace DShop2024.Controllers
 
 			var totalPrice = cartItems.Sum(s => s.Quantity * s.Price);
 			int amount = Convert.ToInt32(totalPrice + info.ShippingCost - coupouns.Sum(c => c.Value) );
-			if (payment == "MOMO")
+			if (payment == PaymentEnumData.MOMO)
 			{
 				OrderInfoModel momoPayment = new OrderInfoModel { 
 					FullName = user.UserName,
@@ -172,7 +176,7 @@ namespace DShop2024.Controllers
 				};
 				return RedirectToAction("CreatePaymentMomo", "Payment", new { momoPayment.FullName, momoPayment.OrderInfo, momoPayment.Amount });
 			}
-			if(payment == "VNPAY")
+			if(payment == PaymentEnumData.VNPAY)
 			{
 				PaymentInformationModel vnpayPayment = new PaymentInformationModel {
 					Name = user.UserName,
@@ -183,7 +187,7 @@ namespace DShop2024.Controllers
 				return RedirectToAction("CreatePaymentUrlVnpay", "Payment", new { vnpayPayment.Name, vnpayPayment.Amount, vnpayPayment.OrderDescription, vnpayPayment.OrderType });
 			}
 
-			if (payment == "COD")
+			if (payment == PaymentEnumData.COD)
 			{
 				string orderCode = Guid.NewGuid().ToString();
 				return RedirectToAction("SaveOrder", "CheckOut", new { paymentMethod = "COD", orderCode = orderCode});
@@ -203,6 +207,7 @@ namespace DShop2024.Controllers
 				InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
 				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 				var user = await _userManager.GetUserAsync(this.User);
+				var payment = await _context.Payments.FirstOrDefaultAsync(p => p.PaymentName == paymentMethod);
 
 				var order = new OrderModel();
 				order.OrderCode = orderCode;
@@ -210,7 +215,7 @@ namespace DShop2024.Controllers
 				order.CreatedDate = DateTime.Now;
 				order.DateUpdate = DateTime.Now;
 				order.UserIdUpdate = user.Id;
-				order.PaymentMethod = paymentMethod;
+				order.PaymentId = payment.Id;
 				order.Status = 1;
 				order.Consignee = info.Consignee;
 				order.ShippingCost = info.ShippingCost;

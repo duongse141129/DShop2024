@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Voucher</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body style="background: #eee;font-family: 'Segoe UI', sans-serif;padding: 40px;">
+    <h2>Dear {{UserName}}</h2>
+    <h4>Thank you for registering an account at the {{ShopName}}. We send you a discount code.</h4>
+    <div class="voucher" style="width: 800px; background: white; padding: 40px 30px; border: 3px dashed #EDAC15; position: relative; margin-left: 100px;">
+        <div class="voucher-header">
+            <h2 style="font-size: 20px; letter-spacing: 2px; text-align: center; margin: 0; color: #666;">GIFT</h2>
+            <h1 style=" font-size: 60px; color: #F06409; text-align: center; margin: 5px 0 10px; letter-spacing: 3px;">COUPON</h1>
+            <p class="subtitle" style="text-align: center; color: #F06409; font-weight: bold; margin-bottom: 15px;">{{CouponName}}</p>
+            <p class="desc" style="text-align: center; color: #888; font-size: 14px; padding: 0 30px; line-height: 1.5;">
+                {{Description}}
+            </p>
+        </div>
+
+        <div class="voucher-footer" style="margin-top: 25px; display: flex; border-top: 2px dashed #ccc;">
+            <div class="left" style="width: 40%; background: #F06409; color: white; text-align: center; padding: 25px 10px; font-weight: bold; align-items: center;">
+                <p style="font-size: 16px;">Coupon Code</p>
+                <span id="couponCode" style="border: 3px solid white; border-radius: 15px; font-size: 13px; padding: 10px 15px; margin-top: 30px; background-color: #EDC615;" >{{CouponCode}}</span>
+            </div>
+            <div class="right" style="width: 60%; background: #ED9115; color: white; text-align: center; padding: 20px 5px;">
+                <h1 style="margin: 0; font-size: 45px;">{{CouponValue}}</h1>
+                <p style="margin: 5px 0 0;font-size: 15px;opacity: 0.85;">Expire: {{DateExpire}}</p>
+            </div>
+        </div>
+    </div>
+    <div class="contact-info">
+        <p>Thanks and best regards</p>
+        <h4>{{ShopName}}</h4>
+        <p>{{EmailShop}}</p>
+        <p>{{HotlineShop}}</p>
+        <img src=cid:{{Logo}} height="100" width="180" />
+    </div>
+</body>
+</html>

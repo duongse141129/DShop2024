@@ -384,3 +384,63 @@ ul{
         color: #025bee;
         font-size: 60px;
     }
+
+
+.like-count {
+    background-color: white;
+    border: solid 2px #888c89;
+    border-radius: 50%;
+    padding: 10px 20px;
+}
+.comment-count {
+    background-color: white;
+    border: solid 2px #888c89;
+    border-radius: 50%;
+    padding: 10px 20px;
+}
+
+.liked{
+    color: dodgerblue;
+    font-size: 35px;
+}
+
+.unlike {
+    color: #8c8e91;
+    font-size: 35px;
+}
+
+
+.comment-parent .comments-child {
+    margin-left: 100px;
+}
+
+.comment-box {
+    border: 2px solid #cfc9c8;
+    border-radius: 25px;
+    padding: 15px;
+    width: 500px;
+    background-color: #ffffff;
+}
+.spanRoleAdmin {
+    background-color: #cc1d00;
+    color:white;
+}
+
+.spanRoleCustomer {
+    background-color: #fca00a;
+    color: white;
+}
+
+.copy-data {
+    background-color: #f24c05;
+    color: white;
+    margin-left: 10px;
+    border: 2px solid #f24c05;
+    border-radius: 5px;
+}
+
+.expand-replies {
+    background-color: white;
+    color: #228ef2;
+    font-size: 15px;
+}

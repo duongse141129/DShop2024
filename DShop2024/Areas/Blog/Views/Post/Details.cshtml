@@ -1,4 +1,4 @@
-﻿@model DShop2024.Models.Blog.PostModel
+﻿@model PostDetailViewModel
 
 @{
     ViewData["Title"] = "Detail post";
@@ -9,39 +9,93 @@
     <div class="card">
         <div class="card-body">
             <div class="card card-post card-round post-item">
-                @if (Model.Image != null)
+                @if (Model.PostDetail.Image != null)
                 {
-                    <img class="card-img-top w-100" src="~/media/post/@Model.Image" height="500" alt="Card image cap">
+                    <img class="card-img-top w-100" src="~/media/post/@Model.PostDetail.Image" height="500" alt="Card image cap">
                 }
-                <a asp-action="PinPostDetail" asp-area="Blog" asp-controller="Post" asp-route-id="@Model.Id" class="btn-pin @( Model.IsPin == true ? "bg-warning text-white" : "")">
+                <a asp-action="PinPostDetail" asp-area="Blog" asp-controller="Post" asp-route-id="@Model.PostDetail.Id" class="btn-pin @( Model.PostDetail.IsPin == true ? "bg-warning text-white" : "")">
                     <i class="fas fa-thumbtack"></i>
                 </a>
                 <div class="card-body">
                     <div class="d-flex">
                         <div class="avatar">
-                            <img src="~/media/avatar/@Model.CreateBy.Avatar" alt="avatar" class="avatar-img rounded-circle">
+                            <img src="~/media/avatar/@Model.PostDetail.Author.Avatar" alt="avatar" class="avatar-img rounded-circle">
                         </div>
                         <div class="info-post ms-2">
-                            <p class="username">@Model.CreateBy.UserName</p>
-                            <p class="date text-muted">Create @Model.DateCreated.ToString("MM/dd/yyyy h:mm tt")</p>
-                            <p class="date text-muted">Update @Model.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</p>
+                            <p class="username">@Model.PostDetail.Author.UserName</p>
+                            <p class="date text-muted">Create @Model.PostDetail.DateCreated.ToString("MM/dd/yyyy h:mm tt")</p>
+                            <p class="date text-muted">Update @Model.PostDetail.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</p>
                         </div>
                     </div>
                     <div class="separator-solid"></div>
                     <p class="card-category text-info mb-1">
-                        @string.Join(", ", Model.PostSubjects.Select(pc => pc.Subject.Title))
+                        @Model.PostDetail.Subjects
                     </p>
                     <h3 class="card-title">
-                       @Model.Title
+                        @Model.PostDetail.Title
                     </h3>
                     <p class="card-text">
-                        @Model.ShortDescription
+                        @Model.PostDetail.ShortDescription
                     </p>
                     <div>
-                        @Html.Raw(Model.PostContent)
+                        @Html.Raw(Model.PostDetail.PostContent)
                     </div>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-rounded btn-md pull-right ">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-rounded btn-md pull-right confirmDeletion">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@Model.PostDetail.Id" class="btn btn-warning btn-rounded btn-md pull-right ">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@Model.PostDetail.Id" class="btn btn-danger btn-rounded btn-md pull-right confirmDeletion">Delete</a>
+
+
+                    <div class="row pt-2">
+                        <div class="col-md-2">
+                            <a class="btn @( Model.Liked == true ? "liked" : "unlike")" id="likeunlikepost" data-post_id="@Model.PostDetail.Id">
+                                <i class="fas fa-thumbs-up fa-3x"></i>
+                                <span id="liked-count">@Model.PostDetail.CountLikes </span>
+
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <p>
+                                <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                    Comment
+                                </a>
+                            </p>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="collapse" id="collapseExample">
+                                <div class="card card-body">
+                                    <form asp-action="CommentPost" method="post">
+                                        <input type="hidden" name="postId" value="@Model.PostDetail.Id" />
+                                        <div class="form-group">
+                                            <label class="control-label">Content</label>
+                                            <textarea rows="5" name="content" class="form-control"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" value="Save" class="btn btn-primary btn-lg" />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pt-3">
+                        <h3>Comments (@Model.PostDetail.CountComments)</h3>
+                        <div class="col-md-10">
+                            <div class="response-area">
+                                <div class="media-list">
+                                    @foreach (var item in Model.ListComments)
+                                    {
+                                        @await Html.PartialAsync("_CommentItemPartial", item)
+                                    }
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+                            </div>
+
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -50,55 +104,48 @@
     <a asp-action="Index">Back to list post</a>
 </div>
 
-
-
-
-@* <div>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            Mô tả
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ShortDescription)
-        </dd>
-        <dt class = "col-sm-2">
-           Url
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Slug)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PostContent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.Raw(@Model.PostContent)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateBy.UserName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.Raw(@Model.CreateBy.UserName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateCreated)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateCreated)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DateUpdated)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DateUpdated)
-        </dd>
-
-
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Sửa</a> |
-    <a asp-action="Index">Các bài viết</a>
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="mainModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
 </div>
 
- *@
+@section Scripts {
+    <script src="~/custom/js/popup.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#likeunlikepost').click(function () {
+                var postId = $(this).data("post_id");
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("LikeOrUnlikePost", "ViewPost")",
+                    data: { postId: postId },
+                    success: function (result) {
+                        if (result.success) {
+                            if(result.message == "liked" ) {
+                                $('#likeunlikepost').removeClass("unlike");
+                                $('#likeunlikepost').addClass('liked');
+                            }
+                            else if(result.message == "unlike" ) {
+                                $('#likeunlikepost').removeClass("liked");
+                                $('#likeunlikepost').addClass('unlike');
+                            }
+                            $('#liked-count').text(result.count);
+                        }
+                        else {
+                            Swal.fire({
+                              icon: "error",
+                              title: "Like Unlike fail",
+                              text: result.message
+                            });
+                        }
+
+                    }
+                });
+            });
+        });
+    </script>
+
+}

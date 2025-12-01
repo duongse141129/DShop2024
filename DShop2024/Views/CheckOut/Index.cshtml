@@ -195,20 +195,14 @@
                                     <td class="py-5">
                                         <h3 class="mb-0 text-dark py-2">Payment method</h3>
                                     </td>
-                                    <div class="form-check text-start my-3">
-                                        <input type="radio" class="form-check-input bg-primary border-0" id="paymentCOD" name="payment" value="COD" checked>
-                                        <label class="form-check-label" for="paymentCOD">Cash On Delivery</label>
-                                    </div>
-                                    <div class="form-check text-start my-3">
-                                        <input type="radio" class="form-check-input bg-primary border-0" id="paymentMomo" name="payment" value="MOMO">
-                                        <img src="~/media/payment/momo_logo.png"  width="50"/>
-                                        <label class="form-check-label" for="paymentMomo">Momo</label>
-                                    </div>
-                                    <div class="form-check text-start my-3">
-                                        <input type="radio" class="form-check-input bg-primary border-0" id="paymentVNPAY" name="payment" value="VNPAY">
-                                        <img src="~/media/payment/vnpaylogo.png" width="50" />
-                                        <label class="form-check-label" for="paymentVNPAY">VNpay</label>
-                                    </div>
+                                    @foreach (var item in Model.Payments)
+                                    {                                      
+                                        <div class="form-check text-start my-3">
+                                            <input type="radio" class="form-check-input bg-primary border-0" id="payment_@item.PaymentName" name="payment" value="@item.PaymentName" @( item.PaymentName == PaymentEnumData.COD ? "checked" : "") >
+                                            <img src="~/media/payment/@item.Logo"  width="50"/>
+                                            <label class="form-check-label" for="payment_@item.PaymentName">@item.PaymentName</label>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                             <div class="row g-4 text-center align-items-center justify-content-center pt-4">
@@ -349,6 +343,31 @@
 
                 }
             });
+        });
+    </script>
+
+    <script>
+        $('.copy-data').on('click', async function () {
+          const text = $(this).data('copy') + '';
+          const btn = this;
+
+          if (navigator.clipboard?.writeText) {
+            try {
+              await navigator.clipboard.writeText(text);
+              $(btn).text('Copied ✓').prop('disabled', true);
+              setTimeout(() => $(btn).text('Save').prop('disabled', false), 1500);
+              return;
+            } catch (e) {
+              // fall through to fallback
+            }
+          }
+          // fallback:
+          const $temp = $('<textarea>').css({position: 'absolute', left: '-9999px'}).val(text).appendTo('body');
+          $temp.select();
+          try { document.execCommand('copy'); $(btn).text('Copied ✓').prop('disabled', true); }
+          catch (e) { alert('Copy failed.'); }
+          $temp.remove();
+          setTimeout(() => $(btn).text('Save').prop('disabled', false), 1500);
         });
     </script>
 

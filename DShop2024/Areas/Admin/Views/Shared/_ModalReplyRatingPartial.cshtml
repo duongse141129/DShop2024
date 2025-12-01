@@ -47,7 +47,11 @@ $("#formData").submit(function (e) {
                              location.reload();
                     });
                 } else {
-                        $("#mainModal .modal-content").html(result);
+                        Swal.fire({
+                          icon: "error",
+                          title: "Oops...",
+                          text: result.message
+                        });
                 }
         }
     });

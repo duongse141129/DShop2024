@@ -7,10 +7,8 @@ namespace DShop2024.AutoMapper
 {
     public class ProductMapper : Profile
     {
-
         public ProductMapper() 
         {
-
             CreateMap<CreateProductRequest, ProductModel>();
             CreateMap<UpdateProductRequest, ProductModel>()
                                .ForMember(dest => dest.MainImage, act => act.Ignore())

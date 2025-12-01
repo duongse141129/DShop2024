@@ -92,7 +92,6 @@
         $(document).ready(function () {
             $('.sendMessageButton').click(function () {
                 var messageInput = $('#messageInput').val();
-
                 $.ajax({
                     type: "POST",
                     url: "@Url.Action("SendMessage", "Message")",

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<PostModel>
+﻿@model IEnumerable<PostViewModel>
 
 @{
     ViewData["Title"] = "Manage post";
@@ -7,11 +7,16 @@
 }
 
 <h1 class="text-primary">@ViewData["title"]</h1>
+
+
 <div class="card">
- 
+
     <div class="card-title px-3">
-@*         <a asp-action="" class="btn btn-danger btn-lg">SeedData</a> *@
+        <a asp-action="SeedLike" class="btn btn-primary btn-md text-white">Seed like</a>
+        <a asp-action="SeedComment" class="btn btn-primary btn-md text-white">Seed comment</a>
+        <a asp-action="SeedDescritp" class="btn btn-primary btn-md text-white">Seed Des</a>
         <a asp-action="Create" class="btn btn-primary btn-md text-white">Create post</a>
+        <a asp-action="SendPromotionToNewCustomer" class="btn btn-primary btn-md text-white">send coupon  </a>
         <h4>Total posts: @ViewBag.totalPosts</h4>
     </div>
 
@@ -59,7 +64,7 @@
             {
                 <div class="col-md-4">
                     <div class="card card-post card-round post-item">
-                        @if(item.Image!= null)
+                        @if (item.Image != null)
                         {
                             <img class="card-img-top" src="~/media/post/@item.Image" width="500" height="350" alt="Card image cap">
                         }
@@ -68,18 +73,18 @@
                         </a>
                         <div class="card-body">
                             <div class="d-flex">
-                                <div class="avatar">                         
-                                    <img width="100" height="100" src="~/media/avatar/@item.CreateBy.Avatar" alt="avatar" class="avatar-img rounded-circle">
+                                <div class="avatar">
+                                    <img width="100" height="100" src="~/media/avatar/@item.Author.Avatar" alt="avatar" class="avatar-img rounded-circle">
                                 </div>
                                 <div class="info-post ms-2">
-                                    <p class="username">@item.CreateBy.UserName</p>
+                                    <p class="username">@item.Author.UserName </p>
                                     <p class="date text-muted">Create @item.DateCreated.ToString("MM/dd/yyyy h:mm tt")</p>
                                     <p class="date text-muted">Update @item.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</p>
                                 </div>
                             </div>
                             <div class="separator-solid"></div>
                             <p class="card-category text-info mb-1">
-                                @string.Join(", ", item.PostSubjects.Select(pc => pc.Subject.Title))
+                                @item.Subjects
                             </p>
                             <h3 class="card-title">
                                 @item.Title
@@ -87,16 +92,25 @@
                             <p class="card-text">
                                 @item.ShortDescription
                             </p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <span class="like-count"><i class="fas fa-thumbs-up"></i> @item.CountLikes</span>
+                                    <span class="comment-count"><i class="far fa-comment"></i> @item.CountComments</span>
+                                </div>
+                            </div>
+                            <div class="col pt-4">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-rounded btn-lg">Read More</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-rounded btn-md pull-right ">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-rounded btn-md pull-right confirmDeletion">Delete</a>
+                            </div>
 
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-rounded btn-lg">Read More</a>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-rounded btn-md pull-right ">Edit</a>
-                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-rounded btn-md pull-right confirmDeletion">Delete</a>
-                                                              
+
+
                         </div>
                     </div>
                 </div>
             }
-    
+
         </div>
         <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
     </div>

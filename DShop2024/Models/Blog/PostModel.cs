@@ -44,5 +44,7 @@ namespace DShop2024.Models.Blog
         [FileExtension]
         public IFormFile? ImageUpload { get; set; }
 
+        public virtual ICollection<CommentModel> Comments { get; set; }
+        public virtual ICollection<LikeModel> Likes { get; set; }
     }
 }

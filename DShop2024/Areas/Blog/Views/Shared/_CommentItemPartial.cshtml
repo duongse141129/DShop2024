@@ -1,0 +1,99 @@
+﻿@using DShop2024.ViewModels
+@model CommentViewModel
+
+<div class="comment-parent">
+    <div class="comment-box mt-2" >
+        <div class="d-flex" >
+            <div class="col-md-3">
+                <img class="media-object" src="~/media/avatar/@Model.User.Avatar" width="100" style="height:100px" alt="">
+                @if (Model.CommentChildren != null && Model.CommentChildren.Any())
+                {
+                    <a class="expand-replies" data-bs-toggle="collapse" href="#comment_@Model.Id" role="button" aria-expanded="false" aria-controls="comment_@Model.Id">
+                        <i class="fas fa-chevron-down"></i> Replies
+                    </a>
+                }
+            </div>
+            <div class="ms-3">
+                <b>@Model.User.UserName</b>  
+                <span class="badge bg-@( Model.User.Role == RoleName.Administrator ? "danger" : "warning")">@Model.User.Role</span>
+                <br />
+                <small>@Model.Timestamp.ToShortTimeString() - @Model.Timestamp.ToShortDateString()</small>
+                <p>@Model.CommentContent</p>
+                <button class="btn btn-sm btn-info"
+                        onclick="openModal('/Blog/Post/GetPopUpReplyComment?Id=@Model.Id')">
+                    <i class="fa fa-reply"></i>
+                    Replay
+                </button>
+                @if (User.IsInRole(RoleName.Administrator))
+                {
+                    <a asp-action="DeleteComment" class="btn btn-sm btn-danger confirmDeletion dCommnet" asp-route-Id="@Model.Id">
+                        Delete
+                    </a>
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <div class="comments-child">
+        <div class="collapse" id="comment_@Model.Id">
+        @if (Model.CommentChildren != null && Model.CommentChildren.Any())
+        {
+            foreach (var child in Model.CommentChildren.OrderBy(c => c.Timestamp))
+            {
+                @await Html.PartialAsync("_CommentItemPartial", child)
+            }
+        }
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@* <div class="comment-box" style="border:2px solid #000; padding:20px; margin:10px 0;">
+
+    <div class="comment-header">
+        <img class="media-object" src="~/media/avatar/@Model.User.Avatar" width="100" style="height:100px" alt="">
+        <span><strong>@Model.User.UserName</strong></span>
+        <span>@Model.Timestamp.ToString("hh:mm tt")</span>
+        <span>@Model.Timestamp.ToString("MM/dd/yyyy")</span>
+        <button class="btn btn-primary btn-sm">Reply</button>
+        <button class="btn btn-danger btn-sm">Delete</button>
+    </div>
+
+    <div class="comment-content" style="margin-top:10px;">
+        @Model.CommentContent
+    </div>
+
+
+
+    <!-- CHILD COMMENTS -->
+    @if (Model.CommentChildren.Any())
+    {
+        <div style="margin-left:40px; margin-top:10px;" >
+            @foreach (var child in Model.CommentChildren)
+            {
+                @await Html.PartialAsync("_CommentItemPartial", child)
+            }
+        </div>
+    }
+</div> *@

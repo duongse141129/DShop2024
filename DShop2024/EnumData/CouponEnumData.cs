@@ -1,16 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Utilities;
-using System;
-using System.Diagnostics.Metrics;
-using static Org.BouncyCastle.Asn1.Cmp.Challenge;
+﻿
 
 namespace DShop2024.EnumData
 {
     public class CouponEnumData
     {
-        public static string COUPON_EXPIRED = "Expired";
-        public static string COUPON_TODAY = "Today";
-        public static string COUPON_NOT_YET = "Not yet";
+        public static readonly string COUPON_EXPIRED = "Expired";
+        public static readonly string COUPON_TODAY = "Today";
+        public static readonly string COUPON_NOT_YET = "Not yet";
 
         public enum StatusCoupon
         {

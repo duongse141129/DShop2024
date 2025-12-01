@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -336,7 +335,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
                     await DeleteProduct(idProduct);
                 }
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Multiple product success";
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete Multiple product successful";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -596,6 +595,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageRating([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
+            ViewBag.sidebar = Menu.Admin.Product;
             var ListRating =  _context.Ratings.Where( r => r.Status != 0)
                                     .Include(r => r.Product)
                                     .Include(r => r.User)
@@ -633,6 +633,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPopUpReplyRating(int? Id)
         {
+            ViewBag.sidebar = Menu.Admin.Product;
             if (Id == null)
             {
                 return NotFound();
@@ -649,6 +650,8 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> ReplyRating(int? Id, string ReplyMessage)
         {
+
+            ViewBag.sidebar = Menu.Admin.Product;
             if (Id == null)
             {
                 return NotFound();
@@ -678,9 +681,11 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpGet]
         public async Task<IActionResult> RemoveRatingPopup(int? Id)
         {
+            ViewBag.sidebar = Menu.Admin.Product;
             if (Id == null)
             {
                 return NotFound();
@@ -694,9 +699,11 @@ namespace DShop2024.Areas.Admin.Controllers
             return PartialView("_ModalRemoveRatingPartial", ratingModel);
         }
 
+        [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         public async Task<IActionResult> RemoveRating(int? Id)
         {
+            ViewBag.sidebar = Menu.Admin.Product;
             if (Id == null)
             {
                 return NotFound();

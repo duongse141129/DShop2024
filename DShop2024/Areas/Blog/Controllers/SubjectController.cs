@@ -29,8 +29,8 @@ namespace DShop2024.Areas.Blog.Controllers
                 .Include(c => c.ParentSubject)
                 .Include(c => c.SubjectChildren);
 
-            var subjects = (await qr.ToListAsync())
-                            .Where(c => c.ParentSubject == null && c.Status != 0)
+            var subjects = (await qr.Where(s => s.Status != 0).ToListAsync())
+                            .Where(c => c.ParentSubject == null)
                             .ToList();
                 
             return View(subjects);
@@ -229,7 +229,7 @@ namespace DShop2024.Areas.Blog.Controllers
             if (canUpdate && subject.ParentSubjectId != null)
             {
                 var childSubs =
-                            (from c in _context.Subjects select c)
+                            (from c in _context.Subjects.Where(s => s.Status != 0) select c)
                             .Include(c => c.SubjectChildren)
                             .ToList()
                             .Where(c => c.ParentSubjectId == subject.Id);
@@ -324,7 +324,7 @@ namespace DShop2024.Areas.Blog.Controllers
                 return NotFound();
             }
 
-            var subject = await _context.Subjects
+            var subject = await _context.Subjects.Where(s => s.Status != 0)
                 .Include(c => c.ParentSubject)
                  .Include(c => c.SubjectChildren)
                 .FirstOrDefaultAsync(m => m.Id == id);

@@ -1,15 +1,20 @@
 ﻿using App.Utilities;
 using AppMvc.Areas.Blog.Models;
+using AutoMapper;
 using Bogus;
-using DShop2024.Areas.Admin.Models.User;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Models.Blog;
+using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Data;
+
 
 namespace AppMvc.Areas.Blog.Controllers
 {
@@ -19,22 +24,24 @@ namespace AppMvc.Areas.Blog.Controllers
     {
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
+        private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly string sidebar = "blog";
+        private readonly IEmailSender _emailSender;
 
-        public PostController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager)
+        public PostController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager, IMapper mapper, IEmailSender emailSender)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
             _userManager = userManager;
+            _mapper = mapper;
+            _emailSender = emailSender;
         }
 
         public async Task<IActionResult> Index(string search,string subject_by, [FromQuery(Name = "p")]int currentPage, int pagesSize)
         {
             ViewBag.sidebar = Menu.Admin.Blog;
             IQueryable<PostModel> posts = _context.Posts.Where(p => p.Status!= 0)
-                                        .Include(p => p.CreateBy)
-                                        .Include(p => p.PostSubjects)
                                         .OrderByDescending(p => p.IsPin)
                                         .ThenByDescending(p => p.DateUpdated);
 
@@ -84,16 +91,20 @@ namespace AppMvc.Areas.Blog.Controllers
 
             var postsInPage =await posts.Skip((currentPage - 1) * pagesSize)
                         .Take(pagesSize)
+                        .Include(p => p.CreateBy)
+                        .Include(p => p.Likes)
+                        .Include(p => p.Comments)
                         .Include(p => p.PostSubjects)
                         .ThenInclude(pc =>pc.Subject)
                         .OrderByDescending(p => p.IsPin)
                         .ThenByDescending(p => p.DateUpdated)
                         .ToListAsync();
-            return View(postsInPage);
+            var postsVM = _mapper.Map<List<PostViewModel>>(postsInPage);
+            return View(postsVM);
         }
 
 
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, [FromQuery(Name = "p")] int currentPage, int pagesSize)
         {
             ViewBag.sidebar = Menu.Admin.Blog;
             if (id == null)
@@ -105,14 +116,95 @@ namespace AppMvc.Areas.Blog.Controllers
                 .Include(p => p.CreateBy)
                 .Include(p => p.PostSubjects)
                 .ThenInclude(pc => pc.Subject)
+                .Include(p => p.Likes)
+                .Include(p => p.Comments)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            bool checkLike = false;
+            var user = await _userManager.GetUserAsync(this.User);
+            if (user != null)
+            {
+                var liked = await _context.Likes.AnyAsync(l => l.UserId == user.Id && l.PostId == post.Id);
+                checkLike = liked;
+            }
+            ViewBag.Like = checkLike;
+
+            var comments = _context.Comments
+                                    .Where(c => c.PostId == post.Id
+                                             && c.Status != 0
+                                             && c.ParentCommentId == null)
+                                    .Include(c => c.User)
+                                    .Include(c => c.CommentChildren.Where(c => c.Status != 0))
+                                        .ThenInclude(ch => ch.User)
+                                    .OrderByDescending(c => c.Timestamp)
+                                    .AsQueryable();
+
+
+            int totalComments = comments.Count();
+            if (pagesSize <= 0)
+                pagesSize = 10;
+            int countPages = (int)Math.Ceiling((double)totalComments / 10);
+
+            if (currentPage > countPages)
+                currentPage = countPages;
+            if (currentPage < 1)
+                currentPage = 1;
+
+            var pagingModel = new PagingModel()
+            {
+                countpages = countPages,
+                currentpage = currentPage,
+                generateUrl = (pageNumber) => Url.Action("Details", new
+                {
+                    p = pageNumber,
+                    pagesSize = pagesSize
+                })
+            };
+
+            var commentsInPage = await comments.Skip((currentPage - 1) * pagesSize)
+                        .Take(pagesSize).ToListAsync();
+            ViewBag.pagingModel = pagingModel;
+            var rootComments = commentsInPage.Select(MapToVM).ToList();
+            PostDetailViewModel postDetailVM = new PostDetailViewModel
+            {
+                PostDetail = _mapper.Map<PostViewModel>(post),
+                ListComments = rootComments,
+                Liked = checkLike
+            };
+            return View(postDetailVM);
         }
+
+        private CommentViewModel MapToVM(CommentModel c)
+        {
+            var roleName = _context.UserRoles
+                                .Where(ur => c.UserId.Contains(ur.UserId))
+                                .Join(_context.Roles, ur => ur.RoleId, r => r.Id,
+                                    (ur, r) => new { ur.UserId, r.Name }).Select( r => r.Name).FirstOrDefault();
+
+            return new CommentViewModel
+            {
+                Id = c.Id,
+                CommentContent = c.CommentContent,
+                Timestamp = c.Timestamp,
+                ParentCommentId = c.ParentCommentId,
+                User = new UserViewModel
+                {
+                    Id = c.User.Id,
+                    UserName = c.User.UserName,
+                    Avatar = c.User.Avatar,
+                    Role = roleName,
+                },
+                CommentChildren = c.CommentChildren?.Where(c => c.Status != 0)
+                    .OrderByDescending(x => x.Timestamp)
+                    .Select(MapToVM)
+                    .ToList()
+            };
+        }
+
 
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> CreateAsync()
@@ -481,10 +573,250 @@ namespace AppMvc.Areas.Blog.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> LikeOrUnlikePost(int postId)
+        {
+            ViewBag.sidebar = Menu.Home.Blog;
+            var user = await _userManager.GetUserAsync(this.User);
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Status != 0 && p.Id == postId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            var liked = await _context.Likes.FirstOrDefaultAsync(l => l.UserId == user.Id && l.PostId == postId);
+            try
+            {
+                var countLike = 0;
+                if (liked != null)
+                {
+                    _context.Likes.Remove(liked);
+                    await _context.SaveChangesAsync();
+                    countLike = await _context.Likes.Where(p => p.PostId == post.Id).CountAsync();
+                    return Ok(new { success = true, message = "unlike", count = countLike });
+                }
+                liked = new LikeModel() { PostId = post.Id, UserId = user.Id };
+                await _context.Likes.AddAsync(liked);
+                await _context.SaveChangesAsync();
+                countLike = await _context.Likes.Where(p => p.PostId == post.Id).CountAsync();
+                return Ok(new { success = true, message = "liked", count = countLike });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = "Like post fail " + ex.Message });
+
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CommentPost(int postId, string content)
+        {
+            ViewBag.sidebar = Menu.Home.Blog;
+            var user = await _userManager.GetUserAsync(this.User);
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Status != 0 && p.Id == postId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            if (String.IsNullOrEmpty(content))
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Comment is empty";
+                return RedirectToAction("Details", new { id = post.Id });
+            }
+            try
+            {
+                CommentModel comment = new CommentModel()
+                {
+                    PostId = post.Id,
+                    UserId = user.Id,
+                    CommentContent = content,
+                    Timestamp = DateTime.Now,
+                    Status = 1
+                };
+                await _context.Comments.AddAsync(comment);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Comment post successful ";
+                return RedirectToAction("Details", new { id = post.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Comment post fail " + ex.Message;
+                return RedirectToAction("Details", new { id = post.Id });
+            }
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPopUpReplyComment(int? Id)
+        {
+            ViewBag.sidebar = Menu.Home.Blog;
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var commentModel = await _context.Comments
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (commentModel == null)
+            {
+                return NotFound();
+            }
+            return PartialView("_ModalReplyCommenttPartial", commentModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReplyComment(int? Id, int postId, string ReplyMessage)
+        {
+            ViewBag.sidebar = Menu.Home.Blog;
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var commentModel = await _context.Comments
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            var postModel = await _context.Posts
+                .FirstOrDefaultAsync(m => m.Id == postId && m.Status != 0);
+            if (commentModel == null || postModel== null)
+            {
+                return NotFound();
+            }
+            if (String.IsNullOrEmpty(ReplyMessage))
+            {
+                return Ok(new { success = false, Message = "Input reply message " });
+            }
+            try
+            {
+                var user = await _userManager.GetUserAsync(this.User);
+
+                CommentModel replyComment = new CommentModel
+                {
+                    CommentContent = ReplyMessage,
+                    UserId = user.Id,
+                    PostId = postId,
+                    ParentCommentId = commentModel.Id,
+                    Timestamp = DateTime.Now,
+                    Status = 1
+                };
+                await _context.Comments.AddAsync(replyComment);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, message = "Reply comment successful" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = "Reply comment fail " + ex.Message });
+            }
+        }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> DeleteComment(int? Id)
+        {
+            ViewBag.sidebar = Menu.Home.Blog;
+            if (Id == null)
+            {
+                return NotFound();
+            }
+            var commentModel = await _context.Comments.Include(c => c.CommentChildren)
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0) ;
+            if (commentModel == null )
+            {
+                return NotFound();
+            }
+            try
+            {
+                if(commentModel?.CommentChildren.Count > 0)
+                {
+                    foreach (var item in commentModel.CommentChildren)
+                    {
+                        await DeleteComment(item.Id);
+                    }
+                }
+                commentModel.Status = 0;
+                _context.Comments.Update(commentModel);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete comment successful ";
+                return RedirectToAction("Details", new {  Id = commentModel.PostId });
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Delete comment fail "+ ex.Message;
+                return RedirectToAction("Details", new { Id = commentModel.PostId });
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+        public async Task<IActionResult> SendPromotionToNewCustomer()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+
+            var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.CategoryCouponName == DShopConst.NEW_CUSTOMER);
+            if (promotion == null)
+            {
+                promotion = new PromotionModel { CategoryCouponName = DShopConst.NEW_CUSTOMER };
+                await _context.Promotions.AddAsync(promotion);
+                await _context.SaveChangesAsync();
+            }
+            //string email = "dacclone878787@gmail.com";
+            string email = "dacclone888999@gmail.com";
+            var user= await _userManager.FindByEmailAsync(email);
+
+            CouponModel couponModel = new CouponModel
+            {
+                CouponName = "Promotion for new customer",
+                CouponCode = "NEWCUSTOMER_" + user.UserName.ToUpper(),
+                Value = 50000,
+                DateStart = DateTime.Today,
+                DateExpired = DateTime.Today.AddDays(7),
+                Quantity = 1,
+                Status = 1,
+                Description = "Free shipping for new customers' first order",
+                PromotionId = promotion.Id
+            };
+
+            try
+            {
+
+                var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
+                await _emailSender.SendEmailCouponForNewCustomer(user, couponModel, infoShop);
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Send coupon email successful " ;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Send coupon email fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
+
+
+
+
 
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> SeedPostSubject()
         {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
             // remove old data
             _context.Subjects.RemoveRange(_context.Subjects.Where(c => c.SubjectContent.Contains("[fakeData]")));
             _context.Posts.RemoveRange(_context.Posts.Where(p => p.PostContent.Contains("[fakeData]")));
@@ -519,7 +851,8 @@ namespace AppMvc.Areas.Blog.Controllers
             var rCateIndex = new Random();
             int postExample = 1;
 
-            var user = _userManager.GetUserAsync(this.User).Result;
+            var user = _userManager.GetUserAsync(User).Result;
+
             var fakerPost = new Faker<PostModel>();
             //fakerPost.RuleFor(p => p.Author, f => f.PickRandom(author));
             fakerPost.RuleFor(p => p.PostContent, f => f.Lorem.Paragraphs(7) + "[fakeData]");
@@ -538,6 +871,7 @@ namespace AppMvc.Areas.Blog.Controllers
                 post.Status = 1;
                 post.IsPin = false;
                 post.DateUpdated = post.DateCreated;
+                post.UserIdCreate = user.Id;
                 posts.Add(post);
                 post_Subjects.Add(new PostSubjectModel()
                 {
@@ -559,6 +893,12 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> SeedOrder()
         {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
             try
             {
                 List<AppUserModel> user = await (from u in _context.Users
@@ -583,7 +923,7 @@ namespace AppMvc.Areas.Blog.Controllers
                         OrderCode = Guid.NewGuid().ToString(),
                         UserId = u.Id,
                         CreatedDate = randomDate,
-                        PaymentMethod = "COD",
+                        PaymentId = 1,
                         Status = 4,
                         AddressDelivery = "78 lang man_Xã Trác Văn_Thị xã Duy Tiên_Tỉnh Hà Nam",
                         PhoneDelivery = "0987654321",
@@ -631,6 +971,179 @@ namespace AppMvc.Areas.Blog.Controllers
             catch (Exception ex)
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedLike()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                List<AppUserModel> user = await (from u in _context.Users
+                                                 join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                 join r in _context.Roles on ur.RoleId equals r.Id
+                                                 where r.Name == RoleName.Customer
+                                                 where u.Status != 0
+                                                 select u).ToListAsync();
+
+                List<PostModel> posts = await _context.Posts.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
+                Random rnd = new Random();
+                foreach (var item in posts)
+                {
+                    for (int i = 0; i < rnd.Next(3,8); i++)
+                    {
+                        var userId = user[rnd.Next(user.Count)].Id;
+                        var checkLike = await _context.Likes.AnyAsync(p => p.UserId == userId && p.PostId == item.Id);
+                        if (!checkLike)
+                        {
+                            LikeModel like = new LikeModel
+                            {
+                                UserId = userId,
+                                PostId = item.Id
+                            };
+                            await _context.Likes.AddAsync(like);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedComment()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                List<AppUserModel> users = await (from u in _context.Users
+                                                 join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                 join r in _context.Roles on ur.RoleId equals r.Id
+                                                 where r.Name == RoleName.Customer
+                                                 where u.Status != 0
+                                                 select u).ToListAsync();
+
+                List<PostModel> posts = await _context.Posts.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
+                Random rnd = new Random();
+                //DateTime dateTime = new DateTime(2025, 11, 1);
+                //DateTime startDate = new DateTime(2025, 11, 1);
+                //DateTime endDate = new DateTime(2025, 11, 5);
+                //int range = (endDate - startDate).Days;
+                //DateTime randomDate = dateTime.AddDays(rnd.Next(range + 1));
+
+                var fakerComment = new Faker<CommentModel>();
+                fakerComment.RuleFor(p => p.Timestamp, f => f.Date.Between(new DateTime(2025, 11, 1), new DateTime(2025,11, 27)));
+                fakerComment.RuleFor(p => p.CommentContent, f => f.Lorem.Sentences(1));
+                //fakerComment.RuleFor(p => p.ParentCommentId, f => f.PickRandom(listIdComment));
+                List<CommentModel> comments = new List<CommentModel>();
+
+
+                for (int i = 0; i < 60; i++)
+                {
+                    var comment = fakerComment.Generate();
+                    comment.Status = 1;
+                    var postId = posts[rnd.Next(posts.Count())].Id;
+                    comment.PostId = postId;
+                    comment.UserId = users[rnd.Next(users.Count())].Id;
+                    var listIdComment = await _context.Comments.Where(c => c.Status != 0 && c.PostId == postId).Select(c => c.Id).ToListAsync();
+                    comment.ParentCommentId = listIdComment[rnd.Next(listIdComment.Count())];
+                    comments.Add(comment);
+                }
+                await _context.Comments.AddRangeAsync(comments);
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail 2" + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail3 " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedDescritp()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                string[] brands = new string[]{ "adidas", "bange" , "KF", "markryden", "msi", "osprey", "TNF" };
+
+                string des = "description";
+
+                var products = await _context.Products.Where(p => p.Status != 0).Where(p => p.Description.Contains("img"))
+                                                        .ToListAsync();
+
+                foreach (var item in products)
+                {
+                    if (item.Description.Contains("localhost:7213/contents/Product"))
+                    {
+                        foreach (var dBrand in brands)
+                        {
+                            if (item.Description.Contains(dBrand))
+                            {
+                                string newDes = item.Description.Replace(dBrand, des);
+                                item.Description = newDes;
+                                _context.Products.Update(item);
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail 2" + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail3 " + ex.Message;
                 return RedirectToAction("Index");
             }
 

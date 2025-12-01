@@ -69,6 +69,25 @@ public class DShopContext : IdentityDbContext<AppUserModel>
             entity.HasIndex(c => c.CouponCode).IsUnique();
         });
 
+        modelBuilder.Entity<PostModel>(entity =>
+        {
+            entity.HasIndex(c => c.Slug).IsUnique();
+        });
+
+        modelBuilder.Entity<SubjectModel>(entity =>
+        {
+            entity.HasIndex(c => c.Slug).IsUnique();
+        });
+
+        modelBuilder.Entity<PaymentModel>(entity =>
+        {
+            entity.HasIndex(c => c.PaymentName).IsUnique();
+        });
+
+        modelBuilder.Entity<LikeModel>(entity =>
+        {
+            entity.HasKey(c => new { c.PostId, c.UserId });
+        });
     }
 
 
@@ -97,5 +116,8 @@ public class DShopContext : IdentityDbContext<AppUserModel>
 		public virtual DbSet<PostSubjectModel> PostSubjects { get; set; }
 		public virtual DbSet<SubjectModel> Subjects { get; set; }
         public virtual DbSet<PolicyModel> Policies { get; set; }
+        public virtual DbSet<PaymentModel> Payments { get; set; }
+        public virtual DbSet<CommentModel> Comments { get; set; }
+        public virtual DbSet<LikeModel> Likes { get; set; }
 }
 

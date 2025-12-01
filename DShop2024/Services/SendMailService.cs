@@ -18,7 +18,7 @@ public class MailSettings
     public string Password { get; set; }
     public string Host { get; set; }
     public int Port { get; set; }
-
+     
 }
 
 public interface IEmailSender
@@ -178,12 +178,12 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{OrderCode}}", order.OrderCode);
         path = path.Replace("{{Products}}", strProduct);
         path = path.Replace("{{CustomerName}}", order.Consignee);
-        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod);
+        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod.PaymentName);
         path = path.Replace("{{Phone}}", order.PhoneDelivery);
         path = path.Replace("{{Mail}}", order.User.Email);
         path = path.Replace("{{AddressDelivery}}", order.AddressDelivery);
         path = path.Replace("{{DateOrder}}", order.CreatedDate.ToShortDateString());
-        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod);
+        path = path.Replace("{{PaymentMetod}}", order.PaymentMethod.PaymentName);
         path = path.Replace("{{Subtotal}}", order.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND"));
         path = path.Replace("{{ShippingCost}}", order.ShippingCost.ToString("#,##0 VND"));
         path = path.Replace("{{CouponValue}}", order.ValueCoupon.ToString("#,##0 VND"));
@@ -255,32 +255,6 @@ public class SendMailService : IEmailSender
 		await SendEmailTemplateAsync(userModel.Email, "confirm email for register", builder);
     }
 
-    public async Task SendEmailCouponForNewCustomer(AppUserModel userModel,CouponModel couponModel, InformationShopModel infoShop)
-    {
-        string webRootPath = _webHostEnvironment.WebRootPath;
-
-		var builder = new BodyBuilder();
-		var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
-		var image = builder.LinkedResources.Add(pathLogo);
-		image.ContentId = MimeUtils.GenerateMessageId();
-
-		string path = "";
-        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCoupon.html"));
-        path = path.Replace("{{UserName}}", userModel.UserName);
-        path = path.Replace("{{CouponName}}", couponModel.CouponName);
-        path = path.Replace("{{Description}}", couponModel.Description);
-        path = path.Replace("{{CouponCode}}", couponModel.CouponCode);
-        path = path.Replace("{{DateExpire}}", couponModel.DateExpired.ToShortDateString());
-
-        path = path.Replace("{{ShopName}}", infoShop.ShopName);
-        path = path.Replace("{{EmailShop}}", infoShop.Email);
-        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
-		path = path.Replace("{{Logo}}", image.ContentId);
-
-		builder.HtmlBody = path;
-
-		await SendEmailTemplateAsync(userModel.Email, "Promotion for new customers", builder);
-    }
 
     public async Task SendEmailOTP(AppUserModel userModel, string otp,string typeService, InformationShopModel infoShop)
     {
@@ -304,7 +278,7 @@ public class SendMailService : IEmailSender
         }
 
         string path = "";
-        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\otpEmail.html"));
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCouponTemplate.html"));
         path = path.Replace("{{UserName}}", userModel.UserName);
         path = path.Replace("{{OTPcode}}", otp);
 
@@ -318,5 +292,33 @@ public class SendMailService : IEmailSender
 		builder.HtmlBody = path;
 
 		await SendEmailTemplateAsync(userModel.Email, subject, builder);
+    }
+
+    public async Task SendEmailCouponForNewCustomer(AppUserModel userModel, CouponModel couponModel, InformationShopModel infoShop)
+    {
+        string webRootPath = _webHostEnvironment.WebRootPath;
+
+        var builder = new BodyBuilder();
+        var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
+        var image = builder.LinkedResources.Add(pathLogo);
+        image.ContentId = MimeUtils.GenerateMessageId();
+
+        string path = "";
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCouponTemplate.html"));
+        path = path.Replace("{{UserName}}", userModel.UserName);
+        path = path.Replace("{{CouponName}}", couponModel.CouponName);
+        path = path.Replace("{{Description}}", couponModel.Description);
+        path = path.Replace("{{CouponCode}}", couponModel.CouponCode);
+        path = path.Replace("{{CouponValue}}", DShopConst.FREE_SHIPPING);
+        path = path.Replace("{{DateExpire}}", couponModel.DateExpired.ToShortDateString());
+
+        path = path.Replace("{{ShopName}}", infoShop.ShopName);
+        path = path.Replace("{{EmailShop}}", infoShop.Email);
+        path = path.Replace("{{HotlineShop}}", infoShop.Phone);
+        path = path.Replace("{{Logo}}", image.ContentId);
+
+        builder.HtmlBody = path;
+
+        await SendEmailTemplateAsync(userModel.Email, "Promotion for new customers", builder);
     }
 }

@@ -3,6 +3,7 @@ using DShop2024.Hubs;
 using DShop2024.Models;
 using DShop2024.Models.Momo;
 using DShop2024.Services;
+using DShop2024.Services.ChatboxAI;
 using DShop2024.Services.Momo;
 using DShop2024.Services.Recommend;
 using DShop2024.Services.Vnpay;
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IMomoService, MomoService>();
 
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<ChatBotService>();
 
 
 
@@ -92,6 +94,7 @@ builder.Services.AddSignalR();
 builder.Services.AddAutoMapper(typeof(ProductMapper));
 builder.Services.AddAutoMapper(typeof(CouponMapper));
 builder.Services.AddAutoMapper(typeof(BannerMapper));
+builder.Services.AddAutoMapper(typeof(PostMapper));
 
 
 var app = builder.Build();

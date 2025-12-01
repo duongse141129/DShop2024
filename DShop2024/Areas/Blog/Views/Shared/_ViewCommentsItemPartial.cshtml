@@ -1,0 +1,54 @@
+﻿@using DShop2024.ViewModels
+@model CommentViewModel
+
+<div class="comment-parent">
+    <div class="comment-box mt-2">
+        <div class="d-flex">
+            <div class="col-md-3">
+                <img class="media-object" src="~/media/avatar/@Model.User.Avatar" width="100" style="height:100px" alt="">
+                @if (Model.CommentChildren != null && Model.CommentChildren.Any())
+                {
+                    <a class="expand-replies" data-bs-toggle="collapse" href="#comment_@Model.Id" role="button" aria-expanded="false" aria-controls="comment_@Model.Id">
+                        <i class="fas fa-chevron-down"></i> Replies
+                    </a>
+                }
+
+            </div>
+
+            <div class="ms-3">
+                <b>@Model.User.UserName</b>
+                <span class="badge @( Model.User.Role == RoleName.Administrator ? "spanRoleAdmin" : "spanRoleCustomer")">@Model.User.Role</span>
+                <br />
+                <small>@Model.Timestamp.ToShortTimeString() - @Model.Timestamp.ToShortDateString()</small>
+                <p>@Model.CommentContent</p>
+                <button class="btn btn-sm btn-info"
+                        onclick="openModal('/Blog/ViewPost/GetPopUpReplyComment?Id=@Model.Id')">
+                    <i class="fa fa-reply"></i>
+                    Replay
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="comments-child">
+        <div class="collapse" id="comment_@Model.Id">
+        @if (Model.CommentChildren != null && Model.CommentChildren.Any())
+        {
+            foreach (var child in Model.CommentChildren.OrderBy(c => c.Timestamp))
+            {
+                @await Html.PartialAsync("_ViewCommentsItemPartial", child)
+            }
+        }
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+

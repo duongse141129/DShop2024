@@ -1,44 +1,104 @@
-﻿@model PostModel
+﻿@model PostDetailViewModel
 @using DShop2024.Components
-@using DShop2024.Models.Blog
+@using DShop2024.ViewModels
+
 
 @{
-    List<SubjectModel> subjects = ViewBag.subjects as List<SubjectModel>;
+    List<SubjectModel> subjects = ViewBag.Subjects as List<SubjectModel>;
     SubjectModel subject = ViewBag.Subject as SubjectModel;
     ViewData["Title"] = "Detail blog";
     Layout = "~/Areas/Blog/Views/ViewPost/_LayoutBlog.cshtml";
-
-    IQueryable<PostModel> otherPosts = ViewBag.otherPosts as IQueryable<PostModel>;
-
 }
 
+<section class="py-5">
+    <div class="container-fluid bg-light py-5 mt-5">
+        <div class="container py-5">
+            <div class="detailpost">
+                <h1>@Model.PostDetail.Title</h1>
+                @if(Model.PostDetail.Image!= null)
+                {
+                    <div>
+                        <img class="card-img-top w-100" height="700" src="~/media/post/@Model.PostDetail.Image" alt="...">
+                    </div>
+                }
 
+                <div>
+                    Subject:   @Model.PostDetail.Subjects
+                </div>
+                <div>
+                    @Model.PostDetail.ShortDescription
+                </div>
+                <div>
+                    <i>Update date: @Model.PostDetail.DateUpdated.ToShortDateString()</i> /
+                    Create by: <strong>@Model.PostDetail.Author.UserName</strong>
+                </div>
+                <hr />
+                @Html.Raw(Model.PostDetail.PostContent)
+                <div class="row pt-2">
+                    <div class="col-md-2">
+                         <a class="btn @( Model.Liked == true ? "liked" : "unlike")" id="likeunlikepost"   data-post_id="@Model.PostDetail.Id" >
+							 <i class="fas fa-thumbs-up fa-3x"></i>
+							 <span id="liked-count">@Model.PostDetail.CountLikes </span>
+					
+					     </a>
+                    </div>
+                    <div class="col-md-4">
+                        <p>
+                          <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                             Comment
+                          </a>
+                        </p>
+                    </div>
 
-<div class="detailpost">
-    <h1>@Model.Title</h1>
-    @if(Model.Image!= null)
-    {
-        <div>
-            <img class="card-img-top w-100" height="500" src="~/media/post/@Model.Image" alt="...">
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                         <div class="collapse" id="collapseExample">
+                              <div class="card card-body">
+                                  <form asp-action="CommentPost" method="post">
+                                        <input type="hidden" name="postId" value="@Model.PostDetail.Id" />
+                                        <div class="form-group">
+                                            <label  class="control-label">Content</label>
+                                            <textarea rows="5"  name="content" class="form-control"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="submit" value="Save" class="btn btn-primary btn-lg" />
+                                        </div>
+                                  </form>
+                              </div>
+                         </div>
+                    </div>
+                </div>
+                <div class="row pt-3">
+                    <h3>Comments (@Model.PostDetail.CountComments)</h3>
+                    <div class="col-md-10">
+                        <div class="response-area">
+							<div class="media-list">
+								@foreach (var item in Model.ListComments)
+								{
+                                    @await Html.PartialAsync("_ViewCommentsItemPartial", item)
+								}
+							</div>
+						</div>
+                        <div class="pt-2">
+                             <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+                        </div>
+                       
+                    </div>
+                </div>
+
+            </div>
         </div>
-    }
-
-    <div>
-        Subject:   @string.Join(", ", Model.PostSubjects.Select(pc => pc.Subject.Title))
     </div>
-    <div>
-        @Model.ShortDescription
-    </div>
-    <div>
-        <i>Update date: @Model.DateUpdated</i> /
-        Create by: <strong>@Model.CreateBy.UserName</strong>
-    </div>
-    <hr />
+</section>
 
-    @Html.Raw(Model.PostContent)
-
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="mainModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
 </div>
-
 
 
 @section Sidebar{
@@ -48,5 +108,44 @@
                     level= 0,
                     subjectSlug= subject.Slug
    })
+
+}
+
+
+@section Scripts{
+    <script src="~/custom/js/popup.js"></script>
+	<script>
+		$(document).ready(function () {
+			$('#likeunlikepost').click(function () {
+				var postId = $(this).data("post_id");
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("LikeOrUnlikePost", "ViewPost")",
+					data: { postId: postId },
+					success: function (result) {
+						if (result.success) {
+							if(result.message == "liked" ) {
+								$('#likeunlikepost').removeClass("unlike");
+								$('#likeunlikepost').addClass('liked');
+							}
+							else if(result.message == "unlike" ) {
+								$('#likeunlikepost').removeClass("liked");
+								$('#likeunlikepost').addClass('unlike');
+							}
+							$('#liked-count').text(result.count);
+						}
+						else {
+							Swal.fire({
+							  icon: "error",
+							  title: "Like Unlike fail",
+							  text: result.message
+							});
+						}
+
+					}
+				});
+			});
+		});
+	</script>
 
 }

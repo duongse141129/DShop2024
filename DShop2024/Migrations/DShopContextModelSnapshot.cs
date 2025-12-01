@@ -180,6 +180,10 @@ namespace DShop2024.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
+
                     b.HasIndex("UserIdCreate");
 
                     b.ToTable("Post");
@@ -237,6 +241,10 @@ namespace DShop2024.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ParentSubjectId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
 
                     b.ToTable("Subject");
                 });
@@ -305,6 +313,45 @@ namespace DShop2024.Migrations
                         .HasFilter("[Slug] IS NOT NULL");
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.CommentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CommentContent")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("DShop2024.Models.CompareModel", b =>
@@ -520,6 +567,21 @@ namespace DShop2024.Migrations
                     b.ToTable("InformationShop");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.LikeModel", b =>
+                {
+                    b.Property<int>("PostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PostId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Like");
+                });
+
             modelBuilder.Entity("DShop2024.Models.MessageModel", b =>
                 {
                     b.Property<int>("Id")
@@ -645,8 +707,8 @@ namespace DShop2024.Migrations
                     b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("PaymentMethod")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("PhoneDelivery")
                         .IsRequired()
@@ -677,11 +739,43 @@ namespace DShop2024.Migrations
                         .IsUnique()
                         .HasFilter("[OrderCode] IS NOT NULL");
 
+                    b.HasIndex("PaymentId");
+
                     b.HasIndex("UserId");
 
                     b.HasIndex("UserIdUpdate");
 
                     b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.PaymentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsPrepayment")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Logo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentName")
+                        .IsUnique();
+
+                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("DShop2024.Models.PolicyModel", b =>
@@ -1130,6 +1224,29 @@ namespace DShop2024.Migrations
                     b.Navigation("ParentSubject");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.CommentModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.CommentModel", "ParentComment")
+                        .WithMany("CommentChildren")
+                        .HasForeignKey("ParentCommentId");
+
+                    b.HasOne("DShop2024.Models.Blog.PostModel", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DShop2024.Models.CompareModel", b =>
                 {
                     b.HasOne("DShop2024.Models.ProductModel", "Product")
@@ -1190,6 +1307,25 @@ namespace DShop2024.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.LikeModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.Blog.PostModel", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DShop2024.Models.MessageModel", b =>
                 {
                     b.HasOne("DShop2024.Models.AppUserModel", "Receiver")
@@ -1245,6 +1381,12 @@ namespace DShop2024.Migrations
 
             modelBuilder.Entity("DShop2024.Models.OrderModel", b =>
                 {
+                    b.HasOne("DShop2024.Models.PaymentModel", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DShop2024.Models.AppUserModel", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
@@ -1252,6 +1394,8 @@ namespace DShop2024.Migrations
                     b.HasOne("DShop2024.Models.AppUserModel", "UpdateBy")
                         .WithMany()
                         .HasForeignKey("UserIdUpdate");
+
+                    b.Navigation("PaymentMethod");
 
                     b.Navigation("UpdateBy");
 
@@ -1398,12 +1542,21 @@ namespace DShop2024.Migrations
 
             modelBuilder.Entity("DShop2024.Models.Blog.PostModel", b =>
                 {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+
                     b.Navigation("PostSubjects");
                 });
 
             modelBuilder.Entity("DShop2024.Models.Blog.SubjectModel", b =>
                 {
                     b.Navigation("SubjectChildren");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.CommentModel", b =>
+                {
+                    b.Navigation("CommentChildren");
                 });
 
             modelBuilder.Entity("DShop2024.Models.OrderModel", b =>

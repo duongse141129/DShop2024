@@ -1,20 +1,19 @@
-﻿@model InformationShopModel
+﻿@using DShop2024.ViewModels
+@model FooterViewModel
 
 <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
     <div class="row g-4">
         <div class="col-lg-6">
-       
-                <h1 class="text-primary mb-0">@Model.ShopName</h1>
-
+            <h1 class="text-primary mb-0">@Model.informationShop.ShopName</h1>
         </div>
         <div class="col-lg-3">
             <div class="position-relative mx-auto">
-                @Html.Raw(Model.PluginFacebook)
+                @Html.Raw(Model.informationShop.PluginFacebook)
             </div>
         </div>
         <div class="col-lg-3">
             <div class="d-flex justify-content-end pt-3 text-light">
-                @Html.Raw(Model.PluginYoutube)
+                @Html.Raw(Model.informationShop.PluginYoutube)
             </div>
         </div>
     </div>
@@ -24,7 +23,7 @@
         <div class="footer-item">
             <h4 class="text-light mb-3">Description</h4>
             <p class="mb-4">
-                @Html.Raw(Model.Description)
+                @Html.Raw(Model.informationShop.Description)
             </p>
             <a asp-action="AboutUs" asp-controller="Home" class="btn border-secondary py-2 px-4 rounded-pill text-primary">Read More</a>
         </div>
@@ -55,13 +54,14 @@
     <div class="col-lg-3 col-md-6">
         <div class="footer-item">
             <h4 class="text-light mb-3">Contact</h4>
-            <p>Address: @Model.Address</p>
-            <p>Email: @Model.Email</p>
-            <p>Phone: @Model.Phone</p>
+            <p>Address: @Model.informationShop.Address</p>
+            <p>Email: @Model.informationShop.Email</p>
+            <p>Phone: @Model.informationShop.Phone</p>
             <p>Payment Accepted</p>
-            <img class="img-fluid" src="~/media/payment/codpayment.png" height="50" width="50" alt="" />
-            <img class="img-fluid" src="~/media/payment/momo_logo.png" height="50"  width="50" alt="" />
-            <img class="img-fluid" src="~/media/payment/vnpaylogo.png" height="50" width="50" alt="" />
+            @foreach (var item in Model.payments)
+            {
+                <img class="img-fluid" src="~/media/payment/@item" height="50" width="50" alt="" />
+            }
         </div>
     </div>
 </div>

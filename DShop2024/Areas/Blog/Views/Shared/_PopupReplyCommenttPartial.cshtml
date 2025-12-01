@@ -1,0 +1,59 @@
+﻿@model CommentModel
+﻿@{
+    ViewData["Title"] = "Replay Comment";
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<form id="formData">
+    <div class="modal-body">
+        <input type="hidden" asp-for="@Model.Id" />
+        <input type="hidden" asp-for="@Model.PostId" />
+        <p>
+            @Model.CommentContent
+        </p>
+        <div class="mb-3">
+            <label class="form-label">Reply Comment</label>
+            <textarea name="ReplyMessage" class="form-control" rows="5"></textarea>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Replay</button>
+    </div>
+</form>
+
+<script>
+    $("#formData").submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            method: "POST",
+            url: "@Url.Action("ReplyComment", "ViewPost")",
+            data: $(this).serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire(
+                                {
+                                      position: "top-end",
+                                      icon: "success",
+                                      title: result.message,
+                                      showConfirmButton: false,
+                                      timer: 500
+                                }
+                        ).then(function(){
+                                 location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                          icon: "error",
+                          title: "Oops...",
+                          text: result.message
+                        });
+                    }
+            }
+        });
+    });
+</script>

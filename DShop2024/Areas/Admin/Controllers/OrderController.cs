@@ -36,7 +36,7 @@ namespace DShop2024.Areas.Admin.Controllers
             ViewBag.countCompletedOrder = countCompletedOrder;
 
 
-            IQueryable<OrderModel> listOrder = _context.Orders.Include(u => u.User).OrderByDescending(o => o.CreatedDate);
+            IQueryable<OrderModel> listOrder = _context.Orders.Include(u => u.User).Include( p =>p.PaymentMethod).OrderByDescending(o => o.CreatedDate);
             var count = await listOrder.CountAsync();
             if (count > 0)
             {
@@ -89,6 +89,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   .Include(c => c.OrderCoupons)
                                                   .ThenInclude(c => c.Coupon)
                                                   .Include(c => c.UpdateBy)
+                                                  .Include(c => c.PaymentMethod)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
             return View(order);
 
@@ -190,6 +191,60 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> GetPaymentMethods()
+        {
+            ViewBag.sidebar = Menu.Admin.Order;
+            var payments = await _context.Payments.ToListAsync();
+            return View(payments);
+
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> SetStatusPaymentMethod(int idPayment, int status)
+        {
+            ViewBag.sidebar = Menu.Admin.Order;
+            try
+            {
+                var payment = await _context.Payments.FindAsync(idPayment);
+                payment.Status = status;
+                _context.Payments.Update(payment);
+                await _context.SaveChangesAsync();
+                return Ok(new { success = true, Message = "Set active payment successful" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, Message = ex.Message });
+            }
+
+        }
+
+
+        //public async Task<IActionResult> SetOrder()
+        //{
+        //    ViewBag.sidebar = Menu.Admin.Order;
+        //    try
+        //    {
+        //        var orders = await _context.Orders.ToListAsync();
+        //        foreach (var item in orders)
+        //        {
+        //            var payment = await _context.Payments.FirstOrDefaultAsync(s => s.PaymentName == item.PaymentMethod);
+        //            item.PaymentId = payment.Id;    
+        //            _context.Orders.Update(item);
+        //            await _context.SaveChangesAsync();
+        //        }
+        //        TempData[DShopConst.TEMPDATA_SUCCESS] = "success ";
+        //        return RedirectToAction("GetPaymentMethods");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        TempData[DShopConst.TEMPDATA_ERROR] = "fail " + ex.Message;
+        //        return RedirectToAction("GetPaymentMethods");
+        //    }
+
+        //}
 
     }
 }

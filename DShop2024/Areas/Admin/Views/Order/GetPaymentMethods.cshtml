@@ -1,0 +1,85 @@
+﻿@model IEnumerable<PaymentModel> 
+
+@{
+    ViewData["Title"] = "Manage payment";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+
+<a class="btn btn-primary btn-md" asp-action="SetOrder">Set payment</a>
+
+<form asp-action="SetPaymentMethods" asp-controller="Order" class="py-2">
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Payment
+            </th>
+            <th>
+                Logo
+            </th>
+            <th>Active</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.PaymentName
+                </td>
+                <td>
+                    <img src="~/media/payment/@item.Logo" width="100" style="height:150px"/>
+                </td>
+                <td>
+                    <input id="@item.Id" class="form-check-input form-control-lg activePaymentMethod" type="checkbox" name="Status" value="@item.Status" @( item.Status == 1 ? "checked" : "" ) />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+</form>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('.activePaymentMethod').on('change', function() {
+                var isChecked = $(this).is(':checked');
+                if(isChecked){
+                    $(this).val("1");
+                }
+                else{
+                      $(this).val("0");
+                }
+                var idPayment = $(this).attr('id');
+                var status = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SetStatusPaymentMethod", "Order")",
+                    data: { idPayment: idPayment, status: status },
+                    success: function (result) {
+                        if (result.success) {
+                           Swal.fire({
+                              position: "top-end",
+                              icon: "success",
+                              title: result.message,
+                              showConfirmButton: false,
+                              timer: 500
+                            });
+                        }
+                        else{
+                           Swal.fire({
+                              icon: "error",
+                              title: "Set active payment fail",
+                              text: result.message
+                            });
+                        }
+
+                    }
+                });
+
+            });
+        });
+
+    </script>
+}

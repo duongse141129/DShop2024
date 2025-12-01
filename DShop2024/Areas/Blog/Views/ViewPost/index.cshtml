@@ -1,13 +1,12 @@
-﻿@model List<PostModel>
+﻿@model List<PostViewModel>
 @using DShop2024.Components
-@using DShop2024.Models.Blog
+@using DShop2024.ViewModels
 @{
     List<SubjectModel> subjects = ViewBag.subjects as List<SubjectModel>;
     SubjectModel subject = ViewBag.Subject as SubjectModel;
     ViewData["Title"] = (subject != null) ? subject.Title : "Post";
     Layout = "~/Areas/Blog/Views/ViewPost/_LayoutBlog.cshtml";
 }
-
                 <h1>@ViewData["Title"]</h1>
 
                 @if(subject != null){
@@ -37,11 +36,19 @@
                                 <div>
                                     Subject:
                                     <strong class="text-danger">
-                                        @string.Join(", ", post.PostSubjects.Select(pc => pc.Subject.Title))
+                                        @post.Subjects
                                     </strong> 
                                 </div>
                                 <p class="card-text">@post.ShortDescription</p>
-                                <a class="btn btn-info" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@post.Slug">Read more →</a>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                         <a class="btn btn-info" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@post.Slug">Read more →</a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <span class="like-count"><i class="fas fa-thumbs-up"></i> @post.CountLikes</span>
+                                        <span class="comment-count"><i class="far fa-comment"></i> @post.CountComments</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -63,6 +70,17 @@
                                     subjectSlug= ViewBag.subjectSlug
                    })
                 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

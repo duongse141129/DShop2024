@@ -28,6 +28,7 @@ namespace DShop2024.Controllers
                                                   .ThenInclude(p => p.Product)
                                                   .Include(c => c.OrderCoupons)
                                                   .ThenInclude(c => c.Coupon)
+                                                  .Include(c => c.PaymentMethod)
                                                   .Where(o => o.UserId == user.Id)
                                                   .OrderByDescending(o => o.CreatedDate);
 

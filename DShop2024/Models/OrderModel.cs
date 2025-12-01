@@ -10,7 +10,6 @@ namespace DShop2024.Models
 		public string OrderCode { get; set; }
 		public string UserId { get; set; }
 		public DateTime CreatedDate { get; set; }
-		public string PaymentMethod { get; set; }
 		public int Status { get; set; }
 		public decimal TotalPrice { get; set; }
 
@@ -33,6 +32,11 @@ namespace DShop2024.Models
 
         [ForeignKey("UserIdUpdate")]
         public virtual AppUserModel UpdateBy { get; set; }
+
+        public int PaymentId { get; set; }
+
+        [ForeignKey("PaymentId")]
+        public virtual PaymentModel PaymentMethod { get; set; }
 
 
         public virtual ICollection<OrderDetailModel> OrderDetails { get; set; }

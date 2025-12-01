@@ -18,6 +18,8 @@
 		public static readonly string FREE_SHIPPING = "FREE SHIPPING";
 		public static readonly string NEW_CUSTOMER = "NEW CUSTOMER";
 
+		public static readonly string ADMIN_DSHOP = "duong8";
+
 		public static readonly string RECENTLY_VIEWED_PRODUCTS = "RecentlyViewedProducts";
 
 		public static readonly decimal DEFAULT_SHIPPING_COST = 50000;

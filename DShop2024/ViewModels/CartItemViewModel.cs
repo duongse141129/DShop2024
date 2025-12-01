@@ -2,7 +2,7 @@
 
 namespace DShop2024.ViewModels
 {
-	public class CartItemViewModel
+	public class CartItemViewModel 
 	{
 		public List<CartItemModel> CartItems { get; set; }
 		public decimal SumPriceItemsCart { get; set; }
@@ -10,6 +10,8 @@ namespace DShop2024.ViewModels
 		public decimal GrandTotal { get; set; }
 
 		public List<CouponModel> CouponsApply { get; set; }
-		public InformationDelivery InfoDelivery { get; set; } 
-	}
+		public InformationDelivery InfoDelivery { get; set; }
+
+        public List<PaymentModel> Payments { get; set; }
+    }
 }
