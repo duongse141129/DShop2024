@@ -4,7 +4,7 @@ using OpenAI.Chat;
 
 namespace DShop2024.Controllers
 {
-    //[Route("api/chatbox")]
+    [Route("api/chatbox")]
     public class ChatboxController : Controller
     {
         private readonly ChatBotService _chatService;

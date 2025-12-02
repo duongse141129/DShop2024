@@ -6,15 +6,21 @@ namespace DShop2024.Services.ChatboxAI
 {
     public class ChatBotService
     {
-        //private readonly OpenAIClient _client;
+        private readonly OpenAIClient _client;
         private readonly ChatClient _chatClient;
         private readonly DShopContext _context;
-
-        public ChatBotService(DShopContext context)
+        private readonly IConfiguration _configuration;
+        public ChatBotService(DShopContext context, IConfiguration configuration)
         {
-            //_client = new OpenAIClient(Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+
+            _configuration = configuration;
+            var mySettingsSection = _configuration.GetSection("ChatbotAI");
+            string apikey = mySettingsSection.GetValue<string>("Apikey");
+            string openAI = mySettingsSection.GetValue<string>("OPENAI_API_KEY");
             _context = context;
-            _chatClient = new(model: "gpt-4o", apiKey: "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");
+            _chatClient = new(model: "gpt-4o", apiKey: apikey);
+            _client = new OpenAIClient(Environment.GetEnvironmentVariable(openAI));
+
         }
 
         public async Task<string> AskAsync(string userMessage)
