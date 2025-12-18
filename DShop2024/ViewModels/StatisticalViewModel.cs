@@ -2,7 +2,7 @@
 
 namespace DShop2024.ViewModels
 {
-    public class StatisticalViewModel
+    public class StatisticalViewModel 
     {
         [Key]
         public int Id { get; set; }

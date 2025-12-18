@@ -1,0 +1,81 @@
+﻿@model AssignmentModel
+﻿@{
+    ViewData["Title"] = "Create assignment";
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title text-primary">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<form id="formData" asp-action="Create" asp-controller="Assignment" asp-area="Admin">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="AssignedDate" class="control-label"></label>
+        <input asp-for="AssignedDate" class="form-control" />
+        <span asp-validation-for="AssignedDate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Deadline" class="control-label"></label>
+        <input asp-for="Deadline" class="form-control" />
+        <span asp-validation-for="Deadline" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="AssignmentDetails" class="control-label"></label>
+        <textarea asp-for="AssignmentDetails" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="AssignmentDetails" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Task</label>
+        <select asp-for="TaskID" class="form-control" asp-items="ViewBag.Tasks">
+            <option>--Choose a task</option>
+        </select>
+        <span asp-validation-for="TaskID" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Employee</label>
+        <select asp-for="EmployeeUserID" class="form-control" asp-items="ViewBag.Employees">
+            <option>--Choose a employee</option>
+        </select>
+        <span asp-validation-for="EmployeeUserID" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+<script>
+    $("#formData").submit(function (e) {
+        e.preventDefault();
+        $.ajax({
+            method: "POST",
+            url: "@Url.Action("Create", "Assignment")",
+            data: $(this).serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire(
+                                {
+                                      position: "top-end",
+                                      icon: "success",
+                                      title: result.message,
+                                      showConfirmButton: false,
+                                      timer: 500
+                                }
+                        ).then(function(){
+                                 location.reload();
+                        });
+                    } else {
+                            Swal.fire({
+                              icon: "error",
+                              title: "Oops...",
+                              text: result.message
+                            });
+                    }
+            }
+        });
+    });
+</script>
+
+
+

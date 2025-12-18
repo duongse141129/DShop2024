@@ -1,5 +1,4 @@
-﻿@model IEnumerable<DShop2024.Models.OrderModel>
-
+﻿@model IEnumerable<OrderViewModel>
 @{
     ViewData["title"] = "History shopping";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -8,144 +7,58 @@
 <div class="container-fluid contact py-5">
     <div class="container py-5">
         <div class="p-5 bg-light rounded">
-            @if(Model.Count() > 0)
+            <h1>@ViewData["title"]</h1>
+            @if (Model.Count() > 0)
             {
-                @foreach (var item in Model)
-                {
-
-                    <hr>
-                    <section class="py-3 py-md-5 ">
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
-                                    <div class="row gy-3 mb-3">
-                                        <div class="col-md-12">
-                                            <h2 class="text-uppercase text-endx m-0">Invoice: @item.OrderCode</h2>
-                                        </div>
-                                        <div class="col-md-12">
-                                            @if (item.Status == 0)
-                                            {
-                                                <h4>Invoice has been cancelled</h4>
-                                            }
-                                            else
-                                            {
-                                                <div class="track">
-                                                    <div class="step @(item.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
-                                                    <div class="step @(item.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
-                                                    <div class="step @(item.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
-                                                    <div class="step @(item.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
-                                                </div>
-                                            }
-
-                                            <hr>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-sm-6">
-                                            <address>
-                                                <strong>@item.CreatedDate.ToLongDateString()</strong><br>
-                                                @item.CreatedDate.ToLongTimeString()<br>
-                                                Payment method: @item.PaymentMethod.PaymentName<br>
-                                            </address>
-                                            <h4>Bill To</h4>
-                                            <address>
-                                                <strong>@item.User.UserName</strong><br>
-                                                Email: @item.User.Email<br>
-                                                Consignee: @item.Consignee<br>
-                                                Address: @item.AddressDelivery<br>
-                                                Phone: @item.PhoneDelivery
-                                            </address>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <h4>Coupon Apply</h4>
-                                            @if (item.OrderCoupons.Count > 0)
-                                            {
-                                                @foreach (var coupon in item.OrderCoupons)
-                                                {
-                                                    <p><strong>@coupon.Coupon.CouponCode</strong> - @coupon.Coupon.Description</p>
-                                                }
-                                            } 
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-12">
-                                            <div class="table-responsive">
-                                                <table class="table table-striped">
-                                                    <thead>
-                                                        <tr>
-                                                            <th scope="col" class="text-uppercase">Stt</th>
-                                                            <th scope="col" class="text-uppercase">Product Name</th>
-                                                            <th scope="col" class="text-uppercase">Quantity</th>
-                                                            <th scope="col" class="text-uppercase text-end">Price</th>
-                                                            <th scope="col" class="text-uppercase text-end">Amount</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody class="table-group-divider">
-                                                        @{
-                                                            int i = 1;
-                                                        }
-                                                        @foreach (var od in item.OrderDetails)
-                                                        {
-                                                            <tr>
-                                                                <td scope="row">@i</td>
-                                                                <td>
-                                                                    <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.Product.ProductName</a>
-                                                                    <img src="~/media/products/@od.Product.MainImage" width="120" height="100" />
-                                                                </td>
-                                                                <td>@od.Quantity</td>
-                                                                <td class="text-end">@od.Price.ToString("#,##0 VND")</td>
-                                                                @{
-                                                                    var subsum = od.Quantity * od.Price;
-                                                                }
-                                                                <td class="text-end">@subsum.ToString("#,##0 VND")</td>
-                                                            </tr>
-                                                            i++;
-                                                        }
-
-                                                        <tr>
-                                                            <td></td>
-                                                            <td colspan="3" class="text-end">Subtotal</td>
-                                                            <td class="text-end">@item.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND")</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td></td>
-                                                            <td colspan="3" class="text-end">coupon</td>
-                                                            <td class="text-end">- @item.ValueCoupon.ToString("#,##0 VND")</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td></td>
-                                                            <td colspan="3" class="text-end">Shipping Cost</td>
-                                                            <td class="text-end">+ @item.ShippingCost.ToString("#,##0 VND")</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td></td>
-                                                            <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
-                                                            <td class="text-end">@item.TotalPrice.ToString("#,##0 VND")</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-    
-                            </div>
-                            @if (item.Status == 1)
-                            {
-                                <div class="row">
-                                    <div class="col-md-4">
-                                    <a class="btn btn-danger btn-md confirmDeletion" asp-action="CancelOder" asp-controller="Order" asp-area="" asp-route-id="@item.Id">Cancel order</a>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </section>
-                    <hr>
-                  
-                }
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Order code</th>
+                            <th scope="col">Order Date</th>
+                            <th scope="col">Payment</th>
+                            <th scope="col">Payment Status</th>
+                            <th scope="col">GrandTotal</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <th>@item.OrderCode</th>
+                                <td>@item.CreatedDate.ToString("MM/dd/yyyy h:mm tt")</td>
+                                <td>@item.PaymentName</td>
+                                <td>
+                                    <span class="payment-status-@((OrderEnumData.PaymentStatusOrder)item.PaymentStatus)">
+                                        @((OrderEnumData.PaymentStatusOrder)item.PaymentStatus)
+                                    </span>
+                                </td>
+                                <td>@item.GrandTotal.ToString("#,##0 VND")</td>
+                                <td>
+                                    @if(item.IsReturn)
+                                    {
+                                        @if (item.IsFullReturn)
+                                        {
+                                            <span class="order-fullly-returned">@OrderEnumData.FULLY_RETURNED</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="order-partially-returned">@OrderEnumData.PARTIALLY_RETURNED</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text status-order-@((OrderEnumData.StatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
+                                    }
+                                </td>
+                                <td>
+                                    <a class="btn btn-md btn-info text-white" asp-action="Details" asp-controller="Order" asp-area="" asp-route-id="@item.Id">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
                 <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
             }
             else
@@ -154,8 +67,7 @@
                     You have never bought anything at the shop.
                 </h2>
             }
-
-
         </div>
     </div>
 </div>
+

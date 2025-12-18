@@ -7,7 +7,16 @@
 <h1 class="text-primary">@ViewData["title"]</h1>
 
 <section>
-    <div class="container py-5">
+    <div class="container py-5" >
+        <div class="card py-5 px-5">
+
+    
+        <div class="row">
+            <div class="col-md-4">
+                <h5>Customer: @ViewBag.receiverName</h5>
+                <img src="~/media/avatar/@ViewBag.receiverAvatar"  class="img-fluid" style="height:100px"/>
+            </div>
+        </div>
         <div class="scroll-container p-3" data-bs-spy="scroll" id="messagesList_@ViewBag.receiverName">
             @foreach (var item in Model)
             {
@@ -69,6 +78,8 @@
             <div class="col-md-2 mt-3 text-end ">
                 <input type="submit" class="sendMessageButton" id="sendMessageButton" value="Send Message" />
             </div>
+        </div>
+
         </div>
     </div>
 </section>

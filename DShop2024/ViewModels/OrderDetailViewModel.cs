@@ -11,10 +11,9 @@
         public int OrderId { get; set; }
 
         public int ProductId { get; set; }
-        public int ProductName { get; set; }
-        public int Img { get; set; }
+        public string ProductName { get; set; }
+        public String MainImage { get; set; }
 
         public decimal SubTotal { get { return Quantity * Price; } }
-        public int Status { get; set; }
     }
 }

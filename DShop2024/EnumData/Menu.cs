@@ -28,7 +28,9 @@
             Chat,
             Information,
             Stock,
-            Blog
+            Blog,
+            Task,
+            Assignment
         }
     }
 }

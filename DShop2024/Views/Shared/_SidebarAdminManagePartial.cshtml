@@ -32,6 +32,12 @@
                     </a>
                 </li>
                 }
+                <li class="nav-item @( ViewBag.sidebar == Menu.Admin.Assignment ? "active" : "")">
+                    <a asp-area="Admin" asp-controller="Assignment" asp-action="Index">
+                        <i class="fas fa-calendar-alt"></i>
+                        <p>Assignment</p>
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a asp-area="" asp-controller="Home" asp-action="Index" >
@@ -39,6 +45,8 @@
                         <p>Home</p>
                     </a>
                 </li>
+
+
                 
                 <li class="nav-section">
                     <span class="sidebar-mini-icon">
@@ -145,11 +153,21 @@
                             @if (User.IsInRole(RoleName.Administrator))
                             {
                                 <li>
-                                    <a asp-area="Admin" asp-controller="Order" asp-action="GetPaymentMethods">
+                                    <a asp-area="Admin" asp-controller="Order" asp-action="ManagePaymentMethod">
                                         <span class="sub-item">Payment</span>
                                     </a>
                                 </li>
                             }
+                            <li>
+                                <a asp-area="Admin" asp-controller="Order" asp-action="ManageReturn">
+                                    <span class="sub-item">Return</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="Admin" asp-controller="Order" asp-action="ManageRefund">
+                                    <span class="sub-item">Refund</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -368,6 +386,29 @@
                         </ul>
                     </div>
                 </li>
+
+                <li class="nav-item  @( ViewBag.sidebar == Menu.Admin.Task ? "active" : "")">
+                    <a data-bs-toggle="collapse" href="#task">
+                        <i class="fas fa-tasks"></i>
+                        <p>Task</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="task">
+                        <ul class="nav nav-collapse">
+                            <li>
+                                <a asp-area="Admin" asp-controller="TaskManage" asp-action="Index">
+                                    <span class="sub-item">Manage Task</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="Admin" asp-controller="TaskManage" asp-action="Create">
+                                    <span class="sub-item">Create Task</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
 
                 <li class="nav-item ">
                     <a target="_blank" class="dropdown-item" asp-action="Index" asp-controller="FileManager" asp-area="Files">

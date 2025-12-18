@@ -95,6 +95,9 @@ builder.Services.AddAutoMapper(typeof(ProductMapper));
 builder.Services.AddAutoMapper(typeof(CouponMapper));
 builder.Services.AddAutoMapper(typeof(BannerMapper));
 builder.Services.AddAutoMapper(typeof(PostMapper));
+builder.Services.AddAutoMapper(typeof(OrderMapper));
+builder.Services.AddAutoMapper(typeof(ReturnMapper));
+builder.Services.AddAutoMapper(typeof(RefundMapper));
 
 
 var app = builder.Build();

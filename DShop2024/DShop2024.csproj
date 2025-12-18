@@ -52,8 +52,11 @@
     <Folder Include="wwwroot\media\brands\" />
     <Folder Include="wwwroot\media\imageProduct\" />
     <Folder Include="wwwroot\media\message\" />
+    <Folder Include="wwwroot\media\refund\" />
+    <Folder Include="wwwroot\media\return\" />
     <Folder Include="wwwroot\media\products\" />
     <Folder Include="wwwroot\importStocks\" />
+    <Folder Include="wwwroot\media\return\Luka\" />
   </ItemGroup>
 
   <ItemGroup>

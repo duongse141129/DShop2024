@@ -8,11 +8,9 @@ using DShop2024.Models.Blog;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Data;
 
 
@@ -26,7 +24,6 @@ namespace AppMvc.Areas.Blog.Controllers
         private readonly UserManager<AppUserModel> _userManager;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly string sidebar = "blog";
         private readonly IEmailSender _emailSender;
 
         public PostController(DShopContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUserModel> userManager, IMapper mapper, IEmailSender emailSender)
@@ -944,7 +941,6 @@ namespace AppMvc.Areas.Blog.Controllers
                             Quantity = rnd.Next(1, 6),
                             Price = p .Price,
                             ProductId = p .Id,
-                            Status = 1,
                             OriginalPrice = p.OriginalPrice,
                             OrderId = orderModel.Id
                         };
@@ -953,7 +949,7 @@ namespace AppMvc.Areas.Blog.Controllers
                     await _context.OrderDetails.AddRangeAsync(orderDetails);
                     await _context.SaveChangesAsync();
                     var grandTotal = orderDetails.Sum(s => s.Quantity * s.Price) + orderModel.ShippingCost;
-                    orderModel.TotalPrice = grandTotal;
+                    orderModel.GrandTotal = grandTotal;
                     _context.Orders.Update(orderModel);
                     await _context.SaveChangesAsync();
                 }
@@ -975,7 +971,46 @@ namespace AppMvc.Areas.Blog.Controllers
             }
 
         }
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> DeleteOrderNoDetail()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                var listOrder = await _context.Orders.Include(od => od.OrderDetails).ToListAsync();
 
+                foreach (var order in listOrder)
+                {
+                    var count = order.OrderDetails.Count();
+                    if(count == 0)
+                    {
+                        _context.Orders.Remove(order);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
 
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> SeedLike()
@@ -1150,5 +1185,51 @@ namespace AppMvc.Areas.Blog.Controllers
         }
 
 
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedMonth12()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+
+                var ordersInMonth12 = await _context.Orders.Where(p => p.CreatedDate.Month == 12 && p.CreatedDate.Year == 2025)
+                                                        .ToListAsync();
+                foreach (var item in ordersInMonth12)
+                {
+                    var refund = await _context.Refunds.Where( o => o.OrderCode == item.OrderCode).FirstOrDefaultAsync();
+                    if(refund != null)
+                    {
+                        _context.Refunds.Remove(refund);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    _context.Orders.Remove(item);
+                    await _context.SaveChangesAsync();
+                }
+
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail 2" + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail3 " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
     }
 }

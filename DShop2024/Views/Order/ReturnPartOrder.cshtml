@@ -1,0 +1,122 @@
+﻿@model List<CreateReturnDetailRequest>
+
+@{
+    ViewData["title"] = "Part Return Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section >
+    <div class="container bg-white bd-g my-3">
+        <h1 class="mt-3">@ViewData["title"] </h1>
+        <div class="row justify-content-center">
+            <div class="row gy-3 mb-3">
+                <div class="col-md-12">
+                    <h2 class="text-uppercase text-endx m-0">Invoice: @ViewBag.OrderCode</h2>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="modal-content">
+                    <form asp-controller="Order" asp-action="CreatePartReturn" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" name="orderCode" value="@ViewBag.OrderCode" />
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">RETURN PRODUCT</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p class="fw-semibold">Please select product(s) to return.</p>
+                            @for (int i = 0; i < Model.Count; i++)
+                            {
+                                <div class="product-row">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <input type="checkbox" class="form-check-input me-3 checkbox-return" name="returnDetails[@i].Status" asp-for="@Model[i].Status">
+                                        <input type="hidden" name="returnDetails[@i].OrderDetailId" value="@Model[i].OrderDetailId" />
+                                        <input type="hidden" name="returnDetails[@i].ProductId" value="@Model[i].ProductId" />
+                                        <img src="~/media/products/@Model[i].Product.MainImage"
+                                             class="product-return-img me-3" />
+
+                                        <div>
+                                            <div class="fw-semibold">@Model[i].Product.ProductName</div>
+                                            <input type="hidden" name="returnDetails[@i].PricePerUnit" value="@Model[i].PricePerUnit" />
+                                            <input type="hidden" name="returnDetails[@i].OriginalPricePerUnit" value="@Model[i].OriginalPricePerUnit" />
+                                            <div class="fw-bold">@Model[i].PricePerUnit.ToString("#,##0 VND")</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label fw-semibold">Qty</label>
+                                            <input class="form-control" type="number" name="returnDetails[@i].Quantity" value="1" min="1" step="1" max="@Model[i].Quantity" />
+                                        </div>
+
+                                        <div class="col-md-5">
+                                            <label class="form-label fw-semibold">Reason </label>
+                                            <select name="returnDetails[@i].ReturnReason" class="form-select br-grey" asp-items="ViewBag.Reasons">
+                                                <option value="">Choose a reason</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-5">
+                                            <label class="form-label fw-semibold">Images *</label>
+                                            <div class="d-flex align-items-center">
+                                                <div id="thumbs_@i" class="d-flex"></div>
+                                                <a class="btn btn-outline-secondary btn-sm ms-2" onclick="uploadImage(@i)">+</a>
+                                                <input name="returnDetails[@i].ImageFiles" asp-for="@Model[i].ImageFiles" type="file" class="d-none" id="fileInput_@i" multiple accept=".jpg,.png,.jpeg" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-8">
+                                            <textarea class="form-control" rows="3" name="returnDetails[@i].Description" placeholder="Add description"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                    </div>
+
+                    <div class="modal-footer">
+                        
+                        <input class="btn btn-primary btn-lg" type="submit" value="Return Products" />
+                    </div>
+                    </form>
+                </div>
+                <div class="col-sm-3">
+                    <a class="btn btn-outline-secondary" asp-controller="Order" asp-action="Index" asp-area="">Cancel</a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a asp-action="Index">Back to List</a>
+        </div>
+
+    </div>
+</section>
+<hr>
+
+@section Scripts {
+    <script>
+        function uploadImage(id) {
+          let input = document.getElementById("fileInput_" + id);
+          input.click();
+
+          input.onchange = () => {
+            let container = document.getElementById("thumbs_" + id);
+            container.innerHTML = "";
+
+            [...input.files].forEach(file => {
+              let reader = new FileReader();
+              reader.onload = e => {
+                let img = document.createElement("img");
+                img.src = e.target.result;
+                img.className = "thumb-preview";
+                container.appendChild(img);
+              };
+              reader.readAsDataURL(file);
+            });
+          };
+        }
+    </script>
+}
+
+
+                    
+                  
+
+

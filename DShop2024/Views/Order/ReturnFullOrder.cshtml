@@ -1,0 +1,153 @@
+﻿@model OrderViewModel
+@{
+    ViewData["title"] = "Return Full Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section >
+    <div class="container bg-white bd-g my-3">
+        <h1 class="mt-3">@ViewData["title"] </h1>
+        <div class="row justify-content-center">
+            <div class="row gy-3 mb-3">
+                <div class="col-md-12">
+                    <h2 class="text-uppercase text-endx m-0">Invoice: @Model.OrderCode</h2>
+                </div>
+                @if (Model.IsReturn)
+                {
+                    <div class="col-md-12">
+                            @if (Model.Return.Status == 0)
+                            {
+                                <h4 class="text-danger fw-bold">The order was refused for return.</h4>
+                            }
+                            else
+                            {
+                                <div class="track">
+                                    <div class="step @(Model.Return.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Pending</span> </div>
+                                    <div class="step @(Model.Return.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Approved</span> </div>
+                                    <div class="step @(Model.Return.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Refunded</span> </div>
+                                </div>
+                            }
+                        <hr>
+                    </div>
+                }
+
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    <address>
+                        <strong>@Model.CreatedDate.ToLongDateString()</strong><br>
+                        @Model.CreatedDate.ToLongTimeString()<br>
+                        Payment method: @Model.PaymentName<br>
+                    </address>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="text-uppercase">Stt</th>
+                                    <th scope="col" class="text-uppercase">Product Name</th>
+                                    <th scope="col" class="text-uppercase">Quantity</th>
+                                    <th scope="col" class="text-uppercase text-end">Price</th>
+                                    <th scope="col" class="text-uppercase text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                @{
+                                    int i = 1;
+                                }
+                                @foreach (var od in Model.OrderDetails)
+                                {
+                                    <tr>
+                                        <td scope="row">@i</td>
+                                        <td>
+                                            <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.ProductName</a>
+                                            <img src="~/media/products/@od.MainImage" width="120" height="100" />
+                                        </td>
+                                        <td>@od.Quantity</td>
+                                        <td class="text-end">@od.Price.ToString("#,##0 VND")</td>
+                                        @{
+                                            var subsum = od.Quantity * od.Price;
+                                        }
+                                        <td class="text-end">@subsum.ToString("#,##0 VND")</td>
+                                    </tr>
+                                    i++;
+                                }
+
+                                <tr>
+                                    <td></td>
+                                    <td colspan="3" class="text-end">Subtotal</td>
+                                    <td class="text-end">@Model.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND")</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td colspan="3" class="text-end">coupon</td>
+                                    <td class="text-end">- @Model.ValueCoupon.ToString("#,##0 VND")</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td colspan="3" class="text-end">Shipping Cost</td>
+                                    <td class="text-end">+ @Model.ShippingCost.ToString("#,##0 VND")</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
+                                    <td class="text-end">@Model.GrandTotal.ToString("#,##0 VND")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if(!Model.IsReturn)
+        {
+            <div class="row my-3">
+                <div class="col-md-4">
+                    <form asp-action="CreateFullReturn" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" name="OrderId" value="@Model.Id" />
+                        <div class="form-group">
+                            <label>Reason</label>
+                            <select name="Reason" class="form-control" asp-items="ViewBag.Reasons">
+                                <option value="">Choose a reason</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="Description" rows="5" cols="60"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <span>Add more images</span>
+                            <input type="file" name="ImageFiles" id="file-input" multiple class="form-control" accept=".jpg,.png,.jpeg" onchange="preview()">
+                            <label for="file-input" id="lbfile" class="text-white">
+                                <i class="fas fa-upload"></i> &nbsp; Choose A Photo
+                            </label>
+                            <p id="num-of-files" style="display: none;">No Files Chosen</p>
+                            <div id="previewImages"></div>
+                        </div>
+                        <div class="form-group">
+                            <input class="btn btn-lg btn-primary" type="submit" value="Return" />
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        }
+        <div class="mt-3">
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</section>
+<hr>
+
+
+                    
+@section Scripts {
+    <link href="~/custom/Css/previewMultiImage.css" rel="stylesheet">
+    <script src="~/custom/js/previewMultiImage.js"></script>
+}
+
+

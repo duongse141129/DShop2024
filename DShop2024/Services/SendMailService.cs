@@ -187,7 +187,7 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{Subtotal}}", order.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND"));
         path = path.Replace("{{ShippingCost}}", order.ShippingCost.ToString("#,##0 VND"));
         path = path.Replace("{{CouponValue}}", order.ValueCoupon.ToString("#,##0 VND"));
-        path = path.Replace("{{GrandTotal}}", order.TotalPrice.ToString("#,##0 VND"));
+        path = path.Replace("{{GrandTotal}}", order.GrandTotal.ToString("#,##0 VND"));
 
         path = path.Replace("{{ShopName}}", infoShop.ShopName);
         path = path.Replace("{{EmailShop}}", infoShop.Email);

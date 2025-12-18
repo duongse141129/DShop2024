@@ -105,6 +105,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var reciver = await _userManager.FindByIdAsync(customerId);
             ViewBag.receiver = customerId;
             ViewBag.receiverName = reciver.UserName;
+            ViewBag.receiverAvatar = reciver.Avatar;
             return View(messages);
         }
 

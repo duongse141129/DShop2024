@@ -1,0 +1,21 @@
+﻿@model OrderModel
+﻿@{
+    ViewData["Title"] = "Return Popup";
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title text-primary">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <p class="text-black">Are you sure you want to return items in this order <strong>@Model.OrderCode</strong>?</p>
+    <div class="fw-bold">The customer is responsible for paying the shipping costs.</div>
+</div>
+<div class="modal-footer">
+    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Order" asp-action="ReturnFullOrder" asp-route-id="@Model.Id">Full return </a>
+    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Order" asp-action="ReturnPartOrder" asp-route-id="@Model.Id">Partial return</a>
+</div>
+
+

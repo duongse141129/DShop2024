@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DShop2024.Models.OrderModel>
+﻿@model IEnumerable<OrderViewModel>
 
 @{
     ViewData["Title"] = "Manage order";
@@ -89,21 +89,11 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User.UserName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentMethod.PaymentName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
+            <th>Created Date</th>
+            <th>OrderCode</th>
+            <th>Customer Name</th>
+            <th>Payment Status</th>
+            <th>Status</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -112,26 +102,39 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                    @item.CreatedDate.ToString("MM/dd/yyyy h:mm tt")
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.OrderCode)
+                    @item.OrderCode
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.User.UserName)
+                    @item.CustomerName
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.PaymentMethod.PaymentName)
+                    <span class="payment-status-@((OrderEnumData.PaymentStatusOrder)item.PaymentStatus)">
+                        @((OrderEnumData.PaymentStatusOrder)item.PaymentStatus)
+                    </span>
                 </td>
                 <td>
-                    <span class="text text-@((OrderEnumData.SpanStatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
-                </td>
-                <td>
-                    <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
-                    @if(item.Status != 4 && item.Status != 0)
+                    @if (item.IsReturn)
                     {
-                        <a asp-action="CancelOrder" class="btn btn-danger confirmDeletion" asp-controller="Order" asp-route-orderId="@item.Id">Cancel</a>
-                    }            
+                        @if (item.IsFullReturn)
+                        {
+                            <span class="order-fullly-returned">@OrderEnumData.FULLY_RETURNED</span>
+                        }
+                        else
+                        {
+                            <span class="order-partially-returned">@OrderEnumData.PARTIALLY_RETURNED</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text status-order-@((OrderEnumData.StatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
+                    }
+                 
+                </td>
+                <td>
+                    <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>         
                 </td>
             </tr>
         }

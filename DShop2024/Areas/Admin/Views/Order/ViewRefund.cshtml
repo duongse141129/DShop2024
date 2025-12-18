@@ -1,0 +1,104 @@
+﻿@model RefundModel
+@{
+    ViewData["title"] = "Details Refund";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+<hr>
+<section class="py-3 py-md-5 ">
+    <div class="container ">
+        <div class="row">
+            @if (Model.Image != null)
+            {
+                <div class="col-md-3 ">
+                    <h5>Image</h5>
+                    <img src="~/media/@Model.Image" class="img-fluid" />
+                </div>
+            }
+
+            <div class="col-md-3 ps-md-0">
+                <div class="card card-pricing">
+                    <div class="card-header">
+                        <h4 class="card-title">Status</h4>
+                        <div class="card-price">
+                            @if (Model.Status == 2)
+                            {
+                                <span class="price" style="font-size:150px">
+                                    <i class="fa fa-check text-success"></i>
+                                </span>
+                            }
+                            @if (Model.Status == 1)
+                            {
+                                <span class="price" style="font-size:150px">
+                                    <i class="fa fa-exclamation-circle text-warning"></i>
+                                </span>
+                            }
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ul class="specification-list">
+                            <li>
+                                <span class="name-specification">Reason</span>
+                                <span class="status-specification">@Model.Reason</span>
+                            </li>
+                            <li>
+                                <span class="name-specification">OrderCode</span>
+                                <span class="status-specification">@Model.OrderCode</span>
+                            </li>
+                            <li>
+                                <span class="name-specification">Amount</span>
+                                <span class="status-specification">@Model.Amount.ToString("#,##0 VND")</span>
+                            </li>
+                            <li>
+                                <span class="name-specification">CreateDate</span>
+                                <span class="status-specification">@Model.CreateDate.ToString("MM/dd/yyyy h:mm tt")</span>
+                            </li>
+
+                            @if(Model.Status == 2)
+                            {
+                                <li>
+                                    <span class="name-specification">RefundDate</span>
+                                    <span class="status-specification">@Model?.RefundDate?.ToString("MM/dd/yyyy h:mm tt") </span>
+                                </li>
+                                <li>
+                                    <span class="name-specification">Payment</span>
+                                    <span class="status-specification">@Model?.Payment.PaymentName</span>
+                                </li>
+                                <li>
+                                    <span class="name-specification">TransactionId</span>
+                                    <span class="status-specification">@Model?.TransactionId</span>
+                                </li>
+                                <li>
+                                    <span class="name-specification">Transaction Content</span>
+                                    <span class="status-specification">@Model.TransactionContent</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    @if (Model.Status == 1)
+                    {
+                        <div class="card-footer">
+                            <button class="btn btn-danger w-100"
+                                    onclick="openModal('/Admin/Order/GetPopUpRefund?Id=@Model.Id')">
+                                <b>Refund</b>
+                            </button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<hr>
+<a asp-action="ManageRefund">Back to List </a>
+<div class="modal fade" id="mainModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/custom/js/popup.js"></script>
+}

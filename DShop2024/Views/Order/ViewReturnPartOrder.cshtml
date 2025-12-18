@@ -1,0 +1,219 @@
+﻿@using DShop2024.ViewModels
+@model OrderAndReturnPartViewModel
+
+@{
+    ViewData["title"] = "View order and return items";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section>
+    <div class="container bg-white bd-g my-3">
+        <h1>@ViewData["title"]</h1>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
+                <h2>Return items</h2>
+                <div class="row gy-3 mb-3">
+                    <div class="col-md-12">
+                        <div class="track">
+                            @if (Model.Return.Status == 0)
+                            {
+                                <h4 class="text-danger fw-bold">The order was refused for return.</h4>
+                            }
+                            else
+                            {
+                                <div class="step  @(Model.Return.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Pending</span> </div>
+                                <div class="step  @(Model.Return.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Approved</span> </div>
+                                <div class="step  @(Model.Return.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Refunded</span> </div>
+                            }
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">RETURN PRODUCT</h5>
+                        </div>
+                        <div class="fw-bold">Total Refund Amount @Model.Return.TotalRefundAmount.ToString("#,##0 VND")</div>
+                        <div class="fw-bold">Shipping Cost @Model.Return.ShippingCost.ToString("#,##0 VND")</div>
+                        <div class="modal-body">
+                            @foreach (var item in Model.Return.ReturnDetails)
+                            {
+                                <div class="product-row">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <img src="~/media/products/@item.ProductImage"
+                                             class="product-return-img me-3" />
+
+                                        <div>
+                                            <div class="fw-semibold">@item.ProductName</div>
+                                            <div class="fw-bold">@item.PricePerUnit.ToString("#,##0 VND")</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-2">
+                                            <label class="form-label fw-semibold">Quantity</label>
+                                            <div class="fw-normal">@item.Quantity</div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label fw-semibold">Reason </label>
+                                            <div class="fw-normal">@item.ReturnReason</div>
+                                        </div>
+                                        <div class="col-md-5">
+
+                                            <label class="form-label fw-semibold">Images *</label>
+                                            <div class="d-flex align-items-center">
+                                                @foreach (var img in item.Images)
+                                                {
+                                                    <img src="~/@img"
+                                                         class="thumb-preview" />
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <p>
+                                                @item.Description
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
+                <div class="row gy-3 mb-3">
+                    <div class="col-md-12">
+                        <h2 class="text-uppercase text-endx m-0">Invoice: @Model.Order.OrderCode</h2>
+                    </div>
+                    <div class="col-md-12">
+                        @if (Model.Order.Status == 0)
+                        {
+                            <h4 class="text-danger">Invoice has been cancelled</h4>
+                        }
+                        else
+                        {
+                            <div class="track">
+                                <div class="step @(Model.Order.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
+                                <div class="step @(Model.Order.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
+                                <div class="step @(Model.Order.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
+                                <div class="step @(Model.Order.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
+                            </div>
+                        }
+
+                        <hr>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <address>
+                            <strong>@Model.Order.CreatedDate.ToLongDateString()</strong><br>
+                            @Model.Order.CreatedDate.ToLongTimeString()<br>
+                            Payment method: @Model.Order.PaymentName<br>
+                        </address>
+                        <h4>Bill To</h4>
+                        <address>
+                            <strong>@Model.Order.CustomerName</strong><br>
+                            Email: @Model.Order.CustomerEmail<br>
+                            Consignee: @Model.Order.Consignee<br>
+                            Address: @Model.Order.AddressDelivery<br>
+                            Phone: @Model.Order.PhoneDelivery
+                        </address>
+                    </div>
+                    <div class="col-sm-6">
+                        <h4>Coupon Apply</h4>
+                        @if (Model.Order.OrderCoupons.Count > 0)
+                        {
+                            @foreach (var coupon in Model.Order.OrderCoupons)
+                            {
+                                <p><strong>@coupon.Coupon.CouponCode</strong> - @coupon.Coupon.Description</p>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="text-uppercase">Stt</th>
+                                        <th scope="col" class="text-uppercase">Product Name</th>
+                                        <th scope="col" class="text-uppercase">Quantity</th>
+                                        <th scope="col" class="text-uppercase text-end">Price</th>
+                                        <th scope="col" class="text-uppercase text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    @{
+                                        int i = 1;
+                                    }
+                                    @foreach (var od in Model.Order.OrderDetails)
+                                    {
+                                        <tr>
+                                            <td scope="row">@i</td>
+                                            <td>
+                                                <a class="btn-link" asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@od.ProductId">@od.ProductName</a>
+                                                <img src="~/media/products/@od.MainImage" width="120" height="100" />
+                                            </td>
+                                            <td>@od.Quantity</td>
+                                            <td class="text-end">@od.Price.ToString("#,##0 VND")</td>
+                                            @{
+                                                var subsum = od.Quantity * od.Price;
+                                            }
+                                            <td class="text-end">@subsum.ToString("#,##0 VND")</td>
+                                        </tr>
+                                        i++;
+                                    }
+
+                                    <tr>
+                                        <td></td>
+                                        <td colspan="3" class="text-end">Subtotal</td>
+                                        <td class="text-end">@Model.Order.OrderDetails.Sum(od => od.Quantity * od.Price).ToString("#,##0 VND")</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td colspan="3" class="text-end">coupon</td>
+                                        <td class="text-end">- @Model.Order.ValueCoupon.ToString("#,##0 VND")</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td colspan="3" class="text-end">Shipping Cost</td>
+                                        <td class="text-end">+ @Model.Order.ShippingCost.ToString("#,##0 VND")</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
+                                        <td class="text-end">@Model.Order.GrandTotal.ToString("#,##0 VND")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="mt-3">
+            <a asp-action="Index">Back to List</a>
+        </div>
+
+    </div>
+</section>
+            
+
+
+
+
+
+
+                    
+                  
+

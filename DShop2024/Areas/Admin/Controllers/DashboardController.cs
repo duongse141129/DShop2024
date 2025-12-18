@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using DShop2024.EnumData;
-using DShop2024.Models;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Metrics;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
@@ -38,7 +36,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             var bestSaleProducts = await _context.Products
                             .Where(p => p.Status != 0)
-                            .Join(_context.OrderDetails.Where(od => od.Status != 0),
+                            .Join(_context.OrderDetails,
                             p => p.Id,
                             od => od.ProductId,
                             (p, od) => new { p, od })
@@ -72,17 +70,19 @@ namespace DShop2024.Areas.Admin.Controllers
                                       join ur in _context.UserRoles on u.Id equals ur.UserId
                                       join r in _context.Roles on ur.RoleId equals r.Id
                                       where r.Name == RoleName.Customer && u.Status != 0
-                                      select u).ToListAsync();
+                                      select u).Take(20).ToListAsync();
 
             var listContact = await _context.Contacts.Include(u => u.User).Where(c => c.Status != 0)
                                                                                 .OrderBy(c => c.Status)
                                                                                 .ThenByDescending(d => d.DateSent)
+                                                                                .Take(10)
                                                                                 .ToListAsync();
 
             var listCoupon = await _context.Coupons
                                     .Where(c => c.Status != 0 && c.Quantity > 0)
                                     .Where(c => c.DateExpired.Date >= DateTime.Today.Date && c.DateStart <= DateTime.Today.Date)
                                     .OrderByDescending(c => c.Status)
+                                    .Take(10)
                                     .ToListAsync();
             var listAvailableCouponVM = _mapper.Map<List<CouponViewModel>>(listCoupon);
 
@@ -101,6 +101,62 @@ namespace DShop2024.Areas.Admin.Controllers
                 ListContact = listContact,
                 ListAvailableCouponVM = listAvailableCouponVM
             };
+
+            var ordersInMonth12 = await _context.Orders.Where(p => p.CreatedDate.Month == 12 && p.CreatedDate.Year == 2025 && p.Status == 4)
+                                        .Include( od => od.OrderDetails)
+                                        .Include( r => r.Returns)
+                                        .ThenInclude( rt => rt.ReturnDetails)
+                                        .ToListAsync();
+            decimal doanhthu = 0;
+            decimal loinhuan = 0;
+            foreach (var item in ordersInMonth12)
+            {
+                decimal sumReOd = 0;
+                decimal sumProfitOd = 0;
+                decimal sumSubProfitRtt = 0;
+                var returnModle = item.Returns.FirstOrDefault();
+                if (returnModle != null)
+                {
+                    if(returnModle.Status == 3)
+                    {
+                        if (String.IsNullOrEmpty(returnModle.Reason))
+                        {
+                            sumReOd = item.GrandTotal - returnModle.TotalRefundAmount;
+                            foreach (var od in item.OrderDetails)
+                            {
+                                var x = (od.Price - od.OriginalPrice) * od.Quantity;
+                                sumProfitOd += x;
+                            }
+                            foreach (var rtt in returnModle.ReturnDetails)
+                            {
+                                var y = (rtt.PricePerUnit - rtt.OriginalPricePerUnit) * rtt.Quantity;
+                                sumSubProfitRtt += y;
+                            }
+                            sumProfitOd -= sumSubProfitRtt;
+                        }
+                        else
+                        {
+                            sumReOd = 0;
+                            sumProfitOd = 0;
+                        }
+                    }
+
+                }
+                else
+                {
+                    sumReOd = item.GrandTotal;
+                    foreach (var od in item.OrderDetails)
+                    {
+                        var x = (od.Price - od.OriginalPrice) * od.Quantity;
+                        sumProfitOd += x;
+                    }
+                }
+                doanhthu += sumReOd ;
+                loinhuan += sumProfitOd;
+            }
+            ViewBag.doanhthu = doanhthu;
+            ViewBag.loinhuan = loinhuan;
+
             return View(dataDashboard);
         }
 
@@ -117,20 +173,36 @@ namespace DShop2024.Areas.Admin.Controllers
                 TempData[DShopConst.TEMPDATA_ERROR] = "Date start must <= date end";
                 return NoContent();
             }
+            var range = dateEndSelect - dateStartSelect;
+            if(range.TotalDays > 30)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Limited to just 30 days";
+                return NoContent();
+            }
 
             var chartDataRangeDay = await _context.Orders
-                            .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
-                            .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
-                            .GroupBy(x => x.o.CreatedDate.Date)
-                            .Select(g => new StatisticalViewModel
-                            {
-                                date = g.Key.ToShortDateString(),
-                                revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
-                                profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
-                                orders = g.Select(x => x.o.Id).Distinct().Count(),
-                                quantitysold = g.Sum(x => x.od.Quantity)
-                            })
-                            .ToListAsync();
+                    .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
+                    .GroupBy(o => new { o.CreatedDate.Date })
+                    .Select(g => new StatisticalViewModel
+                    {
+                        Id = g.Key.Date.Day,
+                        date = g.Key.Date.ToShortDateString(),
+                        orders = g.Count(),
+
+                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
+
+                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
+                                  - g.SelectMany(o => o.Returns).Where(r => r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
+
+                        profit = g.SelectMany(o => o.OrderDetails)
+                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
+                                 - g.Sum(o => o.ValueCoupon)
+                                 - g.SelectMany(o => o.Returns).Where(p => p.Status == 3)
+                                    .SelectMany(r => r.ReturnDetails)
+                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
 
             return Json(chartDataRangeDay);
         }
@@ -173,38 +245,62 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("getDataByMonth")]
         public async Task<List<StatisticalViewModel>> getDataByMonth(int month, int year)
         {
+
             var chartDataYear = await _context.Orders
-                .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
-                .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
-                .GroupBy(x => x.o.CreatedDate.Day)
-                .Select(g => new StatisticalViewModel
-                {
-                    date = g.Key.ToString(),
-                    revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
-                    profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
-                    orders = g.Select(x => x.o.Id).Distinct().Count(),
-                    quantitysold = g.Sum(x => x.od.Quantity)
-                })
-                .ToListAsync();
+                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
+                    .GroupBy(o => new { o.CreatedDate.Day })
+                    .Select(g => new StatisticalViewModel
+                    {
+                        Id = g.Key.Day,
+                        date = g.Key.Day.ToString("D2") + "/" + month + "/" + year,
+                        orders = g.Count(),
+
+                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
+
+                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
+                                  - g.SelectMany(o => o.Returns).Where(r => r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
+
+                        profit = g.SelectMany(o => o.OrderDetails)
+                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
+                                 - g.Sum(o => o.ValueCoupon)
+                                 - g.SelectMany(o => o.Returns).Where(p => p.Status == 3)
+                                    .SelectMany(r => r.ReturnDetails)
+                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+
+
             return chartDataYear;
         }
 
         [Route("getDataByYear")]
         public async Task<List<StatisticalViewModel>> getDataByYear(int year)
         {
-            var chartDataYear= await _context.Orders
-                .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
-                .SelectMany(o => o.OrderDetails.Where(od => od.Status != 0), (o, od) => new { o, od })
-                .GroupBy(x => x.o.CreatedDate.Month)
-                .Select(g => new StatisticalViewModel
-                {
-                    date = g.Key.ToString(),
-                    revenue = g.Select(x => x.o.TotalPrice).Distinct().Sum(),
-                    profit = g.Select(x => x.od.Price - x.od.OriginalPrice).Sum() - g.Sum(y => y.o.ValueCoupon),
-                    orders = g.Select(x => x.o.Id).Distinct().Count(),
-                    quantitysold = g.Sum(x => x.od.Quantity)
-                })
-                .ToListAsync();
+
+            var chartDataYear = await _context.Orders
+                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
+                    .GroupBy(o => new { o.CreatedDate.Month })
+                    .Select(g => new StatisticalViewModel
+                    {
+                        Id = g.Key.Month,
+                        date = g.Key.Month.ToString("D2") + "/" + year,
+                        orders = g.Count(),
+
+                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
+
+                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
+                                  - g.SelectMany(o => o.Returns).Where( r=> r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
+
+                        profit = g.SelectMany(o => o.OrderDetails)
+                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
+                                 - g.Sum(o => o.ValueCoupon)
+                                 - g.SelectMany(o => o.Returns).Where( p => p.Status ==3)
+                                    .SelectMany(r => r.ReturnDetails)
+                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
             return chartDataYear;
         }
 
@@ -217,8 +313,6 @@ namespace DShop2024.Areas.Admin.Controllers
             return Json(chartData);
         }
 
-
-
         [HttpPost]
         [Route("GetChartBrand")]
         public async Task<IActionResult> GetChartBrand()
@@ -229,7 +323,7 @@ namespace DShop2024.Areas.Admin.Controllers
                        b => b.Id,
                        p => p.BrandId,
                        (b, p) => new { b, p })
-                       .Join(_context.OrderDetails.Where(od => od.Status != 0),
+                       .Join(_context.OrderDetails,
                        bp => bp.p.Id,
                        od => od.ProductId,
                        (bp, od) => new { bp.b, bp.p, od })
@@ -248,7 +342,6 @@ namespace DShop2024.Areas.Admin.Controllers
             return Json(productsSoldByBrand);
         }
 
-
         [HttpPost]
         [Route("GetChartCategories")]
         public async Task<IActionResult> GetChartCategories()
@@ -259,7 +352,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                  b => b.Id,
                                  p => p.CategoryId,
                                  (b, p) => new { b, p })
-                                 .Join(_context.OrderDetails.Where(od => od.Status != 0),
+                                 .Join(_context.OrderDetails,
                                  bp => bp.p.Id,
                                  od => od.ProductId,
                                  (bp, od) => new { bp.b, bp.p, od })
@@ -294,7 +387,6 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 var stockOut = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
                                         .SelectMany(o => o.OrderDetails)
-                                        .Where(od => od.Status != 0)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;
 
                 StockViewModel stockViewModel = new StockViewModel 
@@ -334,7 +426,6 @@ namespace DShop2024.Areas.Admin.Controllers
 
                 var stockOut = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
                                         .SelectMany(o => o.OrderDetails)
-                                        .Where(od => od.Status != 0)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;
 
                 StockViewModel stockViewModel = new StockViewModel

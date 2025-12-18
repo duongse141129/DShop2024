@@ -15,8 +15,6 @@ namespace DShop2024.Models
 
 		public int ProductId { get; set; }
 
-		public int Status { get; set; }
-
         public decimal OriginalPrice { get; set; }
 
 

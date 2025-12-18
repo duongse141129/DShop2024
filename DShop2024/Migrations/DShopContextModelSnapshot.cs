@@ -111,6 +111,46 @@ namespace DShop2024.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("DShop2024.Models.AssignmentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AssignedByUserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("AssignmentDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployeeUserID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaskID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedByUserID");
+
+                    b.HasIndex("EmployeeUserID");
+
+                    b.HasIndex("TaskID");
+
+                    b.ToTable("Assignment");
+                });
+
             modelBuilder.Entity("DShop2024.Models.BannerModel", b =>
                 {
                     b.Property<int>("Id")
@@ -668,9 +708,6 @@ namespace DShop2024.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
@@ -704,10 +741,16 @@ namespace DShop2024.Migrations
                     b.Property<DateTime>("DateUpdate")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
                     b.Property<string>("PhoneDelivery")
@@ -720,9 +763,6 @@ namespace DShop2024.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -1008,6 +1048,157 @@ namespace DShop2024.Migrations
                     b.ToTable("ReceivingStock");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.RefundModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefundDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TransactionContent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderCode")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique()
+                        .HasFilter("[TransactionId] IS NOT NULL");
+
+                    b.ToTable("Refund");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.ReturnDetailModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Images")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderDetailId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OriginalPricePerUnit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PricePerUnit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReturnId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReturnReason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReturnId");
+
+                    b.ToTable("ReturnDetail");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.ReturnModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Images")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReturnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalRefundAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UpdateUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Return");
+                });
+
             modelBuilder.Entity("DShop2024.Models.ShippingModel", b =>
                 {
                     b.Property<int>("Id")
@@ -1029,6 +1220,30 @@ namespace DShop2024.Migrations
                         .IsUnique();
 
                     b.ToTable("Shipping");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.TaskModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Task");
                 });
 
             modelBuilder.Entity("DShop2024.Models.WishListModel", b =>
@@ -1185,6 +1400,29 @@ namespace DShop2024.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("DShop2024.Models.AssignmentModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.AppUserModel", "AssignedBy")
+                        .WithMany()
+                        .HasForeignKey("AssignedByUserID");
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeUserID");
+
+                    b.HasOne("DShop2024.Models.TaskModel", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedBy");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Task");
                 });
 
             modelBuilder.Entity("DShop2024.Models.Blog.PostModel", b =>
@@ -1472,6 +1710,57 @@ namespace DShop2024.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DShop2024.Models.RefundModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.PaymentModel", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId");
+
+                    b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.ReturnDetailModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.ProductModel", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DShop2024.Models.ReturnModel", "Return")
+                        .WithMany("ReturnDetails")
+                        .HasForeignKey("ReturnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Return");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.ReturnModel", b =>
+                {
+                    b.HasOne("DShop2024.Models.OrderModel", "Order")
+                        .WithMany("Returns")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "UpdateBy")
+                        .WithMany()
+                        .HasForeignKey("UpdateUserId");
+
+                    b.HasOne("DShop2024.Models.AppUserModel", "Customer")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("UpdateBy");
+                });
+
             modelBuilder.Entity("DShop2024.Models.WishListModel", b =>
                 {
                     b.HasOne("DShop2024.Models.ProductModel", "Product")
@@ -1564,6 +1853,8 @@ namespace DShop2024.Migrations
                     b.Navigation("OrderCoupons");
 
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("Returns");
                 });
 
             modelBuilder.Entity("DShop2024.Models.ProductModel", b =>
@@ -1573,6 +1864,11 @@ namespace DShop2024.Migrations
                     b.Navigation("OrderDetails");
 
                     b.Navigation("Ratings");
+                });
+
+            modelBuilder.Entity("DShop2024.Models.ReturnModel", b =>
+                {
+                    b.Navigation("ReturnDetails");
                 });
 #pragma warning restore 612, 618
         }

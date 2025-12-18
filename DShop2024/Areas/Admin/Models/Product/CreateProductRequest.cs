@@ -49,7 +49,7 @@ namespace DShop2024.Areas.Admin.Models.Product
         public bool USBChargingPort { get; set; }
         public decimal? LaptopPocket { get; set; }
         public DateTime CreateDate { get; set; }
-
+         
 
         [NotMapped]
         [Required(ErrorMessage = "The {0} field is required")]

@@ -1,0 +1,161 @@
+﻿@model IEnumerable<AssignmentModel>
+@{
+    ViewData["title"] = "Assignment Page";
+}
+<h1 class="text-primary">@ViewData["title"]</h1>
+
+<div class="body">
+    <div class="container-calendar">
+        <div class="left">
+            <div class="calendar">
+                <div class="month">
+                    <i class="fas fa-angle-left prev"></i>
+                    <div class="date">december 2015</div>
+                    <i class="fas fa-angle-right next"></i>
+                </div>
+                <div class="weekdays">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="days"></div>
+                <div class="goto-today">
+                    <div class="goto">
+                        <input type="text" placeholder="mm/yyyy" class="date-input" />
+                        <button class="goto-btn">Go</button>
+                    </div>
+                    <button class="today-btn">Today</button>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="today-date">
+                <div class="event-day">wed</div>
+                <div class="event-date">12th december 2022</div>
+            </div>
+            <div class="events"></div>
+            <div class="add-event-wrapper">
+                <div class="add-event-header">
+                    <div class="title">Add Event</div>
+                    <i class="fas fa-times close"></i>
+                </div>
+                <div class="add-event-body">
+                    <div class="add-event-input">
+                        <input type="text" placeholder="Event Name" class="event-name" />
+                    </div>
+                    <div class="add-event-input">
+                        <input type="text"
+                               placeholder="Event Time From"
+                               class="event-time-from" />
+                    </div>
+                    <div class="add-event-input">
+                        <input type="text"
+                               placeholder="Event Time To"
+                               class="event-time-to" />
+                    </div>
+                </div>
+                <div class="add-event-footer">
+                    <button class="add-event-btn">Add Event</button>
+                </div>
+            </div>
+        </div>
+        <button class="add-event">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <div class="modal fade" id="mainModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <button class="btn btn-sm btn-primary py-2"
+                onclick="openModal('/Admin/Assignment/Create')">
+            <i class="fas fa-plus"></i>
+            Add assignment
+        </button>
+    </div>
+
+    <table class="table table-striped table-hover" id="myTable">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.AssignmentDetails)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AssignedDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Deadline)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.AssignedBy)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Employee)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Task)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.AssignmentDetails
+                    </td>
+                    <td>
+                        @item.AssignedDate
+                    </td>
+                    <td>
+                        @item.Deadline
+                    </td>
+                    <td>
+                        @item.AssignedBy.UserName
+                    </td>
+                    <td>
+                        @item.Employee.UserName
+                    </td>
+                    <td>
+                        @item.Task.Name
+                    </td>
+
+                    <td>
+
+                            <div class="btn-toolbar">
+                                <button class="btn btn-sm btn-warning"
+                                    onclick="openModal('/Admin/Assignment/Edit?Id=@item.Id')">
+                                    Edit
+                                </button>
+                            <button class="btn btn-sm btn-danger"
+                                    onclick="openModal('/Admin/Assignment/Delete?Id=@item.Id')">
+                                Delete
+                            </button>
+                            </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+@*     <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
+    <script src="~/custom/js/popup.js"></script>
+    <link href="~/custom/Css/calendar.css" rel="stylesheet">
+    <script src="~/custom/js/calendar.js"></script>
+
+}

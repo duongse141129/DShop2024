@@ -444,3 +444,105 @@ ul{
     color: #228ef2;
     font-size: 15px;
 }
+
+.bd-g {
+    border: 3px solid #adadad;
+    border-radius: 5px;
+    box-shadow: 20px 20px 50px grey;
+}
+
+.product-row {
+    border: 1px solid #e5e5e5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-return-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.thumb-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-right: 6px;
+}
+
+.checkbox-return {
+    border: 2px solid #b5b3b3;
+    border-radius: 15px;
+    width:30px;
+    height:30px;
+}
+.br-grey {
+    border: 3px solid #b5b3b3;
+    border-radius: 5px;
+}
+
+
+
+.payment-status-UnPaid {
+    padding: 10px 20px;
+    color: white;
+    background-color: #F23F1D;
+    border-radius: 5px;
+}
+.payment-status-Paid {
+    padding: 10px 20px;
+    color: white;
+    background-color: #359100;
+    border-radius: 5px;
+}
+.payment-status-Refunded {
+    padding: 10px 20px;
+    color: white;
+    background-color: #fc8c03;
+    border-radius: 5px;
+}
+.order-fullly-returned {
+    padding: 10px 20px;
+    color: white;
+    background-color: #fc8003;
+    border-radius: 5px;
+}
+.order-partially-returned {
+    padding: 10px 20px;
+    color: white;
+    background-color: #fcca03;
+    border-radius: 5px;
+}
+.status-order-Cancel {
+    padding: 10px 20px;
+    color: white;
+    background-color: #ad0202;
+    border-radius: 5px;
+}
+.status-order-New {
+    padding: 10px 20px;
+    color: white;
+    background-color: #1D64F2;
+    border-radius: 5px;
+}
+.status-order-Accepted {
+    padding: 10px 20px;
+    color: white;
+    background-color: #1DCEF2;
+    border-radius: 5px;
+}
+.status-order-Delivery {
+    padding: 10px 20px;
+    color: white;
+    background-color: #F2AB1D;
+    border-radius: 5px;
+}
+.status-order-Completed {
+    padding: 10px 20px;
+    color: white;
+    background-color: #359100;
+    border-radius: 5px;
+}

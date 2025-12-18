@@ -16,7 +16,7 @@ namespace DShop2024.Repository.Components
 		{
 			var bestSaleProducts = await _context.Products
 			 .Where(p => p.Status != 0)
-			 .Join(_context.OrderDetails.Where(od => od.Status != 0),
+			 .Join(_context.OrderDetails,
 			 p => p.Id,
 			 od => od.ProductId,
 			 (p, od) => new { p, od })

@@ -8,9 +8,7 @@ using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 
 namespace DShop2024.Controllers
@@ -53,7 +51,6 @@ namespace DShop2024.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-
             decimal shippingPrice = 0;
 			if (info.ShippingCost != 0)
 			{
@@ -67,7 +64,6 @@ namespace DShop2024.Controllers
 			{
 				grandTotal = 0;
 			}
-
 			CartItemViewModel cartItemViewModel = new CartItemViewModel
 			{
 				CartItems = cartItems,
@@ -78,8 +74,6 @@ namespace DShop2024.Controllers
 				InfoDelivery = info,
 				Payments = patments
 			};
-
-
             return View(cartItemViewModel);
 		}
 
@@ -230,7 +224,12 @@ namespace DShop2024.Controllers
 				{
 					grandTotal = 0;
 				}
-				order.TotalPrice = grandTotal;
+				order.GrandTotal = grandTotal;
+                order.PaymentStatus = 0;
+                if (payment.IsPrepayment)
+				{
+					order.PaymentStatus = 1;
+				}
 				await _context.Orders.AddAsync(order);
 				await _context.SaveChangesAsync();
 
@@ -243,10 +242,7 @@ namespace DShop2024.Controllers
 						ProductId = item.ProductId,
 						Price = item.Price,
 						Quantity = item.Quantity,
-						OriginalPrice = item.OriginalPrice,
-						Status = 1
-
-
+						OriginalPrice = item.OriginalPrice
 					};
 					var product = await _context.Products.FindAsync(item.ProductId);
 					product.Stock -= item.Quantity;
@@ -282,7 +278,7 @@ namespace DShop2024.Controllers
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
                 var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
-                await _emailSender.SendEmailOrder(order, infoShop);			
+                //await _emailSender.SendEmailOrder(order, infoShop);			
 
 				HttpContext.Session.Remove(DShopConst.CART_KEY);
 				HttpContext.Session.Remove(DShopConst.INFO_CUSTOMER_DELIVERY);
@@ -316,8 +312,6 @@ namespace DShop2024.Controllers
 			}
 			TempData[DShopConst.TEMPDATA_ERROR] = "Momo transaction canceled";
 			return RedirectToAction("Index", "Cart");
-
-
 
 		}
 

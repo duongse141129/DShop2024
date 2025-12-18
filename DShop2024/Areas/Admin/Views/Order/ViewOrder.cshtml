@@ -1,4 +1,4 @@
-﻿@model DShop2024.Models.OrderModel
+﻿@model OrderViewModel
 
 @{
     ViewData["title"] = "Invoice";
@@ -6,39 +6,53 @@
 <h1 class="text-primary">@ViewData["title"]</h1>
 <hr>
 <section class="py-3 py-md-5 ">
-    <div class="container">
+    <div class="container ">
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
-                <div class="row gy-3 mb-3">
+            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7 card">
+                <div class="row gy-3 my-3 ">
                     <div class="col-md-12">
                         <h2 class="text-uppercase text-endx m-0">Invoice: @Model.OrderCode</h2>
                     </div>
                     <div class="col-md-12">
-                        @if(Model.Status == 0)
+                        @if(Model.IsReturn)
                         {
-                            <div >
-                                <h4>Invoice has been cancelled by @Model.UpdateBy.UserName</h4>
-                                <div class="avatar avatar-md">
-                                    <img src="~/media/avatar/@Model.UpdateBy.Avatar" class="avatar-img rounded">
-                                </div>
-                                <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
-                            </div>
+                            @if (Model.IsFullReturn)
+                            {
+                                <h3 class="text-warning">
+                                    The order has been returned.
+                                    <a class="link" asp-area="Admin" asp-controller="Order" asp-action="DetailFullReturn" asp-route-Id="@Model?.Return.Id"> See details here</a>
+                                </h3>
+                            }
                         }
                         else
                         {
-                            <div class="track">
-                                <div class="step @(Model.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
-                                <div class="step @(Model.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
-                                <div class="step @(Model.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
-                                <div class="step @(Model.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
-                            </div>
-                            <div>
-                                <h4>Update by @Model.UpdateBy.UserName</h4>
-                                <div class="avatar avatar-md">
-                                    <img src="~/media/avatar/@Model.UpdateBy.Avatar" class="avatar-img rounded">
+                            @if (Model.Status == 0)
+                            {
+                                <div>
+                                    <h4 class="text-danger">Invoice has been cancelled by @Model.UpdateByName</h4>
+                                    <div class="avatar avatar-md">
+                                        <img src="~/media/avatar/@Model.UpdateByAvatar" class="avatar-img rounded">
+                                    </div>
+                                    <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
                                 </div>
-                                <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
-                            </div>
+                            }
+                            else
+                            {
+                                <div class="track">
+                                    <div class="step @(Model.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Order confirmed</span> </div>
+                                    <div class="step @(Model.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text"> Picked by courier</span> </div>
+                                    <div class="step @(Model.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text"> On the way </span> </div>
+                                    <div class="step @(Model.Status == 4 ? "active" : "")"> <span class="icon"> <i class="fa fa-box"></i> </span> <span class="text">Ready for pickup</span> </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-info">Update by @Model.UpdateByName</h4>
+                                    <div class="avatar avatar-md">
+                                        <img src="~/media/avatar/@Model.UpdateByAvatar" class="avatar-img rounded">
+                                    </div>
+                                    <span> @Model.DateUpdate.ToString("MM/dd/yyyy h:mm tt")</span>
+                                </div>
+                            }
+                           
                         }
                         <hr>
                     </div>
@@ -48,12 +62,16 @@
                         <address>
                             <strong>@Model.CreatedDate.ToLongDateString()</strong><br>
                             @Model.CreatedDate.ToLongTimeString()<br>
-                            Payment method: @Model.PaymentMethod.PaymentName<br>
+                            Payment method: @Model.PaymentName -                     
+                            <span class="payment-status-@((OrderEnumData.PaymentStatusOrder)Model.PaymentStatus)">
+                                @((OrderEnumData.PaymentStatusOrder)Model.PaymentStatus)
+                            </span>
+                            <br>
                         </address>
                         <h4>Bill To</h4>
                         <address>
-                            <strong>@Model.User.UserName</strong><br>
-                            Email: @Model.User.Email<br>
+                            <strong>@Model.CustomerName</strong><br>
+                            Email: @Model.CustomerEmail<br>
                             Consignee: @Model.Consignee<br>
                             Address: @Model.AddressDelivery<br>
                             Phone: @Model.PhoneDelivery
@@ -65,7 +83,7 @@
                         {
                             @foreach (var coupon in Model.OrderCoupons)
                             {
-                                <p><strong>@coupon.Coupon.CouponCode</strong> - @coupon.Coupon.Description</p>
+                                <b>@coupon.Coupon.CouponCode</b>
                             }
                         }
                     </div>
@@ -91,8 +109,8 @@
                                         <tr>
                                             <td scope="row">@i</td>
                                             <td>
-                                                <a asp-area="Admin" asp-controller="ProductManage" asp-action="Detail" asp-route-Id="@item.ProductId">@item.Product.ProductName</a>
-                                                <img src="~/media/products/@item.Product.MainImage" width="120" height="100" />
+                                                <a asp-area="Admin" asp-controller="ProductManage" asp-action="Detail" asp-route-Id="@item.ProductId">@item.ProductName</a>
+                                                <img src="~/media/products/@item.MainImage" width="120" height="100" />
                                             </td>
                                             <td>@item.Quantity</td>
                                             <td class="text-end">@item.Price.ToString("#,##0 VND")</td>                             
@@ -121,7 +139,7 @@
                                     <tr>
                                         <td></td>
                                         <th scope="row" colspan="3" class="text-uppercase text-end">Total</th>
-                                        <td class="text-end">@Model.TotalPrice.ToString("#,##0 VND")</td>
+                                        <td class="text-end">@Model.GrandTotal.ToString("#,##0 VND")</td>
                                     </tr>
 
                                 </tbody>

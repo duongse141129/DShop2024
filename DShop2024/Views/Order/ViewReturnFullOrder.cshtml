@@ -1,0 +1,79 @@
+﻿@model ReturnViewModel
+@{
+    ViewData["title"] = "View Full Return Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section>
+    <div class="container bg-white bd-g my-3">
+        <h1 class="mt-3">@ViewData["title"] </h1>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8 col-xxl-7">
+                <h2 class="text-uppercase mt-2">Invoice: @Model.OrderCode</h2>
+                <div class="row gy-3 mb-3">
+                    <div class="col-md-12">
+                        <div class="track">
+                            @if (Model.Status == 0)
+                            {
+                                <h4 class="text-danger fw-bold">The order was refused for return.</h4>
+                            }
+                            else
+                            {
+                                <div class="step @(Model.Status >= 1 ? "active" : "")"> <span class="icon"> <i class="fa fa-check"></i> </span> <span class="text">Pending</span> </div>
+                                <div class="step @(Model.Status >= 2 ? "active" : "")"> <span class="icon"> <i class="fa fa-user"></i> </span> <span class="text">Approved</span> </div>
+                                <div class="step @(Model.Status >= 3 ? "active" : "")"> <span class="icon"> <i class="fa fa-truck"></i> </span> <span class="text">Refunded</span> </div>
+                            }
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">
+                                <span>FUll RETURN PRODUCT</span>
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <h3>Reason: @Model.Reason</h3>
+                            @foreach (var img in Model.Images)
+                            {
+                                <img src="~/@img"
+                                     class="thumb-preview" />
+                            }
+                            <p>
+                                @Model.Description
+                            </p>
+                            <div class="fw-bold">Total Refund Amount @Model.TotalRefundAmount.ToString("#,##0 VND")</div>
+                            <div class="fw-bold">Shipping Cost @Model.ShippingCost.ToString("#,##0 VND")</div>
+                            @foreach (var item in Model.ReturnDetails)
+                            {
+                                <div class="product-row">
+                                    <div class="d-flex align-items-start mb-3">
+                                        <img src="~/media/products/@item.ProductImage"
+                                             class="product-return-img me-3" />
+
+                                        <div>
+                                            <div class="fw-semibold">@item.ProductName</div>
+                                            <div class="fw-bold">@item.PricePerUnit.ToString("#,##0 VND")</div>
+                                            <div class="fw-normal">Quantity @item.Quantity</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+</section>
+<hr>
+
+
+
+
+

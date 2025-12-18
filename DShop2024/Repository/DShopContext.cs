@@ -2,8 +2,7 @@
 using DShop2024.Models.Blog;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
+
 
 
 public class DShopContext : IdentityDbContext<AppUserModel>
@@ -88,11 +87,20 @@ public class DShopContext : IdentityDbContext<AppUserModel>
         {
             entity.HasKey(c => new { c.PostId, c.UserId });
         });
+        modelBuilder.Entity<RefundModel>(entity =>
+        {
+            entity.HasIndex(c => c.OrderCode).IsUnique();
+        });
+        modelBuilder.Entity<RefundModel>(entity =>
+        {
+            entity.HasIndex(c => c.TransactionId).IsUnique();
+        });
+
     }
 
 
 
-        public virtual DbSet<BrandModel> Brands { get; set; }
+    public virtual DbSet<BrandModel> Brands { get; set; }
 		public virtual DbSet<ProductModel> Products { get; set; }
 		public virtual DbSet<CategoryModel> Categories { get; set; }
 		public virtual DbSet<OrderModel> Orders { get; set; }
@@ -119,5 +127,11 @@ public class DShopContext : IdentityDbContext<AppUserModel>
         public virtual DbSet<PaymentModel> Payments { get; set; }
         public virtual DbSet<CommentModel> Comments { get; set; }
         public virtual DbSet<LikeModel> Likes { get; set; }
+        public virtual DbSet<TaskModel> Tasks { get; set; }
+        public virtual DbSet<AssignmentModel> Assignments { get; set; }
+        public virtual DbSet<ReturnModel> Returns { get; set; }
+        public virtual DbSet<ReturnDetailModel> ReturnDetails { get; set; }
+        public virtual DbSet<RefundModel> Refunds { get; set; }
+
 }
 
