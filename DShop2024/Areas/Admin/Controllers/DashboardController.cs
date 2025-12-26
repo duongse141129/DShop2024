@@ -295,7 +295,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         profit = g.SelectMany(o => o.OrderDetails)
                                     .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
                                  - g.Sum(o => o.ValueCoupon)
-                                 - g.SelectMany(o => o.Returns).Where( p => p.Status ==3)
+                                 - g.SelectMany(o => o.Returns).Where( p => p.Status == 3 )
                                     .SelectMany(r => r.ReturnDetails)
                                     .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
                     })
@@ -388,12 +388,16 @@ namespace DShop2024.Areas.Admin.Controllers
                 var stockOut = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
                                         .SelectMany(o => o.OrderDetails)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;
+                var returnItems = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                    .SelectMany(o => o.Returns).Where(r => r.Status == 3 )
+                    .SelectMany(o => o.ReturnDetails)
+                    .SumAsync(rt => (int?)rt.Quantity) ?? 0;
 
                 StockViewModel stockViewModel = new StockViewModel 
                 { 
                     month = i,
                     stockIn = stockIn,
-                    stockOut = stockOut,
+                    stockOut = stockOut - returnItems,
                 };
                 stockViewModels.Add(stockViewModel);
             }
@@ -428,11 +432,16 @@ namespace DShop2024.Areas.Admin.Controllers
                                         .SelectMany(o => o.OrderDetails)
                                         .SumAsync(od => (int?)od.Quantity) ?? 0;
 
+                var returnItems = await _context.Orders.Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == i)
+                                    .SelectMany(o => o.Returns).Where(r => r.Status == 3)
+                                    .SelectMany(o => o.ReturnDetails)
+                                    .SumAsync(rt => (int?)rt.Quantity) ?? 0;
+
                 StockViewModel stockViewModel = new StockViewModel
                 {
                     month = i,
                     stockIn = stockIn,
-                    stockOut = stockOut,
+                    stockOut = stockOut - returnItems,
                 };
                 stockViewModels.Add(stockViewModel);
             }

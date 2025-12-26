@@ -98,6 +98,7 @@ builder.Services.AddAutoMapper(typeof(PostMapper));
 builder.Services.AddAutoMapper(typeof(OrderMapper));
 builder.Services.AddAutoMapper(typeof(ReturnMapper));
 builder.Services.AddAutoMapper(typeof(RefundMapper));
+builder.Services.AddAutoMapper(typeof(AssignmentMapper));
 
 
 var app = builder.Build();

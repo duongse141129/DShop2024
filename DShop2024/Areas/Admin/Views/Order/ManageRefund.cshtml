@@ -42,7 +42,8 @@
                 <td>@item.Amount.ToString("#,##0 VND")</td>
                 <td>@item.Reason</td>
                 <td>
-                    @((OrderEnumData.StatusRefund)item.Status)
+
+                    <span class="text status-refund-@((OrderEnumData.StatusRefund)item.Status)">@((OrderEnumData.StatusRefund)item.Status)</span>
                 </td>
                 <td>
                     <a class="btn btn-info" asp-area="Admin" asp-controller="Order" asp-action="ViewRefund" asp-route-Id="@item.Id">Details</a>

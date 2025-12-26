@@ -1,4 +1,5 @@
-﻿@model AssignmentModel
+﻿@using DShop2024.Areas.Admin.Models.Task
+@model CreateAssignmentRequest
 ﻿@{
     ViewData["Title"] = "Create assignment";
     Layout = null;
@@ -9,48 +10,70 @@
     <button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 
-<form id="formData" asp-action="Create" asp-controller="Assignment" asp-area="Admin">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="form-group">
-        <label asp-for="AssignedDate" class="control-label"></label>
-        <input asp-for="AssignedDate" class="form-control" />
-        <span asp-validation-for="AssignedDate" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Deadline" class="control-label"></label>
-        <input asp-for="Deadline" class="form-control" />
-        <span asp-validation-for="Deadline" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="AssignmentDetails" class="control-label"></label>
-        <textarea asp-for="AssignmentDetails" class="form-control" rows="5"></textarea>
-        <span asp-validation-for="AssignmentDetails" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label>Task</label>
-        <select asp-for="TaskID" class="form-control" asp-items="ViewBag.Tasks">
-            <option>--Choose a task</option>
-        </select>
-        <span asp-validation-for="TaskID" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label>Employee</label>
-        <select asp-for="EmployeeUserID" class="form-control" asp-items="ViewBag.Employees">
-            <option>--Choose a employee</option>
-        </select>
-        <span asp-validation-for="EmployeeUserID" class="text-danger"></span>
-    </div>
+<div class="model-body">
+    <form id="formData">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <input type="hidden" id="date" name="date" value="@ViewBag.DatePick" />
+            <strong>Date @ViewBag.DatePick.ToString("MM/dd/yyyy")</strong>
+        </div>
 
-    <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
-    </div>
-</form>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label asp-for="TimeFrom" class="control-label"></label>
+                    <div class="input-group clockpicker">
+                        <span></span>
+                        <input type="text" name="TimeFrom" class="form-control" value="7:00">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <label asp-for="TimeTo" class="control-label"></label>
+                    <div class="input-group clockpicker">
+                        <span></span>
+                        <input type="text" name="TimeTo" class="form-control" value="7:00">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="AssignmentDetails" class="control-label"></label>
+            <textarea asp-for="AssignmentDetails" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="AssignmentDetails" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Task</label>
+            <select asp-for="TaskId" class="form-control" asp-items="ViewBag.Tasks">
+                <option value="">--Choose a task</option>
+            </select>
+            <span asp-validation-for="TaskId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Employee</label>
+            <select asp-for="EmployeeUserID" class="form-control" asp-items="ViewBag.Employees">
+                <option value="">--Choose a employee</option>
+            </select>
+            <span asp-validation-for="EmployeeUserID" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
+
 <script>
     $("#formData").submit(function (e) {
         e.preventDefault();
         $.ajax({
             method: "POST",
-            url: "@Url.Action("Create", "Assignment")",
+            url: "@Url.Action("Create", "Assignment", new { area = "Admin" })",
             data: $(this).serialize(),
                 success: function (result) {
                     if (result.success) {
@@ -62,9 +85,9 @@
                                       showConfirmButton: false,
                                       timer: 500
                                 }
-                        ).then(function(){
-                                 location.reload();
-                        });
+                        );
+                        var dateString =  $('#date').val();
+                        setActiveDay(dateString);
                     } else {
                             Swal.fire({
                               icon: "error",
@@ -76,6 +99,16 @@
         });
     });
 </script>
+<script type="text/javascript">
+    $('.clockpicker').clockpicker({
+        placement: 'bottom',
+        align: 'left',
+        autoclose: true,
+        donetext: 'Done'
+    });
 
+</script>
 
-
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

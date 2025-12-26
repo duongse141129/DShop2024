@@ -1,0 +1,92 @@
+﻿@model AssignmentModel
+﻿@{
+    ViewData["Title"] = "Details assignment";
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="text-primary">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+	<input type="hidden" id="Date" value="@Model.AssignedDate.ToString("yyyy-MM-dd")" />
+    <div class="fw-bold">@Model.Task.Name</div>
+	<div class="row">
+		<div class="col-sm-8">
+			<b>@Model.AssignedDate.ToString("h:mm tt") - @Model.Deadline.ToString("h:mm tt") </b>
+			<div class="fw-semibold">@Model.AssignedDate.ToString("MM/dd/yyyy")</div>
+		</div>
+		<div class="col-sm-4">
+			<div class="event-status">
+				<span id="status-details" class="status-task-@((AssignmentEnumData.StatusTask)Model.Status)">@((AssignmentEnumData.StatusTask)Model.Status)</span>
+			</div>
+		</div>
+
+	</div>
+
+    <p>@Model.AssignmentDetails</p>
+    <div class="fw-normal my-2">
+        <img src="~/media/avatar/@Model.Employee.Avatar" alt="..." class="avatar-img rounded-circle" style="height:100px; width:100px">
+        Employee: @Model.Employee.UserName
+     </div>
+    <div class="fw-normal my-2">
+        <img src="~/media/avatar/@Model.AssignedBy.Avatar" alt="..." class="avatar-img rounded-circle" style="height:100px; width:100px">
+        Assigned by @Model.AssignedBy.UserName
+    </div>
+	@if (User.IsInRole(RoleName.Employee))
+	{
+		@if (Model.Status == 1 || Model.Status == 2)
+		{
+			<a id="update-status-task" data-assignment_id="@Model.Id" class="btn btn-primary">
+				Update status
+			</a>
+		}
+	}
+
+
+</div>
+
+<script>
+	$(document).ready(function () {
+		$('#update-status-task').click(function () {
+			var Id = $(this).data("assignment_id");
+			$.ajax({
+				type: "POST",
+				url: "@Url.Action("UpdateStatus", "Assignment")",
+				data: { Id: Id },
+				success: function (result) {
+					if (result.success) {
+						Swal.fire({
+						  position: "top-end",
+						  icon: "success",
+						  title: result.message,
+						  showConfirmButton: false,
+						  timer: 500
+						});
+						$('#status-details').text(result.taskstatus);
+						$('#status-details').removeClass();
+						$('#status-details').addClass("status-task-"+ result.taskstatus );
+
+						var event = "#event-task-"+Id;
+						$(event).text(result.taskstatus);
+						$(event).removeClass();
+						$(event).addClass("status-task-"+ result.taskstatus );
+
+						if(result.taskstatus == "Completed"){
+							$('#update-status-task').hide();
+						}
+						var dateString =  $('#Date').val();
+						setActiveDay(dateString);
+					}
+					else {
+						Swal.fire({
+						  icon: "error",
+						  title: "Add to compare fail",
+						  text: result.message
+						});
+					}
+				}
+			});
+		});
+	});
+</script>

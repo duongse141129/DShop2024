@@ -39,6 +39,11 @@
       "provider": "cdnjs",
       "library": "multiple-select@1.2.3",
       "destination": "wwwroot/lib/multiple-select/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "clockpicker@0.0.7",
+      "destination": "wwwroot/lib/clockpicker/"
     }
   ]
 }

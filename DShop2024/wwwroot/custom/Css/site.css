@@ -546,3 +546,29 @@ ul{
     background-color: #359100;
     border-radius: 5px;
 }
+
+.status-refund-Rejected {
+    padding: 10px 20px;
+    color: white;
+    background-color: #ad0202;
+    border-radius: 5px;
+}
+
+.status-refund-Approved {
+    padding: 10px 20px;
+    color: white;
+    background-color: #1DCEF2;
+    border-radius: 5px;
+}
+
+.status-refund-Refunded {
+    padding: 10px 20px;
+    color: white;
+    background-color: #359100;
+    border-radius: 5px;
+}
+
+
+.clockpicker-popover {
+    z-index: 2051 !important; 
+}

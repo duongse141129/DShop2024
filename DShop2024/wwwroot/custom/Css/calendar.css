@@ -301,96 +301,131 @@
     }
 
     .right .today-date .event-date {
-        font-size: 1rem;
+        font-size: 1.5rem;
         font-weight: 400;
-        color: #878895;
+        color: #bdb5b5;
     }
 
 .events {
-    width: 100%;
-    height: 100%;
-    max-height: 600px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 20px;
+    margin-right: 10px;
+    border-radius: 10px;
     overflow-x: hidden;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding-left: 4px;
+    max-height:620px;
 }
 
+
     .events .event {
-        position: relative;
-        width: 95%;
-        min-height: 70px;
+        background: #ffffff;
+        border-radius: 12px; 
+        padding: 16px 20px;
+        margin-bottom: 15px;
         display: flex;
-        justify-content: center;
-        flex-direction: column;
-        gap: 5px;
-        padding: 0 20px;
-        padding-left: 50px;
-        color: #fff;
-        background: linear-gradient(90deg, #3f4458, transparent);
-        cursor: pointer;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 5px solid #6f42c1; 
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); 
     }
-        /* even event */
-        .events .event:nth-child(even) {
-            background: transparent;
-        }
 
         .events .event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             background: linear-gradient(90deg, var(--primary-clr), transparent);
+            color: white;
         }
 
-        .events .event .title {
-            display: flex;
-            align-items: center;
-            pointer-events: none;
-        }
 
-            .events .event .title .event-title {
-                font-size: 1rem;
-                font-weight: 400;
-                margin-left: 20px;
-            }
+.event-content {
+    flex-grow: 1;
+}
 
-        .events .event i {
-            color: var(--primary-clr);
-            font-size: 0.5rem;
-        }
+.title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
 
-        .events .event:hover i {
-            color: #fff;
-        }
+    .title i {
+        font-size: 8px;
+        margin-right: 10px;
+        color: #6f42c1;
+    }
 
-        .events .event .event-time {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: #878895;
-            margin-left: 15px;
-            pointer-events: none;
-        }
+.event-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
 
-        .events .event:hover .event-time {
-            color: #fff;
-        }
-        /* add tick in event after */
-        .events .event::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            right: 0;
-            font-size: 3rem;
-            line-height: 1;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0.3;
-            color: var(--primary-clr);
-            transform: translateY(-50%);
-        }
+.event-time {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: block;
+}
 
-        .events .event:hover::after {
-            display: flex;
-        }
+
+.event-status span {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-task-Pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-task-Approved {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.status-task-Completed {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.event-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 15px;
+}
+
+.btn-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-task-edit {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.btn-task-delete {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-icon:hover {
+    opacity: 0.8;
+}
+
+
 
 .add-event {
     position: absolute;

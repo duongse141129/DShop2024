@@ -10,7 +10,11 @@
 </div>
 
 <div class="modal-body">
-    <p class="text-black">Are you sure you want to delete this assignment <strong>@Model.AssignmentDetails</strong>?</p>
+    <input type="hidden" id="Date" asp-for="@Model.AssignedDate" />
+    <p class="text-black">Are you sure you want to delete this assignment <strong>@Model.Task.Name</strong>?</p>
+    <div class="fw-bold">
+        @Model.AssignmentDetails
+    </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-danger" onclick="confirmDelete(@Model.Id)">Delete</button>
@@ -30,9 +34,9 @@
                                   showConfirmButton: false,
                                   timer: 500
                             }
-                    ).then(function(){
-                             location.reload();
-                    });
+                    );
+                    var dateString =  $('#Date').val();
+                    setActiveDay(dateString);
             }
             else{
                     Swal.fire({

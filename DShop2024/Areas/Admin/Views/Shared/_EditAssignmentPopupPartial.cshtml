@@ -1,4 +1,5 @@
-﻿@model AssignmentModel
+﻿@using DShop2024.Areas.Admin.Models.Task
+@model EditAssignmentRequest
 ﻿@{
     ViewData["Title"] = "Edit assignment";
     Layout = null;
@@ -9,18 +10,35 @@
     <button class="btn-close" data-bs-dismiss="modal"></button>
 </div>
 
-<form id="formData" asp-action="Edit" asp-controller="Assignment" asp-area="Admin">
+<form id="formData" >
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Date" />
+    <input type="hidden" asp-for="Status" />
+
     <div class="form-group">
-        <label asp-for="AssignedDate" class="control-label"></label>
-        <input asp-for="AssignedDate" class="form-control" />
-        <span asp-validation-for="AssignedDate" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Deadline" class="control-label"></label>
-        <input asp-for="Deadline" class="form-control" />
-        <span asp-validation-for="Deadline" class="text-danger"></span>
+        <div class="row">
+            <div class="col-sm-6">
+                <label class="control-label">TimeFrom</label>
+                <div class="input-group clockpicker">
+                    <span></span>
+                    <input type="text" name="TimeFrom" class="form-control" value="@Model.TimeTo.ToString(@"hh\:mm")">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <label asp-for="TimeTo" class="control-label"></label>
+                <div class="input-group clockpicker">
+                    <span></span>
+                    <input type="text" name="TimeTo" class="form-control" value="@Model.TimeFrom.ToString(@"hh\:mm")">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="form-group">
         <label asp-for="AssignmentDetails" class="control-label"></label>
@@ -30,14 +48,14 @@
     <div class="form-group">
         <label>Task</label>
         <select asp-for="TaskID" class="form-control" asp-items="ViewBag.Tasks">
-            <option>--Choose a task</option>
+            <option value="">--Choose a task</option>
         </select>
         <span asp-validation-for="TaskID" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label>Employee</label>
         <select asp-for="EmployeeUserID" class="form-control" asp-items="ViewBag.Employees">
-            <option>--Choose a employee</option>
+            <option value="">--Choose a employee</option>
         </select>
         <span asp-validation-for="EmployeeUserID" class="text-danger"></span>
     </div>
@@ -51,7 +69,7 @@
         e.preventDefault();
         $.ajax({
             method: "POST",
-            url: "@Url.Action("Edit", "Assignment")",
+            url: "@Url.Action("Edit", "Assignment", new { area = "Admin" })",
             data: $(this).serialize(),
                 success: function (result) {
                     if (result.success) {
@@ -63,9 +81,9 @@
                                       showConfirmButton: false,
                                       timer: 500
                                 }
-                        ).then(function(){
-                                 location.reload();
-                        });
+                        );
+                          var dateString =  $('#Date').val();
+                          setActiveDay(dateString);
                     } else {
                             Swal.fire({
                               icon: "error",
@@ -77,3 +95,15 @@
         });
     });
 </script>
+<script type="text/javascript">
+    $('.clockpicker').clockpicker({
+        placement: 'bottom',
+        align: 'left',
+        autoclose: true,
+        donetext: 'Done'
+    });
+
+</script>
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
