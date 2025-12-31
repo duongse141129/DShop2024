@@ -11,13 +11,17 @@ namespace DShop2024.Repository.Components
 		{
 			_context = context;
 		}
-		public async Task<IViewComponentResult> InvokeAsync()
+		public async Task<IViewComponentResult> InvokeAsync(string uiDesignType, string selectedCategory = "")
 		{
 			var categories = await _context.Categories
 								.Where(p => p.Status != 0)
 								.ToListAsync();
-
-			return View(categories);
+            if (uiDesignType == "Details")
+            {
+                return View("Details", categories);
+            }
+            ViewBag.SelectedCategory = selectedCategory;
+            return View("Default", categories);
 
 		}
 	}

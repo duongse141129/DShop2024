@@ -225,18 +225,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 chartData = await getDataByMonth(month, year);
                 return Json(chartData);
             }
-            if (filterdate == "last_year")
-            {
-                chartData = await getDataByYear(year-1);
-                return Json(chartData);
-            }
-
-            if (filterdate == "this_year")
-            {
-                chartData = await getDataByYear(year);
-                return Json(chartData);
-              
-            }
+            year = Convert.ToInt32(filterdate);
+            chartData = await getDataByYear(year);
             return Json(chartData);
         }
      
@@ -409,15 +399,10 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> GetChartStockFilter(string filterbarchart)
         {
             List<StockViewModel> stockViewModels = new List<StockViewModel>();
-            int year = DateTime.Today.Year;
+            int year = Convert.ToInt32(filterbarchart); ;
             int month = DateTime.Today.Month;
-            if(filterbarchart == "this_year")
+            if (year != DateTime.Now.Year)
             {
-                year = DateTime.Today.Year;
-            }
-            if(filterbarchart == "last_year")
-            {
-                year = year - 1;
                 month = 12;
             }
 

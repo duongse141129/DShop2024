@@ -1,0 +1,29 @@
+﻿
+@model IEnumerable<BrandViewModel>
+
+
+<ul class="list-unstyled fruite-categorie list-group brand-list">
+   
+    <li>
+         <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlugs="all">
+            <div class="d-flex justify-content-between fruite-name list-group-item  ">
+                    ALL
+            </div>
+        </a>
+    </li>
+ 
+    @foreach (var item in Model)
+    {     
+        <li>
+            <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlugs="@item.Slug">
+                <div class="d-flex justify-content-between fruite-name list-group-item  ">
+                    @item.BrandName
+                    <span>@item.CountProduct</span>
+                </div>
+            </a>
+        </li>
+    }
+</ul>
+
+
+

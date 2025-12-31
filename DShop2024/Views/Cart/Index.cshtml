@@ -33,7 +33,10 @@
 										</div>
 									</th>
 									<td>
-										<p class="mb-0 mt-4">@item.ProductName</p>
+										<a asp-area="" asp-controller="ShopProducts" asp-action="Details" asp-route-Id="@item.ProductId">
+											<p class="mb-0 mt-4">@item.ProductName</p>
+										</a>
+									
 									</td>
 									<td>
 										<p class="mb-0 mt-4">@item.Price.ToString("#,##0 VND")</p>

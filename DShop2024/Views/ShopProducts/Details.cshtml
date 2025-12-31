@@ -106,7 +106,7 @@
 												<i class="fas fa-minus"></i>
 											</button>
 										</span>
-										<input type="text" id="quantity" name="quantity" class="input-number quantityDetail" value="1" min="1" step="1">
+										<input type="text" id="quantity" name="quantity" class="input-number quantityDetail quantity-input" value="1" min="1" step="1">
 										<span class="input-group-btn">
 											<button type="button" class="quantity-right-plus btn btn-number buttonQuantityPlus" data-type="plus">
 												<i class="fas fa-plus"></i>
@@ -115,7 +115,7 @@
 									</div>
 								</div>
 							</form>
-							<button class="btn btn-primary btn-md add-to-cart-quantity mt-2" id="detail-@Model.ProductDetail.Id">
+							<button class="btn btn-primary btn-md add-to-cart-quantity-form mt-2" id="detail-@Model.ProductDetail.Id">
 								<i class="fas fa-cart-plus"></i> Add to Cart
 							</button>
 
@@ -306,7 +306,7 @@
 										<input type="hidden" id="quantity" name="quantity" class="input-number" value="1">
 									</form>								
 										<div class="d-flex justify-content-between flex-lg-wrap my-2">
-												<button class="btn btn-primary btn-md add-to-cart-quantity " id="related-@relatedProduct.Id">
+												<button class="btn btn-primary btn-md add-to-cart-quantity-form " id="related-@relatedProduct.Id">
 													<i class="fas fa-cart-plus"></i> Add to Cart
 												</button>
 												@if (User.Identity?.IsAuthenticated ?? false)
@@ -345,10 +345,45 @@
 @section Scripts {
 	<link href="~/custom/css/gallery.css" rel="stylesheet" />
 	<script type="text/javascript" src="~/custom/js/gallery.js"></script>
+	<script>
+		$(document).on("click", ".add-to-cart-quantity", function () {
+			const productId = $(this).data("product-id");
+			const quantity = $(this)
+				.closest(".product-item")
+				.find(".quantity-input")
+				.val();
 
+			$.ajax({
+				type: "POST",
+				url: "@Url.Action("AddQuantityToCart", "Cart")",
+				data: {
+					productId: productId,
+					quantity: quantity
+				},
+				success: function (result) {
+					if (result.success) {
+						Swal.fire({
+							position: "top-end",
+							icon: "success",
+							title: result.message,
+							showConfirmButton: false,
+							timer: 800
+						});
+						loadQuantityCart();
+					} else {
+						   Swal.fire({
+							  icon: "error",
+							  title: "Add to cart fail",
+							  text: result.message
+							});
+					}
+				}
+			});
+		});
+	</script>
 	<script>
 		$(document).ready(function () {
-			$('.add-to-cart-quantity').click(function () {
+			$('.add-to-cart-quantity-form').click(function () {
 				var formId  ="form-"+ $(this).attr('id');
 				console.log(formId);
 				var form = document.getElementById(formId);

@@ -12,7 +12,7 @@ namespace DShop2024.Repository.Components
 		{
 			_context = context;
 		}
-		public async Task<IViewComponentResult> InvokeAsync()
+		public async Task<IViewComponentResult> InvokeAsync(string uiDesignType, List<string> selectedBrands = null)
 		{
 			var brands = await _context.Brands
 								.Where(b => b.Status != 0)
@@ -32,9 +32,12 @@ namespace DShop2024.Repository.Components
 									CountProduct = g.Count()
 								})
 								.ToListAsync();
-
-			return View(brands);
-
+            if (uiDesignType == "Details")
+            {
+                return View("Details", brands);
+            }
+            ViewBag.SelectedBrands = selectedBrands ?? new List<string>();
+            return View("Default", brands);
 		}
 	}
 }

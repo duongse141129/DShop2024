@@ -1,0 +1,57 @@
+﻿@model ShopProductViewModel
+
+<div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3" id="product-list">
+    @foreach (var item in Model.Products)
+    {
+        <div class="col">
+            <div class="product-item">
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a data-product_id="@item.Id" class="btn-compare add-btn-compare"><i class="fas fa-retweet"></i></a>
+                    <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist"><i class="far fa-heart"></i></a>
+                }
+                <figure>
+                    <a asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id">
+                        <img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage">
+                    </a>
+                </figure>
+                <h3>@item.ProductName</h3>
+                <span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
+                <div class="d-flex mb-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa fa-star @(item.AveragePoint >= i ? "text-primary" : "")"></i>
+                    }
+                </div>
+                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                <span class="qty">@item.BrandName</span><br />
+                <span class="qty">@item.CategoryName</span>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <input type="hidden" class="form-control input-number" name="productId" value="@item.Id">
+                        <div class="input-group product-qty">
+                            <span class="input-group-btn">
+                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </span>
+                            <input type="text"  name="quantity" class="form-control input-number quantity-input" value="1" min="1" step="1">
+
+                            <span class="input-group-btn">
+                                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                <button class="btn btn-primary btn-md add-to-cart-quantity " id="shop-@item.Id" data-product-id="@item.Id">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    }
+</div>
+<div class="ajax-pagination mt-4">
+    <partial name="_PagingPartial" model="@Model.Paging" />
+</div>

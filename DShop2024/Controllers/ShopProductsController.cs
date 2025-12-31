@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+
+
 
 namespace DShop2024.Controllers
 {
@@ -27,139 +28,113 @@ namespace DShop2024.Controllers
 
         }
 
-        public async Task<IActionResult> Index(string CategorySlug = "", string BrandSlug = "",
-                                                 string searchName = "",
-                                            string sortBy = "", string startprice = "", string endPrice = "",
-                                            string laptopPocket = "", string waterResistance = "", string USBChargingPort = "",
-                                            [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 9)
+        public async Task<IActionResult> Index([FromQuery] ProductFilter filter)
         {
             ViewBag.sidebar = Menu.Home.Shop;
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
-            IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
-                                                    .Include(p => p.Brand)
-                                                    .Include(p => p.Category);
-            var count = await listProduct.CountAsync();
-            if (count > 0)
+            IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).AsNoTracking();
+
+            if (!string.IsNullOrEmpty(filter.CategorySlug))
+                listProduct = listProduct.Where(p => p.Category.Slug == filter.CategorySlug);
+
+            if (filter.BrandSlugs != null && filter.BrandSlugs.Any())
             {
-                if (!String.IsNullOrEmpty(CategorySlug))
+                var getAll = filter.BrandSlugs.Where(s => s == "all").Any();
+                if(!getAll)
                 {
-                    listProduct = listProduct.Where(c => c.Category.Slug == CategorySlug);
-                }
-                if (!String.IsNullOrEmpty(BrandSlug))
-                {
-                    listProduct = listProduct.Where(c => c.Brand.Slug == BrandSlug);
-                }
-                if (!String.IsNullOrEmpty(searchName))
-                {
-                    listProduct = listProduct.Where(c => c.ProductName.Contains(searchName));
-                }
-                if (!String.IsNullOrEmpty(laptopPocket))
-                {
-                    decimal laptopPocketValue;
-                    decimal.TryParse(laptopPocket, out laptopPocketValue);
-                    listProduct = listProduct.Where(c => c.LaptopPocket >= laptopPocketValue);
-                }
-                if (!String.IsNullOrEmpty(waterResistance))
-                {
-                    listProduct = listProduct.Where(c => c.WaterResistance == true);
-                }
-                if (!String.IsNullOrEmpty(USBChargingPort))
-                {
-                    listProduct = listProduct.Where(c => c.USBChargingPort == true);
-                }
+                    var activeSlugs = filter.BrandSlugs.Where(s => s != "all").ToList();
 
-                if (sortBy == "PriceIncrease")
-                {
-                    listProduct = listProduct.OrderBy(p => p.Price);
-                }
-                else if (sortBy == "PriceDecrease")
-                {
-                    listProduct = listProduct.OrderByDescending(p => p.Price);
-                }
-                else if (sortBy == "Newest")
-                {
-                    listProduct = listProduct.OrderByDescending(p => p.Id);
-                }
-                else if (sortBy == "Oldest")
-                {
-                    listProduct = listProduct.OrderBy(p => p.Id);
-                }
-                if (startprice != "" && endPrice != "")
-                {
-                    decimal startPriceValue;
-                    decimal endPriceValue;
-                    if (decimal.TryParse(startprice, out startPriceValue) && decimal.TryParse(endPrice, out endPriceValue))
+                    if (activeSlugs.Any())
                     {
-                        listProduct = listProduct.Where(p => p.Price >= startPriceValue && p.Price <= endPriceValue);
-                    }
-                    else
-                    {
-                        listProduct = listProduct.OrderByDescending(p => p.Id);
+                        listProduct = listProduct.Where(p => activeSlugs.Contains(p.Brand.Slug));
                     }
                 }
-                else
-                {
-                    listProduct = listProduct.OrderByDescending(p => p.Id);
-                }
-
             }
-            var filterSortBy = Enum.GetValues(typeof(ProductEnumData.SortBy))
-                        .Cast<ProductEnumData.SortBy>()
-                        .Select(v => v.ToString())
-                        .ToList();
-            ViewBag.sortBy = new SelectList(filterSortBy, sortBy);
 
-            ViewBag.CategorySlug = CategorySlug;
-            ViewBag.BrandSlug = BrandSlug;
-            ViewBag.searchName = searchName;
-            ViewBag.startprice = startprice;
-            ViewBag.endPrice = endPrice;
-            ViewBag.laptopPocket = laptopPocket;
-            ViewBag.waterResistance = waterResistance;
-            ViewBag.USBChargingPort = USBChargingPort;
+            if (!string.IsNullOrEmpty(filter.SearchName))
+                listProduct = listProduct.Where(p => p.ProductName.Contains(filter.SearchName));
 
-            var slider = _context.Banners.Where(b => b.Status == 1).ToList();
-            ViewBag.Banners = slider;
+            if (decimal.TryParse(filter.LaptopPocket, out decimal lpValue))
+                listProduct = listProduct.Where(p => p.LaptopPocket >= lpValue);
+            if (filter.WaterResistance)
+                listProduct = listProduct.Where(p => p.WaterResistance == true);
 
-            int totalProduct = listProduct.Count();
-            if (pagesSize <= 0)
-                pagesSize = 9;
-            int countPages = (int)Math.Ceiling((double)totalProduct / 9);
+            if (filter.USBChargingPort)
+                listProduct = listProduct.Where(p => p.USBChargingPort == true);
 
-            if (currentPage > countPages)
-                currentPage = countPages;
-            if (currentPage < 1)
-                currentPage = 1;
+            if (decimal.TryParse(filter.StartPrice, out decimal sPrice) && decimal.TryParse(filter.EndPrice, out decimal ePrice))
+                listProduct = listProduct.Where(p => p.Price >= sPrice && p.Price <= ePrice);
+
+            listProduct = filter.SortByList switch
+            {
+                "Price: Low to High" => listProduct.OrderBy(p => p.Price),
+                "Price: High to Low" => listProduct.OrderByDescending(p => p.Price),
+                "Newest Arrivals" => listProduct.OrderByDescending(p => p.Id),
+                "Oldest" => listProduct.OrderBy(p => p.Id),
+                _ => listProduct.OrderByDescending(p => p.Id)
+            };
+
+            int totalProduct = await listProduct.CountAsync();
+            if (filter.PagesSize <= 0)
+                filter.PagesSize = 9;
+            int countPages = (int)Math.Ceiling((double)totalProduct / filter.PagesSize);
+
+            if (filter.P > countPages)
+                filter.P = countPages;
+            if (filter.P < 1)
+                filter.P = 1;
 
             var pagingModel = new PagingModel()
             {
                 countpages = countPages,
-                currentpage = currentPage,
-                generateUrl = (pageNumber) => Url.Action("Index", new
-                {
-                    p = pageNumber,
-                    pagesSize = pagesSize,
-                    searchName = searchName,
-                    startprice = startprice,
-                    endPrice = endPrice,
-                    CategorySlug = CategorySlug,
-                    BrandSlug = BrandSlug,
-                    sortBy = sortBy,
-                    laptopPocket = laptopPocket,
-                    waterResistance = waterResistance,
-                    USBChargingPort = USBChargingPort
-                })
+                currentpage = filter.P,
+                generateUrl = (pageNumber) => {
+                    var routeValues = new RouteValueDictionary {
+                        { "p", pageNumber },
+                        { "pagesSize", filter.PagesSize },
+                        { "searchName", filter.SearchName },
+                        { "CategorySlug", filter.CategorySlug },
+                        { "sortBy", filter.SortByList },
+                        { "startprice", filter.StartPrice },
+                        { "endPrice", filter.EndPrice },
+                        { "laptopPocket", filter.LaptopPocket },
+                        { "waterResistance", filter.WaterResistance },
+                        { "USBChargingPort", filter.USBChargingPort }
+                    };
+
+                    if (filter.BrandSlugs != null)
+                    {
+                        for (int i = 0; i < filter.BrandSlugs.Count; i++)
+                        {
+                            routeValues[$"BrandSlugs[{i}]"] = filter.BrandSlugs[i];
+                        }
+                    }
+
+                    return Url.Action("Index", routeValues);
+                }
             };
+
             ViewBag.pagingModel = pagingModel;
-            var products = await listProduct.Skip((currentPage - 1) * pagesSize)
+            var products = await listProduct.Skip((filter.P - 1) * filter.PagesSize)
                                             .Include(p => p.Ratings)
-                                            .AsSplitQuery()
-                                            .AsNoTracking()
-                                           .Take(pagesSize)
-                                           .ToListAsync();
+                                            .Include(p => p.Brand)
+                                            .Include(p => p.Category)
+                                            .Take(filter.PagesSize)
+                                            .ToListAsync();
             var productVMs = _mapper.Map<List<ProductViewModel>>(products);
-            return View(productVMs);
+            ShopProductViewModel shopProduct = new ShopProductViewModel
+            {
+                Products = productVMs,
+                Filter = filter,
+                Paging = pagingModel,
+                SortByList = new SelectList(ProductEnumData.SortByList, filter.SortByList),
+            };
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ListFilterProductPartial", shopProduct);
+            }
+            return View(shopProduct);
 
         }
 
@@ -205,9 +180,7 @@ namespace DShop2024.Controllers
 										.Include(c => c.User)
                                         .OrderByDescending(r => r.RatingDateTime);
 
-
                 _rec.AddRecentlyViewedProductAsync(productById.Id);
-                //var recom = await _rec.RecommendForRecentlyViewedAsync(topN: 8);
 
                 double pointAvarge = 0.0;
 				bool checkUserOrder = false;
@@ -315,78 +288,5 @@ namespace DShop2024.Controllers
 		}
 
 
-
-        // List with optional recommendations block
-        //public async Task<IActionResult> Index(int? userId)
-        //{
-        //    var items = await _db.Backpacks.AsNoTracking().ToListAsync();
-
-        //    IReadOnlyList<Backpack> recs = Array.Empty<Backpack>();
-        //    if (userId.HasValue)
-        //        recs = await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 8);
-
-        //    return View(new BackpacksIndexVm { Items = items, Recommendations = recs });
-        //}
-
-        // Detail page marks as recently viewed
-        //public async Task<IActionResult> Details(int id, int? userId)
-        //{
-        //    var item = await _db.Backpacks.FindAsync(id);
-        //    if (item == null) return NotFound();
-
-        //    if (userId.HasValue)
-        //        await _rec.AddRecentlyViewedAsync(userId.Value, id);
-
-        //    var recs = userId.HasValue
-        //        ? await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 6)
-        //        : Array.Empty<Backpack>();
-
-        //    return View(new BackpackDetailsVm { Item = item, Recommendations = recs });
-        //}
-
-
-
-
-        //public async Task<IActionResult> Index(int? userId)
-        //{
-        //    var items = await _context.Products.Where(p => p.Status != 0).AsNoTracking().ToListAsync();
-
-        //    IReadOnlyList<ProductModel> recs = Array.Empty<ProductModel>();
-        //    if (userId.HasValue)
-        //        recs = await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 8);
-
-        //    return View(new BackpacksIndexVm { Items = items, Recommendations = recs });
-        //}
-
-        //public async Task<IActionResult> Details(int id, int? userId)
-        //{
-        //    var item = await _context.Products.Where(p => p.Status != 0 & p.Id == id).FirstOrDefaultAsync();
-        //    if (item == null) return NotFound();
-
-        //    if (userId.HasValue)
-        //        await _rec.AddRecentlyViewedAsync(userId.Value, id);
-
-        //    var recs = userId.HasValue
-        //        ? await _rec.RecommendForRecentlyViewedAsync(userId.Value, topN: 6)
-        //        : Array.Empty<ProductModel>();
-
-        //    return View(new BackpackDetailsVm { Item = item, Recommendations = recs });
-        //}
-
-    }
-
-
-
-
-    public class BackpacksIndexVm
-    {
-        public IEnumerable<ProductModel> Items { get; set; } = Enumerable.Empty<ProductModel>();
-        public IReadOnlyList<ProductModel> Recommendations { get; set; } = Array.Empty<ProductModel>();
-    }
-
-    public class BackpackDetailsVm
-    {
-        public ProductModel Item { get; set; } = default!;
-        public IReadOnlyList<ProductModel> Recommendations { get; set; } = Array.Empty<ProductModel>();
     }
 }

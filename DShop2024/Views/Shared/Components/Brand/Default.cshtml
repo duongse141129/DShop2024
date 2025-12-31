@@ -1,26 +1,62 @@
-﻿@using DShop2024.ViewModels
+﻿
 @model IEnumerable<BrandViewModel>
-
-<ul class="list-unstyled fruite-categorie list-group">
-   
-    <li>
-         <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="">
-            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.BrandSlug == "" ? "active" : "")">
-                    ALL
+@{
+    var selectedBrands = ViewBag.SelectedBrands as List<string>;
+}
+@if(selectedBrands.Count == 0)
+{
+    <div class="brand-list">
+        <div class="row">
+            <div class="col-sm-12">
+                <input type="checkbox" id="selectAll" value="all" name="BrandSlugs" class="input-filter-product" checked />
+                <label for="selectAll">  Select All </label>
             </div>
-        </a>
-    </li>
- 
-    @foreach (var item in Model)
-    {     
-        <li>
-            <a asp-action="Index" asp-controller="ShopProducts" asp-route-BrandSlug="@item.Slug">
-                <div class="d-flex justify-content-between fruite-name list-group-item @(ViewBag.BrandSlug == item.Slug ? "active" : "") ">
-                    @item.BrandName
-                    <span>@item.CountProduct</span>
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-12">
+                    <input type="checkbox" class="item-brand input-filter-product" value="@item.Slug" name="BrandSlugs" checked />
+                    <label for="@item.Slug"> @item.BrandName </label>
+                    <small>@item.CountProduct</small>
                 </div>
-            </a>
-        </li>
-    }
-</ul>
+            }
+        </div>
+    </div>
+}
+else
+{
+    
+    <div class="brand-list">
+        <div class="row">
+            <div class="col-sm-12">
+                <input type="checkbox" id="selectAll" value="all" name="BrandSlugs" class="input-filter-product" @(selectedBrands.Contains("all") ? "checked" : "") />
+                <label for="selectAll">  Select All </label>
+            </div>
+            @foreach (var item in Model)
+            {
+                <div class="col-sm-12">
+                    <input type="checkbox" class="item-brand input-filter-product" value="@item.Slug" name="BrandSlugs" @(selectedBrands != null && selectedBrands.Contains(item.Slug) ? "checked" : "") />
+                    <label for="@item.Slug"> @item.BrandName </label>
+                    <small>@item.CountProduct</small>
+                </div>
+            }
+        </div>
+    </div>
 
+}
+
+
+
+
+<script>
+    const selectAll = document.getElementById("selectAll");
+    const items = document.querySelectorAll(".item-brand");
+    selectAll.addEventListener("change", () => {
+      items.forEach((item) => (item.checked = selectAll.checked));
+    });
+    items.forEach((item) => {
+      item.addEventListener("change", () => {
+        const allChecked = Array.from(items).every((i) => i.checked);
+        selectAll.checked = allChecked;
+      });
+    });
+</script>

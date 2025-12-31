@@ -61,7 +61,7 @@
 												<i class="fas fa-minus"></i>
 											</button>
 										</span>
-										<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" step="1">
+										<input type="text" name="quantity" class="form-control input-number quantity-input" value="1" min="1" step="1">
 
 										<span class="input-group-btn">
 											<button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
@@ -71,7 +71,7 @@
 									</div>
 								</div>
 							</form>
-							<button class="btn btn-primary btn-md add-to-cart-quantity " id="recentlyview-@item.Id">
+							<button class="btn btn-primary btn-md add-to-cart-quantity " id="recentlyview-@item.Id" data-product-id="@item.Id">
 								<i class="fas fa-cart-plus"></i> Add to Cart
 							</button>
 					</div>

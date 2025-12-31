@@ -1,21 +1,20 @@
 ﻿@model IEnumerable<CategoryModel>
 
-<ul class="list-unstyled fruite-categorie list-group">
-    <li>
-        <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="">
-            <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == "" ? "active" : "")">
-               ALL
+<div class="category-list">
+    <div class="row">
+        <div class="col-sm-12">
+            <input type="radio" id="All" name="CategorySlug" value="" class="input-filter-product" @(string.IsNullOrEmpty(ViewBag.SelectedCategory) ? "checked" : "") />
+            <label for="All">All</label>
+        </div>
+        @foreach (var item in Model)
+        {
+            <div class="col-sm-12">
+                <input type="radio" id="@item.Id" name="CategorySlug" value="@item.Slug" class="input-filter-product" @(ViewBag.SelectedCategory == item.Slug ? "checked" : "") />
+                <label for="@item.Id">@item.CategoryName</label>
             </div>
-        </a>
-    </li>
-    @foreach (var item in Model)
-    {
-        <li>
-            <a asp-action="Index" asp-controller="ShopProducts" asp-route-CategorySlug="@item.Slug">
-                <div class="d-flex justify-content-between fruite-name list-group-item @( ViewBag.CategorySlug == item.Slug ? "active" : "")">
-                    @item.CategoryName
-                </div>
-            </a>
-        </li>
-    }
-</ul>
+
+        }
+    </div>
+</div>
+
+

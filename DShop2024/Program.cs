@@ -136,28 +136,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "category",
+    name: "Areas",
     pattern: "{area:exists}/{controller=ProductManage}/{action=Index}/{id?}");
-
-
-
-app.MapControllerRoute(
-    name: "Areas",
-    pattern: "/category/{CategorySlug?}",
-    defaults: new { controller = "ShopProducts", action = "Index" });
-
-app.MapControllerRoute(
-    name: "Areas",
-    pattern: "/brand/{BrandSlug?}",
-    defaults: new { controller = "ShopProducts", action = "Index" });
 
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/product/{Slug?}",
     defaults: new { controller = "ShopProducts", action = "GetDetailProductBySlug" });
-
-
-
 
 app.MapControllerRoute(
 	name: "default",

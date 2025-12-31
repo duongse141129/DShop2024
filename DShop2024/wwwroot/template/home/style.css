@@ -641,14 +641,23 @@ h1,h2,h3,h4,h5,h6 {
 .product-item .btn-link {
   text-decoration: none;
 }
-.product-item #quantity {
+/*.product-item #quantity {
   height: auto;
   width: 28px;
   text-align: center;
   border: none;
   margin: 0;
   padding: 0;
-}
+}*/
+    .product-item .quantity-input {
+        height: auto;
+        width: 28px;
+        text-align: center;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+
 .product-item .btn-number {
   width: 26px;
   height: 26px;

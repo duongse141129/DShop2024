@@ -1,0 +1,397 @@
+﻿@using DShop2024.ViewModels
+@model IEnumerable<ProductViewModel>
+@{
+	ViewData["Title"] = "Shopping Page";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Fruits Shop Start-->
+<div class="container-fluid fruite py-5">
+    <div class="container py-5 ws">
+		<h1 class="mb-4">@ViewData["Title"] </h1>
+        <div class="row g-4">
+            <div class="col-lg-12">
+				<form id="filterForm" asp-action="Index" asp-controller="ShopProducts" method="get">
+                    <partial name="_FilterProductsPartial" />
+				</form>
+
+                <div class="row g-4">
+                    <div class="col-lg-3">
+							<div id="sidebar-container">
+								<partial name="_SidebarPartial" />
+							</div>
+                    </div>
+			
+                    <div class="col-lg-9">
+							<div id="product-list-container">
+								<partial name="_ProductListPartial" model="Model" />
+							</div>
+
+							@*        <div class="tab-content" id="nav-tabContent">     id="product-list-container"
+                            <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
+
+                                <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 ">
+                                    @foreach (var item in Model)
+                                    {
+                                        <div class="col">
+                                            <div class="product-item">
+												@if (User.Identity?.IsAuthenticated ?? false)
+												{
+													<a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+														<i class="fas fa-retweet"></i>
+													</a>
+													<a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+														<i class="far fa-heart"></i>
+													</a>
+												}
+                                                <figure>
+													<a asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
+
+														<img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage" >
+                                                    </a>
+                                                </figure>
+                                                <h3>@item.ProductName</h3>
+												<span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
+												<div class="d-flex mb-2">
+													<i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+													<i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+												</div>
+                                                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                                                <span class="qty">@item.BrandName</span><br />
+                                                <span class="qty">@item.CategoryName</span>
+												<form asp-area="" asp-action="AddQuantityToCart" asp-controller="Cart" method="post" id="form-shop-@item.Id">
+													<div class="d-flex align-items-center justify-content-between">
+														<input type="hidden" class="form-control input-number" name="productId" value="@item.Id">
+														<div class="input-group product-qty">
+															<span class="input-group-btn">
+																<button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+																	<i class="fas fa-minus"></i>
+																</button>
+															</span>
+															<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" step="1">
+
+															<span class="input-group-btn">
+																<button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+																	<i class="fas fa-plus"></i>
+																</button>
+															</span>
+														</div>
+													</div>
+												</form>
+												<button class="btn btn-primary btn-md add-to-cart-quantity " id="shop-@item.Id">
+													<i class="fas fa-cart-plus"></i> Add to Cart
+												</button>
+                                            </div>
+                                        </div>
+                                    }
+                                
+								</div>
+                                <!-- / product-grid -->
+								<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+                            </div>
+
+
+                        </div> *@
+                    </div>
+                </div>
+			
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Fruits Shop End-->
+<div class="container-fluid ">
+	@await Component.InvokeAsync("FavouriteProduct")
+</div>
+<div class="container-fluid ">
+	@await Component.InvokeAsync("RecentlyViewedProduct")
+</div>
+<div class="container-fluid " id="recommend-product-placeholder">
+	@await Component.InvokeAsync("RecommendProduct")
+</div>
+
+
+
+@section Scripts {
+	<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.js"></script>
+
+	<script>
+		$(document).ready(function () {
+			// Function to trigger the AJAX filter
+			function filterProducts() {
+				var formData = $('#filterForm').serialize();
+				var url = $('#filterForm').attr('action');
+
+				$.ajax({
+					url: url,
+					type: 'GET',
+					data: formData,
+					success: function (result) {
+						$('#product-list-container').html(result);
+					}
+				});
+			}
+
+			// 3. Handle other filters (Search, Price, etc.)
+			$('#filterForm').on('change', 'select, input[type=radio], input[type=checkbox]', function () {
+				filterProducts();
+			});
+
+			// Price Slider Filter Button [cite: 20]
+			$('.btn-locgia').on('click', function (e) {
+				e.preventDefault();
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+				filterProducts();
+			});
+
+			$(document).on('click', '.fruite-categorie a', function (e) {
+				e.preventDefault();
+
+				// Extract slugs from the URL parameters
+				var url = new URL(this.href);
+				var brandSlug = url.searchParams.get("BrandSlug");
+				var categorySlug = url.searchParams.get("CategorySlug");
+
+				// Update the hidden inputs in _FilterProductsPartial.cshtml
+				if (brandSlug !== null) {
+					$('input[name="BrandSlug"]').val(brandSlug);
+				}
+				if (categorySlug !== null) {
+					$('input[name="CategorySlug"]').val(categorySlug);
+				}
+
+				// Update UI Active Class
+				$(this).closest('.list-group').find('.list-group-item').removeClass('active');
+				$(this).find('.list-group-item').addClass('active');
+
+				// Trigger filter with updated hidden fields
+				var formData = $('#filterForm').serialize();
+				loadProducts($('#filterForm').attr('action'), formData);
+			});
+
+			// Trigger on Search, Sort, Radio, and Checkbox changes
+			$('#filterForm').on('change', 'select, input[type=radio], input[type=checkbox]', function () {
+				filterProducts();
+			});
+
+			// Intercept Search Button / Form Submit
+			$('#filterForm').on('submit', function (e) {
+				e.preventDefault();
+				filterProducts();
+			});
+
+			// Intercept Sidebar Brand Clicks (Default.cshtml)
+			// Update the hidden BrandSlug input and trigger filter
+			$(document).on('click', '.fruite-categorie a', function (e) {
+				e.preventDefault();
+				var slug = new URL(this.href).searchParams.get("BrandSlug") || "";
+				$('input[name="BrandSlug"]').val(slug);
+				filterProducts();
+
+				// Update active class UI
+				$('.fruite-categorie .list-group-item').removeClass('active');
+				$(this).find('.list-group-item').addClass('active');
+			});
+
+			// Intercept Pagination Clicks
+			$(document).on('click', '.ajax-pagination a', function (e) {
+				e.preventDefault();
+				var url = $(this).attr('href');
+				$.get(url, function (result) {
+					$('#product-list-container').html(result);
+					// Scroll back to top of products
+					$('html, body').animate({ scrollTop: $("#product-list-container").offset().top - 100 }, 'slow');
+				});
+			});
+		});
+	</script>
+
+@* 	<script>
+		$(document).ready(function () {
+			$('.add-to-cart-quantity').click(function () {
+				var formId  ="form-"+ $(this).attr('id');
+				console.log(formId);
+				var formP = document.getElementById(formId);
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddQuantityToCart", "Cart")",
+					data: new FormData(formP),
+					contentType: false,
+					processData: false,
+					success: function (result) {
+						if (result.success) {
+						   Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
+							loadQuantityCart();
+						}
+						else {
+						   Swal.fire({
+							  icon: "error",
+							  title: "Add to cart fail",
+							  text: result.message
+							});
+						}
+
+					}
+				});
+			});
+		});
+	</script> *@
+	<script>
+		$(document).on("click", ".add-to-cart-quantity", function () {
+
+			const productId = $(this).data("product-id");
+			const quantity = $(this)
+				.closest(".product-item")
+				.find(".quantity-input")
+				.val();
+
+			$.ajax({
+				type: "POST",
+				url: "@Url.Action("AddQuantityToCart", "Cart")",
+				data: {
+					productId: productId,
+					quantity: quantity
+				},
+				success: function (result) {
+					if (result.success) {
+						Swal.fire({
+							position: "top-end",
+							icon: "success",
+							title: result.message,
+							showConfirmButton: false,
+							timer: 800
+						});
+						loadQuantityCart();
+					} else {
+						   Swal.fire({
+							  icon: "error",
+							  title: "Add to cart fail",
+							  text: result.message
+							});
+					}
+				}
+			});
+		});
+	</script>
+
+
+	<script>
+		$(document).ready(function () {
+			$(function () {
+				$("#slider-range").slider({
+					range: true,
+					step: 50000,
+					min: 0,
+					max: 2000000,
+					// values: [100000, 300000],
+					values: [@(ViewBag.startprice != "" ? ViewBag.startprice : 50000) , @(ViewBag.endPrice != "" ? ViewBag.endPrice : 800000)],
+					slide: function (event, ui) {
+						$("#amount").val(
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[0])
+							+ " - " +
+							new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+								.format(ui.values[1]));
+					}
+				});
+				$("#amount").val(
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 0))
+					+ " - " +
+					new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' })
+						.format($("#slider-range").slider("values", 1)));
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+
+			$('.btn-locgia').on('click', function () {
+				$("#startprice").val($("#slider-range").slider("values", 0));
+				$("#endPrice").val($("#slider-range").slider("values", 1));
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-wishlist').click(function () {
+				var Id = $(this).data("product_id");
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToWishList", "Home")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result.success) {
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
+						}
+						else {
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to wishlist fail",
+							  text: result.message
+							});
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-compare').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddToCompare", "Home")",
+					data: { Id: Id },
+					success: function (result) {
+						if (result.success) {
+							Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							});
+						}
+						else {
+							Swal.fire({
+							  icon: "error",
+							  title: "Add to compare fail",
+							  text: result.message
+							});
+						}
+
+					}
+				});
+			});
+		});
+	</script>
+	<script>
+		function loadQuantityCart() {
+			$('#cartQuantity').load("/AjaxContent/QuantityCart");
+		}
+	</script>
+
+}

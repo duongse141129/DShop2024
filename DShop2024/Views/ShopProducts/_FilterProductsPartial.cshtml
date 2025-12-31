@@ -1,0 +1,56 @@
+﻿@model ShopProductViewModel
+
+<div class="row g-4">
+	<div class="col-xl-3">
+		<div class="input-group w-100 mx-auto d-flex">
+			<input type="search" class="form-control p-3 input-filter-product" placeholder="keywords" aria-describedby="search-icon-1" name="SearchName" value="@Model.Filter.SearchName">
+			<button type="submit"><span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span></button>
+		</div>
+	</div>
+	<div class="col-6">
+		<div class="row">
+			<div class="col-sm-6">
+				<p>Laptop pocket(INCH)</p>
+				@foreach (var item in ViewBag.laptopPocketTypes)
+				{
+					<input type="radio" id="@item" name="LaptopPocket" value="@item" @(Model.Filter.LaptopPocket == item ? "checked" : "") class="input-filter-product" />
+					@if (item == "")
+					{
+						<label for="@item">None</label>
+					}
+					else
+					{
+						<label for="@item">@item</label>
+					}
+				}
+			</div>
+			<div class="col-md-4">
+				<input id="WaterResistance" type="checkbox" name="WaterResistance" value="true" @(Model.Filter.WaterResistance ? "checked" : "") class="input-filter-product" />
+				<label for="WaterResistance">WaterResistance</label><br>
+
+				<input id="USBChargingPort" type="checkbox" name="USBChargingPort" value="true" @(Model.Filter.USBChargingPort ? "checked" : "") class="input-filter-product" />
+				<label for="USBChargingPort">USBChargingPort</label><br>
+			</div>
+
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<input type="hidden" name="StartPrice" class="input-filter-product" id="StartPrice" value="@Model.Filter.StartPrice">
+				<input type="hidden" name="EndPrice" class="input-filter-product" id="EndPrice" value="@Model.Filter.EndPrice">
+				<p>
+					<input type="text" name="amount" id="amount" readonly="" style="border:0; color:#f6931f; font-weight:bold;" width="400">
+				</p>
+				<div id="slider-range"></div>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xl-3">
+		<div class="bg-white ps-3 py-3 rounded d-flex justify-content-between mb-4">
+			<label for="fruits">Sort:</label>
+			<select id="fruits" class="border-0 form-select-sm bg-light me-3" name="SortByList" asp-items="@Model.SortByList">
+			</select>
+		</div>
+	</div>
+</div>

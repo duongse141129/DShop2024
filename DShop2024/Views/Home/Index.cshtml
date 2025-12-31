@@ -214,7 +214,7 @@
                                                                 <i class="fas fa-minus"></i>
                                                             </button>
                                                         </span>
-                                                        <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" step="1">
+                                                        <input type="text"  name="quantity" class="form-control input-number quantity-input" value="1" min="1" step="1">
 
                                                         <span class="input-group-btn">
                                                             <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
@@ -224,7 +224,7 @@
                                                     </div>
                                                 </div>
                                             </form>
-                                            <button class="btn btn-primary btn-md add-to-cart-quantity " id="arrived-@item.Id">
+                                            <button class="btn btn-primary btn-md add-to-cart-quantity " id="arrived-@item.Id" data-product-id="@item.Id">
                                                 <i class="fas fa-cart-plus"></i> Add to Cart
                                             </button>
                                         </div>
@@ -251,42 +251,41 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('.add-to-cart-quantity').click(function () {
-                var formId  ="form-"+ $(this).attr('id');
-                console.log(formId);
-                var formP = document.getElementById(formId);
-                $.ajax({
-                    type: "POST",
-                    url: "@Url.Action("AddQuantityToCart", "Cart")",
-                    data: new FormData(formP),
-                    contentType: false,
-                    processData: false,
-                    success: function (result) {
-                        if (result.success) {
-                           Swal.fire({
-                              position: "top-end",
-                              icon: "success",
-                              title: result.message,
-                              showConfirmButton: false,
-                              timer: 500
-                            });
-                            loadQuantityCart();                         
-                        }
-                        else {
+        $(document).on("click", ".add-to-cart-quantity", function () {
+            const productId = $(this).data("product-id");
+            const quantity = $(this)
+                .closest(".product-item")
+                .find(".quantity-input")
+                .val();
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("AddQuantityToCart", "Cart")",
+                data: {
+                    productId: productId,
+                    quantity: quantity
+                },
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: result.message,
+                            showConfirmButton: false,
+                            timer: 800
+                        });
+                        loadQuantityCart();
+                    } else {
                            Swal.fire({
                               icon: "error",
                               title: "Add to cart fail",
                               text: result.message
                             });
-                        }
-
                     }
-                });
+                }
             });
         });
     </script>
-	
 	<script>
 		$(document).ready(function () {
 			$('.add-btn-wishlist').click(function () {
