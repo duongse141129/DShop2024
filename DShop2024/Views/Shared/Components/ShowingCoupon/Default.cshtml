@@ -1,32 +1,44 @@
 ﻿@model IEnumerable<CouponModel>
 
+
 <div class="row">
     <h2 class="section-title">Coupons</h2>
     @foreach (var item in Model)
     {
-        <div class="col-md-6">
-            <div class="banner-ad bg-@(CouponEnumData.getbgColor(item.Promotion.CategoryCouponName)) mb-3">
-                <div class="banner-content p-5">
-                    @if(item.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING)
+        <div class="col-md-6 mb-3">
+            <div class="coupon-card @(CouponEnumData.getbgStyle(item.Promotion.CategoryCouponName)) ">
+                <div class="coupon-header">
+                    @item.Promotion.CategoryCouponName
+                </div>
+                <div class="coupon-body">
+                    @if (item.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING)
                     {
-                        <div class="categories text-primary fs-3 fw-bold">FREE SHIPPING</div>
+                        <div class="coupon-value">FREE SHIPPING</div>
                     }
                     @if (item.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
                     {
-                        <div class="categories text-primary fs-3 fw-bold">Upto @item.Value % Off</div>
+                        <div class="coupon-value">Upto @item.Value % Off</div>
                     }
                     @if (item.Promotion.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
                     {
-                        <div class="categories text-primary fs-3 fw-bold">Discount @item.Value.ToString("#,##0 VND")</div>
+                        <div class="coupon-value">Discount @item.Value.ToString("#,##0 VND")</div>
                     }
-                   
-                    <h3 class="banner-title">Coupon Name: @item.CouponName</h3>
-                    <p>@item.Description</p>
-                    <p><strong>FROM @item.DateStart.ToString("MMMM dd, yyyy") - TO @item.DateExpired.ToString("MMMM dd, yyyy")</strong></p>
-                    <span id="cpnCode">@item.CouponCode</span>
-
+                    <div class="coupon-code">@item.CouponCode</div>
+                    @if(item.MinimumAmount != 0)
+                    {
+                        <div class="coupon-details">
+                            <strong>Minimum spend:</strong> @item.MinimumAmount.ToString("#,##0 VND")
+                        </div>
+                    }
+                    <div class="coupon-details">
+                        <strong>Expires:</strong> @item.DateExpired.ToString("MMMM dd, yyyy")
+                    </div>
+                    <div class="coupon-details">
+                        <strong>Description:</strong> @item.Description
+                    </div>
                 </div>
             </div>
         </div>
     }
 </div>
+

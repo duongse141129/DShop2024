@@ -1,0 +1,40 @@
+﻿@model List<PostViewModel>
+
+<div class="row">
+    @foreach (var post in Model)
+    {
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                @if (post.Image != null)
+                {
+                    <img class="card-img-top" src="~/media/post/@post.Image" alt="...">
+                }
+
+                <div class="card-body">
+                    <div class="small text-muted">@post.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</div>
+                    <h2 class="card-title h4">@post.Title</h2>
+                    <div>
+                        Subject:
+                        <strong class="text-danger">
+                            @post.Subjects
+                        </strong>
+                    </div>
+                    <p class="card-text">@post.ShortDescription</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a class="btn btn-info" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@post.Slug">Read more →</a>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="like-count"><i class="fas fa-thumbs-up"></i> @post.CountLikes</span>
+                            <span class="comment-count"><i class="far fa-comment"></i> @post.CountComments</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+<div class="ajax-pagination">
+    <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+</div>

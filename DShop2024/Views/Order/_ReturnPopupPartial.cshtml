@@ -1,4 +1,4 @@
-﻿@model OrderModel
+﻿@model OrderViewModel
 ﻿@{
     ViewData["Title"] = "Return Popup";
     Layout = null;
@@ -15,7 +15,10 @@
 </div>
 <div class="modal-footer">
     <a class="btn btn-outline-secondary" asp-area="" asp-controller="Order" asp-action="ReturnFullOrder" asp-route-id="@Model.Id">Full return </a>
-    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Order" asp-action="ReturnPartOrder" asp-route-id="@Model.Id">Partial return</a>
+    @if(Model.TotalQuantity > 1)
+    {
+        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Order" asp-action="ReturnPartOrder" asp-route-id="@Model.Id">Partial return</a>
+    }
 </div>
 
 

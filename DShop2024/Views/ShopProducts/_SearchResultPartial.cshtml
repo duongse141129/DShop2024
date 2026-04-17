@@ -1,0 +1,38 @@
+﻿@model IEnumerable<ProductModel>
+@{
+    var keyword = ViewBag.Keyword as string ?? "";
+}
+@if (!Model.Any())
+{
+    <div class="search-empty">No product found</div>
+}
+else
+{
+    @foreach (var item in Model)
+    {
+        <a asp-area="" asp-controller="ShopProducts" asp-action="GetDetailProductBySlug" asp-route-slug="@item.Slug" class="search-item">
+            <img src="~/media/products/@item.MainImage" />
+            <div>
+                <div class="name">@Html.Raw(Highlight(item.ProductName, keyword))</div>
+
+                
+                <div class="price">@item.Price.ToString("#,##0 VND")</div>
+            </div>
+        </a>
+    }
+}
+
+
+@functions {
+    string Highlight(string text, string keyword)
+    {
+        if (string.IsNullOrWhiteSpace(keyword)) return text;
+
+        return System.Text.RegularExpressions.Regex.Replace(
+            text,
+            System.Text.RegularExpressions.Regex.Escape(keyword),
+            m => $"<mark>{m.Value}</mark>",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase
+        );
+    }
+}

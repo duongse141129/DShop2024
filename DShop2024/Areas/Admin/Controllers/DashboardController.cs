@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DShop2024.EnumData;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Admin.Controllers
@@ -10,7 +12,8 @@ namespace DShop2024.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("Admin/Dashboard")]
 	[Authorize(Roles = RoleName.Administrator )]
-	public class DashboardController : Controller
+    [SidebarMenu(Menu.Admin.Dashboard)]
+    public class DashboardController : Controller
     {
         private readonly DShopContext _context;
 
@@ -23,7 +26,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Dashboard;
+            
             var countProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
             var countUser = _context.Users.Where(p => p.Status != 0).Count();
             var countOrder = _context.Orders.Where(p => p.Status != 0).Count();
@@ -33,6 +36,12 @@ namespace DShop2024.Areas.Admin.Controllers
             var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
             var countDeliveryOrder = _context.Orders.Where(p => p.Status == 3).Count();
             var countCompletedOrder = _context.Orders.Where(p => p.Status == 4).Count();
+
+            var countQuantityReturn = _context.ReturnDetails.Where(p => p.Return.Status != 0  ).Select( re => re.Quantity).Sum();
+
+            string currentYear = DateTime.Now.Year.ToString();
+            ViewBag.StatisticFilterOptions = new SelectList(DateFilterConstantData.GetDynamicStatisticsOptions(), "Value", "Text", currentYear);
+            ViewBag.ImportExportFilterOptions = new SelectList(DateFilterConstantData.GetDynamicImportExportOptions(), "Value", "Text", currentYear);
 
             var bestSaleProducts = await _context.Products
                             .Where(p => p.Status != 0)
@@ -96,68 +105,14 @@ namespace DShop2024.Areas.Admin.Controllers
                 CountAcceptedOrder = countAcceptedOrder,
                 CountDeliveryOrder = countDeliveryOrder,
                 CountCompletedOrder = countCompletedOrder,
+                CountQuantityReturn = countQuantityReturn,
                 BestSaleProducts = bestSaleProducts,
                 ListCustomer = listCustomer,
                 ListContact = listContact,
                 ListAvailableCouponVM = listAvailableCouponVM
             };
-
-            var ordersInMonth12 = await _context.Orders.Where(p => p.CreatedDate.Month == 12 && p.CreatedDate.Year == 2025 && p.Status == 4)
-                                        .Include( od => od.OrderDetails)
-                                        .Include( r => r.Returns)
-                                        .ThenInclude( rt => rt.ReturnDetails)
-                                        .ToListAsync();
-            decimal doanhthu = 0;
-            decimal loinhuan = 0;
-            foreach (var item in ordersInMonth12)
-            {
-                decimal sumReOd = 0;
-                decimal sumProfitOd = 0;
-                decimal sumSubProfitRtt = 0;
-                var returnModle = item.Returns.FirstOrDefault();
-                if (returnModle != null)
-                {
-                    if(returnModle.Status == 3)
-                    {
-                        if (String.IsNullOrEmpty(returnModle.Reason))
-                        {
-                            sumReOd = item.GrandTotal - returnModle.TotalRefundAmount;
-                            foreach (var od in item.OrderDetails)
-                            {
-                                var x = (od.Price - od.OriginalPrice) * od.Quantity;
-                                sumProfitOd += x;
-                            }
-                            foreach (var rtt in returnModle.ReturnDetails)
-                            {
-                                var y = (rtt.PricePerUnit - rtt.OriginalPricePerUnit) * rtt.Quantity;
-                                sumSubProfitRtt += y;
-                            }
-                            sumProfitOd -= sumSubProfitRtt;
-                        }
-                        else
-                        {
-                            sumReOd = 0;
-                            sumProfitOd = 0;
-                        }
-                    }
-
-                }
-                else
-                {
-                    sumReOd = item.GrandTotal;
-                    foreach (var od in item.OrderDetails)
-                    {
-                        var x = (od.Price - od.OriginalPrice) * od.Quantity;
-                        sumProfitOd += x;
-                    }
-                }
-                doanhthu += sumReOd ;
-                loinhuan += sumProfitOd;
-            }
-            ViewBag.doanhthu = doanhthu;
-            ViewBag.loinhuan = loinhuan;
-
             return View(dataDashboard);
+
         }
 
 

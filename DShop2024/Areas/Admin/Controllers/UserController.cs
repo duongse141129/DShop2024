@@ -13,7 +13,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator)]
-	public class UserController : Controller
+    [SidebarMenu(Menu.Admin.User)]
+    public class UserController : Controller
     {
         
 		private UserManager<AppUserModel> _userManager;
@@ -28,27 +29,26 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
         [HttpGet]
-        public async Task<IActionResult> Index(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
+        public async Task<IActionResult> Index(string search = "", string roleName = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = Menu.Admin.User;
-
+            
+            ViewBag.roles = new SelectList(await _context.Roles.Select(s => s.Name).ToListAsync(), roleName);
             IQueryable<UserWithRoleViewModel> userWithRole =  from u in _context.Users
                                                            join ur in _context.UserRoles on u.Id equals ur.UserId
                                                            join r in _context.Roles on ur.RoleId equals r.Id
-                                                           orderby u.Status descending
+                                                           orderby u.Status, r.Name descending
                                                            select new UserWithRoleViewModel { User=u, RoleName=r.Name };
 
-
-            var count = await userWithRole.CountAsync();
-            if (count > 0)
+            if (!String.IsNullOrEmpty(search))
             {
-                if (!String.IsNullOrEmpty(search))
-                {
-                    userWithRole = userWithRole.Where(c => c.User.UserName == search || c.User.Email == search);
-                }
+                userWithRole = userWithRole.Where(c => c.User.UserName.Contains(search)  || c.User.Email.Contains(search) );
+            }
+            if (!String.IsNullOrEmpty(roleName))
+            {
+                userWithRole = userWithRole.Where(c => c.RoleName == roleName);
             }
             ViewBag.search = search;
-            int totalCoupon = userWithRole.Count();
+            int totalCoupon = await userWithRole.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalCoupon / 10);
@@ -66,7 +66,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 {
                     p = pageNumber,
                     pagesSize = pagesSize,
-                    search = search
+                    search = search,
+                    roleName = roleName
                 })
             };
 
@@ -74,16 +75,19 @@ namespace DShop2024.Areas.Admin.Controllers
                         .Take(pagesSize).ToListAsync();
 
             ViewBag.pagingModel = pagingModel;
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_UserListPartial", listUserWithRole);
+            }
 
-            var userWithRoleVM = listUserWithRole.OrderBy(u => u.RoleName);
+            return View(listUserWithRole);
+        }
 
-            return View(userWithRoleVM);
-		}
 
-		[HttpGet]
+        [HttpGet]
 		public async Task<IActionResult> Create()
 		{
-            ViewBag.sidebar = Menu.Admin.User;
+            
             var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             var user = new CreateUserRequest();
@@ -94,7 +98,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserRequest createUserRequest)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             var roles = await _roleManager.Roles.ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             if (ModelState.IsValid)
@@ -155,7 +159,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(string Id)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -189,7 +193,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> RecoverAccount(string Id)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -224,7 +228,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SetPassword(string id)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -259,7 +263,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetPassword(string id, SetPasswordUserRequest model)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -295,7 +299,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> SetRole(string id)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(id))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";
@@ -332,7 +336,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetRole(string userId, string roleId)
         {
-            ViewBag.sidebar = Menu.Admin.User;
+            
             if (string.IsNullOrEmpty(userId))
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Not found user";

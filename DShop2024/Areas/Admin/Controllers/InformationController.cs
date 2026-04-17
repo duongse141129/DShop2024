@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Information)]
     public class InformationController : Controller
 	{
 		private readonly DShopContext _context;
@@ -20,7 +22,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
 		public IActionResult Index()
 		{
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             var info = _context.InformationShops.FirstOrDefault();
 			return View(info);
 		}
@@ -29,7 +31,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
 		public async Task<IActionResult> Edit(int? Id)
 		{
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -49,7 +51,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(int Id, InformationShopModel informationShop)
 		{
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (Id != informationShop.Id)
 			{
 				return NotFound();
@@ -94,8 +96,6 @@ namespace DShop2024.Areas.Admin.Controllers
 					}
 					exitedInformationShop.ShopName = informationShop.ShopName;
 					exitedInformationShop.Description = informationShop.Description;
-					exitedInformationShop.Map = informationShop.Map;
-					exitedInformationShop.Address = informationShop.Address;
 					exitedInformationShop.Phone = informationShop.Phone;
 					exitedInformationShop.Email = informationShop.Email;
 					exitedInformationShop.PluginFacebook = informationShop.PluginFacebook;

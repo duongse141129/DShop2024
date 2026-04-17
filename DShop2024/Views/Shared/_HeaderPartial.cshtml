@@ -25,7 +25,15 @@
                     <a class="nav-item nav-link @( ViewBag.sidebar == Menu.Home.Home ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i>Home</a>
                     <a class="nav-item nav-link @( ViewBag.sidebar == Menu.Home.Shop ? "active" : "")" asp-area="" asp-action="Index" asp-controller="ShopProducts"><i class="fas fa-th-list"></i>Shop</a>
                     <a class="nav-item nav-link @( ViewBag.sidebar == Menu.Home.Blog ? "active" : "")" asp-area="Blog" asp-action="Index" asp-controller="ViewPost"><i class="fab fa-blogger"></i>Blog</a>
-                    <a class="nav-item nav-link @( ViewBag.sidebar == Menu.Home.Chat ? "active" : "")" asp-area="" asp-action="Index" asp-controller="Message"><i class="far fa-comments"></i>Chat</a>
+                    <a class="nav-item nav-link @( ViewBag.sidebar == Menu.Home.Chat ? "active" : "")" asp-area="" asp-action="Index" asp-controller="Message">
+                        <span class="chat-icon">
+                            <i class="far fa-comments"></i>
+                            <div id="notifi-receive-container">
+                                @await Component.InvokeAsync("NotifyReceiveMessage")
+                           </div>
+                        </span>
+                        Chat 
+                    </a>
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">Pages</a>
                         <div class="dropdown-menu m-0 bg-secondary rounded-0 show" data-bs-popper="none">
@@ -45,24 +53,36 @@
     </div>
 </div>
 
-<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="searchModal" tabindex="-1">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content rounded-0">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Search by product name</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Search by product name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form asp-area="" asp-action="Index" asp-controller="ShopProducts">
-                <div class="modal-body d-flex align-items-center">
-                    <div class="input-group w-75 mx-auto d-flex">
-                        <input name="searchName" type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
-                        <button id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i> </button>
+
+            <form asp-area="" asp-controller="ShopProducts" asp-action="Index">
+                <div class="modal-body" style="height:500px">
+                    <div class="search-box mx-auto w-50 position-relative">
+                        <div class="input-group">
+                            <input id="searchInput" name="SearchName" type="search" class="form-control p-3" placeholder="keywords" autocomplete="off">
+
+                            <button class="input-group-text p-3">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+
+                        <div id="searchResult" class="search-result d-none"></div>
                     </div>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
 
+
+
 <div class="hero-header">
 </div>
+

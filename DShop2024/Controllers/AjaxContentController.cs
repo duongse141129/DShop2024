@@ -16,6 +16,10 @@ namespace DShop2024.Controllers
         {
             return ViewComponent("NotificationMessage");
         }
+        public IActionResult RecieveNotificationMessage()
+        {
+            return ViewComponent("NotifyReceiveMessage");
+        }
 
     }
 }

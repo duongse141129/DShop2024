@@ -1,0 +1,61 @@
+﻿.employee-select-container {
+    position: relative;
+    width: 200px;
+    cursor: pointer;
+    font-family: sans-serif;
+}
+
+.select-trigger {
+    padding: 10px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 4px;
+    height:60px;
+}
+
+    .select-trigger img {
+        width: 50px;
+        margin-right: 10px;
+    }
+
+.options-list {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    background: white;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 10;
+}
+
+    .options-list li {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+        .options-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+    .options-list img {
+        width: 50px;
+        margin-right: 10px;
+    }
+
+/* Show the list when active */
+.employee-select-container.open .options-list {
+    display: block;
+}
+
+/* When the hidden input is invalid, style the custom trigger box */
+#hidden-input.input-validation-error + #employeeSelect .select-trigger {
+    border: 1px solid #b94a48; /* Red border color */
+    background-color: #f2dede; /* Light red background */
+}

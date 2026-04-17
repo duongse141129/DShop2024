@@ -43,6 +43,8 @@ namespace App.Areas.Identity.Models.ManageViewModels
         [StringLength(500)]
         public string Address { get; set; }
 
+        public string CustomerSegment { get; set; }
+
         [NotMapped]
         [FileExtension]
         public IFormFile? AvatarUpload { get; set; }

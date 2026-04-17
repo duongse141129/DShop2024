@@ -167,12 +167,13 @@ namespace DShop2024.Areas.Identity.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
-                var user = new AppUserModel 
-                { 
-                    UserName = model.UserName, 
-                    Email = model.Email ,
+                var user = new AppUserModel
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
                     LoginType = UserEnumData.LOGIN_WEBSITE,
                     Avatar = UserEnumData.IMAGE_DEFAULT,
+                    CustomerSegment = 0,
                     Status = 1
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -185,7 +186,7 @@ namespace DShop2024.Areas.Identity.Controllers
                     {
                         await _userManager.AddToRoleAsync(user, RoleName.Customer);
 
-                        await SendPromotionToNewCustomer(user);
+                        //await SendPromotionToNewCustomer(user);
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
@@ -291,7 +292,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 user.EmailConfirmed = true;
                 _context.Update(user);
                 await _context.SaveChangesAsync();
-         
+                await SendPromotionToNewCustomer(user);
                 TempData[DShopConst.TEMPDATA_SUCCESS] = "Confirm email successful";
                 return View();
             }
@@ -468,6 +469,7 @@ namespace DShop2024.Areas.Identity.Controllers
                         Email = externalEmail,
                         LoginType = UserEnumData.LOGIN_GMAIL,
                         Avatar = UserEnumData.IMAGE_DEFAULT,
+                        CustomerSegment = 0,
                         Status = 1
                     };
 

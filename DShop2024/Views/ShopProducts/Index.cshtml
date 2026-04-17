@@ -6,29 +6,22 @@
 
 
 <div class="container-fluid fruite py-5">
-	<div class="container py-5 ws">
+	<div class="container py-5 bg-shop rounded-2">
 		<h1 class="mb-4">@ViewData["Title"] </h1>
 		<div class="row g-4">
 			<div class="col-lg-12">
-				<partial name="_FilterProductsPartial" model="Model" />
-				<div class="row g-4">
+				<partial name="_FilterProductPartial" model="Model" />
+				<div class="row g-4 mt-3">
 					<div class="col-lg-3">
 						<div id="sidebar-container">
-							<div class="row g-4">
-								<div class="col-lg-12">
-									<div class="mb-3">
-										<h4>Brands</h4>
-										@await Component.InvokeAsync("Brand", new { selectedBrands = Model.Filter.BrandSlugs })
-									</div>
-								</div>
-								<div class="col-lg-12">
-									<div class="mb-3">
-										<h4>Categories</h4>
-										@await Component.InvokeAsync("Category", new { selectedCategory = Model.Filter.CategorySlug })
-									</div>
-								</div>
+							<div class="sidebar-section">
+								<h4>Brands</h4>
+									@await Component.InvokeAsync("Brand", new { selectedBrands = Model.Filter.BrandSlugs })
 							</div>
-
+							<div class="sidebar-section">
+								<h4>Categories</h4>
+									@await Component.InvokeAsync("Category", new { selectedCategory = Model.Filter.CategorySlug })
+							</div>
 						</div>
 					</div>
 
@@ -65,74 +58,76 @@
 	<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
 	<script src="~/lib/jqueryui/jquery-ui.js"></script>
 
-	<script>
 
-		$(document).ready(function () {
-				function filterProducts() {
-					$("#StartPrice").val($("#slider-range").slider("values", 0));
-					$("#EndPrice").val($("#slider-range").slider("values", 1));
-					var formData = $(".input-filter-product, select[name='SortByList']").serializeArray();
+    <script>
+        $(document).ready(function () {           
 
+            function applyFilter(targetUrl = null) {
+				$("#StartPrice").val($("#slider-range").slider("values", 0));
+				$("#EndPrice").val($("#slider-range").slider("values", 1));
 
-					$(".input-filter-product[type='checkbox']").each(function() {
-						if (!this.checked) {
-							formData.push({ name: this.name, value: "false" });
-						}
-					});
+                let url = targetUrl || window.location.pathname;
+                
+                let formData = $(".input-filter-product, select[name='SortByList']").serialize();
 
-					$.ajax({
-						url: '@Url.Action("Index", "ShopProducts")',
-						type: 'GET',
-						data: $.param(formData),
-						success: function (result) {
-							$("#product-list-container .tab-pane").html(result);
-						}
-					});
-				}
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: formData,
+                    beforeSend: function () {
+                        $("#product-list-container").css("opacity", "0.5");
+                    },
+                    success: function (result) {
+                        $("#product-list-container").html(result);
+                        $("#product-list-container").css("opacity", "1");
 
-			$(document).on("change", ".input-filter-product, select[name='SortByList']", function () {
-				filterProducts();
-			});
+                        let newUrl = url + (formData ? "?" + formData : "");
+                        window.history.pushState({ path: newUrl }, '', newUrl);
+                    },
+                    error: function () {
+                        alert("Error loading products. Please try again.");
+                        $("#product-list-container").css("opacity", "1");
+                    }
+                });
+            }
 
-			let timer;
-			$("input[name='SearchName']").on("keyup", function () {
-				clearTimeout(timer);
-				timer = setTimeout(filterProducts, 500);
-			});
+            $(document).on("change", ".input-filter-product:not([type='text']), select[name='SortByList']", function () {
+                applyFilter();
+            });
+
+			let searchTimer;
+            $(document).on("keyup", "input[name='SearchName']", function () {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() {
+                    applyFilter();
+                }, 500);
+            });
 
 			$("#slider-range").on("slidestop", function (event, ui) {
-				filterProducts();
+				applyFilter();
 			});
 
-		});
-	</script>
-	<script>
-		$(document).ready(function () {
-			function loadProducts(url, data = null) {
-				$.ajax({
-					url: url,
-					type: 'GET',
-					data: data,
-					success: function (result) {
-						$("#product-list-container .tab-pane").html(result);
-					}
-				});
-			}
+            $(document).on("click", ".pagination a", function (e) {
+                e.preventDefault();
+                let url = $(this).attr("href");
+                if (url && url !== "#") {
+                    applyFilter(url);
+                    
+                    $('html, body').animate({ 
+                        scrollTop: $("#product-list-container").offset().top - 100 
+                    }, 'fast');
+                }
+            });
 
-			$(document).on("change", ".input-filter-product, select[name='SortByList']", function () {
-				var formData = $(".input-filter-product, select[name='SortByList']").serialize();
-				loadProducts('@Url.Action("Index", "ShopProducts")', formData);
-			});
+            //  Back/Forward buttons
+            window.onpopstate = function (e) {
+                if (e.state) {
+                    location.reload(); 
+                }
+            };
+        });
+    </script>
 
-			$(document).on("click", ".ajax-pagination a", function (e) {
-				e.preventDefault(); 
-				var url = $(this).attr("href");
-				if (url && url !== "#") {
-					loadProducts(url);
-				}
-			});
-		});
-	</script>
 	<script>
 		$(document).on("click", ".add-to-cart-quantity", function () {
 			const productId = $(this).data("product-id");
@@ -178,7 +173,7 @@
 					range: true,
 					step: 50000,
 					min: 0,
-					max: 2000000,
+					max: 3000000,
 					values: [@Model.Filter.StartPrice , @Model.Filter.EndPrice],
 					slide: function (event, ui) {
 						$("#amount").val(

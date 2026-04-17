@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DShop2024.Models
 {
 	[Table("Rating")]
-	public class RatingModel
+	public class RatingModel 
 	{
 		[Key]
 		public int Id { get; set; }

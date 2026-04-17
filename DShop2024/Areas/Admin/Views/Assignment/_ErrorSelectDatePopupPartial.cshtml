@@ -1,7 +1,5 @@
-﻿@using DShop2024.Areas.Admin.Models.Task
-@model EditAssignmentRequest
 ﻿@{
-    ViewData["Title"] = "Error select date";
+    ViewData["Title"] = "Error";
     Layout = null;
 }
 
@@ -11,7 +9,7 @@
 </div>
 
 <div class="modal-body">
-    <p class="fs-3"> You can not select a date in the past.</p>
+    <p class="fs-3"> @Model</p>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

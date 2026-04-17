@@ -1,4 +1,5 @@
 ﻿using DShop2024.EnumData;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator)]
+    [SidebarMenu(Menu.Admin.Role)]
     public class RoleController : Controller
     {
 
@@ -21,14 +23,14 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             return View(await _context.Roles.OrderByDescending(p => p.Id).ToListAsync());
         }
 
 
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             return View();
         }
 
@@ -37,7 +39,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name")] IdentityRole roleModel)
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             if (ModelState.IsValid)
             {
                 if (String.IsNullOrEmpty(roleModel.Name))
@@ -65,7 +67,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(string Id)
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -98,7 +100,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(string Id)
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();
@@ -120,7 +122,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string Id, IdentityRole model)
         {
-            ViewBag.sidebar = Menu.Admin.Role;
+            
             if (string.IsNullOrEmpty(Id))
             {
                 return NotFound();

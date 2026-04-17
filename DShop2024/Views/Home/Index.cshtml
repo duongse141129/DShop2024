@@ -6,12 +6,12 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="py-5 mb-5" style="background-image: url('~home/images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
+<section class="py-5 mb-5" style="background-image: url('~/wwwroot/home/images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
                 <div class="banner-blocks">
-                    <div class="banner-ad large bg-info block-1">
+                    <div class="banner-ad large bg-banners block-1">
                             <div class="swiper main-swiper">
                             <div class="swiper-wrapper">
                                 @foreach (var item in ViewBag.Banners as IEnumerable<BannerModel>)
@@ -28,14 +28,14 @@
                         </div>
                     </div>
 
-                    <div class="banner-ad bg-success-subtle block-2" style="background:url('~home/images/ad-image-1.png') no-repeat;background-position: right bottom">
+                    <div class="banner-ad bg-categories block-2" >
                         <div class="row banner-content p-5">
 
                             <div class="content-wrapper col-md-5">
                                 <h3 class="banner-title">Categories</h3>
                                
 
-                                <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="d-flex align-items-center nav-link">Shop Collection <svg width="24" height="24"><use xlink:href="#arrow-right"></use></svg></a>
+                                <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="d-flex align-items-center nav-link">Shop Collection <i class="fas fa-arrow-right"></i></a>
                             </div>
                             <div class="img-wrapper col-md-7">
                               
@@ -45,12 +45,12 @@
                         </div>
                     </div>
 
-                    <div class="banner-ad bg-danger block-3" style="background:url('~home/images/ad-image-2.png') no-repeat;background-position: right bottom">
+                    <div class="banner-ad bg-brands block-3" >
                         <div class="row banner-content p-5">
 
                             <div class="content-wrapper col-md-5">
                                 <h3 class="item-title">Brands</h3>                          
-                                <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="d-flex align-items-center nav-link">Shop Collection <svg width="24" height="24"><use xlink:href="#arrow-right"></use></svg></a>
+                                <a asp-area="" asp-action="Index" asp-controller="ShopProducts" class="d-flex align-items-center nav-link">Shop Collection <i class="fas fa-arrow-right"></i></a>
                               
                             </div>
                             <div class="img-wrapper col-md-7">
@@ -169,7 +169,7 @@
             <div class="col-md-12">
                 <div class="bootstrap-tabs product-tabs">
                     <div class="tabs-header d-flex justify-content-between border-bottom my-5">
-                        <h3>Just Arrived Products</h3>
+                        <h2 class="section-title"> Just Arrived Products</h2>
                     </div>
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">

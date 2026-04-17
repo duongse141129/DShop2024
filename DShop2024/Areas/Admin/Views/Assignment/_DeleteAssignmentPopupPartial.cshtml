@@ -11,6 +11,7 @@
 
 <div class="modal-body">
     <input type="hidden" id="Date" asp-for="@Model.AssignedDate" />
+    <div class="fw-bold">Date @Model.AssignedDate.ToString("yyyy-MM-dd")</div>
     <p class="text-black">Are you sure you want to delete this assignment <strong>@Model.Task.Name</strong>?</p>
     <div class="fw-bold">
         @Model.AssignmentDetails
@@ -35,8 +36,7 @@
                                   timer: 500
                             }
                     );
-                    var dateString =  $('#Date').val();
-                    setActiveDay(dateString);
+                    loadTasks();
             }
             else{
                     Swal.fire({

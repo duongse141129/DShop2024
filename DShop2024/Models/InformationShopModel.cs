@@ -13,10 +13,7 @@ namespace DShop2024.Models
         [Required(ErrorMessage = "The {0} field is required")]
         public string ShopName { get; set; }
 
-        [Required(ErrorMessage = "The {0} field is required")]
-        public string Map { get; set; }
-        [Required(ErrorMessage = "The {0} field is required")]
-        public string Address { get; set; }
+
         [Required(ErrorMessage = "The {0} field is required")]
         public string Phone { get; set; }
         [Required(ErrorMessage = "The {0} field is required")]

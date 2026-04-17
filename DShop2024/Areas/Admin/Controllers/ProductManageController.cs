@@ -2,6 +2,7 @@
 using DShop2024.Areas.Admin.Models.Product;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-	public class ProductManageController : Controller
+    [SidebarMenu(Menu.Admin.Product)]
+    public class ProductManageController : Controller
 	{
 		private readonly DShopContext _context;
 		private readonly IWebHostEnvironment _webHostEnvironment;
@@ -31,7 +33,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
 		{
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             var products =  await _context.Products.Where(p => p.Status != 0)
                                                             .Include(p => p.Category)
                                                             .Include(p => p.Brand)
@@ -43,7 +45,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
 		public IActionResult Create()
 		{
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName");
 			ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName");
 
@@ -57,7 +59,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateProductRequest product)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             ViewBag.Categories = new SelectList(_context.Categories.Where(c => c.Status != 0), "Id", "CategoryName", product.CategoryId);
             ViewBag.Brands = new SelectList(_context.Brands.Where(b => b.Status != 0), "Id", "BrandName", product.BrandId);
             ViewBag.laptopPocket = new SelectList(ProductEnumData.laptopPocketTypes, product.LaptopPocket);
@@ -142,7 +144,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[HttpGet]
         public async Task<IActionResult> Edit(int? Id)
 		{
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -171,7 +173,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, UpdateProductRequest product)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id != product.Id)
             {
                 return NotFound();
@@ -251,7 +253,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[Authorize(Roles = RoleName.Administrator)]
 		public async Task<IActionResult> Delete(int? Id)
 		{
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -323,7 +325,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
 		public  async Task<IActionResult> DeleteMultiple(List<int> IdProductsToDelete)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (IdProductsToDelete.Count == 0)
             {
                 TempData[DShopConst.TEMPDATA_ERROR] = "Select list product to delete mutiple" ;
@@ -350,7 +352,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> AddQuantity(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -378,7 +380,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StoreProductQuantity(ReceivingStockModel receivingStock)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == receivingStock.ProductId && m.Status != 0);
             if (product == null)
             {
@@ -413,7 +415,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Detail(int? id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (id == null)
 			{
 				return NotFound();
@@ -434,11 +436,9 @@ namespace DShop2024.Areas.Admin.Controllers
 			var listRating =  _context.Ratings
 						.Where(p => p.ProductId == id)
 						.Where(r => r.Status == 1)
-						.Include(c => c.User)
-						.Include(c => c.ReplyBy)
-                        .OrderByDescending(c => c.RatingDateTime);
+                        .OrderByDescending(c => c.RatingDateTime).AsQueryable();
 			var pointAvarge = 0.0;
-            List<RatingModel> ratings = new List<RatingModel>();
+            List<RatingViewModel> ratings = new List<RatingViewModel>();
 
             var count = await listRating.CountAsync();
 			if (count > 0)
@@ -468,24 +468,41 @@ namespace DShop2024.Areas.Admin.Controllers
 					})
 				};
 
-				ratings = await listRating
+			   ratings = await listRating
 							.Skip((currentPage - 1) * pagesSize)
-							.Take(pagesSize).ToListAsync();
+							.Take(pagesSize)
+                            .Include(c => c.User)
+                            .Include(c => c.ReplyBy)
+                             .Select(r => new RatingViewModel
+                             {
+                                 Rating = r,
+                                 ReplyByRole = _context.UserRoles
+                                .Where(ur => ur.UserId == r.UserIdReply)
+                                .Join(_context.Roles,
+                                      ur => ur.RoleId,
+                                      role => role.Id,
+                                      (ur, role) => role.Name)
+                                .FirstOrDefault()
+                             })
+                            .ToListAsync();
 
 				ViewBag.pagingModel = pagingModel;
 
 			}
 
-			var viewModel = new ProductDetailViewModel
-			{
+			var viewModel = new ProductDetailManageViewModel
+            {
 				ProductDetail = productModel,
 				Point = pointAvarge,
 				listRating = ratings,
                 ExistingImages = productModel.Images.Select(i => i.ImagePath).ToList()
             };
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_FeedbackListAdminPartial", viewModel);
+            }
 
-
-			return View(viewModel);
+            return View(viewModel);
 		}
 
 
@@ -494,7 +511,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddImages(int productId, List<IFormFile> ImageFiles)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             ProductModel product = await _context.Products
                 .Include(p => p.Images)
                 .FirstOrDefaultAsync(m => m.Id == productId && m.Status != 0);
@@ -554,7 +571,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> DeleteImage(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -595,13 +612,13 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageRating([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             var ListRating =  _context.Ratings.Where( r => r.Status != 0)
                                     .Include(r => r.Product)
                                     .Include(r => r.User)
                                     .Include(r => r.ReplyBy)
                                     .OrderByDescending(r => r.RatingDateTime);
-            int totalRating = ListRating.Count();
+            int totalRating = await ListRating.CountAsync();
             ViewBag.totalOrder = totalRating;
             if (pagesSize <= 0)
                 pagesSize = 10;
@@ -624,7 +641,19 @@ namespace DShop2024.Areas.Admin.Controllers
             };
 
             var ratings = await ListRating.Skip((currentPage - 1) * pagesSize)
-                        .Take(pagesSize).ToListAsync();
+                        .Take(pagesSize)
+                        .Select(r => new RatingViewModel
+                        {
+                            Rating = r,
+                            ReplyByRole = _context.UserRoles
+                            .Where(ur => ur.UserId == r.UserIdReply)
+                            .Join(_context.Roles,
+                                  ur => ur.RoleId,
+                                  role => role.Id,
+                                  (ur, role) => role.Name)
+                            .FirstOrDefault()
+                        })
+                        .ToListAsync();
 
             ViewBag.pagingModel = pagingModel;
             return View(ratings);
@@ -633,7 +662,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPopUpReplyRating(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -650,8 +679,6 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> ReplyRating(int? Id, string ReplyMessage)
         {
-
-            ViewBag.sidebar = Menu.Admin.Product;
             if (Id == null)
             {
                 return NotFound();
@@ -685,7 +712,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> RemoveRatingPopup(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -703,7 +730,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveRating(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Product;
+            
             if (Id == null)
             {
                 return NotFound();

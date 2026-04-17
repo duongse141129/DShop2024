@@ -70,20 +70,11 @@
                     </div>
                 </div>
                 <div class="row pt-3">
-                    <h3>Comments (@Model.PostDetail.CountComments)</h3>
+                    <h3>Comments (@Model.PostDetail.CountComments)</h3>                 
                     <div class="col-md-10">
-                        <div class="response-area">
-							<div class="media-list">
-								@foreach (var item in Model.ListComments)
-								{
-                                    @await Html.PartialAsync("_ViewCommentsItemPartial", item)
-								}
-							</div>
-						</div>
-                        <div class="pt-2">
-                             <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+                        <div id="comment-section-container">
+                            <partial name="_CommentListPartial" model="Model" />
                         </div>
-                       
                     </div>
                 </div>
 
@@ -147,5 +138,29 @@
 			});
 		});
 	</script>
+
+    <script>
+		$(document).on("click", "#comment-section-container .ajax-pagination a", function (e) {
+			e.preventDefault();
+			var url = $(this).attr("href");
+			if (!url || url === "#") return;
+			$.ajax({
+				url: url,
+				type: 'GET',
+				headers: { "X-Requested-With": "XMLHttpRequest" },
+				success: function (data) {
+					$('#comment-section-container').html(data);
+				},
+				error: function () {
+					Swal.fire({
+						icon: "error",
+						title: "Error",
+						text: "Could not load feedback. Please try again."
+					});
+				}
+			});
+		});
+	</script>
+
 
 }

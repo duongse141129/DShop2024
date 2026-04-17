@@ -11,7 +11,7 @@ using MimeKit;
 using MimeKit.Encodings;
 using MimeKit.Utils;
 
-public class MailSettings
+public class MailSettings 
 {
     public string Mail { get; set; }
     public string DisplayName { get; set; }
@@ -146,7 +146,6 @@ public class SendMailService : IEmailSender
 
 	public Task SendSmsAsync(string number, string message)
     {
-        // Cài đặt dịch vụ gửi SMS tại đây
         System.IO.Directory.CreateDirectory("smssave");
         var emailsavefile = string.Format(@"smssave/{0}-{1}.txt", number, Guid.NewGuid());
         System.IO.File.WriteAllTextAsync(emailsavefile, message);
@@ -278,7 +277,7 @@ public class SendMailService : IEmailSender
         }
 
         string path = "";
-        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\sendCouponTemplate.html"));
+        path = System.IO.File.ReadAllText(Path.Combine(webRootPath, "media\\Email\\otpEmail.html"));
         path = path.Replace("{{UserName}}", userModel.UserName);
         path = path.Replace("{{OTPcode}}", otp);
 
@@ -298,6 +297,8 @@ public class SendMailService : IEmailSender
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 
+        var couponValue = $"{DShopConst.FREE_SHIPPING} AND SAVE {DShopConst.DISCOUNT_NEW_CUSTOMER.ToString("#,##0 VND")}";
+
         var builder = new BodyBuilder();
         var pathLogo = Path.Combine(webRootPath, "media\\Logo\\" + infoShop.LogoImg);
         var image = builder.LinkedResources.Add(pathLogo);
@@ -309,7 +310,7 @@ public class SendMailService : IEmailSender
         path = path.Replace("{{CouponName}}", couponModel.CouponName);
         path = path.Replace("{{Description}}", couponModel.Description);
         path = path.Replace("{{CouponCode}}", couponModel.CouponCode);
-        path = path.Replace("{{CouponValue}}", DShopConst.FREE_SHIPPING);
+        path = path.Replace("{{CouponValue}}", couponValue);
         path = path.Replace("{{DateExpire}}", couponModel.DateExpired.ToShortDateString());
 
         path = path.Replace("{{ShopName}}", infoShop.ShopName);

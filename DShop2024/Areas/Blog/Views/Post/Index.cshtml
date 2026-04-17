@@ -13,123 +13,93 @@
 
     <div class="card-title px-3">
         <a asp-action="SeedLike" class="btn btn-primary btn-md text-white">Seed like</a>
-        <a asp-action="SeedComment" class="btn btn-primary btn-md text-white">Seed comment</a>
-        <a asp-action="DeleteOrderNoDetail" class="btn btn-primary btn-md text-white">Delete order no detail</a>
-        <a asp-action="SeedDescritp" class="btn btn-primary btn-md text-white">Seed Des</a>
-        <a asp-action="Create" class="btn btn-primary btn-md text-white">Create post</a>
-        <a asp-action="SendPromotionToNewCustomer" class="btn btn-primary btn-md text-white">send coupon  </a>
-        <a asp-action="SeedMonth12" class="btn btn-danger btn-md text-white">Remove Order 12  </a>
+        @if (User.IsInRole(RoleName.Administrator))
+        {
+            <a asp-action="SeedComment" class="btn btn-primary btn-md text-white">Seed comment</a>
+            <a asp-action="DeleteOrderNoDetail" class="btn btn-primary btn-md text-white">Delete order no detail</a>
+            <a asp-action="SeedDescritp" class="btn btn-primary btn-md text-white">Seed Des</a>
+            <a asp-action="Create" class="btn btn-primary btn-md text-white">Create post</a>
+            <a asp-action="SendPromotionToNewCustomer" class="btn btn-primary btn-md text-white">send coupon  </a>
+            <a asp-action="SeedOrder" class="btn btn-primary btn-md text-white">SeedOrder</a>
+            <a asp-action="SeedMonth12" class="btn btn-danger btn-md text-white">Remove Order 12  </a>
+            <a asp-action="SeedSegment" class="btn btn-primary btn-md text-white">SeedSegment</a>
+            <a asp-action="SeedDataStock" class="btn btn-primary btn-md text-white">SeedStock</a>
+            <a asp-action="SeedDataAssignment" class="btn btn-primary btn-md text-white">SeedAssign</a>
+        }
         <h4>Total posts: @ViewBag.totalPosts</h4>
     </div>
 
     <div class="card-body">
         <div class="row mb-3">
             <div class="col-md-3">
-                <form asp-action="Index" asp-controller="Post">
                     <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <button type="submit" class="btn btn-search pe-1">
+                                <button type="submit" class="btn btn-search pe-1" id="btnSearch">
                                     <i class="fa fa-search search-icon"></i>
                                 </button>
                             </div>
-                            <input type="text" placeholder="Search" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
+                            <input id="searchInput" type="text" placeholder="Search" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )" />
                         </div>
                     </nav>
-                </form>
+ 
+
             </div>
             <div class="col-md-9">
                 <div class="form-group pull-right">
                     <label>Subject </label>
-                    <select class="form-control" id="subject_by">
-                        <option value="@currentUrl"></option>
-                        @foreach (var item in ViewBag.listSubject as IEnumerable<SubjectModel>)
-                        {
-                            @if (item.Id == ViewBag.subjectBy)
-                            {
-                                <option value="@currentUrl?subject_by=@item.Id" selected>@item.Title</option>
-                            }
-                            else
-                            {
-                                <option value="@currentUrl?subject_by=@item.Id">@item.Title</option>
-                            }
-                        }
+                    <select id="subject_by" class="form-control" asp-items="ViewBag.subjects">
+                        <option value=""></option>
                     </select>
                 </div>
             </div>
         </div>
 
-
-
-        <div class="row row-demo-grid">
-            @foreach (var item in Model)
-            {
-                <div class="col-md-4">
-                    <div class="card card-post card-round post-item">
-                        @if (item.Image != null)
-                        {
-                            <img class="card-img-top" src="~/media/post/@item.Image" width="500" height="350" alt="Card image cap">
-                        }
-                        <a asp-action="PinPost" asp-area="Blog" asp-controller="Post" asp-route-id="@item.Id" class="btn-pin @( item.IsPin == true ? "bg-warning text-white" : "")">
-                            <i class="fas fa-thumbtack"></i>
-                        </a>
-                        <div class="card-body">
-                            <div class="d-flex">
-                                <div class="avatar">
-                                    <img width="100" height="100" src="~/media/avatar/@item.Author.Avatar" alt="avatar" class="avatar-img rounded-circle">
-                                </div>
-                                <div class="info-post ms-2">
-                                    <p class="username">@item.Author.UserName </p>
-                                    <p class="date text-muted">Create @item.DateCreated.ToString("MM/dd/yyyy h:mm tt")</p>
-                                    <p class="date text-muted">Update @item.DateUpdated.ToString("MM/dd/yyyy h:mm tt")</p>
-                                </div>
-                            </div>
-                            <div class="separator-solid"></div>
-                            <p class="card-category text-info mb-1">
-                                @item.Subjects
-                            </p>
-                            <h3 class="card-title">
-                                @item.Title
-                            </h3>
-                            <p class="card-text">
-                                @item.ShortDescription
-                            </p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <span class="like-count"><i class="fas fa-thumbs-up"></i> @item.CountLikes</span>
-                                    <span class="comment-count"><i class="far fa-comment"></i> @item.CountComments</span>
-                                </div>
-                            </div>
-                            <div class="col pt-4">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-rounded btn-lg">Read More</a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-rounded btn-md pull-right ">Edit</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-rounded btn-md pull-right confirmDeletion">Delete</a>
-                            </div>
-
-
-
-                        </div>
-                    </div>
-                </div>
-            }
-
+        <div id ="postRowContainer">
+            <partial name="_PostListPartial" model="Model" />
         </div>
-        <partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
     </div>
 </div>
 
 
 @section Scripts{
-    <script type="text/javascript">
+
+    <script>
         $(document).ready(function () {
+            function loadData(page = 1) {
+                var search = $('#searchInput').val();
+                var subject = $('#subject_by').val();
+
+                $.ajax({
+                    url: '@Url.Action("Index", "Post")',
+                    type: 'GET',
+                    data: {
+                        p: page,
+                        search: search,
+                        subject_by: subject
+                    },
+                    success: function (result) {
+                        $('#postRowContainer').html(result);
+                    }
+                });
+            }
+
             $('#subject_by').on('change', function () {
-                var url = $(this).val();
-                if (url) {
-                    window.location = url;
-                }
-                return false;
+                loadData(1);
+            });
+
+            $('#btnSearch').on('click', function () {
+                loadData(1);
+            });
+
+            $(document).on('click', '#postRowContainer .pagination a', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                var page = new URLSearchParams(url.split('?')[1]).get('p');
+                loadData(page);
             });
         });
     </script>
+
 }
 

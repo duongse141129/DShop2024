@@ -1,6 +1,6 @@
 ﻿namespace DShop2024.EnumData
 {
-	public class  OrderEnumData
+	public class  OrderEnumData 
 	{
         public static int StatusOrderCount = 5;
 		public enum StatusOrder

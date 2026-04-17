@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.Services.Recommend;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
-	public class ShopProductsController : Controller
+    [SidebarMenu(Menu.Home.Shop)]
+    public class ShopProductsController : Controller
 	{
 		private readonly DShopContext _context;
 		private readonly UserManager<AppUserModel> _userManager;
@@ -28,9 +30,9 @@ namespace DShop2024.Controllers
 
         }
 
-        public async Task<IActionResult> Index([FromQuery] ProductFilter filter)
+        public async Task<IActionResult> Index( ProductFilter filter)
         {
-            ViewBag.sidebar = Menu.Home.Shop;
+            
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
             IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).AsNoTracking();
@@ -38,18 +40,15 @@ namespace DShop2024.Controllers
             if (!string.IsNullOrEmpty(filter.CategorySlug))
                 listProduct = listProduct.Where(p => p.Category.Slug == filter.CategorySlug);
 
-            if (filter.BrandSlugs != null && filter.BrandSlugs.Any())
+            if (filter.BrandSlugs.Count() > 0 && filter.BrandSlugs.Any( s => s != "all") )
             {
-                var getAll = filter.BrandSlugs.Where(s => s == "all").Any();
-                if(!getAll)
-                {
-                    var activeSlugs = filter.BrandSlugs.Where(s => s != "all").ToList();
+                var activeSlugs = filter.BrandSlugs.Where(s => s != "all").ToList();
 
-                    if (activeSlugs.Any())
-                    {
-                        listProduct = listProduct.Where(p => activeSlugs.Contains(p.Brand.Slug));
-                    }
+                if (activeSlugs.Any())
+                {
+                    listProduct = listProduct.Where(p => activeSlugs.Contains(p.Brand.Slug));
                 }
+
             }
 
             if (!string.IsNullOrEmpty(filter.SearchName))
@@ -141,7 +140,7 @@ namespace DShop2024.Controllers
 
         public async Task<IActionResult> Details(int? Id, [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
 		{
-            ViewBag.sidebar = Menu.Home.Shop;
+            
             try
 			{
 				if (Id == null)
@@ -259,8 +258,12 @@ namespace DShop2024.Controllers
                     ExistingImages = productById.Images != null ?  productById.Images.Select( p => p.ImagePath).ToList() : new List<string>()
 
                 };
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return PartialView("_FeedbackListPartial", viewModel);
+                }
 
-				return View(viewModel);
+                return View(viewModel);
 			}
 			catch (Exception ex)
 			{
@@ -272,7 +275,7 @@ namespace DShop2024.Controllers
 		}
         public async Task<IActionResult> GetDetailProductBySlug(string slug)
 		{
-            ViewBag.sidebar = Menu.Home.Shop;
+            
             if (String.IsNullOrEmpty(slug))
             {
                 return NotFound();
@@ -286,6 +289,24 @@ namespace DShop2024.Controllers
 			return RedirectToAction("Details", "ShopProducts", new { Id = productModelbySlug.Id });
 		
 		}
+
+        [HttpGet]
+        public async Task<IActionResult> SearchLive(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return PartialView("_SearchResultPartial", new List<ProductModel>());
+            ViewBag.Keyword = keyword;
+            var products = await _context.Products
+                .Where(x => x.Status != 0 && x.ProductName.Contains(keyword))
+                .OrderBy(x => x.ProductName)
+                .Take(5) 
+                .Include(x => x.Brand)    
+                .Include(x => x.Category)    
+                .ToListAsync();
+
+            return PartialView("_SearchResultPartial", products);
+        }
+
 
 
     }

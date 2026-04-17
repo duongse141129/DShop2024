@@ -15,14 +15,16 @@
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="Date" />
     <input type="hidden" asp-for="Status" />
-
+    <div class="form-group">
+        <div class="fw-bold">@Model.Date</div>
+    </div>
     <div class="form-group">
         <div class="row">
             <div class="col-sm-6">
                 <label class="control-label">TimeFrom</label>
                 <div class="input-group clockpicker">
                     <span></span>
-                    <input type="text" name="TimeFrom" class="form-control" value="@Model.TimeTo.ToString(@"hh\:mm")">
+                    <input type="text" name="TimeFrom" class="form-control" value="@Model.TimeFrom.ToString(@"hh\:mm")">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-time"></span>
                     </span>
@@ -32,7 +34,7 @@
                 <label asp-for="TimeTo" class="control-label"></label>
                 <div class="input-group clockpicker">
                     <span></span>
-                    <input type="text" name="TimeTo" class="form-control" value="@Model.TimeFrom.ToString(@"hh\:mm")">
+                    <input type="text" name="TimeTo" class="form-control" value="@Model.TimeTo.ToString(@"hh\:mm")">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-time"></span>
                     </span>
@@ -54,16 +56,32 @@
     </div>
     <div class="form-group">
         <label>Employee</label>
-        <select asp-for="EmployeeUserID" class="form-control" asp-items="ViewBag.Employees">
-            <option value="">--Choose a employee</option>
-        </select>
-        <span asp-validation-for="EmployeeUserID" class="text-danger"></span>
+        <div class="employee-select-container" id="employeeSelect">
+            <div class="select-trigger">
+                <img src="~/media/avatar/@Model.EmployeeAvatar" alt="" id="selected-img">
+                <span id="selected-text">@Model.EmployeeName</span>
+                <div class="arrow"></div>
+            </div>
+            <ul class="options-list">
+                @foreach (var item in ViewBag.PickEmployees as IEnumerable<AppUserModel>)
+                {
+                    <li data-value="@item.Id" data-img="/media/avatar/@item.Avatar">
+                        <img src="~/media/avatar/@item.Avatar" alt="@item.UserName">
+                        <span>@item.UserName</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        <input type="hidden" id="hidden-input" value="@Model.EmployeeUserID" asp-for="EmployeeUserID">
     </div>
 
     <div class="form-group">
         <input type="submit" value="Edit" class="btn btn-primary" />
     </div>
 </form>
+
+<link href="~/custom/Css/selectListImage.css" rel="stylesheet">
+<script src="~/custom/js/selectListImage.js"></script>
 <script>
     $("#formData").submit(function (e) {
         e.preventDefault();
@@ -82,8 +100,7 @@
                                       timer: 500
                                 }
                         );
-                          var dateString =  $('#Date').val();
-                          setActiveDay(dateString);
+                        loadTasks();
                     } else {
                             Swal.fire({
                               icon: "error",

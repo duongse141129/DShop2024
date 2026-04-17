@@ -21,6 +21,8 @@ const addEventTitle = document.querySelector(".event-name");
 const addEventFrom = document.querySelector(".event-time-from");
 const addEventTo = document.querySelector(".event-time-to");
 const addEventSubmit = document.querySelector(".add-event-btn");
+
+
 let dateString
 /* =======================
    DATE STATE
@@ -29,6 +31,18 @@ let today = new Date();
 let activeDay = today.getDate();
 let month = today.getMonth();
 let year = today.getFullYear();
+/* =======================
+   DATE RANGE STATE
+======================= */
+/*let startDate = null; // Format: { day, month, year }*/
+let startDate = {
+    day: activeDay,
+    month: month,
+    year: year,
+    timestamp: new Date(year, month, activeDay).getTime()
+};
+let endDate = null;   // Format: { day, month, year }
+
 
 const months = [
     "January", "February", "March", "April", "May", "June",
@@ -103,27 +117,34 @@ function initCalendar() {
     }
 
     for (let i = 1; i <= lastDay.getDate(); i++) {
-        const hasEvent = eventsArr.some(e =>
-            e.day === i && e.month === month + 1 && e.year === year
-        );
+        const currentTimestamp = new Date(year, month, i).getTime();
 
-        const isActive =
-            i === activeDay; 
+        const hasEvent = eventsArr.some(e =>
+             e.day === i && e.month === month + 1 && e.year === year
+        );
 
         const isToday =
             i === today.getDate() &&
             month === today.getMonth() &&
             year === today.getFullYear();
 
+        let rangeClass = "";
+        if (startDate && i === startDate.day && month === startDate.month && year === startDate.year) {
+            rangeClass = "active start-date"; 
+        } else if (endDate && i === endDate.day && month === endDate.month && year === endDate.year) {
+            rangeClass = "active end-date";
+        } else if (startDate && endDate && currentTimestamp > startDate.timestamp && currentTimestamp < endDate.timestamp) {
+            rangeClass = "in-range";
+        }
+
         const classes = [
             "day",
-            isToday ? "today" : "",
-            isActive ? "active" : "", 
-            hasEvent ? "event" : ""
+            isToday ? "today" : "", 
+            rangeClass,
+            hasEvent ? "event" : "" 
         ].join(" ");
 
         days += `<div class="${classes}">${i}</div>`;
-
     }
 
     const nextDays = 7 - lastDay.getDay() - 1;
@@ -138,30 +159,45 @@ function initCalendar() {
 /* =======================
    DAY CLICK
 ======================= */
+
+
 function addDayListeners() {
     document.querySelectorAll(".day").forEach(day => {
         day.addEventListener("click", e => {
-            if (day.classList.contains("prev-date")) {
-                prevMonth();
-                day.classList.add("active");
-                activeDay = Number(day.innerText);
-            }
-            else if (day.classList.contains("next-date")) {
-                nextMonth();
-                day.classList.add("active");
-                activeDay = Number(day.innerText);
-            }
-            else {
-                document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
-                day.classList.add("active");
+            const clickedDay = Number(day.innerText);
+            const clickedDate = new Date(year, month, clickedDay).getTime();
 
-                activeDay = Number(day.innerText);
-                updateEvents(activeDay);
-                updateHeader(activeDay);
+            activeDay = clickedDay;
+            updateEvents(activeDay);
+            updateHeader(activeDay);
+
+            // 2. Shift + Click Logic for Range
+            if (e.shiftKey) {
+                if (!startDate || (startDate && endDate)) {
+                    // Start a new range if none exists or one just finished
+                    startDate = { day: clickedDay, month, year, timestamp: clickedDate };
+                    endDate = null;
+                } else {
+                    // Complete the range
+                    if (clickedDate < startDate.timestamp) {
+                        // Swap if the second click is earlier than the first
+                        endDate = { ...startDate };
+                        startDate = { day: clickedDay, month, year, timestamp: clickedDate };
+                    } else {
+                        endDate = { day: clickedDay, month, year, timestamp: clickedDate };
+                    }
+                }
+            } else {
+                // Regular Click: Reset selection to a single day
+                startDate = { day: clickedDay, month, year, timestamp: clickedDate };
+                endDate = null;
             }
+
+            initCalendar(); 
         });
     });
 }
+
 
 /* =======================
    UPDATE HEADER
@@ -229,13 +265,6 @@ function updateEvents(day) {
 ======================= */
 prevBtn.onclick = () => {  prevMonth(); }
 nextBtn.onclick = () => {  nextMonth(); }
-todayBtn.onclick = () => {
-    today = new Date();
-    month = today.getMonth();
-    year = today.getFullYear();
-    loadTasks();
-
-};
 
 function prevMonth() {
     month--;
@@ -243,6 +272,9 @@ function prevMonth() {
         month = 11;
         year--;
     }
+    activeDay = 1;
+    startDate = { day: 1, month, year, timestamp: new Date(year, month, 1).getTime() };
+    endDate = null;
     loadTasks();
 }
 
@@ -252,17 +284,50 @@ function nextMonth() {
         month = 0;
         year++;
     }
+    activeDay = 1;
+    startDate = { day: 1, month, year, timestamp: new Date(year, month, 1).getTime() };
+    endDate = null;
     loadTasks();
 }
 
-/* =======================
-   ADD TASK
-======================= */
 
+/* =======================
+   ADD TASK WITH RANGE
+======================= */
 function openCreateAssignment() {
-    const date = `${year}-${month + 1}-${activeDay}`;
-    openModal(`/Admin/Assignment/Create?date=${date}`);
+    if (!startDate) {
+        alert("Please select at least a start date.");
+        return;
+    }
+
+    const startStr = `${startDate.year}-${startDate.month + 1}-${startDate.day}`;
+
+    const endStr = endDate
+        ? `${endDate.year}-${endDate.month + 1}-${endDate.day}`
+        : startStr;
+
+    openModal(`/Admin/Assignment/Create?startDate=${startStr}&endDate=${endStr}`);
 }
+
+/* =======================
+   DELETE TASK WITH RANGE
+======================= */
+function openDeleteAllAssignment() {
+    if (!startDate) {
+        alert("Please select at least a start date.");
+        return;
+    }
+
+    const startStr = `${startDate.year}-${startDate.month + 1}-${startDate.day}`;
+
+    const endStr = endDate
+        ? `${endDate.year}-${endDate.month + 1}-${endDate.day}`
+        : startStr;
+
+    openModal(`/Admin/Assignment/DeleteAll?startDate=${startStr}&endDate=${endStr}`);
+}
+
+
 
 /* =======================
    Details TASK
@@ -278,13 +343,23 @@ eventsContainer.onclick = e => {
    ToDay
 ======================= */
 
-todayBtn.addEventListener("click", () => {
+todayBtn.onclick = () => {
     today = new Date();
     month = today.getMonth();
     year = today.getFullYear();
     activeDay = today.getDate();
+
+    startDate = {
+        day: activeDay,
+        month: month,
+        year: year,
+        timestamp: new Date(year, month, activeDay).getTime()
+    };
+    endDate = null;
+
     loadTasks();
-});
+};
+
 
 
 /* =======================
@@ -327,7 +402,15 @@ function gotoDate() {
     year = inputYear;
     activeDay = 1; 
 
-    loadTasks();   
+    startDate = {
+        day: activeDay,
+        month: month,
+        year: year,
+        timestamp: new Date(year, month, activeDay).getTime()
+    };
+    endDate = null; 
+
+    loadTasks();
 }
 
 
@@ -355,4 +438,28 @@ function setActiveDay(dateString) {
 
     loadTasks();
 }
+
+$('.clockpicker').clockpicker({
+    afterShow: function () {
+        $('.popover').css('z-index', 2051);
+    }
+});
+
+
+function handleRangeSelection(day, month, year) {
+    const clickedDate = new Date(year, month, day);
+
+    if (!startDate || (startDate && endDate)) {
+        startDate = { day, month, year, timestamp: clickedDate.getTime() };
+        endDate = null;
+    } else {
+        if (clickedDate.getTime() < startDate.timestamp) {
+            startDate = { day, month, year, timestamp: clickedDate.getTime() };
+        } else {
+            endDate = { day, month, year, timestamp: clickedDate.getTime() };
+        }
+    }
+    initCalendar(); 
+}
+
 

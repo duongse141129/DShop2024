@@ -1,21 +1,12 @@
-﻿<div class="row g-4">
-    <div class="col-lg-12">
-        <div class="mb-3">
-            <h4>Brands</h4>
-            @await Component.InvokeAsync("Brand", new { uiDesignType = "Details" })
-
-        </div>
-    </div>
-    <div class="col-lg-12">
-        <div class="mb-3">
-            <h4>Categories</h4>
-            @await Component.InvokeAsync("Category", new { uiDesignType = "Details" })
-        </div>
-    </div>
+﻿
+<div class="sidebar-section">
+    <h4>Brands</h4>
+    @await Component.InvokeAsync("Brand", new { uiDesignType = "Details" })
 </div>
-
-
-
+<div class="sidebar-section">
+    <h4>Categories</h4>
+    @await Component.InvokeAsync("Category", new { uiDesignType = "Details" })
+</div>
 
 
 

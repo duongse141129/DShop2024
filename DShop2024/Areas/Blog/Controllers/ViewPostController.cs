@@ -107,6 +107,10 @@ namespace AppMvc.Areas.Blog.Controllers
 
             ViewBag.Subject = subject;
             ViewBag.search = search;
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_PostListPartial", postsVM);
+            }
             return View(postsVM);
         }
 
@@ -184,6 +188,11 @@ namespace AppMvc.Areas.Blog.Controllers
                 ListComments = rootComments,
                 Liked = checkLike
             };
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_CommentListPartial", postDetailVM);
+            }
+
             return View(postDetailVM);
         }
 

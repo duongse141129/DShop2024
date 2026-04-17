@@ -21,7 +21,7 @@
 <div class="row g-5">
     <div class="col-lg-3 col-md-6">
         <div class="footer-item">
-            <h4 class="text-light mb-3">Description</h4>
+            <h4 class="text-primary mb-3">Description</h4>
             <p class="mb-4">
                 @Html.Raw(Model.informationShop.Description)
             </p>
@@ -30,18 +30,19 @@
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="d-flex flex-column footer-item">
-            <h4 class="text-light  mb-3">Shop Info</h4>
+            <h4 class="text-primary  mb-3">Shop Information</h4>
             <a class="linkFooter" asp-action="AboutUs" asp-controller="Home">About Us</a>
             <a class="linkFooter" asp-action="Index" asp-controller="SendContact">Contact Us</a>
             <a class="linkFooter" asp-action="Index" asp-controller="SendContact">FAQs</a>
             <a class="linkFooter" asp-action="Index" asp-controller="Message">Chat</a>
             <a class="linkFooter" asp-action="Index" asp-controller="ViewPost" asp-area="Blog">Blog</a>
+            <a class="linkFooter" asp-action="AboutUs" asp-controller="Home">Branches</a>
             <a class="linkFooter" asp-action="Privacy" asp-controller="Home">Privacy Policy</a>
         </div>
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="d-flex flex-column text-start footer-item">
-            <h4 class="text-light mb-3">Account</h4>
+            <h4 class="text-primary mb-3">Account</h4>
             <a class="linkFooter" asp-area="Identity" asp-controller="Manage" asp-action="EditProfile">My Account</a>
             <a class="linkFooter" asp-action="Index" asp-controller="ShopProducts">Shop Products</a>
             <a class="linkFooter" asp-action="Index" asp-controller="Cart">Shopping Cart</a>
@@ -53,8 +54,7 @@
     </div>
     <div class="col-lg-3 col-md-6">
         <div class="footer-item">
-            <h4 class="text-light mb-3">Contact</h4>
-            <p>Address: @Model.informationShop.Address</p>
+            <h4 class="text-primary mb-3">Contact</h4>
             <p>Email: @Model.informationShop.Email</p>
             <p>Phone: @Model.informationShop.Phone</p>
             <p>Payment Accepted</p>

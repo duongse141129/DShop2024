@@ -132,6 +132,7 @@ public class DShopContext : IdentityDbContext<AppUserModel>
         public virtual DbSet<ReturnModel> Returns { get; set; }
         public virtual DbSet<ReturnDetailModel> ReturnDetails { get; set; }
         public virtual DbSet<RefundModel> Refunds { get; set; }
+        public virtual DbSet<BranchModel> Branches { get; set; }
 
 }
 

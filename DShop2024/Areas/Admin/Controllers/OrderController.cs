@@ -3,6 +3,7 @@ using DShop2024.Areas.Admin.Models.Order;
 using DShop2024.Areas.Admin.Models.Refund;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Order)]
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
@@ -28,35 +30,24 @@ namespace DShop2024.Areas.Admin.Controllers
             _webHostEnvironment = webHostEnvironment;
             _mapper = mapper;
         }
+
         public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
 
             var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
             var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
             var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
             var countDeliveryOrder = _context.Orders.Where(p => p.Status == 3).Count();
             var countCompletedOrder = _context.Orders.Where(p => p.Status == 4).Count();
-
-            ViewBag.countCancelOrder = countCancelOrder;
-            ViewBag.countNewOrder = countNewOrder;
-            ViewBag.countAcceptedOrder = countAcceptedOrder;
-            ViewBag.countDeliveryOrder = countDeliveryOrder;
-            ViewBag.countCompletedOrder = countCompletedOrder;
-
+            var countTotalOrder = _context.Orders.Count();
 
             IQueryable<OrderModel> listOrder = _context.Orders.OrderByDescending(o => o.CreatedDate);
-            var count = await listOrder.CountAsync();
-            if (count > 0)
+            if (!String.IsNullOrEmpty(searchOrderCode))
             {
-                if (!String.IsNullOrEmpty(searchOrderCode))
-                {
-                    listOrder = listOrder.Where(c => c.OrderCode == searchOrderCode);
-                }
+                listOrder = listOrder.Where(c => c.OrderCode == searchOrderCode);
             }
-            ViewBag.searchOrderCode = searchOrderCode;
-            int totalOrder = listOrder.Count();
-            ViewBag.totalOrder = totalOrder;
+            int totalOrder = await listOrder.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalOrder / 10);
@@ -85,13 +76,27 @@ namespace DShop2024.Areas.Admin.Controllers
                         .Include(p => p.Returns)
                         .ToListAsync();
             var orderVMs = _mapper.Map<List<OrderViewModel>>(orders);
-            ViewBag.pagingModel = pagingModel;
-            return View(orderVMs);
+            ManageOrderViewModel manageOrderVM = new ManageOrderViewModel
+            {
+                CountCancelOrder = countCancelOrder,
+                CountNewOrder = countNewOrder,
+                CountAcceptedOrder = countAcceptedOrder,
+                CountDeliveryOrder = countDeliveryOrder,
+                CountCompletedOrder = countCompletedOrder,
+                CountTotalOrder = countTotalOrder,
+                SearchOrderCode = searchOrderCode,
+                ListOrder = orderVMs,
+                Paging = pagingModel
+            };
+
+            return View(manageOrderVM);
         }
+
+
 
         public async Task<IActionResult> ViewOrder(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -123,7 +128,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ViewOrderAndPartReturn(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -200,7 +205,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> UpdateStatusOrder(int? orderId)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (orderId == null)
             {
                 return NotFound();
@@ -242,7 +247,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> CancelOrder(int? orderId)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (orderId == null)
             {
                 return NotFound();
@@ -301,7 +306,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> ManagePaymentMethod()
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             var payments = await _context.Payments.ToListAsync();
             return View(payments);
 
@@ -310,7 +315,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SetStatusPaymentMethod(int idPayment, int status)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             try
             {
                 var payment = await _context.Payments.FindAsync(idPayment);
@@ -323,26 +328,27 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return Ok(new { success = false, Message = ex.Message });
             }
-
         }
 
-        public async Task<IActionResult> ManageReturn(string search = "",[FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
+        public async Task<IActionResult> ManageReturn(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
+            var countRejectedReturned = _context.Returns.Where(s => s.Status == 0).Count();
+            var countFullyReturned = _context.Returns.Where(s => s.Status != 0 && !String.IsNullOrEmpty(s.Reason) ).Count();
+            var countPartlyReturned = _context.Returns.Where(s => s.Status != 0 && String.IsNullOrEmpty(s.Reason) ).Count();
+            var countQuantity = _context.ReturnDetails.Where(r => r.Return.Status != 0).Select( re => re.Quantity).Sum();
+        
             var listReturn = _context.Returns.Include(r => r.Customer)
                                             .Include(r => r.Order)
                                             .OrderByDescending(r => r.ReturnDate)
                                             .AsQueryable();
-            int totaReturns = listReturn.Count();
-            if (totaReturns > 0)
+
+            if (!String.IsNullOrEmpty(search))
             {
-                if (!String.IsNullOrEmpty(search))
-                {
-                    listReturn = listReturn.Where(c => c.Order.OrderCode == search || c.Reason.Contains(search) 
-                    || c.Customer.UserName.Contains(search) || c.Description.Contains(search) );
-                }
+                listReturn = listReturn.Where(c => c.Order.OrderCode == search || c.Reason.Contains(search)
+                || c.Customer.UserName.Contains(search) || c.Description.Contains(search));
             }
-            ViewBag.search= search;
+            int totaReturns = await listReturn.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totaReturns / 10);
@@ -359,7 +365,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 generateUrl = (pageNumber) => Url.Action("ManageReturn", new
                 {
                     p = pageNumber,
-                    pagesSize = pagesSize
+                    pagesSize = pagesSize,
+                    search = search
                 })
             };
 
@@ -367,13 +374,24 @@ namespace DShop2024.Areas.Admin.Controllers
                         .Take(pagesSize)
                         .ToListAsync();
             var returnVMs = _mapper.Map<List<ReturnViewModel>>(returns);
-            ViewBag.pagingModel = pagingModel;
-            return View(returnVMs);
+            ManageReturnViewModel manageReturnVM = new ManageReturnViewModel
+            {
+                CountRejectedReturned = countRejectedReturned,
+                CountFullyReturned = countFullyReturned,
+                CountPartlyReturned = countPartlyReturned,
+                CountQuantityReturned = countQuantity,
+                Search = search,
+                ListReturn = returnVMs,
+                Paging = pagingModel
+            };
+
+            return View(manageReturnVM);
         }
+
 
         public async Task<IActionResult> DetailFullReturn(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -394,7 +412,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> DetailPartReturn(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -416,7 +434,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> AcceptedReturnStatus(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -470,7 +488,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> RejectReturnStatus(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -496,19 +514,17 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ManageRefund(string search ="",[FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             IQueryable<RefundModel> listRefund = _context.Refunds.Where(c => c.Status != 0)
                                                         .OrderByDescending(d => d.CreateDate).AsQueryable();
-            int totalRefund = listRefund.Count();
-            if (totalRefund > 0)
+
+            if (!String.IsNullOrEmpty(search))
             {
-                if (!String.IsNullOrEmpty(search))
-                {
-                    listRefund = listRefund.Where(c => c.OrderCode == search || c.TransactionId == search 
-                    || c.TransactionContent.Contains(search) || c.Reason.Contains(search) );
-                }
+                listRefund = listRefund.Where(c => c.OrderCode == search || c.TransactionId == search
+                || c.TransactionContent.Contains(search) || c.Reason.Contains(search));
             }
             ViewBag.search = search;
+            int totalRefund = await listRefund.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalRefund / 10);
@@ -539,7 +555,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPopUpRefundReturn(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -559,7 +575,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> RefundReturn(RefundModel refund)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (refund == null)
             {
                 return NotFound();
@@ -635,7 +651,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ViewRefund(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -652,7 +668,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPopUpRefund(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -671,7 +687,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> RefundOder(RefundModel refund)
         {
-            ViewBag.sidebar = Menu.Admin.Order;
+            
             var orderModel = await _context.Orders.Include(r => r.Returns)
                       .FirstOrDefaultAsync(o => o.OrderCode == refund.OrderCode);
             if (orderModel == null)

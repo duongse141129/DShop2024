@@ -1,0 +1,53 @@
+﻿@model DShop2024.ViewModels.ProductDetailViewModel
+
+<div id="feedback-content">
+
+    <div class="response-area">
+        <div class="media-list">
+            @foreach (var item in Model.listRating) 
+            {
+            <div class="card col-md-8 mt-2">
+                <div class="row pb-2 mt-2 me-4 ms-2">
+                    <div class="col-sm-3">
+                            <div class="user-avatar-wrapper">
+                                <img src="~/media/avatar/@item.User.Avatar" width="100" height="100" alt="Avatar">
+                            </div>
+                    </div>
+                    <div class="col-md-9">
+                        <ul class="sinlge-post-meta">
+                            <li><i class="fa fa-user"></i>@item.User.UserName</li>
+                            <li><i class="far fa-clock"></i>@item.RatingDateTime?.ToShortTimeString()</li>
+                            <li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
+                        </ul>
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex mb-2">
+                                    <i class="@(item.Star >= 1 ? "fa fa-star text-primary" : "fa fa-star")"></i>
+                                    <i class="@(item.Star >= 2 ? "fa fa-star text-primary" : "fa fa-star")"></i>
+                                    <i class="@(item.Star >= 3 ? "fa fa-star text-primary" : "fa fa-star")"></i>
+                                    <i class="@(item.Star >= 4 ? "fa fa-star text-primary" : "fa fa-star")"></i>
+                                    <i class="@(item.Star >= 5 ? "fa fa-star text-primary" : "fa fa-star")"></i>
+                            </div>
+                        </div>
+                        <p>@item.Comment</p>
+                    </div>
+                        @if (!String.IsNullOrEmpty(item.ReplyMessage))
+                        {
+                            <div class="shop-response">
+                                <strong><i class="fas fa-reply me-2"></i>Response from Shop</strong>
+                                <p class="mb-0">@item.ReplyMessage</p>
+                            </div>
+                        }
+
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    @if (ViewBag.pagingmodel != null)
+    {
+        <div class="ajax-pagination mt-2">
+            <partial name="_PagingPartial" model="@ViewBag.pagingmodel" /> 
+        </div>
+    }
+</div>

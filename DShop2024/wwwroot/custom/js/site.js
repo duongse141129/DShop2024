@@ -26,10 +26,4 @@ function readURL(input) {
     }
 }
 
-$('.clockpicker').clockpicker({
-    // ... other options
-    afterShow: function () {
-        $('.popover').css('z-index', 2051); // Adjust z-index after it appears
-    }
-});
 

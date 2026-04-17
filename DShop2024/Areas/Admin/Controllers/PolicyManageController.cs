@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Information)]
     public class PolicyManageController : Controller
     {
         private readonly DShopContext _context;
@@ -20,14 +22,14 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             return View(await _context.Policies.Where(p => p.Status != 0).ToListAsync());
         }
 
         [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             return View();
         }
 
@@ -36,7 +38,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,Description")] PolicyModel policyModel)
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (ModelState.IsValid)
             {
                 try
@@ -61,7 +63,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (id == null)
             {
                 return NotFound();
@@ -80,7 +82,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description")] PolicyModel policyModel)
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (id != policyModel.Id)
             {
                 return NotFound();
@@ -115,7 +117,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Information;
+            
             if (id == null)
             {
                 return NotFound();

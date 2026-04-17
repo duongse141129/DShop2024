@@ -36,5 +36,6 @@ namespace DShop2024.Models
 		public IFormFile? ImageUpload { get; set; }
 
 		public int Status { get; set; }
+		public int CustomerSegment { get; set; }
     }
 }

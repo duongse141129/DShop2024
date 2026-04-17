@@ -4,6 +4,7 @@ using DShop2024.Models;
 using DShop2024.Models.Momo;
 using DShop2024.Services;
 using DShop2024.Services.ChatboxAI;
+using DShop2024.Services.Geo;
 using DShop2024.Services.Momo;
 using DShop2024.Services.Recommend;
 using DShop2024.Services.Vnpay;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IMomoService, MomoService>();
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<ChatBotService>();
+builder.Services.AddScoped<IGeoService, GeoService>();
 
 
 

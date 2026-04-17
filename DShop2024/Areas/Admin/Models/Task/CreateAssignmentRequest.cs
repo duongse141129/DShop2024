@@ -6,7 +6,10 @@ namespace DShop2024.Areas.Admin.Models.Task
     {
         [Required(ErrorMessage = "The {0} field is required")]
         public int TaskId { get; set; }
-        public string Date { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime StartDate { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime EndDate { get; set; }
         [Required(ErrorMessage = "The {0} field is required")]
         public TimeSpan TimeFrom { get; set; }
         [Required(ErrorMessage = "The {0} field is required")]
@@ -15,12 +18,5 @@ namespace DShop2024.Areas.Admin.Models.Task
         public string EmployeeUserID { get; set; }
         public string AssignmentDetails { get; set; }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    if (TimeFrom > TimeTo)
-        //    {
-        //        yield return new ValidationResult("Time To must be greater than the Time From.", new[] { "EndDate" });
-        //    }
-        //}
     }
 }

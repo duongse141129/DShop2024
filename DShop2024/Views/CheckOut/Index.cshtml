@@ -239,12 +239,24 @@
                 url: "@Url.Action("UseMyInformation", "Cart")",
                 data: { checkInfo: checkInfo },
                 success: function (result) {
-                        if (result.success) {                 
-                            Swal.fire(result.message).then(function(){
-                                    location.reload();
+                        if (result.success) {      
+                             Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							}).then(function(){
+                                 location.reload();
                             });
                         } else {
-                            location.reload();
+                              Swal.fire({
+							  icon: "error",
+				              title: "Oops...",
+                              text: result.message
+							}).then(function(){
+                                 location.reload();
+                            });
                         }
                     }
                 });
@@ -261,10 +273,17 @@
                 url: "@Url.Action("GetCoupon", "Cart")",
                 data: { couponCode: couponCode },
                 success: function (result) {
-                    if (result.success) {                 
-                        Swal.fire(result.message).then(function(){
-                                                    location.reload();
-                                                });
+                    if (result.success) {     
+                        	Swal.fire({
+							  position: "top-end",
+							  icon: "success",
+							  title: result.message,
+							  showConfirmButton: false,
+							  timer: 500
+							}).then(function(){
+                                 location.reload();
+                            });
+
                     } else {
                         Swal.fire(result.message);
                     }
@@ -292,9 +311,15 @@
                         data: { tinh: tinh, quan: quan, phuong: phuong, street: street, PhoneDelivery: phonedelevery, consignee: consignee },
                         success: function (result) {
                             if (result.success) {
-                                Swal.fire(result.message).then(function(){
-                                                    location.reload();
-                                                });
+                                 Swal.fire({
+							      position: "top-end",
+							      icon: "success",
+							      title: result.message,
+							      showConfirmButton: false,
+							      timer: 500
+							    }).then(function(){
+                                     location.reload();
+                                });
 
                             } else {
                                 Swal.fire(result.message);
@@ -358,10 +383,8 @@
               setTimeout(() => $(btn).text('Save').prop('disabled', false), 1500);
               return;
             } catch (e) {
-              // fall through to fallback
             }
           }
-          // fallback:
           const $temp = $('<textarea>').css({position: 'absolute', left: '-9999px'}).val(text).appendTo('body');
           $temp.select();
           try { document.execCommand('copy'); $(btn).text('Copied ✓').prop('disabled', true); }

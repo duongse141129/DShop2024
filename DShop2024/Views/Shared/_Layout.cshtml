@@ -110,7 +110,7 @@
 
     <script src="~/custom/js/site.js"></script>
     <script src="~/custom/js/previewMultiImage.js"></script>
-
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
 
     <script>
         $(function () {
@@ -134,6 +134,70 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+            connection.on("ReceiveMessage", (user, message) => {
+                const userElement = document.getElementById("user-name-login");
+                if (userElement) {
+                    const currentUserName = userElement.value;
+                    if (user !== currentUserName) {
+                        const notifyPopup = document.querySelector(".notify-receive-message");
+                        if (notifyPopup) {
+                            notifyPopup.classList.add("active");
+                        }
+                        loadNotify();
+                    }
+                }
+            });
+
+            connection.start()
+                .then(() => console.log("Connected to SignalR!"))
+                .catch(err => console.error("SignalR Connection Error: ", err.toString()));
+
+            function loadNotify() {
+                $('#notifi-receive-container').load("/AjaxContent/RecieveNotificationMessage");
+            }
+        });
+    </script>
+    <script>
+        let timer = null;
+
+        $('#searchInput').on('keyup', function () {
+            clearTimeout(timer);
+            let keyword = $(this).val();
+            timer = setTimeout(() => {
+                if (keyword.length < 1) {
+                    $('#searchResult').addClass('d-none').html('');
+                    return;
+                }
+
+                $.get('@Url.Action("SearchLive", "ShopProducts")', { keyword }, function (res) {
+                    $('#searchResult')
+                        .removeClass('d-none')
+                        .html(res);
+                });
+            }, 300);
+        });
+
+        // click outside => hide
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.search-box').length) {
+                $('#searchResult').addClass('d-none');
+            }
+        });
+
+        // focus on => show
+        $('#searchInput').on('focus', function () {
+            if ($('#searchResult').html().trim() !== '') {
+                $('#searchResult').removeClass('d-none');
+            }
+        });
+    </script>
+
 
 </body>
 

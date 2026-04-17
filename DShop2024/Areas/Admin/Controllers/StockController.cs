@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +13,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Stock)]
     public class StockController : Controller
 	{
 		private readonly DShopContext _context;
@@ -24,13 +26,13 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 		public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
 		{
-            ViewBag.sidebar = Menu.Admin.Stock;
+            
             IQueryable<ReceivingStockModel> listStockIn =  _context.ReceivingStocks
                             .Where(s => s.Status != 0)
                             .Include(p => p.Product)
                             .Include(p => p.User)
                                      .OrderByDescending(o => o.DateReceive);
-            int totalOrder = listStockIn.Count();
+            int totalOrder = await listStockIn.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalOrder / 10);
@@ -61,7 +63,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SearchByProductId(int productId)
         {
-            ViewBag.sidebar = Menu.Admin.Stock;
+            
 
             var product = await _context.Products.FirstOrDefaultAsync( p => p.Id == productId);
             if (product != null)
@@ -81,14 +83,14 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public  IActionResult ImportFromFIle()
         {
-            ViewBag.sidebar = Menu.Admin.Stock;
+            
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> ImportFromFile(IFormFile file)
         {
-            ViewBag.sidebar = Menu.Admin.Stock;     
+                 
             if (file != null && file.Length > 0)
             {
                 var uploadDirectory = $"{Directory.GetCurrentDirectory()}\\wwwroot\\importStocks";
@@ -161,7 +163,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public  async Task<IActionResult> Save( List<NameAndValueVM> items)
         {
-            ViewBag.sidebar = Menu.Admin.Stock;
+            
             var user = await _userManager.GetUserAsync(this.User);
             try
             {

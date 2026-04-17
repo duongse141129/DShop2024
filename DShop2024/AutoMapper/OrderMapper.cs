@@ -33,6 +33,7 @@ namespace DShop2024.AutoMapper
                     .ForMember(pv => pv.UpdateByName, p => p.MapFrom(p => p.UpdateBy.UserName))
                     .ForMember(pv => pv.UpdateByAvatar, p => p.MapFrom(p => p.UpdateBy.Avatar))
                     .ForMember(pv => pv.PaymentName, p => p.MapFrom(p => p.PaymentMethod.PaymentName))
+                    .ForMember(pv => pv.TotalQuantity, p => p.MapFrom(p => p.OrderDetails.Select(s => s.Quantity).Sum() ))
                     .ForMember(pv => pv.AllowReturn, p => p.MapFrom(p => CheckAllowReturn(p.DateUpdate, p.Status)))
                     .ForMember(pv => pv.Return, p => p.MapFrom(p => p.Returns.FirstOrDefault()))
                     .ForMember(pv => pv.IsReturn, p => p.MapFrom(p => p.Returns.Count > 0 ? true : false))
@@ -53,5 +54,6 @@ namespace DShop2024.AutoMapper
             if(updateDate.AddDays(7) >= DateTime.Now ) return true;
             return false;
         }
+
     }
 }

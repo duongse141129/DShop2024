@@ -63,25 +63,16 @@
 						  showConfirmButton: false,
 						  timer: 500
 						});
+						loadTasks();
 						$('#status-details').text(result.taskstatus);
 						$('#status-details').removeClass();
 						$('#status-details').addClass("status-task-"+ result.taskstatus );
 
-						var event = "#event-task-"+Id;
-						$(event).text(result.taskstatus);
-						$(event).removeClass();
-						$(event).addClass("status-task-"+ result.taskstatus );
-
-						if(result.taskstatus == "Completed"){
-							$('#update-status-task').hide();
-						}
-						var dateString =  $('#Date').val();
-						setActiveDay(dateString);
 					}
 					else {
 						Swal.fire({
 						  icon: "error",
-						  title: "Add to compare fail",
+						  title: "Update status assignment fail",
 						  text: result.message
 						});
 					}

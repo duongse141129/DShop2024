@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DShop2024.EnumData;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Repository.Components
@@ -15,7 +16,9 @@ namespace DShop2024.Repository.Components
         {
             var coupons = await _context.Coupons
              .Where(p => p.Status != 0 && p.Quantity > 0 && p.DateExpired >= DateTime.Today && p.DateStart <= DateTime.Today)
-             .Include(p => p.Promotion).ToListAsync();
+             .Include(p => p.Promotion).Where( p => p.Promotion.CategoryCouponName != DShopConst.NEW_CUSTOMER)
+             .OrderByDescending(p => p.Id)
+             .ToListAsync();
             return View(coupons);
 
         }

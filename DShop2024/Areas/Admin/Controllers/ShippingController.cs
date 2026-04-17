@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace DShop2024.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("Admin/Shipping")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Shipping)]
     public class ShippingController : Controller
 	{
         private readonly DShopContext _context;
@@ -21,7 +23,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("Index")]
         public async Task<IActionResult> Index()
 		{
-            ViewBag.sidebar = Menu.Admin.Shipping;
+            
             var shippingList = await _context.Shippings.ToListAsync();
             ViewBag.Shippings = shippingList;
             ViewBag.DefaultShipping = DShopConst.DEFAULT_SHIPPING_COST.ToString("#,##0 VND");
@@ -34,7 +36,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("StoreShipping")]
         public async Task<IActionResult> StoreShipping(ShippingModel shippingModel,string tinh, decimal price)
         {
-            ViewBag.sidebar = Menu.Admin.Shipping;
+            
             shippingModel.Price = price;       
             try
             {
@@ -61,7 +63,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Route("Delete")]
         public async Task<IActionResult> Delete(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Shipping;
+            
             if (Id == null)
             {
                 return NotFound();

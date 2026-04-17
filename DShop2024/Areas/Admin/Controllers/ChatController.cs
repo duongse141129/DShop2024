@@ -1,6 +1,7 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Hubs;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,7 +14,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-	public class ChatController : Controller
+    [SidebarMenu(Menu.Admin.Chat)]
+    public class ChatController : Controller
     {
         private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
@@ -29,7 +31,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Chat;
+            
 
             var customers = await (from u in _context.Users
                                    join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -55,7 +57,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public async Task<IActionResult> SearchUserName(string userName)
         {
-            ViewBag.sidebar = Menu.Admin.Chat;
+            
             ViewBag.searchUserName = userName;
             if (String.IsNullOrEmpty(userName))
             {
@@ -74,7 +76,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> ChatWithCustomer(string customerId)
         {
-            ViewBag.sidebar = Menu.Admin.Chat;
+            
             if (String.IsNullOrEmpty(customerId))
             {
                 return NotFound();
@@ -169,7 +171,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> SendMessage(string receiverId, string messageInput)
         {
-            ViewBag.sidebar = Menu.Admin.Chat;
+            
             var user = await _userManager.GetUserAsync(this.User);
             if (!String.IsNullOrEmpty(messageInput))
             {

@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-	public class ContactController : Controller
+    [SidebarMenu(Menu.Admin.Contact)]
+    public class ContactController : Controller
     {
         private readonly DShopContext _context;
 		private readonly IEmailSender _emailSender;
@@ -24,7 +26,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		}
         public async Task<IActionResult> Index([FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 5)
         {
-            ViewBag.sidebar = Menu.Admin.Contact;
+            
             IQueryable<ContactModel> listContact = _context.Contacts.Where(c => c.Status != 0)
                                                         .Include(u => u.User)
                                                         .Include(r => r.Respondent)
@@ -60,7 +62,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Reply(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Contact;
+            
             if (id == null)
             {
                 return NotFound();
@@ -80,7 +82,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Reply(int IdContact, string replyMessage)
         {
-            ViewBag.sidebar = Menu.Admin.Contact;
+            
             try
             {
                 if (String.IsNullOrEmpty(replyMessage))
@@ -118,7 +120,7 @@ namespace DShop2024.Areas.Admin.Controllers
 		[Authorize(Roles = RoleName.Administrator)]
 		public async Task<IActionResult> Remove(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Contact;
+            
             if (id == null)
             {
                 return NotFound();

@@ -1,6 +1,6 @@
 ﻿namespace DShop2024.EnumData
 {
-    public class DShopConst
+    public class DShopConst 
     {
 
         public static readonly string OTP_CONFIRM_EMAIL = "ConfirmEmail";
@@ -23,5 +23,6 @@
 		public static readonly string RECENTLY_VIEWED_PRODUCTS = "RecentlyViewedProducts";
 
 		public static readonly decimal DEFAULT_SHIPPING_COST = 50000;
+		public static readonly decimal DISCOUNT_NEW_CUSTOMER = 50000;
 	}
 }

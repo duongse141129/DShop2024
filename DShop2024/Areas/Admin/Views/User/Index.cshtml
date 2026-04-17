@@ -5,91 +5,72 @@
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 
-
-<div class="row py-5">
-    <div class="col-md-8">
+<div class="row">
+    <div class="col-sm-12">
         <a class="btn btn-primary btn-md" asp-action="Create" asp-controller="User">Create New User</a>
     </div>
-    <div class="col-md-4 ">
-        <form asp-area="Admin" asp-controller="User" asp-action="Index" method="get">
+</div>
+<div class="row py-3">
+    <div class="col-md-3">
+
             <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
                 <div class="input-group">
                     <div class="input-group-prepend">
-                        <button type="submit" class="btn btn-search pe-1">
+                        <button type="submit" class="btn btn-search pe-1" id="btnSearch">
                             <i class="fa fa-search search-icon"></i>
                         </button>
                     </div>
-                    <input type="text" placeholder="Search user name or email" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )" />
+                    <input id="searchInput" type="text" placeholder="Search user name or email" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )" />
                 </div>
             </nav>
-        </form>
+
+    </div>
+    <div class="col-md-9">
+        <select id="roleFilter" class="form-control" asp-items="ViewBag.roles" style="width:200px;">
+            <option value="">All Roles</option>
+        </select>
     </div>
 </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Role</th>
+<div id="userTableContainer">
+    <partial name="_UserListPartial" model="Model" />
+</div>
 
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var userWithRoles in Model)
-        {
-            <tr>
-                <td class="bg-primary" >@userWithRoles.User.Id</td>
-                <td>
-                    <div class="row">
-                        @userWithRoles.User.UserName
-                    </div>
-                    <div class="avatar">
-                        <img src="~/media/avatar/@userWithRoles.User.Avatar" alt="avatar user" class="avatar-img rounded">
-                    </div>
-                </td>
-                <td>@userWithRoles.User.Email</td>
-                <td>@userWithRoles.User.PhoneNumber</td>
-                <td>
-                    @if (userWithRoles.RoleName == null)
-                    {
-                        <a asp-action="SetRole" asp-controller="User" asp-route-id="@userWithRoles.User.Id">+ Add Role</a>
-                    }
-                    else if (userWithRoles.RoleName == RoleName.Administrator)
-                    {
-                        <p>@userWithRoles.RoleName</p>
-                    }
-                    else 
-                    {
-                        <a asp-action="SetRole" asp-controller="User" asp-route-id="@userWithRoles.User.Id">@userWithRoles.RoleName</a>
-                    }
-                   
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function loadData(page = 1) {
+                var search = $('#searchInput').val();
+                var role = $('#roleFilter').val();
 
-                </td>
-   
-                <td>
-                    @if (userWithRoles.RoleName != RoleName.Administrator)
-                    {
-                        <a class="btn btn-info btn-sm" asp-action="SetPassword" asp-controller="User" asp-route-id="@userWithRoles.User.Id">Change Password</a>
-                        @if (userWithRoles.User.Status == 1)
-                        {
-                            <a class="btn btn-danger btn-sm confirmDeletion" asp-action="Delete" asp-controller="User" asp-route-id="@userWithRoles.User.Id">Remove</a>
-                        }
-                        @if (userWithRoles.User.Status == 0)
-                        {
-                            <a class="btn btn-success btn-sm confirmDeletion" asp-action="RecoverAccount" asp-controller="User" asp-route-id="@userWithRoles.User.Id">Recover account</a>
-                        }
+                $.ajax({
+                    url: '@Url.Action("Index", "User")',
+                    type: 'GET',
+                    data: {
+                        p: page,
+                        search: search,
+                        roleName: role
+                    },
+                    success: function (result) {
+                        $('#userTableContainer').html(result);
                     }
-                    
+                });
+            }
 
-                   
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            $('#roleFilter').on('change', function () {
+                loadData(1);
+            });
 
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+            $('#btnSearch').on('click', function () {
+                loadData(1);
+            });
+
+            $(document).on('click', '#userTableContainer .pagination a', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                var page = new URLSearchParams(url.split('?')[1]).get('p');
+                loadData(page);
+            });
+        });
+    </script>
+}

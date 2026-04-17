@@ -6,7 +6,6 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-
 <div class="card">
     <div class="card-body">
         <a asp-action="Create" class="btn btn-primary btn-sn">
@@ -24,7 +23,7 @@
                                 <i class="fa fa-search search-icon"></i>
                             </button>
                         </div>
-                        <input type="text" placeholder="Search by title" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
+                        <input type="text" placeholder="Search by title" class="form-control" name="search" value="@( ViewBag.search ?? "" )">
                     </div>
                 </nav>
             </form>
@@ -33,60 +32,27 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Title)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Slug)
-                    </th>
+                    <th>@Html.DisplayNameFor(model => model.Title)</th>
+                    <th>@Html.DisplayNameFor(model => model.Slug)</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
-                    await RenderSubject(item, 0);
+                    <partial name="_SubjectListPartial"
+                             model="item"
+                             view-data='new ViewDataDictionary(ViewData) { ["Level"] = 0 }' />
                 }
             </tbody>
         </table>
-
-        @{
-            async Task RenderSubject(SubjectModel item, int level)
-            {
-                string prefix = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", level));
-
-                <tr>
-                    <td>
-                        @Html.Raw(prefix)
-                        <a asp-action="Details" asp-route-id="@item.Id">
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </a>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Slug)
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-icon btn-round btn-warning"><i class="fas fa-edit"></i></a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-icon btn-round btn-danger confirmDeletion"><i class="fas fa-trash-alt"></i></a>
-                    </td>
-                </tr>
-                if (item.SubjectChildren?.Count > 0)
-                {
-                    foreach (var childSubject in item.SubjectChildren)
-                    {
-                        if(childSubject.Status != 0)
-                        {
-                            await RenderSubject(childSubject, level + 1);
-                        }
-                       
-                    }
-                }
-            }
-
-        }
-
     </div>
-
 </div>
+
+
+
+
+
+
 
 

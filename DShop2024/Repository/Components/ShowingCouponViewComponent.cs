@@ -17,7 +17,9 @@ namespace DShop2024.Repository.Components
 
             var coupons = await _context.Coupons
              .Where(p => p.Status == (int)CouponEnumData.StatusCoupon.Showing && p.Quantity > 0 && p.DateExpired >= DateTime.Today)
-             .Include(p => p.Promotion).ToListAsync();
+             .Include(p => p.Promotion)
+             .OrderBy(p => p.PromotionId)
+             .ToListAsync();
             return View(coupons);
 
         }

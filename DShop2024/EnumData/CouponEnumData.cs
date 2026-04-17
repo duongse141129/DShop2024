@@ -26,13 +26,6 @@ namespace DShop2024.EnumData
 
 
         }
-        public static string getRandom()
-        {
-            Random rd = new Random();
-            int count = Enum.GetNames(typeof(BackGorund)).Length;
-            string bg = ""+ (BackGorund)rd.Next(1, count);
-            return bg;
-        }
         public static string getbgColor(string couponTypeName)
         {
             if(couponTypeName == DShopConst.FREE_SHIPPING)
@@ -46,6 +39,23 @@ namespace DShop2024.EnumData
             if (couponTypeName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
             {
                 return "" + (BackGorund)2;
+            }
+            return "";
+        }
+
+        public static string getbgStyle(string couponTypeName)
+        {
+            if (couponTypeName == DShopConst.FREE_SHIPPING)
+            {
+                return "free-shipping";
+            }
+            if (couponTypeName == DShopConst.PERCENTAGE_DISCOUNT)
+            {
+                return "percentage-discount";
+            }
+            if (couponTypeName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
+            {
+                return "cash-discount";
             }
             return "";
         }

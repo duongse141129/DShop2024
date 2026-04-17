@@ -5,6 +5,7 @@ using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using static DShop2024.EnumData.UserEnumData;
 
 namespace DShop2024.Areas.Identity.Controllers
 {
@@ -91,6 +92,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 Gender = user.Gender,
                 LoginType = user.LoginType,
                 Address = user.Address,
+                CustomerSegment = ((UserEnumData.StatusCustomerSegment)user.CustomerSegment).ToString(),
                 RoleName = roles.FirstOrDefault()
             };
             return View(model);

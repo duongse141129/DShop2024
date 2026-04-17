@@ -32,7 +32,7 @@ namespace DShop2024.Controllers
                                                   .Where(o => o.UserId == user.Id)
                                                   .OrderByDescending(o => o.CreatedDate);
 
-            int totalOrder = listOrder.Count();
+            int totalOrder = await listOrder.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalOrder / 10);
@@ -183,7 +183,8 @@ namespace DShop2024.Controllers
                 TempData[DShopConst.TEMPDATA_ERROR] = "The order cannot be return. Because the order has been processed.";
                 return RedirectToAction("Index");
             }
-            return PartialView("_ReturnPopupPartial", order);
+            var orderVM = _mapper.Map<OrderViewModel>(order);
+            return PartialView("_ReturnPopupPartial", orderVM);
         }
 
         public async Task<IActionResult> ReturnFullOrder(int? id)

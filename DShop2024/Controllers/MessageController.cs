@@ -1,6 +1,7 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Hubs;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DShop2024.Controllers
 {
     [Authorize(Roles = RoleName.Customer)]
+    [SidebarMenu(Menu.Home.Chat)]
     public class MessageController : Controller
     {
         private readonly DShopContext _context;
@@ -27,8 +29,13 @@ namespace DShop2024.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Home.Chat;
+            
             var user = await _userManager.GetUserAsync(this.User);
+            if(user == null)
+            {
+                return NotFound();
+            }
+            await ReadLatedMessage(user.Id);
 
             List<MessageViewModel> messages = await (from m in _context.Messages
                                                      join u in _context.Users on m.UserId equals u.Id
@@ -52,6 +59,7 @@ namespace DShop2024.Controllers
         [HttpPost]
         public async Task<IActionResult> SendMessage(string messageInput)
         {
+            
             var user = await _userManager.GetUserAsync(this.User);
             if (!String.IsNullOrEmpty(messageInput))
             {
@@ -82,6 +90,7 @@ namespace DShop2024.Controllers
                 };
 
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
+                await ReadLatedMessage(user.Id);
                 return Ok(new { success = true, Message = "Send message successful" });
                 
             }
@@ -92,6 +101,7 @@ namespace DShop2024.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload([FromForm] IFormFile file)
         {
+            
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(this.User);
@@ -135,6 +145,7 @@ namespace DShop2024.Controllers
 
                 };
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", user.UserName, modelVM);
+                await ReadLatedMessage(user.Id);
                 return Ok(new { success = true, Message = "Send message successful" });
 
             }
@@ -159,6 +170,26 @@ namespace DShop2024.Controllers
                 return "2 days ago " + dateTime.ToString("hh:mm tt");
             }
             return "";
+        }
+
+        private async Task ReadLatedMessage(string userId)
+        {
+            try
+            {
+                var latedMessage = await _context.Messages.Where(r => r.ReceiverId == userId)
+                                            .OrderByDescending(s => s.Timestamp)
+                                            .FirstOrDefaultAsync();
+                if (latedMessage != null)
+                {
+                    latedMessage.IsRead = true;
+                    _context.Messages.Update(latedMessage);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
     }

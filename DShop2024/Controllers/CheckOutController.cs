@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static DShop2024.EnumData.UserEnumData;
 
 
 namespace DShop2024.Controllers
@@ -278,9 +279,10 @@ namespace DShop2024.Controllers
 													.Where(o => o.Id == order.Id)
 													.FirstOrDefaultAsync();
                 var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
+				await updateCustomerSegment(user.Id);
                 //await _emailSender.SendEmailOrder(order, infoShop);			
 
-				HttpContext.Session.Remove(DShopConst.CART_KEY);
+                HttpContext.Session.Remove(DShopConst.CART_KEY);
 				HttpContext.Session.Remove(DShopConst.INFO_CUSTOMER_DELIVERY);
 				HttpContext.Session.Remove(DShopConst.COUPONS_CUSTOMER_APPPLY);
 
@@ -328,6 +330,40 @@ namespace DShop2024.Controllers
 			return RedirectToAction("Index", "Cart");
 	
 		}
+
+		private async Task updateCustomerSegment(string userId)
+		{
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                return;
+
+            var sumPriceOrders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Select(o => o.GrandTotal)
+                .SumAsync();
+
+            int newSegment = sumPriceOrders switch
+            {
+                >= (decimal)RangeCustomerSegment.VIP
+                    => (int)StatusCustomerSegment.VIP,
+
+                >= (decimal)RangeCustomerSegment.Loyal
+                    => (int)StatusCustomerSegment.Loyal,
+
+                >= (decimal)RangeCustomerSegment.Leads
+                    => (int)StatusCustomerSegment.Leads,
+
+                _ => (int)StatusCustomerSegment.New
+            };
+
+            if (user.CustomerSegment != newSegment)
+            {
+                user.CustomerSegment = newSegment;
+				_context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
+
+        }
 	
 	}
 }

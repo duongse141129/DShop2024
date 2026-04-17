@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
-using DShop2024.EnumData;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Brand)]
     public class BrandManageController : Controller
     {
         private readonly DShopContext _context;
@@ -22,7 +24,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             return View(await _context.Brands.Where(p => p.Status != 0).ToListAsync());
 
         }
@@ -30,7 +32,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             return View();
         }
 
@@ -39,7 +41,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BrandName,Description,ImageUpload")] BrandModel brandModel)
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             if (ModelState.IsValid)
             {
 				brandModel.Slug = brandModel.BrandName.ToLower().Replace(" ", "-");
@@ -85,7 +87,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             if (id == null)
             {
                 return NotFound();
@@ -104,7 +106,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,BrandName,Description,ImageUpload")] BrandModel brandModel)
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             if (id != brandModel.Id)
             {
                 return NotFound();
@@ -184,7 +186,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Brand;
+            
             if (id == null)
             {
                 return NotFound();

@@ -1,4 +1,4 @@
-﻿@model DShop2024.ViewModels.ProductDetailViewModel
+﻿@model DShop2024.ViewModels.ProductDetailManageViewModel
 
 @{
 	ViewData["Title"] = "Details Product";
@@ -141,74 +141,10 @@
 						<li class="color">(@Model.listRating.Count() votes)</li>
 					</ul>
 				</div><!--/rating-area-->
+				<div id="feedback-section-container">
+					<partial name="_FeedbackListAdminPartial" model="Model" />
+				</div>
 
-				<h2 class="title text-center">FEEDBACK</h2>
-				<div class="response-area">					
-					<div class="media-list">
-						@foreach (var item in Model.listRating)
-						{
-							<div class="card col-md-6">					
-								<div class="row pb-2 mt-2 me-4 ms-2">
-									<div class="col-sm-2 ">
-										<img class="media-object" src="~/media/avatar/@item.User.Avatar" width="100" style="height:120px" alt="">
-									</div>
-									<div class="col-md-10">
-										<ul class="sinlge-post-meta">
-											<li><i class="fa fa-user"></i>@item.User.UserName</li>
-											<li><i class="far fa-clock"></i>@item.RatingDateTime?.ToShortTimeString()</li>
-											<li><i class="fa fa-calendar"></i>@item.RatingDateTime?.ToShortDateString()</li>
-										</ul>
-										<span>Point: @item.Star</span>
-										<div class="d-fex ">
-											<i class="fa fa-star @( item.Star >= 1 ? "text-warning" : "")"></i>
-											<i class="fa fa-star @( item.Star >= 2 ? "text-warning" : "")"></i>
-											<i class="fa fa-star @( item.Star >= 3 ? "text-warning" : "")"></i>
-											<i class="fa fa-star @( item.Star >= 4 ? "text-warning" : "")"></i>
-											<i class="fa fa-star @( item.Star >= 5 ? "text-warning" : "")"></i>
-										</div>
-										<p>@item.Comment</p>
-										@if (item.ReplyBy == null)
-										{
-											<button class="btn btn-sm btn-primary"
-													onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Id')">
-												<i class="fa fa-reply"></i>
-												Replay
-											</button>
-										}
-										<button class="btn btn-sm btn-danger pull-right"
-												onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Id')">
-											<i class="fas fa-trash-alt"></i>
-											Remove
-										</button>
-									</div>
-									@if (item.ReplyBy != null)
-									{
-										<div class="row pb-2 ms-5">
-											<div class="col-sm-2">
-												<img class="media-object" src="~/media/avatar/@item.ReplyBy.Avatar" width="100" style="height:120px" alt="">
-											</div>
-											<div class="col-md-10">
-												<ul class="sinlge-post-meta">
-													<li><i class="fa fa-user"></i>@item.User.UserName</li>
-												</ul>
-												<p>@item.Comment</p>
-											</div>
-										</div>
-									}
-								</div>
-							</div>
-
-						}
-					</div> 
-
-
-				</div><!--/Response-area-->
-				@if (ViewBag.pagingmodel != null)
-				{
-					<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
-				}
-				
-			</div>
 		</div>
 	</div>
 </section>
@@ -222,4 +158,26 @@
 </div>
 @section Scripts {
 	<script src="~/custom/js/popup.js"></script>
+	<script>
+		$(document).on("click", "#feedback-section-container .ajax-pagination a", function (e) {
+			e.preventDefault();
+			var url = $(this).attr("href");
+			if (!url || url === "#") return;
+			$.ajax({
+				url: url,
+				type: 'GET',
+				headers: { "X-Requested-With": "XMLHttpRequest" },
+				success: function (data) {
+					$('#feedback-section-container').html(data);
+				},
+				error: function () {
+					Swal.fire({
+						icon: "error",
+						title: "Error",
+						text: "Could not load feedback. Please try again."
+					});
+				}
+			});
+		});
+	</script>
 }

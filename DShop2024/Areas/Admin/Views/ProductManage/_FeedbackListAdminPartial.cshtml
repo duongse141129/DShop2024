@@ -1,0 +1,71 @@
+﻿@model DShop2024.ViewModels.ProductDetailManageViewModel
+
+<h2 class="title text-center">FEEDBACK</h2>
+<div class="response-area">
+	<div class="media-list">
+		@foreach (var item in Model.listRating)
+		{
+			<div class="card col-md-6">
+				<div class="row pb-2 mt-2 me-4 ms-2">
+					<div class="col-sm-2 ">
+						<img class="media-object" src="~/media/avatar/@item.Rating.User.Avatar" width="100" style="height:120px" alt="">
+					</div>
+					<div class="col-md-10">
+						<ul class="sinlge-post-meta">
+							<li><i class="fa fa-user"></i>@item.Rating.User.UserName</li>
+							<li><i class="far fa-clock"></i>@item.Rating.RatingDateTime?.ToShortTimeString()</li>
+							<li><i class="fa fa-calendar"></i>@item.Rating.RatingDateTime?.ToShortDateString()</li>
+						</ul>
+						<span>Point: @item.Rating.Star</span>
+						<div class="d-fex ">
+							<i class="fa fa-star @( item.Rating.Star >= 1 ? "text-warning" : "")"></i>
+							<i class="fa fa-star @( item.Rating.Star >= 2 ? "text-warning" : "")"></i>
+							<i class="fa fa-star @( item.Rating.Star >= 3 ? "text-warning" : "")"></i>
+							<i class="fa fa-star @( item.Rating.Star >= 4 ? "text-warning" : "")"></i>
+							<i class="fa fa-star @( item.Rating.Star >= 5 ? "text-warning" : "")"></i>
+						</div>
+						<p>@item.Rating.Comment</p>
+						@if (item.Rating.ReplyBy == null)
+						{
+							<button class="btn btn-sm btn-primary"
+									onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Rating.Id')">
+								<i class="fa fa-reply"></i>
+								Replay
+							</button>
+						}
+						<button class="btn btn-sm btn-danger pull-right"
+								onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Rating.Id')">
+							<i class="fas fa-trash-alt"></i>
+							Remove
+						</button>
+					</div>
+					@if (item.Rating.ReplyBy != null)
+					{
+						<div class="row pb-2 ms-5">
+							<div class="col-sm-2">
+								<img class="media-object" src="~/media/avatar/@item.Rating.ReplyBy.Avatar" width="100" style="height:120px" alt="">
+							</div>
+							<div class="col-md-10">
+								<ul class="sinlge-post-meta">
+									<li><i class="fa fa-user"></i>@item.Rating.User.UserName</li>
+									<li><i class="fa fa-user-tag"></i>@item.ReplyByRole</li>
+								</ul>
+								<p>@item.Rating.ReplyMessage</p>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+
+		}
+	</div>
+
+
+@if (ViewBag.pagingmodel != null)
+{
+		<div class="ajax-pagination">
+			<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+		</div>
+		
+}
+</div>

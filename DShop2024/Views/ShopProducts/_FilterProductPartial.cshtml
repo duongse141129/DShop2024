@@ -1,0 +1,70 @@
+﻿@model ShopProductViewModel
+
+<div class="row g-4 align-items-end">
+	<div class="col-xl-3">
+		<div class="filter-section-label mb-2">Search</div>
+		<div class="input-group search-wrapper shadow-sm">
+			<input type="search" class="form-control p-3 input-filter-product"
+				   placeholder="Keywords..." name="SearchName" value="@Model.Filter.SearchName" >
+			<button type="submit"><i class="fa fa-search"></i></button>
+		</div>
+	</div>
+
+	<div class="col-xl-6">
+		<div class="row">
+			<div class="col-sm-7">
+				<div class="filter-section-label mb-2">Laptop pocket (INCH)</div>
+				<div class="pocket-selector">
+					@foreach (var item in ViewBag.laptopPocketTypes)
+					{
+						<input type="radio" class="btn-check input-filter-product" name="LaptopPocket"
+							   id="pocket-@item" value="@item" autocomplete="off"
+							   @(Model.Filter.LaptopPocket == item ? "checked" : "")>
+						<label class="btn btn-outline-light text-dark" for="pocket-@item">
+							@(string.IsNullOrEmpty(item) ? "None" : item)
+						</label>
+					}
+				</div>
+			</div>
+
+			<div class="col-sm-5">
+				<div class="filter-section-label mb-2">Features</div>
+				<div class="filter-group-sync">
+					<input type="checkbox" class="btn-check input-filter-product" id="WaterResistance"
+						   name="WaterResistance" value="true" @(Model.Filter.WaterResistance ? "checked" : "")>
+					<label class="btn btn-sync-style w-100 mb-2" for="WaterResistance">
+						<i class="bi bi-droplet"></i> Water Resistance
+					</label>
+
+					<input type="checkbox" class="btn-check input-filter-product" id="USBChargingPort"
+						   name="USBChargingPort" value="true" @(Model.Filter.USBChargingPort ? "checked" : "")>
+					<label class="btn btn-sync-style w-100" for="USBChargingPort">
+						<i class="fab fa-usb"></i> USB Port
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="row mt-3">
+			<div class="col-12">
+				<div class="filter-section-label mb-1">Price Range</div>
+				<input type="hidden" class="input-filter-product" name="StartPrice" id="StartPrice" value="@Model.Filter.StartPrice">
+				<input type="hidden" class="input-filter-product" name="EndPrice" id="EndPrice" value="@Model.Filter.EndPrice">
+				<div class="d-flex justify-content-between align-items-center mb-2">
+					<input type="text" id="amount" readonly >
+				</div>
+				<div id="slider-range" class="mx-2"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xl-3">
+		<div class="filter-section-label mb-2">Sort by</div>
+		<div class="sort-wrapper shadow-sm">
+			<i class="bi bi-sort-down me-2 text-primary"></i>
+			<select id="fruits" class="form-select border-0 bg-transparent form-select-sm"
+					name="SortByList" asp-items="@Model.SortByList">
+			</select>
+		</div>
+	</div>
+</div>

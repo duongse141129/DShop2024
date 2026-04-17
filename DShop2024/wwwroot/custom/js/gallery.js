@@ -1,33 +1,46 @@
 ﻿
-    let thumbnails = document.getElementsByClassName('thumbnail')
+document.addEventListener("DOMContentLoaded", function () {
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const featured = document.getElementById('featured');
 
-    let activeImages = document.getElementsByClassName('active')
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('mouseover', function () {
+            const active = document.querySelector('.thumbnail.active');
+            if (active) active.classList.remove('active');
+            this.classList.add('active');
+            featured.src = this.src;
+        });
+    });
 
-    for (var i=0; i < thumbnails.length; i++){
+    // --- left/ right button ---
+    const buttonRight = document.getElementById('slideRight');
+    const buttonLeft = document.getElementById('slideLeft');
+    const slider = document.getElementById('slider');
 
-        thumbnails[i].addEventListener('mouseover', function () {
-            console.log(activeImages)
-
-            if (activeImages.length > 0) {
-                activeImages[0].classList.remove('active')
-            }
-
-
-            this.classList.add('active')
-            document.getElementById('featured').src = this.src
-        })
+    if (buttonLeft && buttonRight && slider) {
+        buttonLeft.addEventListener('click', () => slider.scrollLeft -= 180);
+        buttonRight.addEventListener('click', () => slider.scrollLeft += 180);
     }
 
 
-    let buttonRight = document.getElementById('slideRight');
-    let buttonLeft = document.getElementById('slideLeft');
+    // --- Zoom ---
+    const container = document.querySelector('.main-img-container');
 
-    buttonLeft.addEventListener('click', function(){
-        document.getElementById('slider').scrollLeft -= 180
-    })
+    if (container && featured) {
+        container.addEventListener('mousemove', function (e) {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-    buttonRight.addEventListener('click', function(){
-        document.getElementById('slider').scrollLeft += 180
-    })
 
+            featured.style.transformOrigin = `${x}px ${y}px`;
+            featured.style.transform = "scale(2.2)"; // zoom
+        });
+
+        container.addEventListener('mouseleave', function () {
+            featured.style.transformOrigin = "center center";
+            featured.style.transform = "scale(1)";
+        });
+    }
+});
 

@@ -248,11 +248,12 @@ namespace DShop2024.Controllers
 		[HttpPost]
 		public async Task<ActionResult> GetCoupon( string couponCode)
 		{
-			if(couponCode == null)
+			if(String.IsNullOrEmpty(couponCode))
 			{
 				return Ok(new { success = false, message = "Please enter your coupon code to apply coupon" });
 			}
-            
+           
+
             var validCoupon = await _context.Coupons
 									.Include(p => p.Promotion)
 									.FirstOrDefaultAsync(x => x.CouponCode == couponCode);
@@ -277,7 +278,7 @@ namespace DShop2024.Controllers
 				int daysRemaining = remainingTime.Days;
 				if(daysRemaining >= 0)
 				{
-					var user = await _userManager.GetUserAsync(this.User);
+                    var user = await _userManager.GetUserAsync(this.User);
 
                     var CheckUsed = await _context.CouponRedemptions.FirstOrDefaultAsync(u => u.UserId == user.Id && u.CouponId == validCoupon.Id);
 
@@ -353,19 +354,18 @@ namespace DShop2024.Controllers
 							{
                                 if (info.ShippingCost == 0)
                                 {
-                                    return Ok(new { success = false, message = "You got free shipping. Save this code for next time." });
+                                    return Ok(new { success = false, message = "You’ve already received free shipping. Save this code for next time." });
                                 }
                                 info.ShippingCost = 0;
 								HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
-								validCoupon.Value = 0;
-							}
+                                validCoupon.Value = validCoupon.Value;
+                            }
 						}
 						else
 						{
 							return Ok(new { success = false, message = "This coupon code does not belong to you." });
 						}					
 					}
-
 
 					coupouns.Add(validCoupon);
 					HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);

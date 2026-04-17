@@ -1,10 +1,89 @@
-﻿@model IEnumerable<ReturnViewModel>
+﻿@model ManageReturnViewModel
 
 @{
     ViewData["Title"] = "Manage return";
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
-<div class="row py-5">
+<div class="row py-3">
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="text-center icon-return-page">
+                            <i class="far fa-times-circle text-danger "></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Rejected returned</p>
+                            <h4 class="card-title">@Model.CountRejectedReturned</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="text-center icon-return-page">
+                            <i class="fas fa-chart-pie icon-part-return icon-return-page"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Partially Returned</p>
+                            <h4 class="card-title">@Model.CountPartlyReturned</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="text-center icon-return-page">
+                            <i class="fas fa-check-circle icon-full-return icon-return-page"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Fully Returned</p>
+                            <h4 class="card-title">@Model.CountFullyReturned</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-5">
+                        <div class="text-center icon-return-page">
+                            <i class="fas fa-dolly text-primary icon-return-page"></i>
+                        </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                        <div class="numbers">
+                            <p class="card-category">Total quantity returned</p>
+                            <h4 class="card-title">@Model.CountQuantityReturned</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row py-3">
     <div class="col-md-8"></div>
     <div class="col-md-4 ">
         <form asp-area="Admin" asp-action="ManageReturn" asp-controller="Order">
@@ -15,7 +94,7 @@
                             <i class="fa fa-search search-icon"></i>
                         </button>
                     </div>
-                    <input type="text" placeholder="Search ordercode, description, reason, customer name" class="form-control" name="search" value="@( ViewBag.search != "" ? ViewBag.search  : "" )">
+                    <input type="text" placeholder="Search ordercode, description, reason, customer name" class="form-control" name="search" value="@Model.Search">
                 </div>
             </nav>
         </form>
@@ -34,7 +113,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.ListReturn)
         {
             <tr>
                 <td>
@@ -57,11 +136,11 @@
                 <td>
                     @if (item.IsFullReturn)
                     {
-                        <span>@OrderEnumData.FULLY_RETURNED</span>
+                        <span class="order-fullly-returned">@OrderEnumData.FULLY_RETURNED</span>
                     }
                     else
                     {
-                        <span>@OrderEnumData.PARTIALLY_RETURNED</span>
+                        <span class="order-partially-returned">@OrderEnumData.PARTIALLY_RETURNED</span>
                     }
                 </td>
                 <td>
@@ -71,4 +150,6 @@
         }
     </tbody>
 </table>
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+<partial name="_PagingPartial" model="@Model.Paging" />
+
+

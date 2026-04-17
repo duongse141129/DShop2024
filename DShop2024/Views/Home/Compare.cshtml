@@ -1,154 +1,156 @@
-﻿@model IEnumerable<ProductModel>
+﻿@model IEnumerable<ProductViewModel>
 @{
     ViewData["Title"] = "Compare Products";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <section class="py-5">
-    <div class="container-fluid bg-light  py-5">
-@if(Model.Count() == 0)
-{
-    <h4>List compare is empty</h4>
-}
-else
-{
+    <div class="container-fluid bg-white rounded-2  py-5">
+        @if (Model.Count() == 0)
+        {
+            <h4>List compare is empty</h4>
+        }
+        else
+        {
 
-<h4>List Compare Product </h4>
-<a asp-action="DeleteAllCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" >Clear all</a>
-    <table class="table table-striped">
-    <thead >
-        <tr>
-            <th></th>
-            @foreach (var item in Model)
-            {
-                <th scope="col">
-                    @item.ProductName
-                    <img src="~/media/products/@item.MainImage" width="120" height="100" />
-                </th>
-            }         
-        </tr>
-    </thead>
-    <tbody >
-        <tr>
-            <td>Rating Point</td>
-            @foreach (var item in Model)
-            {
-                var averagePoint = item.Ratings.Any() ? item.Ratings.Where(r => r.ProductId == item.Id && r.Status != 0).Average(r => r.Star) : 0;
-               <td>
-                            <span>@averagePoint.ToString("#.##")</span>
-                            <div class="d-flex mb-2">
-                                <i class="fa fa-star @( averagePoint >= 1 ? "text-primary " :  "")"></i>
-                                <i class="fa fa-star @( averagePoint >= 2 ? "text-primary " :  "")"></i>
-                                <i class="fa fa-star @( averagePoint >= 3 ? "text-primary " :  "")"></i>
-                                <i class="fa fa-star @( averagePoint >= 4 ? "text-primary " :  "")"></i>
-                                <i class="fa fa-star @( averagePoint >= 5 ? "text-primary " :  "")"></i>
-                            </div>
+            <h4>List Compare Product </h4>
+            <a asp-action="DeleteAllCompare" class="btn btn-danger btn-sm text-white confirmDeletion" asp-controller="Home">Clear all</a>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        @foreach (var item in Model)
+                        {
+                            <th scope="col">
+                                @item.ProductName
+                                <img src="~/media/products/@item.MainImage" width="120" height="100" />
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Rating Point</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>
+                                <span>@item.AveragePoint.ToString("#.##")</span>
+                                <div class="d-flex mb-2">
+                                    <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+                                    <i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+                                </div>
 
-               </td>
-            }
-        </tr>
+                            </td>
+                        }
+                    </tr>
 
-        <tr>
-            <td>Price</td>
-            @foreach (var item in Model)
-            {
-                <td>@item.Price.ToString("#,##0 VND")</td>
-            }
-        </tr>
-        <tr>
-            <td>Capacity (L)</td>
-            @foreach (var item in Model)
-            {
-                <td>@item.Capacity</td>
-            }
-        </tr>
-        <tr>
-            <td>Dimension (CM)</td>
-            @foreach (var item in Model)
-            {
-                <td>@item.Dimension</td>
-            }
-        </tr>
-        <tr>
-            <td>Weight (KG)</td>
-            @foreach (var item in Model)
-            {
-                <td>@item.Weight</td>
-            }
-        </tr>
-        <tr>
-            <td>Material</td>
-            @foreach (var item in Model)
-            {
-                <td>@item.Material</td>
-            }
-        </tr>
-        <tr>
-            <td>Main Pocket</td>
-            @foreach (var item in Model)
-            {
-               <td>@item.MainPocket</td>
-            }
-        </tr>
-        <tr>
-            <td>Pocket Laptop (INCH)</td>
-            @foreach (var item in Model)
-            {
-                    @if(item.LaptopPocket!= null)
-                    {
-                        <td>@item.LaptopPocket</td>
-                    }
-                    else
-                    {
-                        <td>No</td>
-                    }
-            }
-         </tr>
+                    <tr>
+                        <td>Price</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.Price.ToString("#,##0 VND")</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Capacity (L)</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.Capacity</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Dimension (CM)</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.Dimension</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Weight (KG)</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.Weight</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Material</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.Material</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Main Pocket</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>@item.MainPocket</td>
+                        }
+                    </tr>
+                    <tr>
+                        <td>Pocket Laptop (INCH)</td>
+                        @foreach (var item in Model)
+                        {
+                            @if (item.LaptopPocket != null)
+                            {
+                                <td>@item.LaptopPocket</td>
+                            }
+                            else
+                            {
+                                <td>No</td>
+                            }
+                        }
+                    </tr>
 
-         <tr>
-            <td>Water Resistance</td>
-            @foreach (var item in Model)
-            {
-                @if (item.WaterResistance)
-                {
-                    <td>Yes</td>
-                }              
-                else{
-                    <td>No</td>         
-                }
-            }
-        </tr>
-        <tr>
-            <td>USB Charging Port</td>
-            @foreach (var item in Model)
-            {
-                @if (item.USBChargingPort)
-                {
-                    <td>Yes</td>
-                }
-                else
-                {
-                    <td>No</td>
-                }
-            }
-        </tr> 
+                    <tr>
+                        <td>Water Resistance</td>
+                        @foreach (var item in Model)
+                        {
+                            @if (item.WaterResistance)
+                            {
+                                <td>Yes</td>
+                            }
+                            else
+                            {
+                                <td>No</td>
+                            }
+                        }
+                    </tr>
+                    <tr>
+                        <td>USB Charging Port</td>
+                        @foreach (var item in Model)
+                        {
+                            @if (item.USBChargingPort)
+                            {
+                                <td>Yes</td>
+                            }
+                            else
+                            {
+                                <td>No</td>
+                            }
+                        }
+                    </tr>
 
-    
-        <tr>
-            <td>Remove</td>
-            @foreach (var item in Model)
-            {
-                <td>
-                    <a asp-action="DeleteCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@item.Id">Delete</a>
-                </td>
-            }
-        </tr>
-       
 
-    </tbody>
+                    <tr>
+                        <td>Remove</td>
+                        @foreach (var item in Model)
+                        {
+                            <td>
+                                <a asp-action="DeleteCompare" class="btn btn-danger btn-sm text-white confirmDeletion" asp-controller="Home" asp-route-Id="@item.Id">Delete</a>
+                            </td>
+                        }
+                    </tr>
 
-</table>
 
-}
+                </tbody>
+
+            </table>
+
+        }
     </div>
-
 </section>
+
+
+

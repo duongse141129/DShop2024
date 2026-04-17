@@ -26,6 +26,7 @@ namespace DShop2024.ViewModels
         public bool AllowReturn { get; set; }
         public bool IsReturn { get; set; }
         public bool IsFullReturn { get; set; }
+        public int TotalQuantity { get; set; }
 
         public string UpdateByName { get; set; }
         public string UpdateByAvatar { get; set; }

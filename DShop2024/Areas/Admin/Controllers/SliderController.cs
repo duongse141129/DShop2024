@@ -2,6 +2,7 @@
 using DShop2024.Areas.Admin.Models.Banner;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,8 @@ namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-	public class SliderController : Controller
+    [SidebarMenu(Menu.Admin.Slider)]
+    public class SliderController : Controller
 	{
 		private readonly DShopContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -25,7 +27,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Index()
 		{
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
             return View(await _context.Banners.Where(p => p.Status != 0).ToListAsync());
 
 		}
@@ -33,7 +35,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
 
             return View();
         }
@@ -42,7 +44,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateBannerRequest banner)
         {
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
             if (ModelState.IsValid)
             {
                 try
@@ -90,7 +92,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
             if (Id == null)
             {
                 return NotFound();
@@ -108,7 +110,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, BannerModel banner)
         {
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
             if (Id != banner.Id)
             {
                 return NotFound();
@@ -179,7 +181,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? Id)
         {
-            ViewBag.sidebar = Menu.Admin.Slider;
+            
             if (Id == null)
             {
                 return NotFound();

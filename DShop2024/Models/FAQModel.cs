@@ -12,6 +12,6 @@ namespace DShop2024.Models
 		public string Question { get; set; }
 		[Required(ErrorMessage = "The {0} field is required")]
 		public string Answer { get; set; }
-		
+		public int Status { get; set; }
 	}
 }

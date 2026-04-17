@@ -1,4 +1,4 @@
-﻿@model IEnumerable<OrderViewModel>
+﻿@model ManageOrderViewModel
 
 @{
     ViewData["Title"] = "Manage order";
@@ -13,33 +13,33 @@
                     <div class="row">
                         <div class="col-5">
                             <div class="icon-big text-center">
-                                <i class="@OrderEnumData.IconStatusOrder[i] text-@((OrderEnumData.SpanStatusOrder) i)"></i>
+                                <i class="@OrderEnumData.IconStatusOrder[i] text-@((OrderEnumData.SpanStatusOrder)i)"></i>
                             </div>
                         </div>
                         <div class="col-7 col-stats">
                             <div class="numbers">
                                 <p class="card-category">@((OrderEnumData.StatusOrder)i)</p>
                                 <h4 class="card-title">
-                                @if(i == 0)
-                                {
-                                        @ViewBag.countCancelOrder
-                                }
-                                @if (i == 1)
-                                {
-                                        @ViewBag.countNewOrder
-                                }
-                                @if (i == 2)
-                                {
-                                        @ViewBag.countAcceptedOrder
-                                }
-                                @if (i == 3)
-                                {
-                                        @ViewBag.countDeliveryOrder
-                                }
-                                @if (i == 4)
-                                {
-                                        @ViewBag.countCompletedOrder
-                                }
+                                    @if (i == 0)
+                                    {
+                                        @Model.CountCancelOrder
+                                    }
+                                    @if (i == 1)
+                                    {
+                                        @Model.CountNewOrder
+                                    }
+                                    @if (i == 2)
+                                    {
+                                        @Model.CountAcceptedOrder
+                                    }
+                                    @if (i == 3)
+                                    {
+                                        @Model.CountDeliveryOrder
+                                    }
+                                    @if (i == 4)
+                                    {
+                                        @Model.CountCompletedOrder
+                                    }
                                 </h4>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
                     <div class="col-7 col-stats">
                         <div class="numbers">
                             <p class="card-category">Total Order</p>
-                            <h4 class="card-title">@ViewBag.totalOrder</h4>
+                            <h4 class="card-title">@Model.CountTotalOrder</h4>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                             <i class="fa fa-search search-icon"></i>
                         </button>
                     </div>
-                    <input type="text" placeholder="Search Order Code" class="form-control" name="searchOrderCode" value="@( ViewBag.searchOrderCode != "" ? ViewBag.searchOrderCode  : "" )">
+                    <input type="text" placeholder="Search Order Code" class="form-control" name="searchOrderCode" value="@Model.SearchOrderCode">
                 </div>
             </nav>
         </form>
@@ -98,7 +98,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.ListOrder)
         {
             <tr>
                 <td>
@@ -131,15 +131,21 @@
                     {
                         <span class="text status-order-@((OrderEnumData.StatusOrder)item.Status)"> @((OrderEnumData.StatusOrder)item.Status) </span>
                     }
-                 
+
                 </td>
                 <td>
-                    <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>         
+                    <a class="btn btn-info" asp-action="ViewOrder" asp-route-Id="@item.Id">ViewOrder</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+<partial name="_PagingPartial" model="@Model.Paging" />
+
+
+
+
+
+
 

@@ -70,13 +70,13 @@
                     <div class="row align-items-center">
                         <div class="col-icon">
                             <div class="icon-big text-center icon-secondary bubble-shadow-small">
-                                <i class="far fa-check-circle"></i>
+                                <i class="fas fa-backspace"></i>
                             </div>
                         </div>
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
-                                <p class="card-category">Completed Orders</p>
-                                <h4 class="card-title">@Model.CountCompletedOrder</h4>
+                                <p class="card-category">Returned Quantities</p>
+                                <h4 class="card-title">@Model.CountQuantityReturn</h4>
                             </div>
                         </div>
                     </div>
@@ -93,7 +93,7 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-4">
-                            <p>Filter by date  @ViewBag.doanhthu.ToString("#,##0") | @ViewBag.loinhuan.ToString("#,##0") </p>
+                            <p>Filter by date  </p>
                                 <label for="from">From</label>
                                 <input autocomplete="off" class="form-control" type="text" id="dateStart" name="dateStart">
                                 <label for="to">to</label>
@@ -102,16 +102,11 @@
                                 <button type="button" class="btn btn-info btn-filter-date">Filter</button>
                         </div>
                         <div class="col-sm-4">
-                            <p>Filter by month or year</p>
-                            <p>
-                                <select class="form-control filter-date">
-                                    <option value="last_month">Last month</option>
-                                    <option value="this_month">This month</option>
-                                    <option value="2024">2024</option>
-                                    <option selected value="2025">2025</option>
-                                    <option  value="2026">2026</option>
+                            <div class="form-group">
+                                <label>Filter by month or year:</label>
+                                <select class="form-control filter-date" asp-items="ViewBag.StatisticFilterOptions">
                                 </select>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -166,10 +161,7 @@
                     <div class="card-head-row card-tools-still-right">
                         <h4 class="card-title">Import-Export Group Chart</h4>
                         <div class="card-tools">
-                            <select class="form-control filter-barchart">
-                                <option value="2024">2024</option>
-                                <option selected value="2025">2025</option>
-                                <option value="2026">2026</option>
+                            <select class="form-control filter-barchart" asp-items="ViewBag.ImportExportFilterOptions">
                             </select>
                         </div>
                     </div>

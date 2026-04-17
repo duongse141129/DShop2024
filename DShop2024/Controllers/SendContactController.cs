@@ -26,7 +26,7 @@ namespace DShop2024.Controllers
         }
 		public async Task<IActionResult> Index()
 		{
-            var faqs = await _context.FAQs.ToListAsync();
+            var faqs = await _context.FAQs.Where(f => f.Status != 0).ToListAsync();
             ViewBag.Subjects = new SelectList(ContactEnumData.typeSubject.ToList());
             ViewBag.FAQs = faqs;    
 			return View();

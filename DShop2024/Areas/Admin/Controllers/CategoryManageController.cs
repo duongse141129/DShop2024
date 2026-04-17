@@ -1,14 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
-using DShop2024.EnumData;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Category)]
     public class CategoryManageController : Controller
     {
         private readonly DShopContext _context;
@@ -22,7 +24,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(int pg =1)
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             return View(await _context.Categories.Where(p => p.Status != 0).ToListAsync());
         }
 
@@ -32,7 +34,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             return View();
         }
 
@@ -42,7 +44,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             if (ModelState.IsValid)
             {
                 categoryModel.Slug = categoryModel.CategoryName.ToLower().Replace(" ", "-");
@@ -88,7 +90,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             if (id == null)
             {
                 return NotFound();
@@ -108,7 +110,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,CategoryName,Description,ImageUpload")] CategoryModel categoryModel)
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             if (id != categoryModel.Id)
             {
                 return NotFound();
@@ -189,7 +191,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Category;
+            
             if (id == null)
             {
                 return NotFound();

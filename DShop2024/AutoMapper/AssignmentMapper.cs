@@ -11,6 +11,8 @@ namespace DShop2024.AutoMapper
         public AssignmentMapper()
         {
             CreateMap<AssignmentModel, EditAssignmentRequest>()
+                  .ForMember(pv => pv.EmployeeName, p => p.MapFrom(p => p.Employee.UserName))
+                  .ForMember(pv => pv.EmployeeAvatar, p => p.MapFrom(p => p.Employee.Avatar))
                 .ForMember(pv => pv.Date, p => p.MapFrom(p => getDate(p.AssignedDate)))
                 .ForMember(pv => pv.TimeFrom, p => p.MapFrom(p => getTimespan(p.AssignedDate)))
                 .ForMember(pv => pv.TimeTo, p => p.MapFrom(p => getTimespan(p.Deadline)));
@@ -34,7 +36,7 @@ namespace DShop2024.AutoMapper
         }
         private static string getDate(DateTime datetime)
         {
-            return datetime.Date.ToString();
+            return datetime.Date.ToString("yyyy-MM-dd");
         }
     }
 }

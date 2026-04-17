@@ -190,7 +190,11 @@
         }
 
     .calendar .days .today {
-        font-size: 2rem;
+        font-size: 1.2rem; /* Reduced from 2.5rem to maintain layout */
+        font-weight: 700;
+        color: var(--primary-clr);
+        border: 2px solid var(--primary-clr) !important; /* Visual ring for "Today" */
+        border-radius: 5px;
     }
 
     .calendar .days .event {
@@ -430,7 +434,7 @@
 .add-event {
     position: absolute;
     bottom: 30px;
-    right: 30px;
+    right: 35%;
     width: 40px;
     height: 40px;
     display: flex;
@@ -669,3 +673,108 @@
         .credits a:hover {
             text-decoration: underline;
         }
+
+
+
+.day.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.day.in-range {
+    background-color: rgba(0, 123, 255, 0.2);
+    border-radius: 0; /* Makes the middle of the range look like a solid bar */
+}
+
+.day.start-date {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.day.end-date {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* 2. Range Selection Styling */
+.day.active {
+    background-color: var(--primary-clr) !important; 
+    color: white !important;
+}
+
+/* Remove the heavy shadow from the original .active styling */
+.calendar .days .active::before {
+    display: none;
+}
+
+.day.in-range {
+    background-color: rgba(179, 138, 221, 0.2);  
+    border-radius: 0;
+    color: var(--primary-clr);
+}
+
+/* 3. Handle "Today" inside a range */
+.day.today.active {
+    color: #fff !important;
+    border-color: #fff !important;  
+}
+
+.day.today.in-range {
+    border-color: var(--primary-clr) !important;
+}
+
+/* 4. Smooth out the range edges */
+.day.start-date {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.day.end-date {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+
+
+.calendar-hint-select-range-dates {
+    color: #878895;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+
+
+.delete-all-tasks {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: red;
+    border: 2px solid red;
+    opacity: 0.5;
+    border-radius: 50%;
+    background-color: white;
+    cursor: pointer;
+}
+
+    .delete-all-tasks:hover {
+        opacity: 1;
+        color:white;
+        background-color: red;
+    }
+
+    .delete-all-tasks i {
+        pointer-events: none;
+    }
+
+

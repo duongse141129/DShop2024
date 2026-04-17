@@ -1,0 +1,39 @@
+﻿@model DShop2024.Models.Blog.SubjectModel
+@{
+    int level = ViewData["Level"] as int? ?? 0;
+    string prefix = string.Concat(Enumerable.Repeat("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", level));
+}
+
+<tr>
+    <td>
+        @Html.Raw(prefix)
+        <a asp-action="Details" asp-route-id="@Model.Id">
+            @Html.DisplayFor(modelItem => Model.Title)
+        </a>
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => Model.Slug)
+    </td>
+    <td>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-icon btn-round btn-warning">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-icon btn-round btn-danger confirmDeletion">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+    </td>
+</tr>
+
+@if (Model.SubjectChildren?.Count > 0)
+{
+    foreach (var childSubject in Model.SubjectChildren)
+    {
+        if (childSubject.Status != 0)
+        {
+            var nextViewData = new ViewDataDictionary(ViewData);
+            nextViewData["Level"] = level + 1;
+
+            <partial name="_SubjectListPartial" model="childSubject" view-data="nextViewData" />
+        }
+    }
+}

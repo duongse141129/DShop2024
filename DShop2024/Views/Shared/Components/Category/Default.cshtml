@@ -1,20 +1,20 @@
 ﻿@model IEnumerable<CategoryModel>
 
+
 <div class="category-list">
-    <div class="row">
-        <div class="col-sm-12">
+    <div class="filter-item">
+        <div class="filter-wrapper">
             <input type="radio" id="All" name="CategorySlug" value="" class="input-filter-product" @(string.IsNullOrEmpty(ViewBag.SelectedCategory) ? "checked" : "") />
             <label for="All">All</label>
         </div>
-        @foreach (var item in Model)
-        {
-            <div class="col-sm-12">
+    </div>
+    @foreach (var item in Model)
+    {
+        <div class="filter-item">
+            <div class="filter-wrapper">
                 <input type="radio" id="@item.Id" name="CategorySlug" value="@item.Slug" class="input-filter-product" @(ViewBag.SelectedCategory == item.Slug ? "checked" : "") />
                 <label for="@item.Id">@item.CategoryName</label>
             </div>
-
-        }
-    </div>
+        </div>
+    }
 </div>
-
-

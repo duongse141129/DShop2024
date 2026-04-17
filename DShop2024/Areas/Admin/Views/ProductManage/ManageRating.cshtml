@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DShop2024.Models.RatingModel>
+﻿@model IEnumerable<RatingViewModel>
 
 @{
     ViewData["Title"] = "Feedback";
@@ -13,32 +13,32 @@
             {
                 <li class="media">
                     <div class="pull-left mx-2">
-                        <img class="media-object" src="~/media/avatar/@item.User.Avatar" alt="">
+                        <img class="media-object" src="~/media/avatar/@item.Rating.User.Avatar" alt="">
                     </div>
                     <div class="media-body">
                         <div class="row">
                             <div class="col-md-8">
                                 <ul class="sinlge-post-meta">
-                                    <li><i class="fa fa-user"></i>@item.User.UserName</li>
-                                    <li><i class="fa fa-clock"></i>@item.RatingDateTime</li>
+                                    <li><i class="fa fa-user"></i>@item.Rating.User.UserName</li>
+                                    <li><i class="fa fa-clock"></i>@item.Rating.RatingDateTime</li>
                                 </ul>
                                 <div class="rating-area">
                                     <ul class="ratings">
                                         <li class="rate-this">Rate this item:</li>
                                         <li>
-                                            <i class="fa fa-star @( item.Star >= 1 ? "color" : "")"></i>
-                                            <i class="fa fa-star @( item.Star >= 2 ? "color" : "")"></i>
-                                            <i class="fa fa-star @( item.Star >= 3 ? "color" : "")"></i>
-                                            <i class="fa fa-star @( item.Star >= 4 ? "color" : "")"></i>
-                                            <i class="fa fa-star @( item.Star >= 5 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Rating.Star >= 1 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Rating.Star >= 2 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Rating.Star >= 3 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Rating.Star >= 4 ? "color" : "")"></i>
+                                            <i class="fa fa-star @( item.Rating.Star >= 5 ? "color" : "")"></i>
                                         </li>
                                     </ul>
                                 </div>
-                                <p>@item.Comment</p>
-                                @if (item.ReplyBy == null)
+                                <p>@item.Rating.Comment</p>
+                                @if (item.Rating.ReplyBy == null)
                                 {
                                     <button class="btn btn-sm btn-primary"
-                                            onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Id')">
+                                            onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Rating.Id')">
                                         <i class="fa fa-reply"></i>
                                         Replay
                                     </button>
@@ -46,7 +46,7 @@
                                 @if (User.IsInRole(RoleName.Administrator))
                                 {
                                     <button class="btn btn-sm btn-danger pull-right"
-                                            onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Id')">
+                                            onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Rating.Id')">
                                         <i class="fas fa-trash-alt"></i>
                                         Remove
                                     </button>
@@ -55,28 +55,33 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="row">
-                                    <a class="pull-right" asp-action="Detail" asp-route-id="@item.Product.Id">
-                                        @item.Product.ProductName
+                                    <a class="pull-right" asp-action="Detail" asp-route-id="@item.Rating.Product.Id">
+                                        @item.Rating.Product.ProductName
                                     </a>
-                                    <img src="~/media/products/@item.Product.MainImage" class="media-product" alt="">
+                                    <img src="~/media/products/@item.Rating.Product.MainImage" class="media-product" alt="">
                                 </div>
 
                             </div>
                         </div>
                     </div>
                 </li>
-                @if(item.ReplyBy != null)
+                @if (item.Rating.ReplyBy != null)
                 {
                     <li class="media second-media">
                         <div class="pull-left mx-2">
-                            <img class="media-object" src="~/media/avatar/@item.ReplyBy.Avatar" alt="">
+                            <img class="media-object" src="~/media/avatar/@item.Rating.ReplyBy.Avatar" alt="">
                         </div>
                         <div class="media-body">
                             <ul class="sinlge-post-meta">
-                                <li><i class="fa fa-user"></i>@item.ReplyBy.UserName</li>
+                                <li>
+                                    <i class="fa fa-user"></i>@item.Rating.ReplyBy.UserName
+                                </li>
+                                <li class="text-warning">
+                                    <i class="fas fa-user-tag"></i>@item.ReplyByRole
+                                </li>
                             </ul>
                             <h5>Reply message</h5>
-                            <p>@item.ReplyMessage</p>
+                            <p>@item.Rating.ReplyMessage</p>
                         </div>
                     </li>
                 }

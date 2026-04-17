@@ -12,6 +12,7 @@ namespace DShop2024.ViewModels
         public int CountAcceptedOrder { get; set; } = 0;
         public int CountDeliveryOrder { get; set; } = 0;
         public int CountCompletedOrder { get; set; } = 0;
+        public int CountQuantityReturn { get; set; } = 0;
         public List<ProductViewModel> BestSaleProducts { get; set; } = new List<ProductViewModel>();
         public List<AppUserModel> ListCustomer { get; set; } = new List<AppUserModel>();
         public List<ContactModel> ListContact { get; set; } = new List<ContactModel>();

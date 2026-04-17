@@ -1,5 +1,6 @@
 ﻿using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator)]
+    [SidebarMenu(Menu.Admin.Task)]
     public class TaskManageController : Controller
     {
         private readonly DShopContext _context;
@@ -20,7 +22,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             var listTask = await _context.Tasks.Where(t => t.Status != 0).ToListAsync();
             return View(listTask);
         }
@@ -29,7 +31,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             return View();
         }
 
@@ -38,7 +40,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description")] TaskModel taskModel)
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             if (ModelState.IsValid)
             {
                 try
@@ -61,7 +63,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             if (id == null)
             {
                 return NotFound();
@@ -80,7 +82,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description")] TaskModel taskModel)
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             if (id != taskModel.Id)
             {
                 return NotFound();
@@ -114,7 +116,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Task;
+            
             if (id == null)
             {
                 return NotFound();

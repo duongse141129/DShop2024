@@ -1,13 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using DShop2024.EnumData;
 using DShop2024.Models;
-using DShop2024.EnumData;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Faq)]
     public class FAQController : Controller
     {
         private readonly DShopContext _context;
@@ -20,15 +22,15 @@ namespace DShop2024.Areas.Admin.Controllers
         // GET: Admin/FAQModels
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
-            return View(await _context.FAQs.ToListAsync());
+            
+            return View(await _context.FAQs.Where(f => f.Status != 0).ToListAsync());
         }
 
 
         [Authorize(Roles = RoleName.Administrator)]
         public IActionResult Create()
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
+            
             return View();
         }
 
@@ -37,7 +39,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Question,Answer")] FAQModel fAQModel)
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
+            
             if (ModelState.IsValid)
             {
                 try
@@ -51,7 +53,7 @@ namespace DShop2024.Areas.Admin.Controllers
                         return View(fAQModel);
                     }
 
-
+                    fAQModel.Status = 1;
                     _context.Add(fAQModel);
                     await _context.SaveChangesAsync();
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Create FAQ successful ";
@@ -70,7 +72,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
+            
             if (id == null)
             {
                 return NotFound();
@@ -87,9 +89,9 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer")] FAQModel fAQModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Question,Answer,Status")] FAQModel fAQModel)
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
+            
             if (id != fAQModel.Id)
             {
                 return NotFound();
@@ -135,7 +137,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Faq;
+            
             if (id == null)
             {
                 return NotFound();
@@ -147,13 +149,20 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            if (fAQModel != null)
+            try
             {
-                _context.FAQs.Remove(fAQModel);
+                fAQModel.Status = 0;
+                _context.FAQs.Update(fAQModel);
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete FAQ successful ";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Update FAQ fail " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool FAQModelExists(int id)

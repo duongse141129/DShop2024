@@ -3,46 +3,51 @@
 @{
     var selectedBrands = ViewBag.SelectedBrands as List<string>;
 }
+
 @if(selectedBrands.Count == 0)
 {
     <div class="brand-list">
-        <div class="row">
-            <div class="col-sm-12">
+        <div class="filter-item select-all">
+            <div class="filter-wrapper">
                 <input type="checkbox" id="selectAll" value="all" name="BrandSlugs" class="input-filter-product" checked />
                 <label for="selectAll">  Select All </label>
             </div>
-            @foreach (var item in Model)
-            {
-                <div class="col-sm-12">
+        </div>
+        @foreach (var item in Model)
+        {
+            <div class="filter-item select-all">
+                <div class="filter-wrapper">
                     <input type="checkbox" class="item-brand input-filter-product" value="@item.Slug" name="BrandSlugs" checked />
                     <label for="@item.Slug"> @item.BrandName </label>
                     <small>@item.CountProduct</small>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 }
 else
 {
-    
     <div class="brand-list">
-        <div class="row">
-            <div class="col-sm-12">
+        <div class="filter-item select-all">
+            <div class="filter-wrapper">
                 <input type="checkbox" id="selectAll" value="all" name="BrandSlugs" class="input-filter-product" @(selectedBrands.Contains("all") ? "checked" : "") />
                 <label for="selectAll">  Select All </label>
             </div>
-            @foreach (var item in Model)
-            {
-                <div class="col-sm-12">
+        </div>
+        @foreach (var item in Model)
+        {
+            <div class="filter-item select-all">
+                <div class="filter-wrapper">
                     <input type="checkbox" class="item-brand input-filter-product" value="@item.Slug" name="BrandSlugs" @(selectedBrands != null && selectedBrands.Contains(item.Slug) ? "checked" : "") />
                     <label for="@item.Slug"> @item.BrandName </label>
                     <small>@item.CountProduct</small>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
-
 }
+
+
 
 
 

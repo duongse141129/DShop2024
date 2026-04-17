@@ -1,17 +1,18 @@
 using AutoMapper;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Drawing.Printing;
 
 
 namespace DShop2024.Controllers
 {
+    [SidebarMenu(Menu.Home.Home)]
     public class HomeController : Controller
     {
         private readonly DShopContext _context;
@@ -25,14 +26,12 @@ namespace DShop2024.Controllers
             _context = context;
 			_userManager = userManager;
             _mapper = mapper;
-
-
         }
 
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Home.Home;
+            
             ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
 
 			IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
@@ -164,7 +163,7 @@ namespace DShop2024.Controllers
                                                            join w in _context.WishLists on p.Id equals w.ProductId
                                                            where w.UserId == user.Id
                                                            select p;
-            int totalWishlistProduct = wishListProduct.Count();
+            int totalWishlistProduct = await wishListProduct.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
             int countPages = (int)Math.Ceiling((double)totalWishlistProduct / 10);
@@ -204,7 +203,8 @@ namespace DShop2024.Controllers
                                                        select p)
                                         .Include(p => p.Ratings)
                                         .ToListAsync();
-            return View(compareProduct);
+            var compareProductVM = _mapper.Map<List<ProductViewModel>>(compareProduct);
+            return View(compareProductVM);
 		}
 
 		[Authorize]
@@ -326,7 +326,13 @@ namespace DShop2024.Controllers
         public async Task<IActionResult> AboutUs()
         {
             var infomationShop = await _context.InformationShops.FirstOrDefaultAsync();
-            return View(infomationShop);
+            var branches = await _context.Branches.Where( b => b.Status != 0).OrderByDescending(p => p.Id).ToListAsync();
+            InformationShopAndBranchesVM allInformation = new InformationShopAndBranchesVM
+            {
+                InformationShop = infomationShop,
+                Branches = branches
+            };
+            return View(allInformation);
         }
 
 

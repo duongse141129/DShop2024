@@ -2,6 +2,7 @@
 using DShop2024.Areas.Admin.Models.Task;
 using DShop2024.EnumData;
 using DShop2024.Models;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,7 @@ namespace DShop2024.Areas.Admin.Controllers
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
     [Route("Admin/Assignment")]
+    [SidebarMenu(Menu.Admin.Assignment)]
     public class AssignmentController : Controller
     {
         private readonly DShopContext _context;
@@ -28,7 +30,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
         public  IActionResult Index()
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             return View();
         }
 
@@ -52,7 +54,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 Month = t.AssignedDate.Month,
                 Year = t.AssignedDate.Year,
                 Time = $"{t.AssignedDate:hh\\:mm tt} - {t.Deadline:hh\\:mm tt}",
-                IsAllowUpdateDelete = role == RoleName.Administrator && t.Status == 1 ? true : false,
+                IsAllowUpdateDelete = role == RoleName.Administrator && t.Status == 1 && t.AssignedDate >= DateTime.Now ? true : false,
                 Status = ((AssignmentEnumData.StatusTask)t.Status).ToString(),
             })
             .ToListAsync();
@@ -63,7 +65,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet("Details/{id?}")]
         public async Task<IActionResult> Details(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (id == null)
             {
                 return NotFound();
@@ -85,7 +87,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost("UpdateStatus/{id?}")]
         public async Task<IActionResult> UpdateStatus(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (id == null)
             {
                 return NotFound();
@@ -99,6 +101,14 @@ namespace DShop2024.Areas.Admin.Controllers
             }
             try
             {
+                var user = await _userManager.GetUserAsync(this.User);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains(RoleName.Employee) && assignmentModel.EmployeeUserID != user.Id)
+                {
+                    return Ok(new { success = false, message = "You are not authorized to access other people's work." });
+                }
+
                 if (assignmentModel.Status == 1 || assignmentModel.Status == 2)
                 {
                     assignmentModel.Status += 1;
@@ -113,25 +123,30 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
-
-
         [HttpGet("Create")]
-        public async Task<IActionResult> Create(DateTime date)
+        public async Task<IActionResult> Create(DateTime startDate, DateTime endDate)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
-            if(date.Date < DateTime.Today.Date)
+            
+            if (startDate.Date < DateTime.Today.Date)
             {
-                return PartialView("_ErrorSelectDatePopupPartial");
+                return PartialView("_ErrorSelectDatePopupPartial", "You can not select a date in the past.");
             }
             ViewBag.Tasks = new SelectList(_context.Tasks.Where(b => b.Status != 0), "Id", "Name");
-            List<AppUserModel> employees = await(from u in _context.Users
-                                             join ur in _context.UserRoles on u.Id equals ur.UserId
-                                             join r in _context.Roles on ur.RoleId equals r.Id
-                                             where r.Name == RoleName.Employee
-                                             where u.Status != 0
-                                             select u).ToListAsync();
-            ViewBag.Employees = new SelectList(employees, "Id", "UserName");
-            ViewBag.DatePick = date;
+            List<AppUserModel> employees = await (from u in _context.Users
+                                                  join ur in _context.UserRoles on u.Id equals ur.UserId
+                                                  join r in _context.Roles on ur.RoleId equals r.Id
+                                                  where r.Name == RoleName.Employee
+                                                  where u.Status != 0
+                                                  select u).ToListAsync();
+            ViewBag.PickEmployees = employees;
+            ViewBag.DatePick = startDate;
+            ViewBag.DatePickEnd = endDate;
+            var selectedDates = $" {startDate.Day} -> {endDate.Day} {endDate.ToString("MMMM yyyy")} ";
+            if(startDate.Date == endDate.Date)
+            {
+                selectedDates = $" {startDate.Day} {endDate.ToString("MMMM yyyy")} ";
+            }
+            ViewBag.SelectedDates = selectedDates;
             return PartialView("_CreateAssignmentPopupPartial");
 
         }
@@ -140,7 +155,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create(CreateAssignmentRequest createAssignmentModel)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (ModelState.IsValid)
             {
                 if(createAssignmentModel.TimeFrom > createAssignmentModel.TimeTo)
@@ -151,25 +166,34 @@ namespace DShop2024.Areas.Admin.Controllers
                 try
                 {
                     var user = await _userManager.GetUserAsync(this.User);
-                    var date = DateTime.Parse(createAssignmentModel.Date);
-                    var timeFrom = date.Date.Add(createAssignmentModel.TimeFrom);
-                    var timeTo = date.Date.Add(createAssignmentModel.TimeTo);
-                    if (timeFrom < DateTime.Now)
+
+                    List<AssignmentModel> assignments = new List<AssignmentModel>();
+                    for (DateTime date = createAssignmentModel.StartDate.Date ; date <= createAssignmentModel.EndDate.Date; date = date.AddDays(1))
                     {
-                        return Ok(new { success = false, message = "Time From must be greater than the current time." });
+                        var timeFrom = date.Date.Add(createAssignmentModel.TimeFrom);
+                        var timeTo = date.Date.Add(createAssignmentModel.TimeTo);
+                        if (timeFrom < DateTime.Now)
+                        {
+                            return Ok(new { success = false, message = "Time From must be greater than the current time." });
+                        }
+
+                        AssignmentModel assignmentModel = new AssignmentModel
+                        {
+                            AssignedByUserID = user.Id,
+                            EmployeeUserID = createAssignmentModel.EmployeeUserID,
+                            TaskID = createAssignmentModel.TaskId,
+                            AssignmentDetails = createAssignmentModel.AssignmentDetails,
+                            AssignedDate = timeFrom,
+                            Deadline = timeTo,
+                            Status = 1
+                        };
+                        assignments.Add(assignmentModel);
                     }
-                    AssignmentModel assignmentModel = new AssignmentModel
+                    if (assignments.Any())
                     {
-                        AssignedByUserID = user.Id,
-                        EmployeeUserID = createAssignmentModel.EmployeeUserID,
-                        TaskID = createAssignmentModel.TaskId,
-                        AssignmentDetails = createAssignmentModel.AssignmentDetails,
-                        AssignedDate = timeFrom,
-                        Deadline = timeTo,
-                        Status = 1
-                    };
-                    _context.Assignments.Add(assignmentModel);
-                    await _context.SaveChangesAsync();
+                        await _context.Assignments.AddRangeAsync(assignments);
+                        await _context.SaveChangesAsync();
+                    }
                     return Ok(new { success = true, message = "Create assignment successful" });
                 }
                 catch (Exception ex)
@@ -181,10 +205,61 @@ namespace DShop2024.Areas.Admin.Controllers
             return Ok(new { success = false, message = "Input value is not complete" });
         }
 
+
+        [HttpGet("DeleteAll")]
+        public async Task<IActionResult> DeleteAll(DateTime startDate, DateTime endDate)
+        {
+            
+            if (startDate.Date < DateTime.Today.Date)
+            {
+                return PartialView("_ErrorSelectDatePopupPartial", "You can not select a date in the past.");
+            }
+            var checkAssignment = await _context.Assignments.Where(s => s.Status != 0).Where(a => a.AssignedDate.Date >= startDate && a.AssignedDate.Date <= endDate).AnyAsync();
+            if (!checkAssignment)
+            {
+                return PartialView("_ErrorSelectDatePopupPartial", "There is no assignment to delete.");
+            }
+            ViewBag.DatePick = startDate;
+            ViewBag.DatePickEnd = endDate;
+            var selectedDates = $" {startDate.Day} -> {endDate.Day} {endDate.ToString("MMMM yyyy")} ";
+            if (startDate.Date == endDate.Date)
+            {
+                selectedDates = $" {startDate.Day} {endDate.ToString("MMMM yyyy")} ";
+            }
+            ViewBag.SelectedDates = selectedDates;
+            return PartialView("_DeleteAllAssignmentPopupPartial");
+        }
+
+        [HttpPost("DeleteAll")]
+        public async Task<IActionResult> DeleteAllConfirm(DateTime startDate, DateTime endDate)
+        {
+            
+            if (startDate.Date < DateTime.Today.Date)
+            {
+                return PartialView("_ErrorSelectDatePopupPartial", "You can not select a date in the past.");
+            }
+            try
+            {
+                await _context.Assignments
+                        .Where(s => s.Status != 0)
+                        .Where(a => a.AssignedDate.Date >= startDate && a.AssignedDate.Date <= endDate)
+                        .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, 0));
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Delete tasks all successful" });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = "Delete all fail" + ex.Message });
+            }
+        }
+
+
         [HttpGet("Edit/{id?}")]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (id == null)
             {
                 return NotFound();
@@ -195,6 +270,11 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+            if(assignmentModel.AssignedDate < DateTime.Now)
+            {
+                return PartialView("_ErrorSelectDatePopupPartial", "Dates in the past shall not be modified.");
+            }
+
             ViewBag.Tasks = new SelectList(_context.Tasks.Where(b => b.Status != 0), "Id", "Name", assignmentModel.TaskID);
             List<AppUserModel> employees = await (from u in _context.Users
                                                   join ur in _context.UserRoles on u.Id equals ur.UserId
@@ -203,7 +283,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   where u.Status != 0
                                                   select u).ToListAsync();
 
-            ViewBag.Employees = new SelectList(employees, "Id", "UserName", assignmentModel.EmployeeUserID);
+            ViewBag.PickEmployees = employees;
             EditAssignmentRequest editAssignment = _mapper.Map<EditAssignmentRequest>(assignmentModel);
             return PartialView("_EditAssignmentPopupPartial", editAssignment);
         }
@@ -212,7 +292,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost("Edit/{id?}")]
         public async Task<IActionResult> Edit(EditAssignmentRequest editAssignment)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
 
             if (ModelState.IsValid)
             {
@@ -248,7 +328,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpGet("Delete/{id?}")]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (id == null)
             {
                 return NotFound();
@@ -259,6 +339,10 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+            if (assignmentModel.AssignedDate < DateTime.Now)
+            {
+                return PartialView("_ErrorSelectDatePopupPartial", "Dates in the past shall not be modified.");
+            }
             return PartialView("_DeleteAssignmentPopupPartial", assignmentModel);
         }
 
@@ -266,7 +350,7 @@ namespace DShop2024.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirm(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Assignment;
+            
             if (id == null)
             {
                 return NotFound();

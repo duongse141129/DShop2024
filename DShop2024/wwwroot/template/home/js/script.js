@@ -231,56 +231,32 @@
 
     }
 
-    //var initProductQty = function () {
 
-    //    $('.product-qty').each(function () {
+    var initProductQty = function () {
 
-    //        var $el_product = $(this);
-    //        var quantity = 0;
+        // Use Event Delegation to handle dynamic content (AJAX)
+        $(document).on('click', '.quantity-right-plus', function (e) {
+            e.preventDefault();
+            // Find the specific input relative to the clicked button
+            var $el_product = $(this).closest('.product-qty');
+            var $input = $el_product.find('.quantity-input');
+            var quantity = parseInt($input.val()) || 1;
 
-    //        $el_product.find('.quantity-right-plus').click(function (e) {
-    //            e.preventDefault();
-    //            var quantity = parseInt($el_product.find('#quantity').val());
-    //            $el_product.find('#quantity').val(quantity + 1);
-    //        });
+            $input.val(quantity + 1);
+        });
 
-    //        $el_product.find('.quantity-left-minus').click(function (e) {
-    //            e.preventDefault();
-    //            var quantity = parseInt($el_product.find('#quantity').val());
-    //            if (quantity > 1) {
-    //                $el_product.find('#quantity').val(quantity - 1);
-    //            }
-    //        });
+        $(document).on('click', '.quantity-left-minus', function (e) {
+            e.preventDefault();
+            var $el_product = $(this).closest('.product-qty');
+            var $input = $el_product.find('.quantity-input');
+            var quantity = parseInt($input.val()) || 1;
 
-    //    });
+            if (quantity > 1) {
+                $input.val(quantity - 1);
+            }
+        });
 
-    //}
-
-
-  var initProductQty = function(){
-
-    $('.product-qty').each(function(){
-
-      var $el_product = $(this);
-      var quantity = 0;
-
-      $el_product.find('.quantity-right-plus').click(function(e){
-          e.preventDefault();
-          var quantity = parseInt($el_product.find('.quantity-input').val());
-          $el_product.find('.quantity-input').val(quantity + 1);
-      });
-
-      $el_product.find('.quantity-left-minus').click(function(e){
-          e.preventDefault();
-          var quantity = parseInt($el_product.find('.quantity-input').val());
-          if(quantity>1){
-              $el_product.find('.quantity-input').val(quantity - 1);
-          }
-      });
-
-    });
-
-  }
+    }
 
   // init jarallax parallax
   var initJarallax = function() {
