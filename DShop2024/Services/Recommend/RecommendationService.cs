@@ -62,6 +62,7 @@ namespace DShop2024.Services.Recommend
                                                 .Include(r => r.Ratings)
                                                 .Include(r => r.Category)
                                                 .Include(r => r.Brand)
+                                                .Include(r => r.Sales)
                                                 .FirstOrDefaultAsync(p => p.Status != 0 && p.Stock > 0 && p.Id == item);
                     if (model != null)
                     {
@@ -84,6 +85,7 @@ namespace DShop2024.Services.Recommend
                                                 .Include(p => p.Ratings)
                                                 .Include(p => p.Brand)
                                                 .Include(p => p.Category)
+                                                .Include(r => r.Sales)
                                                 .Take(topN)
                                                 .Select( c => _mapper.Map<ProductViewModel>(c))
                                                 .ToListAsync();
@@ -92,6 +94,7 @@ namespace DShop2024.Services.Recommend
                                             .Include(p => p.Ratings)
                                             .Include(p => p.Brand)
                                             .Include(p => p.Category)
+                                            .Include(r => r.Sales)
                                             .AsNoTracking()
                                             .AsSplitQuery()
                                             .Select(c => _mapper.Map<ProductViewModel>(c))
@@ -130,6 +133,7 @@ namespace DShop2024.Services.Recommend
                                                 .Include(p => p.Ratings)
                                                 .Include(p => p.Brand)
                                                 .Include(p => p.Category)
+                                                .Include(r => r.Sales)
                                                 .Take(topN)
                                                 .Select(c => _mapper.Map<ProductViewModel>(c))
                                                 .ToListAsync();

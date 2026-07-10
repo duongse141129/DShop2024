@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DShop2024.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = RoleName.Customer)]
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
@@ -139,9 +139,8 @@ namespace DShop2024.Controllers
                     _context.Orders.Update(order);
                     await _context.SaveChangesAsync();
 
-                    if (order.PaymentMethod.IsPrepayment)
+                    if (order.PaymentStatus == 1)
                     {
-                        
                         RefundModel refundModel = new RefundModel
                         {
                             Amount = order.GrandTotal,
@@ -184,6 +183,7 @@ namespace DShop2024.Controllers
                 return RedirectToAction("Index");
             }
             var orderVM = _mapper.Map<OrderViewModel>(order);
+            orderVM.TotalQuantity = await _context.OrderDetails.Where(od => od.OrderId == order.Id).SumAsync(s => s.Quantity);
             return PartialView("_ReturnPopupPartial", orderVM);
         }
 
@@ -353,8 +353,8 @@ namespace DShop2024.Controllers
                     Description = returnModel.Description,
                     ReturnDate = DateTime.Now,
                     Status = 1,
-                    TotalRefundAmount = order.GrandTotal - order.ShippingCost, //The customer is responsible for paying the shipping costs.
-                    ShippingCost = order.ShippingCost,
+                    TotalRefundAmount = order.GrandTotal, //The shop is responsible for paying the shipping costs.
+                    ReturnShippingCost = await GetShippingCost(order.AddressDelivery),
                     UserId = order.UserId,
                     OrderId = order.Id,
                     UpdateDate = DateTime.Now,
@@ -432,18 +432,20 @@ namespace DShop2024.Controllers
                     }
                     totalPrice += item.Quantity * item.PricePerUnit;
                 }
-                var customerPay = order.GrandTotal - order.ShippingCost;
-                if(totalPrice > customerPay)
+
+                totalPrice += order.ShippingCost;
+                if (totalPrice > order.GrandTotal)
                 {
-                    totalPrice = customerPay; //If the refund amount is greater than the amount the customer paid, the refund amount = the amount the customer paid - Shipping Cost
+                    totalPrice = order.GrandTotal; //If the refund amount is greater than the amount the customer paid, the refund amount = the amount the customer paid 
                 }
+
 
                 ReturnModel returnModel = new ReturnModel
                 {
                     ReturnDate = DateTime.Now,
                     Status = 1,
                     TotalRefundAmount = totalPrice,
-                    ShippingCost = order.ShippingCost,
+                    ReturnShippingCost = await GetShippingCost(order.AddressDelivery),
                     UserId = order.UserId,
                     OrderId = order.Id,
                     UpdateDate = DateTime.Now,
@@ -517,7 +519,19 @@ namespace DShop2024.Controllers
             return true;
         }
 
+        private async Task<decimal> GetShippingCost(string addressDelivery)
+        {
+            if (string.IsNullOrEmpty(addressDelivery))
+                return DShopConst.DEFAULT_SHIPPING_COST;
 
+            var parts = addressDelivery.Split("_");
+            var province = parts.Last(); 
+
+            var shippingCost = await _context.Shippings.Where(s => s.Province == province)
+                                                        .Select(s => (decimal?)s.Price) 
+                                                        .FirstOrDefaultAsync();
+            return shippingCost ?? DShopConst.DEFAULT_SHIPPING_COST;
+        }
 
 
 

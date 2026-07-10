@@ -4,13 +4,13 @@
     {
 
         public static List<string> typeSubject = new List<string> {
-            "Cancel order",
-            "Refund money",
-            "Return product",
-            "Exchange goods",
+            "Delivery Issues",
+            "Tracking Help",
+            "Return Request",
+            "Exchange Request",
             "Feedback",
-            "Arrival date",
-            "Estimated Time of Arrival",
+            "Product Information",
+            "Restock Inquiry",
             "Other"
         };
     }

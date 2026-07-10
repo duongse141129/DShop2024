@@ -14,8 +14,9 @@ namespace DShop2024.Repository.Components
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
+            var today= DateTime.Today;
             var coupons = await _context.Coupons
-             .Where(p => p.Status != 0 && p.Quantity > 0 && p.DateExpired >= DateTime.Today && p.DateStart <= DateTime.Today)
+             .Where(p => p.Status != 0 && p.Quantity > 0 && p.DateStart.Date <= today &&  today <= p.DateExpired.Date)
              .Include(p => p.Promotion).Where( p => p.Promotion.CategoryCouponName != DShopConst.NEW_CUSTOMER)
              .OrderByDescending(p => p.Id)
              .ToListAsync();

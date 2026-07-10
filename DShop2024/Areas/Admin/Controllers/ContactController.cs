@@ -10,7 +10,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Contact)]
+    [SidebarMenu(Menu.Admin.CustomerService, SubMenu.CustomerService.Contact)]
     public class ContactController : Controller
     {
         private readonly DShopContext _context;

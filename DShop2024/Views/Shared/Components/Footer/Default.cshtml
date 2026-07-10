@@ -1,23 +1,42 @@
 ﻿@using DShop2024.ViewModels
 @model FooterViewModel
 
-<div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <h1 class="text-primary mb-0">@Model.informationShop.ShopName</h1>
+<div class="footer-social-section py-4 mb-4">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-4">
+            <div class="social-card h-100 d-flex flex-column justify-content-center">
+                <h1 class="shop-logo mb-2">
+                    <i class="fas fa-store"></i> @Model.informationShop.ShopName
+                </h1>
+                <p class="text-muted mb-0">
+                    Discover backpacks that combine comfort, functionality, and modern style for every occasion.
+                </p>
+            </div>
         </div>
-        <div class="col-lg-3">
-            <div class="position-relative mx-auto">
+        <div class="col-lg-4">
+            <div class="social-card h-100">
+                <div class="social-title">
+                    <i class="fab fa-facebook text-primary"></i>
+                    Follow us on Facebook
+                </div>
                 @Html.Raw(Model.informationShop.PluginFacebook)
             </div>
         </div>
-        <div class="col-lg-3">
-            <div class="d-flex justify-content-end pt-3 text-light">
-                @Html.Raw(Model.informationShop.PluginYoutube)
+        <div class="col-lg-4">
+            <div class="social-card h-100 text-center d-flex flex-column justify-content-center">
+                <div class="social-title mb-4">
+                    <i class="fab fa-youtube text-danger"></i>
+                    Subscribe our channel
+                </div>
+                <div>
+                    @Html.Raw(Model.informationShop.PluginYoutube)
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+
 <div class="row g-5">
     <div class="col-lg-3 col-md-6">
         <div class="footer-item">

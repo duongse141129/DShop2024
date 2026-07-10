@@ -14,37 +14,55 @@ namespace DShop2024.Repository.Components
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
+            var now = DateTime.Now;
+
             var topWishlistedProducts = await _context.WishLists
-                    .GroupBy(w => w.ProductId)
-                    .Select(g => new
+                .GroupBy(w => w.ProductId)
+                .Select(g => new
+                {
+                    ProductId = g.Key,
+                    Count = g.Count()
+                })
+                .Join(_context.Products,
+                    w => w.ProductId,
+                    p => p.Id,
+                    (w, p) => new
                     {
-                        ProductId = g.Key,
-                        Count = g.Count()
+                        Product = p,
+                        WishlistCount = w.Count,
+
+                        CurrentSalePrice = p.Sales
+                            .Where(s => s.Status != 0
+                                     && now >= s.SaleStartDate
+                                     && now <= s.SaleEndDate)
+                            .Select(s => (decimal?)s.SalePrice)
+                            .FirstOrDefault()
                     })
-             
-                    .Join(_context.Products,
-                        w => w.ProductId,
-                        p => p.Id,
-                        (w, p) => new
-                        {
-                            Product = p,
-                            WishlistCount = w.Count
-                        })
-                        .Select(g => new ProductViewModel
-                        {
-                                 Id = g.Product.Id,
-                                 ProductName = g.Product.ProductName,
-                                 MainImage = g.Product.MainImage,
-                                 Price = g.Product.Price,
-                                 Stock = g.Product.Stock,
-                                 BrandName = _context.Brands.FirstOrDefault(b => b.Id == g.Product.BrandId).BrandName,
-                                 CategoryName = _context.Categories.FirstOrDefault(c => c.Id == g.Product.CategoryId).CategoryName,
-                                 AveragePoint = g.Product.Ratings.Any() ? g.Product.Ratings.Where(r => r.ProductId == g.Product.Id && r.Status != 0).Average(r => r.Star) : 0,
-                                 WishlistCount = g.WishlistCount
-                        })
-                    .OrderByDescending(g => g.WishlistCount)           
-                    .Take(8)
-                    .ToListAsync();
+                .Select(g => new ProductViewModel
+                {
+                    Id = g.Product.Id,
+                    ProductName = g.Product.ProductName,
+                    MainImage = g.Product.MainImage,
+                    Price = g.Product.Price,
+                    OriginalPrice = g.Product.OriginalPrice,
+                    Stock = g.Product.Stock,
+
+                    BrandName = g.Product.Brand.BrandName,
+                    CategoryName = g.Product.Category.CategoryName,
+
+                    AveragePoint = g.Product.Ratings
+                        .Where(r => r.Status != 0)
+                        .Average(r => (double?)r.Star) ?? 0,
+
+                    WishlistCount = g.WishlistCount,
+
+                    SalePrice = g.CurrentSalePrice,
+                    IsOnSale = g.CurrentSalePrice != null
+                })
+                .OrderByDescending(g => g.WishlistCount)
+                .Take(8)
+                .ToListAsync();
+
             return View(topWishlistedProducts);
 
         }

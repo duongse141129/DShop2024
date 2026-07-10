@@ -16,9 +16,11 @@ namespace DShop2024.AutoMapper
             CreateMap<ReturnModel, ReturnViewModel>()
                 .ForMember(pv => pv.CustomerAvatar, p => p.MapFrom(p => p.Customer.Avatar))
                 .ForMember(pv => pv.CustomerName, p => p.MapFrom(p => p.Customer.UserName))
+                .ForMember(pv => pv.CustomerId, p => p.MapFrom(p => p.Customer.Id))
                 .ForMember(pv => pv.UpdateByName, p => p.MapFrom(p => p.UpdateBy.UserName))
                 .ForMember(pv => pv.UpdateByAvatar, p => p.MapFrom(p => p.UpdateBy.Avatar))
                 .ForMember(pv => pv.OrderCode, p => p.MapFrom(p => p.Order.OrderCode))
+                .ForMember(pv => pv.OrderId, p => p.MapFrom(p => p.Order.Id))
                 .ForMember(pv => pv.Images, p => p.MapFrom(p => GetListImages(p.Images)))
                 .ForMember(pv => pv.IsFullReturn, p => p.MapFrom(p => CheckIsFullReturn(p.Reason)));
         }

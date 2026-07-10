@@ -1,0 +1,88 @@
+﻿@model IEnumerable<ProductViewModel>
+
+@if(Model.Count() > 0)
+{
+    <div class="sale-wrap">
+
+        <div class="carousel-controls-top">
+            <div>
+                <h2 class="section-title"> Everything <mark class="mark-sale">on sale</mark> right now</h2>
+            </div>
+        </div>
+
+        <div class="track-shell">
+            <button class="nav-btn" id="prevBtn" aria-label="Previous products">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="track-sale" id="track-sale">
+
+                @foreach (var item in Model)
+                {
+                    <div class="ticket add-quantity-productid-cart">
+                        <div class="stamp">-@item.DiscountPercent%</div>
+                        <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="@item.ProductName">
+                            <img class="ticket-img" src="~/media/products/@item.MainImage" alt="@item.ProductName" style="width: 100%; height: 150px;">
+                        </a>
+                        <div class="ticket-body">
+                            <div class="ticket-name">@item.ProductName</div>
+                            <div class="d-flex align-items-center rating-wrap">
+                                <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
+                                <i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+                                <span class="rating"> @(item.AveragePoint == 0 ? "" : item.AveragePoint.ToString("(#.##)"))</span>
+                            </div>
+                            <div class="ticket-eyebrow">@item.BrandName</div>
+                            <div class="ticket-eyebrow">@item.CategoryName</div>
+                            <div class="price-row">
+                                <div class="price-old">
+                                    @item.Price.ToString("#,##0")
+                                </div>
+
+                                <div class="price-new">
+                                    @item.SalePrice?.ToString("#,##0 VND")
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="add-product-qty product-qty">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="add-btn-number quantity-left-minus btn-number" data-type="minus">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="quantity" class="add-quantity-input quantity-input" value="1" >
+                                    <span class="input-group-btn">
+                                        <button type="button" class="add-btn-number quantity-right-plus btn-number" data-type="plus">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                                <a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+                                    <i class="fas fa-retweet"></i>
+                                </a>
+                                <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+                                    <i class="far fa-heart"></i>
+                                </a>
+                            </div>
+                            <button class="add-to-cart-quantity" data-product-id="@item.Id">
+                                <i class="fas fa-cart-plus me-2"></i>
+                                Add to cart
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button class="nav-btn" id="nextBtn" aria-label="Next products">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+    </div>
+
+}
+
+
+

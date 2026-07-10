@@ -2,6 +2,7 @@
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Models.Blog;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AppMvc.Areas.Blog.Controllers
 {
     [Area("Blog")]
+    [SidebarMenu(Menu.Home.Blog)]
     public class ViewPostController : Controller
     {
         private readonly ILogger<ViewPostController> _logger;
@@ -31,7 +33,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Route("/post/{subjectSlug?}")]
         public async Task<IActionResult> Index(string search,string subjectSlug,[FromQuery(Name ="p")] int currentPage, int pagesSize)
         {
-            ViewBag.sidebar = Menu.Home.Blog;
+            
             var Subjects = GetSubjects();
             ViewBag.Subjects = Subjects;
             ViewBag.subjectSlug = subjectSlug;
@@ -39,26 +41,24 @@ namespace AppMvc.Areas.Blog.Controllers
             SubjectModel subject = null;
             if (!string.IsNullOrEmpty(subjectSlug))
             {
-                subject = _context.Subjects
-                                    .Where(c => c.Slug == subjectSlug)
-                                    .Include(c => c.SubjectChildren)
-                                    .FirstOrDefault();
+                subject = await _context.Subjects
+                    .Where(c => c.Slug == subjectSlug)
+                    .Include(c => c.SubjectChildren)
+                    .FirstOrDefaultAsync();
                 if (subject == null)
                 {
-                    return NotFound("Cannot find subject");
+                    return NotFound();
                 }
             }
+
+
 
             IQueryable<PostModel> posts = _context.Posts.Where(p => p.Status != 0)
                                 .OrderByDescending(p => p.DateUpdated);
 
-            var count = await posts.CountAsync();
-            if (count > 0)
+            if (!String.IsNullOrEmpty(search))
             {
-                if (!String.IsNullOrEmpty(search))
-                {
-                    posts = posts.Where(c => c.Title.Contains(search) || c.ShortDescription.Contains(search) || c.PostContent.Contains(search));
-                }
+                posts = posts.Where(c => c.Title.Contains(search) || c.ShortDescription.Contains(search) || c.PostContent.Contains(search));
             }
 
             if (subject != null)
@@ -70,7 +70,7 @@ namespace AppMvc.Areas.Blog.Controllers
                 posts = posts.Where(p => p.PostSubjects.Where(pc => ids.Contains(pc.SubjectId)).Any());
             }
 
-            int totalPosts = posts.Count();
+            int totalPosts = await posts.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 9;
             int countPages = (int)Math.Ceiling((double)totalPosts / 9);
@@ -90,17 +90,21 @@ namespace AppMvc.Areas.Blog.Controllers
                     pagesSize = pagesSize
                 })
             };
+            var postIds = await posts.Skip((currentPage - 1) * pagesSize)
+                         .Take(pagesSize)
+                         .Select(p => p.Id)
+                         .ToListAsync();
 
-            var postsInPage = posts.Skip((currentPage - 1) * pagesSize)
-                                .Take(pagesSize)
-                                .Include(P => P.Likes)
-                                .Include(P => P.Comments.Where(c => c.Status != 0))
-                                .Include(P => P.CreateBy)
-                                .Include(P => P.PostSubjects)
+            var postsInPage = await _context.Posts
+                            .Include(P => P.Likes)
+                            .Include(P => P.Comments.Where(c => c.Status != 0))
+                            .Include(P => P.CreateBy)
+                            .Include(P => P.PostSubjects)
                                 .ThenInclude(p => p.Subject)
-                                .AsSplitQuery()
-                                .AsNoTracking()
-                                .AsQueryable();
+                            .Where(p => postIds.Contains(p.Id))
+                            .OrderByDescending(p => p.DateUpdated) 
+                            .ToListAsync();
+
             var postsVM = _mapper.Map<List<PostViewModel>>(postsInPage);
             ViewBag.pagingModel = pagingModel;
             ViewBag.totalPosts = totalPosts;
@@ -117,7 +121,11 @@ namespace AppMvc.Areas.Blog.Controllers
         [Route("/post/{postslug}.html")]
         public async Task<IActionResult> Detail(string postslug, [FromQuery(Name = "p")] int currentPage, int pagesSize)
         {
-            ViewBag.sidebar = Menu.Home.Blog;
+            if (string.IsNullOrEmpty(postslug))
+            {
+                return NotFound();
+            }
+            
             var Subjects = GetSubjects();
             ViewBag.Subjects = Subjects;
 
@@ -132,7 +140,7 @@ namespace AppMvc.Areas.Blog.Controllers
 
             if (post == null)
             {
-                return NotFound("Cannot find post");
+                return NotFound();
             }
             SubjectModel subject = post.PostSubjects.FirstOrDefault()?.Subject;
             ViewBag.Subject = subject;
@@ -190,7 +198,7 @@ namespace AppMvc.Areas.Blog.Controllers
             };
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return PartialView("_CommentListPartial", postDetailVM);
+                return PartialView("_ViewCommentListPartial", postDetailVM);
             }
 
             return View(postDetailVM);
@@ -238,7 +246,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [HttpPost]
         public async Task<IActionResult> LikeOrUnlikePost(int postId)
         {
-            ViewBag.sidebar = Menu.Home.Blog;
+            
             var user = await _userManager.GetUserAsync(this.User);
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.Status != 0 && p.Id == postId);
             if (post == null)
@@ -270,23 +278,20 @@ namespace AppMvc.Areas.Blog.Controllers
 
         }
 
-
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CommentPost(int postId, string content)
         {
-            ViewBag.sidebar = Menu.Home.Blog;
             var user = await _userManager.GetUserAsync(this.User);
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.Status != 0 && p.Id == postId);
-            if (post == null)
+
+            if (post == null) return NotFound();
+
+            if (string.IsNullOrEmpty(content))
             {
-                return NotFound();
+                return Ok(new { success = false, message = "Comment cannot be empty." });
             }
-            if (String.IsNullOrEmpty(content))
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Comment is empty";
-                return RedirectToAction("Detail", new { postslug = post.Slug });
-            }
+
             try
             {
                 CommentModel comment = new CommentModel()
@@ -299,15 +304,13 @@ namespace AppMvc.Areas.Blog.Controllers
                 };
                 await _context.Comments.AddAsync(comment);
                 await _context.SaveChangesAsync();
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Comment post successful ";
-                return RedirectToAction("Detail", new { postslug = post.Slug });
+
+                return Ok(new { success = true, message = "Add comment successfully." });
             }
             catch (Exception ex)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Comment post fail " + ex.Message;
-                return RedirectToAction("Detail", new { postslug = post.Slug});
+                return Ok(new { success = false, message = "Add comment fail: " + ex.Message });
             }
-
         }
 
 
@@ -368,8 +371,6 @@ namespace AppMvc.Areas.Blog.Controllers
                 return Ok(new { success = false, message = "Reply comment fail " + ex.Message });
             }
         }
-
-
 
 
 

@@ -1,14 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Net.Mail;
-using System.Threading.Tasks;
-using System.Web;
-using Azure.Core;
-using DShop2024.EnumData;
+﻿using DShop2024.EnumData;
 using DShop2024.Models;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using MimeKit.Encodings;
 using MimeKit.Utils;
 
 public class MailSettings 
@@ -21,7 +14,7 @@ public class MailSettings
      
 }
 
-public interface IEmailSender
+public interface IEmailSender 
 {
     Task SendEmailAsync(string email, string subject, string message);
     Task SendEmailTemplateAsync(string email, string subject, BodyBuilder builder);
@@ -35,18 +28,10 @@ public interface IEmailSender
 
 public class SendMailService : IEmailSender
 {
-
-
     private readonly MailSettings mailSettings;
-
     private readonly ILogger<SendMailService> logger;
-
     private readonly IWebHostEnvironment _webHostEnvironment;
 
-
-
-    // mailSetting được Inject qua dịch vụ hệ thống
-    // Có inject Logger để xuất log
     public SendMailService(IOptions<MailSettings> _mailSettings, ILogger<SendMailService> _logger, IWebHostEnvironment webHostEnvironment)
     {
         mailSettings = _mailSettings.Value;
@@ -59,7 +44,6 @@ public class SendMailService : IEmailSender
     public async Task SendEmailTemplateAsync(string email, string subject, BodyBuilder builder)
     {
         var message = new MimeMessage();
-        //var message = new MailMessage();
         message.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
         message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
         message.To.Add(MailboxAddress.Parse(email));
@@ -72,35 +56,23 @@ public class SendMailService : IEmailSender
 
         try
         {
-            //smtp.Connect (mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
-            //smtp.Authenticate (mailSettings.Mail, mailSettings.Password);
             await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(mailSettings.Mail, "rzskdmicavdwmjyo");
+            await smtp.AuthenticateAsync(mailSettings.Mail, mailSettings.Password);
             await smtp.SendAsync(message);
         }
 
         catch (Exception ex)
         {
-            // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
-            System.IO.Directory.CreateDirectory("mailssave");
-            var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
-            await message.WriteToAsync(emailsavefile);
-
-            logger.LogInformation("Lỗi gửi mail, lưu tại - " + emailsavefile);
+            logger.LogInformation("Error send mail" );
             logger.LogError(ex.Message);
         }
-
         smtp.Disconnect(true);
-
         logger.LogInformation("send mail to " + email);
-
-
     }
 
 	public async Task SendEmailAsync(string email, string subject, string htmlMessage)
 	{
 		var message = new MimeMessage();
-		//var message = new MailMessage();
 		message.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
 		message.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
 		message.To.Add(MailboxAddress.Parse(email));
@@ -112,36 +84,23 @@ public class SendMailService : IEmailSender
 
 		message.Body = builder.ToMessageBody();
 
-
-
 		// dùng SmtpClient của MailKit
 		using var smtp = new MailKit.Net.Smtp.SmtpClient();
 
 		try
 		{
-			//smtp.Connect (mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
-			//smtp.Authenticate (mailSettings.Mail, mailSettings.Password);
 			await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
-			await smtp.AuthenticateAsync(mailSettings.Mail, "rzskdmicavdwmjyo");
+			await smtp.AuthenticateAsync(mailSettings.Mail, mailSettings.Password);
 			await smtp.SendAsync(message);
 		}
 
 		catch (Exception ex)
 		{
-			// Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
-			System.IO.Directory.CreateDirectory("mailssave");
-			var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
-			await message.WriteToAsync(emailsavefile);
-
-			logger.LogInformation("Lỗi gửi mail, lưu tại - " + emailsavefile);
-			logger.LogError(ex.Message);
+            logger.LogInformation("Error send mail");
+            logger.LogError(ex.Message);
 		}
-
 		smtp.Disconnect(true);
-
 		logger.LogInformation("send mail to " + email);
-
-
 	}
 
 	public Task SendSmsAsync(string number, string message)
@@ -251,7 +210,7 @@ public class SendMailService : IEmailSender
 
 		builder.HtmlBody = path;
 
-		await SendEmailTemplateAsync(userModel.Email, "confirm email for register", builder);
+		await SendEmailTemplateAsync(userModel.Email, "Confirm email for register", builder);
     }
 
 
@@ -268,12 +227,12 @@ public class SendMailService : IEmailSender
         if(typeService == DShopConst.OTP_CONFIRM_EMAIL)
         {
             title = "Please enter this confirmation code in the window where you started creating your account:";
-            subject = "confirm email for register";
+            subject = "Confirm email for register";
         }
         if(typeService == DShopConst.OTP_RESET_PASSWORD)
         {
             title = "Please enter this confirmation code in the window where you want to reset password your account:";
-            subject =  "confirm email for reset password";
+            subject =  "Confirm email for reset password";
         }
 
         string path = "";
@@ -293,7 +252,7 @@ public class SendMailService : IEmailSender
 		await SendEmailTemplateAsync(userModel.Email, subject, builder);
     }
 
-    public async Task SendEmailCouponForNewCustomer(AppUserModel userModel, CouponModel couponModel, InformationShopModel infoShop)
+    public async Task SendEmailCouponForNewCustomer(AppUserModel userModel, CouponModel couponModel, InformationShopModel infoShop) 
     {
         string webRootPath = _webHostEnvironment.WebRootPath;
 

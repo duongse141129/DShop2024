@@ -8,7 +8,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Promotion)]
+    [SidebarMenu(Menu.Admin.Promotion, SubMenu.Promotion.Promotion)]
     public class PromotionController : Controller
     {
         private readonly DShopContext _context;

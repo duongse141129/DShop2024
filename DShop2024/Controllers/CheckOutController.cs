@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using static DShop2024.EnumData.UserEnumData;
 
 
 namespace DShop2024.Controllers
 {
-	[Authorize]
-	public class CheckOutController : Controller
+    [Authorize(Roles = RoleName.Customer)]
+    public class CheckOutController : Controller
 	{
 		private readonly DShopContext _context;
 
@@ -30,16 +31,25 @@ namespace DShop2024.Controllers
 			_emailSender = emailSender;
 			_momoService = momoService;
 			_vnPayService = vnPayService;
+        }
 
-		}
-
-		public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
 		{
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
-			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
 
-			var patments = await _context.Payments.Where(p => p.Status != 0).ToListAsync();
+            var messages = await ValidateCartPrice();
+            if (messages.Any())
+            {
+                TempData[DShopConst.TEMPDATA_WARNING_CHECKOUT] =string.Join("<br>", messages);
+                return RedirectToAction("Index", "Cart");
+            }
+
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY) ?? new InformationDelivery();
+			List<CouponItem> coupouns = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponItem>();
+
+			
+
+            var payments = await _context.Payments.Where(p => p.Status != 0).ToListAsync();
 
             if (cartItems.Count == 0)
 			{
@@ -73,12 +83,64 @@ namespace DShop2024.Controllers
 				GrandTotal = grandTotal,
 				CouponsApply = coupouns,
 				InfoDelivery = info,
-				Payments = patments
+				Payments = payments
 			};
             return View(cartItemViewModel);
 		}
 
-		private async Task<string> CheckAllStock()
+        private async Task<List<string>> ValidateCartPrice()
+        {
+            var messages = new List<string>();
+            var cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
+            if (cartItems == null || !cartItems.Any())
+                return messages;
+
+            var now = DateTime.Now;
+            for (int i = cartItems.Count - 1; i >= 0; i--)
+            {
+                var item = cartItems[i];
+                var product = await _context.Products
+					.FirstOrDefaultAsync(p => p.Id == item.ProductId);
+				if (product == null || product.Status == 0)
+				{
+					messages.Add($"The product '{item.ProductName}' is no longer available.");
+					cartItems.RemoveAll(p => p.ProductId == item.ProductId);
+				}
+				else
+				{
+					var activeSale = await _context.Sales
+						.FirstOrDefaultAsync(s =>
+							s.ProductId == item.ProductId &&
+							s.Status != 0 &&
+							s.SaleStartDate <= now &&
+							s.SaleEndDate >= now);
+
+					decimal oldPrice = item.Price;
+					decimal currentPrice = activeSale?.SalePrice ?? product.Price;
+
+					if (oldPrice != currentPrice)
+					{
+						if (oldPrice < product.Price && activeSale == null)
+						{
+							messages.Add(
+								$"The promotion for '{item.ProductName}' has ended.");
+						}
+						else
+						{
+							messages.Add(
+								$"The price of '{item.ProductName}' has changed from " +
+								$"{oldPrice:N0} VND to {currentPrice:N0} VND.");
+						}
+
+						item.Price = currentPrice;
+					}
+				}
+			}
+			HttpContext.Session.SetJson(DShopConst.CART_KEY, cartItems);
+            return messages;
+        }
+
+        private async Task<string> CheckAllStock()
 		{
 			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			string productOutOfStock = "";
@@ -109,10 +171,16 @@ namespace DShop2024.Controllers
 				TempData[DShopConst.TEMPDATA_ERROR] = checkStock;
 				return RedirectToAction("Index");
 			}
+            var messages = await ValidateCartPrice();
+            if (messages.Any())
+            {
+                TempData[DShopConst.TEMPDATA_WARNING_CHECKOUT] = string.Join("<br>", messages);
+                return RedirectToAction("Index");
+            }
 
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 			InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+			List<CouponItem> coupouns = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponItem>();
 			var user = await _userManager.GetUserAsync(this.User);
 			if (cartItems.Count == 0)
 			{
@@ -197,10 +265,15 @@ namespace DShop2024.Controllers
 		{
 			try
 			{
+				bool checkOrderExit = await _context.Orders.Where(o => o.OrderCode == orderCode).AnyAsync();
+				if(checkOrderExit)
+				{
+                    return RedirectToAction("Index", "Order");
+                }
 
 				List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
 				InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+				List<CouponItem> coupouns = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponItem>();
 				var user = await _userManager.GetUserAsync(this.User);
 				var payment = await _context.Payments.FirstOrDefaultAsync(p => p.PaymentName == paymentMethod);
 
@@ -255,9 +328,14 @@ namespace DShop2024.Controllers
 
 				foreach (var item in coupouns)
 				{
-					CouponRedemptionModel couponRedemption = await _context.CouponRedemptions.FirstOrDefaultAsync(cr => cr.UserId == user.Id && cr.CouponId == item.Id );
-					couponRedemption.Status = 2;
-                    CouponModel couponModel = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
+					CouponRedemptionModel couponRedemption = new CouponRedemptionModel() 
+					{
+						UserId = user.Id,
+						CouponId = item.Id,
+						Status = 0
+					};
+
+					CouponModel couponModel = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == item.Id);
                     couponModel.Quantity -= 1;
 					OrderCouponsModel orderCoupons = new OrderCouponsModel { OrderId = order.Id, CouponId = item.Id, Status = 1 };
 
@@ -267,8 +345,8 @@ namespace DShop2024.Controllers
 					}
 
 					_context.Coupons.Update(couponModel);
-					_context.CouponRedemptions.Update(couponRedemption);
-					await _context.OrderCouponss.AddAsync(orderCoupons);
+                    await _context.CouponRedemptions.AddAsync(couponRedemption);
+                    await _context.OrderCouponss.AddAsync(orderCoupons);
 					await _context.SaveChangesAsync();
 				}
 
@@ -280,20 +358,20 @@ namespace DShop2024.Controllers
 													.FirstOrDefaultAsync();
                 var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
 				await updateCustomerSegment(user.Id);
-                //await _emailSender.SendEmailOrder(order, infoShop);			
+                await _emailSender.SendEmailOrder(order, infoShop);			
 
                 HttpContext.Session.Remove(DShopConst.CART_KEY);
 				HttpContext.Session.Remove(DShopConst.INFO_CUSTOMER_DELIVERY);
 				HttpContext.Session.Remove(DShopConst.COUPONS_CUSTOMER_APPPLY);
 
 
-				TempData[DShopConst.TEMPDATA_SUCCESS] = "Checkout successful. Thank you for shopping at the DShop2024. ";
-				return RedirectToAction("Index", "Home");
+				TempData[DShopConst.TEMPDATA_SUCCESS] = "Checkout successful. Thank you for shopping";
+				return RedirectToAction("Index", "Order");
 			}
 			catch (Exception ex)
 			{
 				TempData[DShopConst.TEMPDATA_ERROR] = "CheckOut fail " +ex.Message;
-				return RedirectToAction("Index", "Cart");
+				return RedirectToAction("Index", "CheckOut");
 			}
 
 		}
@@ -334,35 +412,31 @@ namespace DShop2024.Controllers
 		private async Task updateCustomerSegment(string userId)
 		{
             var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-                return;
+            if (user != null)
+			{
+                var sumPriceOrders = await _context.Orders.Where(o => o.UserId == userId).Select(o => o.GrandTotal).SumAsync();
 
-            var sumPriceOrders = await _context.Orders
-                .Where(o => o.UserId == userId)
-                .Select(o => o.GrandTotal)
-                .SumAsync();
+                int newSegment = sumPriceOrders switch
+                {
+                    >= (decimal)RangeCustomerSegment.VIP
+                        => (int)StatusCustomerSegment.VIP,
 
-            int newSegment = sumPriceOrders switch
-            {
-                >= (decimal)RangeCustomerSegment.VIP
-                    => (int)StatusCustomerSegment.VIP,
+                    >= (decimal)RangeCustomerSegment.Loyal
+                        => (int)StatusCustomerSegment.Loyal,
 
-                >= (decimal)RangeCustomerSegment.Loyal
-                    => (int)StatusCustomerSegment.Loyal,
+                    >= (decimal)RangeCustomerSegment.Leads
+                        => (int)StatusCustomerSegment.Leads,
 
-                >= (decimal)RangeCustomerSegment.Leads
-                    => (int)StatusCustomerSegment.Leads,
+                    _ => (int)StatusCustomerSegment.New
+                };
 
-                _ => (int)StatusCustomerSegment.New
-            };
-
-            if (user.CustomerSegment != newSegment)
-            {
-                user.CustomerSegment = newSegment;
-				_context.Users.Update(user);
-                await _context.SaveChangesAsync();
-            }
-
+                if (user.CustomerSegment != newSegment)
+                {
+                    user.CustomerSegment = newSegment;
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+            }               
         }
 	
 	}

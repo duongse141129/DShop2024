@@ -4,38 +4,56 @@
 <div class="row">
     <div class="col-md-12">
         <h2 class="section-title">Available Coupons</h2>
-
         <div class="section-header d-flex flex-wrap flex-wrap justify-content-between mb-5">
             <div class="slider-container-coupon">
                 <button class="nav-coupon left" onclick="slideLeftCoupon()">&#10094;</button>
-                <div class="slidercoupon">
+                <div class="slidercoupon gap-3">
                     @foreach (var item in Model)
                     {
-                        <div class="card card-coupon">
-                            <div class="card-body">
+                        <div class="card available-coupon-card h-100">
+                            <div class="card-body d-flex flex-column">
+
                                 @if (item.Promotion.CategoryCouponName == DShopConst.FREE_SHIPPING)
                                 {
-                                    <h5 class="card-title text-primary fs-3 fw-bold">FREE SHIPPING</h5>
+                                    <h5 class="available-coupon-title">FREE SHIPPING</h5>
                                 }
+
                                 @if (item.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
                                 {
-                                    <h5 class="card-title text-primary fs-3 fw-bold">@item.Value %</h5>
+                                    <h5 class="available-coupon-title">@item.Value %</h5>
                                 }
+
                                 @if (item.Promotion.CategoryCouponName == DShopConst.SUB_SUMTOTAL_DISCOUNT)
                                 {
-                                    <h5 class="card-title text-primary fs-3 fw-bold">@item.Value.ToString("#,##0 VND")</h5>
+                                    <h5 class="available-coupon-title">@item.Value.ToString("#,##0 VND")</h5>
                                 }
-                                <div class="fw-bold">Remaining quantity: @item.Quantity</div>
-                                <small class="py-2">Expired: @item.DateExpired.ToString("MM/dd/yyyy")</small>
-                                @if(item.MinimumAmount > 0)
-                                {
-                                    <p class="fs-5">Minimum purchase amount: @item.MinimumAmount.ToString("#,##0 VND")</p>
-                                }
-                                <div class="mt-3">
-                                    <span class="card-title bg-primary text-white px-3 py-3">@item.CouponCode</span>
-                                    <button class="copy-data" data-copy="@item.CouponCode">Save</button>
+
+                                <div class="available-coupon-info">
+                                    <div><strong>Quantity:</strong> @item.Quantity</div>
+                                    <div><strong>Expired:</strong> @item.DateExpired.ToString("MM/dd/yyyy")</div>
+                                    @if (item.MinimumAmount > 0)
+                                    {
+                                        <div class="available-coupon-minimum">
+                                            <strong>Min:</strong>
+                                            @item.MinimumAmount.ToString("#,##0 VND")
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="available-coupon-minimum empty"></div>
+                                    }
                                 </div>
-                 
+
+                                <div class="available-coupon-footer">
+                                    <span class="available-coupon-code">
+                                        @item.CouponCode
+                                    </span>
+                                    <button class="copy-data available-coupon-save-btn"
+                                            data-copy="@item.CouponCode">
+                                        Save
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     }

@@ -9,7 +9,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Information)]
+    [SidebarMenu(Menu.Admin.Information, SubMenu.Information.PrivacyPolicy)]
     public class PolicyManageController : Controller
     {
         private readonly DShopContext _context;

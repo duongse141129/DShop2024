@@ -14,42 +14,39 @@ namespace DShop2024.Repository.Components
 		}
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
-			var bestSaleProducts = await _context.Products
-			 .Where(p => p.Status != 0)
-			 .Join(_context.OrderDetails,
-			 p => p.Id,
-			 od => od.ProductId,
-			 (p, od) => new { p, od })
-			 .Join(_context.Orders.Where(o => o.Status != 0),
-			 pod => pod.od.OrderId,
-			 o => o.Id,
-			 (pod, o) => new { pod.p, pod.od, o })
-			 .GroupBy(x => new
-			 {
-				 x.p.Id,
-				 x.p.ProductName,
-				 x.p.MainImage,
-				 x.p.Price,
-				 x.p.Stock,
-				 x.p.BrandId,
-				 x.p.CategoryId
-			 })
-			 .Select(g => new ProductViewModel
-			 {
-				 Id = g.Key.Id,
-				 ProductName = g.Key.ProductName,
-				 MainImage = g.Key.MainImage,
-				 Stock = g.Key.Stock,	
-				 Price = g.Key.Price,
-				 BrandName = _context.Brands.FirstOrDefault( b => b.Id == g.Key.BrandId).BrandName,
-				 CategoryName = _context.Categories.FirstOrDefault( b => b.Id == g.Key.CategoryId).CategoryName,
-				 QuantitySold = g.Sum(x => x.od.Quantity)
-			 })
-			 .OrderByDescending(x => x.QuantitySold)
-			 .Take(8)
-			 .ToListAsync();
-			return View(bestSaleProducts);
+            var now = DateTime.Now;
+            var bestSaleProducts = await _context.Products
+                .Where(p => p.Status != 0)
+                .Select(p => new ProductViewModel
+                {
+                    Id = p.Id,
+                    ProductName = p.ProductName,
+                    MainImage = p.MainImage,
+                    Price = p.Price,
+                    OriginalPrice = p.OriginalPrice,
+                    Stock = p.Stock,
+                    BrandName = p.Brand.BrandName,
+                    CategoryName = p.Category.CategoryName,
 
-		}
+                    QuantitySold = p.OrderDetails.Where(od => od.Order.Status != 0).Sum(od => (int?)od.Quantity) ?? 0,
+                    AveragePoint = p.Ratings.Where(r => r.Status != 0).Average(r => (double?)r.Star) ?? 0,
+
+                    SalePrice = p.Sales
+                                    .Where(s => s.Status != 0
+                                             && now >= s.SaleStartDate
+                                             && now <= s.SaleEndDate)
+                                    .Select(s => (decimal?)s.SalePrice)
+                        .FirstOrDefault(),
+                    IsOnSale = p.Sales.Any(s =>
+                                        s.Status != 0 &&
+                                        now >= s.SaleStartDate &&
+                                        now <= s.SaleEndDate)
+                })
+                .Where(p => p.QuantitySold > 0)
+                .OrderByDescending(p => p.QuantitySold)
+                .Take(8)
+                .ToListAsync();
+            return View(bestSaleProducts);
+        }
 	}
 }

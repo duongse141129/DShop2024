@@ -11,7 +11,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Slider)]
+    [SidebarMenu(Menu.Admin.Blog, SubMenu.Blog.Slider)]
     public class SliderController : Controller
 	{
 		private readonly DShopContext _context;

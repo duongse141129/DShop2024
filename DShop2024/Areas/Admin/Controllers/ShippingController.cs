@@ -10,7 +10,7 @@ namespace DShop2024.Areas.Admin.Controllers
     [Area("Admin")]
     [Route("Admin/Shipping")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Shipping)]
+    [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Shipping)]
     public class ShippingController : Controller
 	{
         private readonly DShopContext _context;

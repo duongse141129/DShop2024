@@ -1,4 +1,5 @@
-﻿using DShop2024.EnumData;
+﻿using AutoMapper;
+using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
 using DShop2024.ViewModels;
@@ -15,15 +16,23 @@ namespace DShop2024.Controllers
 	{
 		private readonly DShopContext _context;
         private readonly UserManager<AppUserModel> _userManager;
+        private readonly IMapper _mapper;
 
-        public CartController(DShopContext context, UserManager<AppUserModel> userManager)
+        public CartController(DShopContext context, UserManager<AppUserModel> userManager, IMapper mapper)
 		{
 			_context = context;
             _userManager = userManager;
+            _mapper = mapper;
         }
-		public  IActionResult Index()
+		public async  Task<IActionResult> Index()
 		{
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            var messages = await ValidateCartPrice();
+            if (messages.Any())
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = string.Join(", ", messages);
+                return RedirectToAction("Index");
+            }
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
 			decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
 			CartItemViewModel cartItemViewModel = new CartItemViewModel
 			{
@@ -33,30 +42,61 @@ namespace DShop2024.Controllers
 			return View(cartItemViewModel);
 		}
 
-		private async Task GetValueByPercentCoupon()
-		{
-			List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			if (coupouns.Count > 0)
-			{
-				foreach (CouponModel couponModel in coupouns)
-				{
-					var coupon = await _context.Coupons.Include(p => p.Promotion).FirstOrDefaultAsync(c => c.Id == couponModel.Id);
-					if (coupon.Promotion.CategoryCouponName == DShopConst.PERCENTAGE_DISCOUNT)
-					{
-						decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
-						var val = coupon.Value * subtotal / 100000;
-						var CellVal = Math.Ceiling(val);
-						couponModel.Value = CellVal * 1000;					
-					}
-				}
-				HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);
-			}
+        private async Task<List<string>> ValidateCartPrice()
+        {
+            var messages = new List<string>();
+            var cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY);
+            if (cartItems == null || !cartItems.Any())
+                return messages;
 
-		}
+            var now = DateTime.Now;
+            for (int i = cartItems.Count - 1; i >= 0; i--)
+            {
+                var item = cartItems[i];
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                if (product == null || product.Status == 0)
+                {
+                    messages.Add($"The product '{item.ProductName}' is no longer available.");
+                    cartItems.RemoveAll(p => p.ProductId == item.ProductId);
+                }
+                else
+                {
+                    var activeSale = await _context.Sales
+                        .FirstOrDefaultAsync(s =>
+                            s.ProductId == item.ProductId &&
+                            s.Status != 0 &&
+                            s.SaleStartDate <= now &&
+                            s.SaleEndDate >= now);
+
+                    decimal oldPrice = item.Price;
+                    decimal currentPrice = activeSale?.SalePrice ?? product.Price;
+
+                    if (oldPrice != currentPrice)
+                    {
+                        if (oldPrice < product.Price && activeSale == null)
+                        {
+                            messages.Add(
+                                $"The promotion for '{item.ProductName}' has ended.");
+                        }
+                        else
+                        {
+                            messages.Add(
+                                $"The price of '{item.ProductName}' has changed from " +
+                                $"{oldPrice:N0} VND to {currentPrice:N0} VND.");
+                        }
+
+                        item.Price = currentPrice;
+                    }
+                }
+            }
+            HttpContext.Session.SetJson(DShopConst.CART_KEY, cartItems);
+            return messages;
+        }
+
 
         [HttpPost]
-        public async Task<ActionResult> AddQuantityToCart([FromForm] int quantity, [FromForm] int? productId)
+        public async Task<ActionResult> AddQuantityToCart( int quantity,int? productId)
         {
             if (productId == null)
             {
@@ -66,7 +106,7 @@ namespace DShop2024.Controllers
             {
                 return Ok(new { success = false, Message = $" Input quantity >= 1" });
             }
-            ProductModel product = await _context.Products
+            ProductModel product = await _context.Products.Include(p => p.Sales)
                 .FirstOrDefaultAsync(m => m.Id == productId && m.Status != 0);
             if (product == null)
             {
@@ -74,322 +114,288 @@ namespace DShop2024.Controllers
             }
             if (product.Stock == 0)
             {
-                return Ok(new { success = false, Message =  $" Item {product.ProductName} is out of ourder" });
+                return Ok(new { success = false, Message = $" Item {product.ProductName} is out of stock" });
             }
             if (product.Stock < quantity)
             {
-                return Ok(new { success = false, Message =  $" Item {product.ProductName} only has  {product.Stock} quantities left" });
+                return Ok(new { success = false, Message = $" Item {product.ProductName} only has  {product.Stock} quantities left" });
             }
+            var now = DateTime.Now;
+            var activeSale = product.Sales?.FirstOrDefault(s =>s.Status != 0 && s.SaleStartDate <= now &&  s.SaleEndDate >= now);
+            decimal finalPrice = activeSale != null ? activeSale.SalePrice : product.Price;
 
             List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
             CartItemModel cartItem = cart.Where(c => c.ProductId == productId).FirstOrDefault();
+            int currentInCart = cartItem?.Quantity ?? 0;
+            if (product.Stock < (currentInCart + quantity))
+            {
+                return Ok(new { success = false, Message = $"Sản phẩm {product.ProductName} chỉ còn {product.Stock} sản phẩm." });
+            }
+
             if (cartItem == null)
             {
-                product.Stock = quantity;
-                cart.Add(new CartItemModel(product));
+                cart.Add(new CartItemModel(product, quantity, finalPrice));
             }
             else
             {
-                if (product.Stock < cartItem.Quantity + quantity)
-                {
-                    return Ok(new { success = false, Message = $"Item {product.ProductName} only has {product.Stock} left" });
-                }
-                else
-                {
-                    cartItem.Quantity += quantity;
-                }
+                cartItem.Quantity += quantity;
+                cartItem.Price = finalPrice; 
             }
             HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-            await GetValueByPercentCoupon();
+            await UpdateCouponValuesInSession();
             return Ok(new { success = true, Message = $" Add Item {product.ProductName} to cart successfully" });
         }
 
+        public ActionResult Clear()
+        {
+            HttpContext.Session.Remove(DShopConst.CART_KEY);
+            return RedirectToAction("Index");
+        }
+
+        private async Task UpdateCouponValuesInSession()
+        {
+            var coupons = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY);
+            if (coupons == null || !coupons.Any()) return;
+
+            var cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
+
+            foreach (var coupon in coupons)
+            {
+                if (coupon.Promotion == DShopConst.PERCENTAGE_DISCOUNT)
+                {
+                    var dbCoupon = await _context.Coupons.Where(c => c.CouponCode == coupon.CouponCode).FirstOrDefaultAsync();
+                    var val = subtotal * dbCoupon.Value  / 100000;
+                    coupon.Value = Math.Ceiling(val) * 1000;
+                }
+            }
+            HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupons);
+        }
+
+        private void CheckMinimumAmount()
+        {
+            var coupons = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY);
+            if (coupons == null || !coupons.Any()) return;
+            List<string> removedCodes = new List<string>();
+            var cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
+
+            coupons.RemoveAll(coupon =>
+            {
+                bool UnCondition = subtotal < coupon.MinimumAmount;
+                if (UnCondition)
+                {
+                    removedCodes.Add(coupon.CouponCode);
+                }
+                return UnCondition;
+            });
+
+            HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupons);
+            if (removedCodes.Count == 0)
+                return;
+            TempData[DShopConst.TEMPDATA_ERROR] = $"Coupon {string.Join(", ", removedCodes)} were removed because the minimum order value was not met.";
+        }
 
         public async Task<ActionResult> Increase(int? Id)
-		{
-            if (Id == null)
-            {
-                return NotFound();
-            }
-            ProductModel product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-            if (product == null)
-            {
-                return NotFound();
-            }
+        {
+            if (Id == null) return NotFound();
 
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			if (product.Stock <= cartItem.Quantity)
-			{
-				TempData[DShopConst.TEMPDATA_ERROR] = $" Item {product.ProductName} only has {product.Stock} left";
-				HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-				return RedirectToAction("Index");
-			}
-
-			if (cartItem.Quantity >= 1 && product.Stock > cartItem.Quantity)
-			{
-				++cartItem.Quantity;
-			}
-			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-			await GetValueByPercentCoupon();
-			return RedirectToAction("Index");
-
-		}
-
-		public async Task<ActionResult> Decrease(int? Id)
-		{
-            if (Id == null)
-            {
-                return NotFound();
-            }
-            ProductModel product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = await _context.Products.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (product == null) return NotFound();
 
             List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			if(cartItem.Quantity >1)
-			{
-				--cartItem.Quantity;
-			}
-			else
-			{
-				cart.RemoveAll(p => p.ProductId == Id);
-			}
+            CartItemModel cartItem = cart.FirstOrDefault(c => c.ProductId == Id);
 
-			if(cart.Count == 0)
-			{
-				HttpContext.Session.Remove(DShopConst.CART_KEY);
-			}
-			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-			await GetValueByPercentCoupon();
-			return RedirectToAction("Index");
-		}
+            if (product.Stock <= cartItem.Quantity)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Product '{product.ProductName}' only has {product.Stock} items left in stock.";
+                return RedirectToAction("Index");
+            }
 
-		public async Task<ActionResult> Remove(int? Id)
-		{
-            if (Id == null)
-            {
-                return NotFound();
-            }
-            ProductModel product = await _context.Products
-							.FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            cartItem.Quantity++;
+            HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
+
+            await UpdateCouponValuesInSession();
+            return RedirectToAction("Index");
+        }
+
+        public async Task<ActionResult> Decrease(int? Id)
+        {
+            if (Id == null) return NotFound();
 
             List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-			CartItemModel cartItem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-			cart.RemoveAll(p => p.ProductId == Id);
+            CartItemModel cartItem = cart.FirstOrDefault(c => c.ProductId == Id);
 
-			if (cart.Count == 0)
-			{
-				HttpContext.Session.Remove(DShopConst.CART_KEY);
-			}
-			HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
-			await GetValueByPercentCoupon();
-			return RedirectToAction("Index");
-		}
+            if (cartItem != null)
+            {
+                if (cartItem.Quantity > 1) cartItem.Quantity--;
+                else cart.Remove(cartItem);
+            }
 
-		public ActionResult Clear()
-		{
-			HttpContext.Session.Remove(DShopConst.CART_KEY);
-			return RedirectToAction("Index");
-		}
+            if (!cart.Any()) HttpContext.Session.Remove(DShopConst.CART_KEY);
+            else HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 
+            await UpdateCouponValuesInSession();
+            CheckMinimumAmount();
+            return RedirectToAction("Index");
+        }
 
+        public async Task<ActionResult> Remove(int? Id)
+        {
+            if (Id == null) return NotFound();
 
+            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            cart.RemoveAll(p => p.ProductId == Id);
 
-		[HttpPost]
-		[Route("GetShipping")]
-		public async Task<ActionResult> GetShipping(InformationDelivery informationDelivery)
-		{
+            if (!cart.Any()) HttpContext.Session.Remove(DShopConst.CART_KEY);
+            else HttpContext.Session.SetJson(DShopConst.CART_KEY, cart);
 
-			decimal shipppingPrice = DShopConst.DEFAULT_SHIPPING_COST;
-			if (ModelState.IsValid)
-			{
-
-				var existingShipping = await _context.Shippings
-											.FirstOrDefaultAsync(x => x.Province == informationDelivery.tinh);
-
-				if (existingShipping != null)
-				{
-					shipppingPrice = existingShipping.Price;
-				}
-
-				List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
-				if (coupouns.Count > 0)
-				{
-					foreach (var item in coupouns)
-					{
-						if (item.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING) || item.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
-						{
-							informationDelivery.ShippingCost = 0;
-							HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
-							return Ok(new { success = true, message = "Get shipping successful" });
-							
-						}
-					}
-				}
-
-				informationDelivery.ShippingCost = shipppingPrice;
-				HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
-				return Ok(new { success = true, message = "Get shipping successful" });
-			}
-			return Ok(new { success = false, message = "Get shipping fail. Please fill all inputs." });
-		}
+            await UpdateCouponValuesInSession();
+            CheckMinimumAmount();
+            return RedirectToAction("Index");
+        }
 
 
-		[HttpPost]
-		public async Task<ActionResult> GetCoupon( string couponCode)
-		{
-			if(String.IsNullOrEmpty(couponCode))
-			{
-				return Ok(new { success = false, message = "Please enter your coupon code to apply coupon" });
-			}
-           
+        [HttpPost]
+        [Route("GetShipping")]
+        public async Task<ActionResult> GetShipping(InformationDelivery informationDelivery)
+        {
 
-            var validCoupon = await _context.Coupons
-									.Include(p => p.Promotion)
-									.FirstOrDefaultAsync(x => x.CouponCode == couponCode);
-					
-			if(validCoupon != null)
-			{
-				if(validCoupon.Status == 0)
-				{
-					return Ok(new { success = false, message = "Coupon code has been deleted" });
-				}
-                if (validCoupon.Quantity == 0)
+            decimal shipppingPrice = DShopConst.DEFAULT_SHIPPING_COST;
+            if (ModelState.IsValid)
+            {
+
+                var existingShipping = await _context.Shippings
+                                            .FirstOrDefaultAsync(x => x.Province == informationDelivery.tinh);
+
+                if (existingShipping != null)
                 {
-                    return Ok(new { success = false, message = "Coupon code is out of stock" });
+                    shipppingPrice = existingShipping.Price;
                 }
 
-                TimeSpan remainingTime = validCoupon.DateExpired.Date - DateTime.Today.Date;				
-				TimeSpan continueTime = validCoupon.DateStart.Date - DateTime.Today.Date;
-				if(continueTime.Days > 0)
-				{
-					return Ok(new { success = false, message = "Can't use this coupon now. Too soon" });
-				}
-				int daysRemaining = remainingTime.Days;
-				if(daysRemaining >= 0)
-				{
-                    var user = await _userManager.GetUserAsync(this.User);
-
-                    var CheckUsed = await _context.CouponRedemptions.FirstOrDefaultAsync(u => u.UserId == user.Id && u.CouponId == validCoupon.Id);
-
-					if (CheckUsed == null)
-					{
-						CouponRedemptionModel couponRedemption = new CouponRedemptionModel { UserId = user.Id, CouponId = validCoupon.Id, Status = 1 };
-						await _context.CouponRedemptions.AddAsync(couponRedemption);
-						await _context.SaveChangesAsync();
-					}
-					if (CheckUsed != null && CheckUsed.Status == 2 )
-					{
-						return Ok(new { success = false, message = "You have already used this coupon" });
-					}
-
-					List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
-					if ( coupouns.Count > 0 )
-					{
-						foreach (var item in coupouns)
-						{
-							if (item.CouponCode == couponCode)
-							{
-								return Ok(new { success = false, message = "You have actived a coupon in this order" });
-							}
-						}
-					}
-                    List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
-                    decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
-					if( sumPirceItemsCart > 0 && cartItems.Count > 0)
-					{
-						if(sumPirceItemsCart < validCoupon.MinimumAmount)
-						{
-                            return Ok(new { success = false, message = "You do not satisfy the minimum purchase amount. Please purchase additional items." });
-                        }
-					}
-
-                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
-					{
-						validCoupon.Value = validCoupon.Value;
-                    }
-                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
+                List<CouponModel> coupouns = HttpContext.Session.GetJson<List<CouponModel>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponModel>();
+                if (coupouns.Count > 0)
+                {
+                    foreach (var item in coupouns)
                     {
-						if(cartItems.Count > 0 )
-						{
-                            decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
-							var val = validCoupon.Value * subtotal / 100000;
-							var CellVal = Math.Ceiling(val);
-							validCoupon.Value = CellVal*1000;
+                        if (item.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING) || item.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
+                        {
+                            informationDelivery.ShippingCost = 0;
+                            HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
+                            return Ok(new { success = true, message = "Get shipping successful" });
+
                         }
                     }
+                }
 
-                    if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING))
-                    {
-                        InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-                        if(info != null)
-						{
-							if(info.ShippingCost == 0)
-							{
-                                return Ok(new { success = false, message = "You got free shipping. Save this code for next time." });
-                            }
-							info.ShippingCost = 0;
-                            HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
-							validCoupon.Value = 0;
-                        }
-                    }
+                informationDelivery.ShippingCost = shipppingPrice;
+                HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
+                return Ok(new { success = true, message = "Get shipping successful" });
+            }
+            return Ok(new { success = false, message = "Get shipping fail. Please fill all inputs." });
+        }
 
-					if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
-					{
-						var codeCustomer = validCoupon.CouponCode.Split('_')[1];
-						if (user.UserName.ToUpper().Equals(codeCustomer))
-						{
-							InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
-							if (info != null)
-							{
-                                if (info.ShippingCost == 0)
-                                {
-                                    return Ok(new { success = false, message = "You’ve already received free shipping. Save this code for next time." });
-                                }
-                                info.ShippingCost = 0;
-								HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
-                                validCoupon.Value = validCoupon.Value;
-                            }
-						}
-						else
-						{
-							return Ok(new { success = false, message = "This coupon code does not belong to you." });
-						}					
-					}
 
-					coupouns.Add(validCoupon);
-					HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, coupouns);
-					return Ok(new { success = true, message = "Apply coupon successfully" });
+        [HttpPost]
+        public async Task<ActionResult> GetCoupon(string couponCode)
+        {
+            InformationDelivery info = HttpContext.Session.GetJson<InformationDelivery>(DShopConst.INFO_CUSTOMER_DELIVERY);
+            if (info == null)
+            {
+                return Ok(new { success = false, message = "Please provide delivery information and calculate shipping costs first." });
+            }
 
-				}
-				return Ok(new { success = false, message = "Coupon has expried" });
-			}
-			return Ok(new { success = false, message = "Coupon hasn't existed" });
+            if (string.IsNullOrEmpty(couponCode))
+                return Ok(new { success = false, message = "Please enter a coupon code." });
 
-		}
+            var validCoupon = await _context.Coupons
+                .Include(p => p.Promotion)
+                .FirstOrDefaultAsync(x => x.CouponCode == couponCode);
+
+            if (validCoupon == null )
+                return Ok(new { success = false, message = "Coupon code does not exist." });
+
+            if (validCoupon.Status == 0)
+                return Ok(new { success = false, message = "Coupon has been removed." });
+
+            if (validCoupon.Quantity <= 0)
+                return Ok(new { success = false, message = "Coupon is out of usage limit." });
+
+            if (validCoupon.DateStart.Date > DateTime.Today)
+                return Ok(new { success = false, message = "The coupon is not active yet." });
+
+            if (validCoupon.DateExpired.Date < DateTime.Today)
+                return Ok(new { success = false, message = "The coupon has expired." });
+
+            if (!CheckConditionAmuont(validCoupon.MinimumAmount))
+                return Ok(new { success = false, message = "The coupon conditions are not met." });
+
+
+            var user = await _userManager.GetUserAsync(this.User);
+            var checkUsed = await _context.CouponRedemptions.FirstOrDefaultAsync(u => u.UserId == user.Id && u.CouponId == validCoupon.Id);
+
+            if (checkUsed?.Status == 0)
+                return Ok(new { success = false, message = "You had already used this code. You were allowed to use each code only once." });
+
+            var currentCoupons = HttpContext.Session.GetJson<List<CouponItem>>(DShopConst.COUPONS_CUSTOMER_APPPLY) ?? new List<CouponItem>();
+
+            if (currentCoupons.Any(c => c.CouponCode == couponCode))
+                return Ok(new { success = false, message = "You have already applied this coupon." });
+
+
+            if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.SUB_SUMTOTAL_DISCOUNT))
+            {
+                validCoupon.Value = validCoupon.Value;
+            }
+            if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.PERCENTAGE_DISCOUNT))
+            {
+                List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+                decimal subtotal = cartItems.Sum(c => c.Quantity * c.Price);
+                var val = subtotal * validCoupon.Value / 100000;
+                validCoupon.Value = Math.Ceiling(val) * 1000;
+            }
+
+            if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.FREE_SHIPPING))
+            {
+                var checkFreeShipping = currentCoupons.Any(c => c.Promotion == DShopConst.FREE_SHIPPING || c.Promotion == DShopConst.NEW_CUSTOMER);
+                if (checkFreeShipping)
+                {
+                    return Ok(new { success = false, message = "You already have free shipping applied. Please save this code for your next purchase." });
+                }
+                info.ShippingCost = 0;
+                validCoupon.Value = 0;
+                HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
+            }
+
+            if (validCoupon.Promotion.CategoryCouponName.Equals(DShopConst.NEW_CUSTOMER))
+            {
+                var codeCustomer = validCoupon.CouponCode.Split('_')[1];
+                if (!user.UserName.ToUpper().Equals(codeCustomer))
+                {
+                    return Ok(new { success = false, message = "This coupon does not belong to your account." });
+                }
+                info.ShippingCost = 0;
+                validCoupon.Value = validCoupon.Value;
+                HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, info);
+            }
+            CouponItem couponDto = _mapper.Map<CouponItem>(validCoupon);
+            currentCoupons.Add(couponDto);
+            HttpContext.Session.SetJson(DShopConst.COUPONS_CUSTOMER_APPPLY, currentCoupons);
+            return Ok(new { success = true, message = "Coupon applied successfully." });
+        }
 
 
         [HttpPost]
         public async Task<ActionResult> UseMyInformation(bool checkInfo)
         {
-			if(!checkInfo)
-			{
+            if (!checkInfo)
+            {
                 InformationDelivery informationDelivery = new InformationDelivery();
                 HttpContext.Session.SetJson(DShopConst.INFO_CUSTOMER_DELIVERY, informationDelivery);
                 return Ok(new { success = false, message = "Remove shipping information." });
             }
-			try
-			{
+            try
+            {
                 var user = await _userManager.GetUserAsync(this.User);
                 if (String.IsNullOrEmpty(user.PhoneNumber))
                 {
@@ -415,11 +421,20 @@ namespace DShop2024.Controllers
                 }
                 return Ok(new { success = false, message = "Use information to get shipping fail." });
             }
-			catch (Exception ex)
-			{
+            catch (Exception ex)
+            {
                 return Ok(new { success = false, message = "Use information to get shipping fail. " + ex.Message });
             }
         }
 
+        private bool CheckConditionAmuont(decimal minimumAmount)
+        {
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>(DShopConst.CART_KEY) ?? new List<CartItemModel>();
+            if (cartItems.Count == 0) return false;
+            decimal sumPirceItemsCart = cartItems.Sum(s => s.Quantity * s.Price);
+            if (sumPirceItemsCart >= minimumAmount)
+                return true;
+            return false;
+        }
     }
 }

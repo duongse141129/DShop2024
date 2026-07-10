@@ -1,5 +1,4 @@
-﻿using DShop2024.EnumData;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DShop2024.Repository.Validation
 {

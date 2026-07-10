@@ -16,7 +16,6 @@ namespace DShop2024.Areas.Admin.Controllers
     public class DashboardController : Controller
     {
         private readonly DShopContext _context;
-
         private readonly IMapper _mapper;
 
         public DashboardController(DShopContext context, IMapper mapper)
@@ -24,79 +23,86 @@ namespace DShop2024.Areas.Admin.Controllers
             _context = context;
             _mapper = mapper;
         }
+
         public async Task<IActionResult> Index()
         {
-            
-            var countProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0).Count();
-            var countUser = _context.Users.Where(p => p.Status != 0).Count();
-            var countOrder = _context.Orders.Where(p => p.Status != 0).Count();
-        
-            var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
-            var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
-            var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
-            var countDeliveryOrder = _context.Orders.Where(p => p.Status == 3).Count();
-            var countCompletedOrder = _context.Orders.Where(p => p.Status == 4).Count();
+            var orderStatusCounts = await _context.Orders
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+            int countCancelOrder = orderStatusCounts.FirstOrDefault(x => x.Status == 0)?.Count ?? 0;
+            int countNewOrder = orderStatusCounts.FirstOrDefault(x => x.Status == 1)?.Count ?? 0;
+            int countAcceptedOrder = orderStatusCounts.FirstOrDefault(x => x.Status == 2)?.Count ?? 0;
+            int countDeliveryOrder = orderStatusCounts.FirstOrDefault(x => x.Status == 3)?.Count ?? 0;
+            int countCompletedOrder = orderStatusCounts.FirstOrDefault(x => x.Status == 4)?.Count ?? 0;
+            int countOrder = orderStatusCounts.Where(x => x.Status != 0).Sum(x => x.Count);
 
-            var countQuantityReturn = _context.ReturnDetails.Where(p => p.Return.Status != 0  ).Select( re => re.Quantity).Sum();
+            var countProduct = await _context.Products.Where(p => p.Status != 0 && p.Stock > 0).CountAsync();
+            var countUser = await _context.Users.Where(p => p.Status != 0).CountAsync();
+            var countQuantityReturn = await _context.ReturnDetails.Where(p => p.Return.Status != 0).SumAsync(re => re.Quantity);
 
             string currentYear = DateTime.Now.Year.ToString();
             ViewBag.StatisticFilterOptions = new SelectList(DateFilterConstantData.GetDynamicStatisticsOptions(), "Value", "Text", currentYear);
             ViewBag.ImportExportFilterOptions = new SelectList(DateFilterConstantData.GetDynamicImportExportOptions(), "Value", "Text", currentYear);
 
+            var now = DateTime.Now;
             var bestSaleProducts = await _context.Products
-                            .Where(p => p.Status != 0)
-                            .Join(_context.OrderDetails,
-                            p => p.Id,
-                            od => od.ProductId,
-                            (p, od) => new { p, od })
-                            .Join(_context.Orders.Where(o => o.Status != 0),
-                            pod => pod.od.OrderId,
-                            o => o.Id,
-                            (pod, o) => new { pod.p, pod.od, o })
-                            .GroupBy(x => new
-                            {
-                                x.p.Id,
-                                x.p.ProductName,
-                                x.p.MainImage,
-                                x.p.OriginalPrice,
-                                x.p.Price
-                            })
-                            .Select(g => new ProductViewModel
-                            {
-                                Id = g.Key.Id,
-                                ProductName = g.Key.ProductName,
-                                MainImage = g.Key.MainImage,
-                                OriginalPrice = g.Key.OriginalPrice,
-                                Price = g.Key.Price,
-                                QuantitySold = g.Sum(x => x.od.Quantity)
-                            })
-                            .OrderByDescending(x => x.QuantitySold)
-                            .Take(5)
-                            .ToListAsync();
+                                        .Where(p => p.Status != 0)
+                                        .Select(p => new ProductViewModel
+                                        {
+                                            Id = p.Id,
+                                            ProductName = p.ProductName,
+                                            MainImage = p.MainImage,
+                                            Price = p.Price,
+                                            OriginalPrice = p.OriginalPrice,
+                                            Stock = p.Stock,
+                                            BrandName = p.Brand.BrandName,
+                                            CategoryName = p.Category.CategoryName,
 
+                                            QuantitySold = p.OrderDetails.Where(od => od.Order.Status != 0).Sum(od => (int?)od.Quantity) ?? 0,
+                                            AveragePoint = p.Ratings.Where(r => r.Status != 0).Average(r => (double?)r.Star) ?? 0,
+
+                                            SalePrice = p.Sales.Where(s => s.Status != 0
+                                                                     && now >= s.SaleStartDate
+                                                                     && now <= s.SaleEndDate)
+                                                            .Select(s => (decimal?)s.SalePrice)
+                                                            .FirstOrDefault(),
+                                            IsOnSale = p.Sales.Any(s => s.Status != 0 &&
+                                                                now >= s.SaleStartDate &&
+                                                                now <= s.SaleEndDate)
+                                        })
+                                        .Where(p => p.QuantitySold > 0)
+                                        .OrderByDescending(p => p.QuantitySold)
+                                        .Take(5)
+                                        .ToListAsync();
 
             var listCustomer = await (from u in _context.Users
                                       join ur in _context.UserRoles on u.Id equals ur.UserId
                                       join r in _context.Roles on ur.RoleId equals r.Id
                                       where r.Name == RoleName.Customer && u.Status != 0
-                                      select u).Take(20).ToListAsync();
+                                      select u)
+                                      .Take(20)
+                                      .ToListAsync();
 
-            var listContact = await _context.Contacts.Include(u => u.User).Where(c => c.Status != 0)
-                                                                                .OrderBy(c => c.Status)
-                                                                                .ThenByDescending(d => d.DateSent)
-                                                                                .Take(10)
-                                                                                .ToListAsync();
+            var listContact = await _context.Contacts
+                .Include(u => u.User)
+                .Where(c => c.Status != 0)
+                .OrderBy(c => c.Status)
+                .ThenByDescending(d => d.DateSent)
+                .Take(10)
+                .ToListAsync();
 
-            var listCoupon = await _context.Coupons
-                                    .Where(c => c.Status != 0 && c.Quantity > 0)
-                                    .Where(c => c.DateExpired.Date >= DateTime.Today.Date && c.DateStart <= DateTime.Today.Date)
-                                    .OrderByDescending(c => c.Status)
-                                    .Take(10)
-                                    .ToListAsync();
+            var today = DateTime.Today;
+            var listCoupon = await _context.Coupons 
+                .Where(c => c.Status != 0 && c.Quantity > 0)
+                .Where(c => c.DateExpired.Date >= today && c.DateStart <= today)
+                .OrderByDescending(c => c.Status)
+                .Take(10)
+                .ToListAsync();
             var listAvailableCouponVM = _mapper.Map<List<CouponViewModel>>(listCoupon);
 
-            DataDashboardViewModel dataDashboard = new DataDashboardViewModel 
-            { 
+            var dataDashboard = new DataDashboardViewModel
+            {
                 CountProduct = countProduct,
                 CountUser = countUser,
                 CountOrder = countOrder,
@@ -112,29 +118,30 @@ namespace DShop2024.Areas.Admin.Controllers
                 ListAvailableCouponVM = listAvailableCouponVM
             };
             return View(dataDashboard);
-
         }
 
 
-
+        //"If the customer returns the goods, the shop has to cover the shipping cost itself."
         [HttpPost]
         [Route("SubmitFilterDate")]
         public async Task<IActionResult> SubmitFilterDate(string dateStart, string dateEnd)
         {
-            DateTime dateStartSelect = DateTime.Parse(dateStart);
-            DateTime dateEndSelect = DateTime.Parse(dateEnd);
-            if(dateEndSelect < dateStartSelect)
+
+            if (!DateTime.TryParse(dateStart, out DateTime dateStartSelect) ||
+                        !DateTime.TryParse(dateEnd, out DateTime dateEndSelect))
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Date start must <= date end";
-                return NoContent();
-            }
-            var range = dateEndSelect - dateStartSelect;
-            if(range.TotalDays > 30)
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Limited to just 30 days";
-                return NoContent();
+                return Json(new { success = false, message = "Invalid date format." });
             }
 
+            if (dateEndSelect < dateStartSelect)
+            {
+                return Json(new { success = false, message = "Start date must be earlier than or equal to end date." });
+            }
+
+            if ((dateEndSelect - dateStartSelect).TotalDays > 31)
+            {
+                return Json(new { success = false, message = "Date range cannot exceed 31 days." });
+            }
             var chartDataRangeDay = await _context.Orders
                     .Where(o => o.Status == 4 && o.CreatedDate.Date >= dateStartSelect.Date && o.CreatedDate.Date <= dateEndSelect.Date)
                     .GroupBy(o => new { o.CreatedDate.Date })
@@ -143,24 +150,111 @@ namespace DShop2024.Areas.Admin.Controllers
                         Id = g.Key.Date.Day,
                         date = g.Key.Date.ToShortDateString(),
                         orders = g.Count(),
-
                         quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
 
-                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
-                                  - g.SelectMany(o => o.Returns).Where(r => r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
+                        revenue = g.Sum(o => o.GrandTotal)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.TotalRefundAmount) ?? 0)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0),
 
                         profit = g.SelectMany(o => o.OrderDetails)
                                     .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
                                  - g.Sum(o => o.ValueCoupon)
-                                 - g.SelectMany(o => o.Returns).Where(p => p.Status == 3)
-                                    .SelectMany(r => r.ReturnDetails)
-                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(p => p.Status == 3)
+                                      .SelectMany(r => r.ReturnDetails)
+                                      .Sum(rd => (decimal?)((rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)) ?? 0)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(r => r.Status == 3)
+                                      .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0)
                     })
                     .OrderBy(x => x.Id)
                     .ToListAsync();
-
-            return Json(chartDataRangeDay);
+            return Json(new { success = true, data = chartDataRangeDay });
         }
+
+        [Route("getDataByMonth")]
+        public async Task<List<StatisticalViewModel>> getDataByMonth(int month, int year)
+        {
+            var chartDataYear = await _context.Orders
+                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
+                    .GroupBy(o => new { o.CreatedDate.Day })
+                    .Select(g => new StatisticalViewModel
+                    {
+                        Id = g.Key.Day,
+                        date = g.Key.Day.ToString("D2") + "/" + month + "/" + year,
+                        orders = g.Count(),
+                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
+
+                        revenue = g.Sum(o => o.GrandTotal)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.TotalRefundAmount) ?? 0)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0),
+
+                        profit = g.SelectMany(o => o.OrderDetails)
+                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
+                                 - g.Sum(o => o.ValueCoupon)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(p => p.Status == 3)
+                                      .SelectMany(r => r.ReturnDetails)
+                                      .Sum(rd => (decimal?)((rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)) ?? 0)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(r => r.Status == 3)
+                                      .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0)
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+            return chartDataYear;
+        }
+
+        [Route("getDataByYear")]
+        public async Task<List<StatisticalViewModel>> getDataByYear(int year)
+        {
+            var chartDataYear = await _context.Orders
+                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
+                    .GroupBy(o => new { o.CreatedDate.Month })
+                    .Select(g => new StatisticalViewModel
+                    {
+                        Id = g.Key.Month,
+                        date = g.Key.Month.ToString("D2") + "/" + year,
+                        orders = g.Count(),
+                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
+
+                        revenue = g.Sum(o => o.GrandTotal)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.TotalRefundAmount) ?? 0)
+                                  - (g.SelectMany(o => o.Returns)
+                                       .Where(r => r.Status == 3)
+                                       .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0),
+
+                        profit = g.SelectMany(o => o.OrderDetails)
+                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
+                                 - g.Sum(o => o.ValueCoupon)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(p => p.Status == 3)
+                                      .SelectMany(r => r.ReturnDetails)
+                                      .Sum(rd => (decimal?)((rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)) ?? 0)
+                                 - (g.SelectMany(o => o.Returns)
+                                      .Where(r => r.Status == 3)
+                                      .Sum(r => (decimal?)r.ReturnShippingCost) ?? 0)
+
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+            return chartDataYear;
+        }
+
+
+
+
+
 
         [HttpPost]
         [Route("SelectFilterDate")]
@@ -172,7 +266,7 @@ namespace DShop2024.Areas.Admin.Controllers
             var year = DateTime.Today.Year;
             if (filterdate == "last_month")
             {
-                chartData = await getDataByMonth(month-1, year);
+                chartData = await getDataByMonth(month - 1, year);
                 return Json(chartData);
             }
             if (filterdate == "this_month")
@@ -184,70 +278,7 @@ namespace DShop2024.Areas.Admin.Controllers
             chartData = await getDataByYear(year);
             return Json(chartData);
         }
-     
 
-
-        [Route("getDataByMonth")]
-        public async Task<List<StatisticalViewModel>> getDataByMonth(int month, int year)
-        {
-
-            var chartDataYear = await _context.Orders
-                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year && o.CreatedDate.Month == month)
-                    .GroupBy(o => new { o.CreatedDate.Day })
-                    .Select(g => new StatisticalViewModel
-                    {
-                        Id = g.Key.Day,
-                        date = g.Key.Day.ToString("D2") + "/" + month + "/" + year,
-                        orders = g.Count(),
-
-                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
-
-                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
-                                  - g.SelectMany(o => o.Returns).Where(r => r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
-
-                        profit = g.SelectMany(o => o.OrderDetails)
-                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
-                                 - g.Sum(o => o.ValueCoupon)
-                                 - g.SelectMany(o => o.Returns).Where(p => p.Status == 3)
-                                    .SelectMany(r => r.ReturnDetails)
-                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
-                    })
-                    .OrderBy(x => x.Id)
-                    .ToListAsync();
-
-
-            return chartDataYear;
-        }
-
-        [Route("getDataByYear")]
-        public async Task<List<StatisticalViewModel>> getDataByYear(int year)
-        {
-
-            var chartDataYear = await _context.Orders
-                    .Where(o => o.Status == 4 && o.CreatedDate.Year == year)
-                    .GroupBy(o => new { o.CreatedDate.Month })
-                    .Select(g => new StatisticalViewModel
-                    {
-                        Id = g.Key.Month,
-                        date = g.Key.Month.ToString("D2") + "/" + year,
-                        orders = g.Count(),
-
-                        quantitysold = g.SelectMany(o => o.OrderDetails).Sum(od => od.Quantity),
-
-                        revenue = g.Sum(o => o.GrandTotal - o.ValueCoupon)
-                                  - g.SelectMany(o => o.Returns).Where( r=> r.Status == 3).Sum(r => (decimal?)r.TotalRefundAmount + r.ShippingCost ?? 0),
-
-                        profit = g.SelectMany(o => o.OrderDetails)
-                                    .Sum(od => (od.Price - od.OriginalPrice) * od.Quantity)
-                                 - g.Sum(o => o.ValueCoupon)
-                                 - g.SelectMany(o => o.Returns).Where( p => p.Status == 3 )
-                                    .SelectMany(r => r.ReturnDetails)
-                                    .Sum(rd => (rd.PricePerUnit - rd.OriginalPricePerUnit) * rd.Quantity)
-                    })
-                    .OrderBy(x => x.Id)
-                    .ToListAsync();
-            return chartDataYear;
-        }
 
         [HttpPost]
         [Route("GetChartData")]

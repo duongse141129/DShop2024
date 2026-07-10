@@ -37,7 +37,8 @@ namespace DShop2024.Controllers
 			IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
                                                     .Include(p => p.Brand)
                                                     .Include(p => p.Category)
-                                                    .Include(r => r.Ratings);
+                                                    .Include(r => r.Ratings)
+                                                    .Include(r => r.Sales);
             var products = await listProduct.OrderByDescending(p => p.CreateDate)
                         .Take(10)
                         .Select( g => _mapper.Map<ProductViewModel>(g))                     
@@ -71,23 +72,27 @@ namespace DShop2024.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        [Authorize]
+
 		[HttpPost]
         public async Task<IActionResult> AddToWishList(int? Id)
 		{
             if (Id == null)
             {
-                return Ok(new { success = false, Message = "NotFound" });
+                return Ok(new { success = false, Message = "Product ID is required" });
             }
             ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
-                return Ok(new { success = false, Message = "NotFound" });
+                return Ok(new { success = false, Message = "The product was not found" });
             }
 
             var user = await _userManager.GetUserAsync(User);
-			var chechExit = await (_context.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return Ok(new { success = false, Message = "Please log in to use this feature" });
+            }
+            var chechExit = await (_context.WishLists.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
 			if (chechExit != null)
 			{
                 return Ok(new { success = false, Message = "The product is already in in your wishlist" });
@@ -110,27 +115,29 @@ namespace DShop2024.Controllers
             }
 		}
 
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> AddToCompare(int? Id)
 		{
             if (Id == null)
             {
-				return Ok(new { success = false, Message = "NotFound" });
+				return Ok(new { success = false, Message = "Product ID is required" });
 			}
             ProductModel product = await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
             if (product == null)
             {
-				return Ok(new { success = false, Message = "NotFound" });
+				return Ok(new { success = false, Message = "The product was not found" });
 			}
 
             var user = await _userManager.GetUserAsync(User);
-
-            var countConpare = await (_context.Compares.Where(co => co.UserId == user.Id)).CountAsync();
-            if(countConpare == 5)
+            if (user == null)
             {
-				return Ok(new { success = false, Message = "Maximum 5 product in your list compare" });
+                return Ok(new { success = false, Message = "Please log in to use this feature" });
+            }
+            var countConpare = await (_context.Compares.Where(co => co.UserId == user.Id)).CountAsync();
+            if(countConpare >= DShopConst.MAX_COMPARE_SHOW)
+            {
+				return Ok(new { success = false, Message = $"Maximum {DShopConst.MAX_COMPARE_SHOW} product in your list compare" });
 			}
 
             var chechExit = await (_context.Compares.Where(co => co.UserId == user.Id).Where(co => co.ProductId == Id)).FirstOrDefaultAsync();
@@ -187,6 +194,7 @@ namespace DShop2024.Controllers
                         .Include(p => p.Brand)
                         .Include(p => p.Category)
                         .Include(p => p.Ratings)
+                        .Include(p => p.Sales)
                         .Select( g => _mapper.Map<ProductViewModel>(g))
                         .ToListAsync();
             ViewBag.pagingModel = pagingModel;
@@ -197,12 +205,14 @@ namespace DShop2024.Controllers
 		public async Task<IActionResult> Compare()
 		{
             var user = await _userManager.GetUserAsync(this.User);
-            List<ProductModel> compareProduct = await (from p in _context.Products
-                                                       join co in _context.Compares on p.Id equals co.ProductId
-                                                       where co.UserId == user.Id
-                                                       select p)
-                                        .Include(p => p.Ratings)
-                                        .ToListAsync();
+
+            var compareProduct = await _context.Products
+                                     .Where(p => _context.Compares
+                                         .Any(c => c.UserId == user.Id && c.ProductId == p.Id))
+                                     .Include(p => p.Ratings)
+                                     .Include(p => p.Sales)
+                                     .ToListAsync();
+
             var compareProductVM = _mapper.Map<List<ProductViewModel>>(compareProduct);
             return View(compareProductVM);
 		}

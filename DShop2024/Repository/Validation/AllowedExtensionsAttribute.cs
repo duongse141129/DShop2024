@@ -6,7 +6,7 @@ namespace DShop2024.Repository.Validation
     {
         private readonly string[] _allowedExtensions;
 
-        public AllowedExtensionsAttribute(string[] allowedExtensions)
+        public AllowedExtensionsAttribute(string[] allowedExtensions) 
         {
             _allowedExtensions = allowedExtensions;
         }

@@ -10,7 +10,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Brand)]
+    [SidebarMenu(Menu.Admin.Catalog, SubMenu.Catalog.Brand)]
     public class BrandManageController : Controller
     {
         private readonly DShopContext _context;
@@ -25,7 +25,7 @@ namespace DShop2024.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             
-            return View(await _context.Brands.Where(p => p.Status != 0).ToListAsync());
+            return View(await _context.Brands.Where(p => p.Status != 0).OrderByDescending(b => b.Id).ToListAsync());
 
         }
 

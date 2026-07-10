@@ -29,7 +29,8 @@ namespace DShop2024.AutoMapper
             CreateMap<OrderModel, OrderViewModel>()
                     .ForMember(pv => pv.CustomerAvatar, p => p.MapFrom(p => p.User.Avatar))
                     .ForMember(pv => pv.CustomerName, p => p.MapFrom(p => p.User.UserName))
-                    .ForMember(pv => pv.CustomerName, p => p.MapFrom(p => p.User.Email))
+                    .ForMember(pv => pv.CustomerEmail, p => p.MapFrom(p => p.User.Email))
+                    .ForMember(pv => pv.CustomerId, p => p.MapFrom(p => p.User.Id))
                     .ForMember(pv => pv.UpdateByName, p => p.MapFrom(p => p.UpdateBy.UserName))
                     .ForMember(pv => pv.UpdateByAvatar, p => p.MapFrom(p => p.UpdateBy.Avatar))
                     .ForMember(pv => pv.PaymentName, p => p.MapFrom(p => p.PaymentMethod.PaymentName))
@@ -37,7 +38,8 @@ namespace DShop2024.AutoMapper
                     .ForMember(pv => pv.AllowReturn, p => p.MapFrom(p => CheckAllowReturn(p.DateUpdate, p.Status)))
                     .ForMember(pv => pv.Return, p => p.MapFrom(p => p.Returns.FirstOrDefault()))
                     .ForMember(pv => pv.IsReturn, p => p.MapFrom(p => p.Returns.Count > 0 ? true : false))
-                    .ForMember(pv => pv.IsFullReturn, p => p.MapFrom(p => CheckIsFullReturn(p.Returns)));
+                    .ForMember(pv => pv.IsFullReturn, p => p.MapFrom(p => CheckIsFullReturn(p.Returns)))
+                    .ForMember(pv => pv.IsReturnRejected, p => p.MapFrom(p => p.Returns.FirstOrDefault().Status == 0 ? true : false));
 
 
         }

@@ -1,6 +1,7 @@
 ﻿using App.Utilities;
 using DShop2024.EnumData;
 using DShop2024.Models.Blog;
+using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,10 +13,10 @@ namespace DShop2024.Areas.Blog.Controllers
 {
     [Area("Blog")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Blog, SubMenu.Blog.Subject)]
     public class SubjectController : Controller
     {
         private readonly DShopContext _context;
-        private readonly string sidebar = "blog";
 
         public SubjectController(DShopContext context)
         {
@@ -24,21 +25,20 @@ namespace DShop2024.Areas.Blog.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             var qr = (from c in _context.Subjects select c).Where(c => c.Status != 0)
                 .Include(c => c.ParentSubject)
                 .Include(c => c.SubjectChildren);
 
             var subjects = (await qr.Where(s => s.Status != 0).ToListAsync())
-                            .Where(c => c.ParentSubject == null)
-                            .ToList();
+                            .Where(c => c.ParentSubject == null).ToList();
                 
             return View(subjects);
         }
 
         public async Task<IActionResult> Details(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -57,7 +57,7 @@ namespace DShop2024.Areas.Blog.Controllers
 
         public async Task<IActionResult> SearchTitle(String search)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (String.IsNullOrEmpty(search))
             {
                 return RedirectToAction("Index");
@@ -95,7 +95,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> CreateAsync()
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             var qr = (from c in _context.Subjects select c)
                 .Where(s => s.Status != 0)
                 .Include(c => c.ParentSubject)
@@ -123,20 +123,21 @@ namespace DShop2024.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,SubjectContent,ParentSubjectId")] SubjectModel subject)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (ModelState.IsValid)
             {
                 try
                 {
                     if (subject.ParentSubjectId == -1) subject.ParentSubjectId = null;
                     subject.Slug = AppUtilities.GenerateSlug(subject.Title);
-                    if (await _context.Posts.AnyAsync(p => p.Slug == subject.Slug))
+                    bool checkSlug = await _context.Subjects.AnyAsync(p => p.Slug == subject.Slug);
+                    if (checkSlug)
                     {
-                        ModelState.AddModelError("Slug", "This url subject already exists.");
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This url subject already exists. ";
                         return View(subject);
                     }
                     subject.Status = 1;
-                    _context.Add(subject);
+                    _context.Subjects.Add(subject);
                     await _context.SaveChangesAsync();
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Create subject successful ";
                     return RedirectToAction(nameof(Index));
@@ -172,7 +173,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -213,7 +214,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,SubjectContent,Status,ParentSubjectId")] SubjectModel subject)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id != subject.Id)
             {
                 return NotFound();
@@ -267,14 +268,14 @@ namespace DShop2024.Areas.Blog.Controllers
 
                     var dtc = _context.Subjects.Where(s => s.Status != 0).FirstOrDefault(c => c.Id == id);
                     subject.Slug = AppUtilities.GenerateSlug(subject.Title);
-                    if (await _context.Posts.AnyAsync(p => p.Slug == subject.Slug))
+                    if (await _context.Subjects.AnyAsync(p => p.Slug == subject.Slug))
                     {
-                        ModelState.AddModelError("Slug", "This url subject already exists.");
+                        TempData[DShopConst.TEMPDATA_ERROR] = "This url subject already exists. ";
                         return View(subject);
                     }
 
                     _context.Entry(dtc).State = EntityState.Detached;
-                    _context.Update(subject);
+                    _context.Subjects.Update(subject);
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Edit subject successful ";
                     await _context.SaveChangesAsync();                    
                 }
@@ -318,7 +319,7 @@ namespace DShop2024.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();

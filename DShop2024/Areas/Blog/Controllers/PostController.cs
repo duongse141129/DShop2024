@@ -5,6 +5,7 @@ using Bogus;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Models.Blog;
+using DShop2024.Repository;
 using DShop2024.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +20,7 @@ namespace AppMvc.Areas.Blog.Controllers
 {
     [Area("Blog")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
+    [SidebarMenu(Menu.Admin.Blog, SubMenu.Blog.Post)]
     public class PostController : Controller
     {
         private readonly DShopContext _context;
@@ -38,7 +40,7 @@ namespace AppMvc.Areas.Blog.Controllers
 
         public async Task<IActionResult> Index(string search = "",string subject_by = "", [FromQuery(Name = "p")]int currentPage = 1, int pagesSize = 9)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             IQueryable<PostModel> posts = _context.Posts.Where(p => p.Status!= 0)
                                         .OrderByDescending(p => p.IsPin)
                                         .ThenByDescending(p => p.DateUpdated);
@@ -74,13 +76,10 @@ namespace AppMvc.Areas.Blog.Controllers
             };
 
             ViewBag.pagingModel = pagingModel;
-            ViewBag.totalPosts = totalPosts;
             ViewBag.postIndex = (currentPage -1) * pagesSize;
             ViewBag.search = search;
 
             var subjects = await _context.Subjects.Where(s => s.Status !=0).ToArrayAsync();
-            //ViewBag.listSubject = subjects;
-            //ViewBag.subjectBy = Convert.ToInt32(subject_by);
             ViewBag.subjects = new SelectList(subjects, "Id", "Title", subject_by);
 
           var postsInPage =await posts.Skip((currentPage - 1) * pagesSize)
@@ -105,7 +104,7 @@ namespace AppMvc.Areas.Blog.Controllers
 
         public async Task<IActionResult> Details(int? id, [FromQuery(Name = "p")] int currentPage, int pagesSize)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -212,7 +211,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> CreateAsync()
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             var Subjects = await _context.Subjects.Where(s=> s.Status != 0).ToArrayAsync();
 
             ViewData["Subjects"] = new MultiSelectList(Subjects, "Id", "Title");
@@ -225,7 +224,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,ShortDescription,PostContent,SubjectIDs,ImageUpload")] CreatePostModel post)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             var Subjects = await _context.Subjects.Where(s => s.Status != 0).ToListAsync();
             ViewData["Subjects"] = new MultiSelectList(Subjects,"Id","Title");
 
@@ -290,7 +289,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -330,7 +329,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ShortDescription,PostContent,SubjectIDs,ImageUpload")] CreatePostModel post)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id != post.Id)
             {
                 return NotFound();
@@ -437,7 +436,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -488,7 +487,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> PinPost(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -506,9 +505,9 @@ namespace AppMvc.Areas.Blog.Controllers
                 if (post.IsPin == false)
                 {
                     var count = await _context.Posts.Where(p => p.Status != 0 && p.IsPin == true).CountAsync();
-                    if (count == 5)
+                    if (count == DShopConst.MAX_POST_SHOW)
                     {
-                        TempData[DShopConst.TEMPDATA_ERROR] = "Pin post fail. Maximum of 5 posts can be pinned ";
+                        TempData[DShopConst.TEMPDATA_ERROR] = $"Pin post fail. Maximum of {DShopConst.MAX_POST_SHOW} posts can be pinned ";
                         return RedirectToAction("Index");
                     }
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Pin post successful " + post.Title;
@@ -533,7 +532,7 @@ namespace AppMvc.Areas.Blog.Controllers
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> PinPostDetail(int? id)
         {
-            ViewBag.sidebar = Menu.Admin.Blog;
+            
             if (id == null)
             {
                 return NotFound();
@@ -614,18 +613,16 @@ namespace AppMvc.Areas.Blog.Controllers
         [HttpPost]
         public async Task<IActionResult> CommentPost(int postId, string content)
         {
-            ViewBag.sidebar = Menu.Home.Blog;
             var user = await _userManager.GetUserAsync(this.User);
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.Status != 0 && p.Id == postId);
-            if (post == null)
+
+            if (post == null) return NotFound();
+
+            if (string.IsNullOrEmpty(content))
             {
-                return NotFound();
+                return Ok(new { success = false, message = "Comment cannot be empty." });
             }
-            if (String.IsNullOrEmpty(content))
-            {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Comment is empty";
-                return RedirectToAction("Details", new { id = post.Id });
-            }
+
             try
             {
                 CommentModel comment = new CommentModel()
@@ -638,16 +635,16 @@ namespace AppMvc.Areas.Blog.Controllers
                 };
                 await _context.Comments.AddAsync(comment);
                 await _context.SaveChangesAsync();
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Comment post successful ";
-                return RedirectToAction("Details", new { id = post.Id });
+
+                return Ok(new { success = true, message = "Add comment successfully." });
             }
             catch (Exception ex)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Comment post fail " + ex.Message;
-                return RedirectToAction("Details", new { id = post.Id });
+                return Ok(new { success = false, message = "Add comment fail: " + ex.Message });
             }
-
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> GetPopUpReplyComment(int? Id)
@@ -719,14 +716,14 @@ namespace AppMvc.Areas.Blog.Controllers
                 return NotFound();
             }
             var commentModel = await _context.Comments.Include(c => c.CommentChildren)
-                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0) ;
-            if (commentModel == null )
+                .FirstOrDefaultAsync(m => m.Id == Id && m.Status != 0);
+            if (commentModel == null)
             {
                 return NotFound();
             }
             try
             {
-                if(commentModel?.CommentChildren.Count > 0)
+                if (commentModel?.CommentChildren.Count > 0)
                 {
                     foreach (var item in commentModel.CommentChildren)
                     {
@@ -736,24 +733,13 @@ namespace AppMvc.Areas.Blog.Controllers
                 commentModel.Status = 0;
                 _context.Comments.Update(commentModel);
                 await _context.SaveChangesAsync();
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete comment successful ";
-                return RedirectToAction("Details", new {  Id = commentModel.PostId });
+                return Ok(new { success = true, message = "Delete comment  successfully." });
             }
             catch (Exception ex)
             {
-                TempData[DShopConst.TEMPDATA_ERROR] = "Delete comment fail "+ ex.Message;
-                return RedirectToAction("Details", new { Id = commentModel.PostId });
+                return Ok(new { success = false, message = "Delete comment fail: " + ex.Message });
             }
         }
-
-
-
-
-
-
-
-
-
 
 
         public async Task<IActionResult> SendPromotionToNewCustomer()
@@ -913,11 +899,11 @@ namespace AppMvc.Areas.Blog.Controllers
 
                 List<ProductModel> products = await _context.Products.Where(p => p.Status != 0).OrderBy(p => p.Id).ToListAsync();
                 Random rnd = new Random();
-                DateTime dateTime = new DateTime(2025, 12, 24);
-                DateTime startDate = new DateTime(2025, 12, 1); 
-                DateTime endDate = new DateTime(2025, 12, 20); 
+                DateTime dateTime = new DateTime(2026, 7, 1);
+                DateTime startDate = new DateTime(2026, 7, 1); 
+                DateTime endDate = new DateTime(2026, 7, 30); 
                 int range = (endDate - startDate).Days;
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < 15; i++)
                 {
                     DateTime randomDate = dateTime.AddDays(rnd.Next(range+1));
                     var u = user[rnd.Next(user.Count)];
@@ -1192,6 +1178,51 @@ namespace AppMvc.Areas.Blog.Controllers
 
         }
 
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedLinkImageDescritp()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                string local = "localhost:7213";
+                string dshop = "dshopbackpack.io.vn";
+
+                var products = await _context.Products.Where(p => p.Status != 0).Where(p => p.Description.Contains("img"))
+                                                        .ToListAsync();
+
+                foreach (var item in products)
+                {
+                    if (item.Description.Contains(local))
+                    {
+                        string newDes = item.Description.Replace(local, dshop);
+                        item.Description = newDes;
+                        _context.Products.Update(item);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail 2" + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail3 " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
 
 
 
@@ -1319,8 +1350,8 @@ namespace AppMvc.Areas.Blog.Controllers
             {
                 string userID = "57a1ccc4-504c-43f1-bdc2-a9b7f5c8dbbc";
                 List<int> listProductId = await _context.Products.Where(s => s.Status!=0).Select(s => s.Id).ToListAsync();
-                DateTime startDate = new DateTime(2025, 10, 1);
-                DateTime endDate = new DateTime(2025, 12, 25);
+                DateTime startDate = new DateTime(2026, 6, 1);
+                DateTime endDate = new DateTime(2026, 7, 3);
 
                 Random rand = new Random();
                 int range = (endDate - startDate).Days;
@@ -1377,14 +1408,14 @@ namespace AppMvc.Areas.Blog.Controllers
                 List<int> tasks = await _context.Tasks.Where(s => s.Status != 0).Select(s => s.Id).ToListAsync();
 
                 string assignedByUserID = "ea2512a6-c19c-40dc-91b8-ecc9288954ec";
-                DateTime startDate = new DateTime(2025, 11, 1);
-                DateTime endDate = new DateTime(2025, 12, 24);
+                DateTime startDate = new DateTime(2026, 6, 1);
+                DateTime endDate = new DateTime(2026, 7, 3);
 
                 var faker = new Faker();
                 Random rand = new Random();
                 int dayRange = (endDate - startDate).Days;
 
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < 50; i++)
                 {
                     DateTime randomDay = startDate.AddDays(rand.Next(dayRange + 1));
 
@@ -1410,6 +1441,83 @@ namespace AppMvc.Areas.Blog.Controllers
                     };
 
                     _context.Assignments.Add(assignment);
+                }
+
+
+                await _context.SaveChangesAsync();
+                TempData[DShopConst.TEMPDATA_SUCCESS] = "Seed data successful ";
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Seed data fail " + ex.Message;
+                return RedirectToAction("Index");
+            }
+
+        }
+
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> SeedDataSale()
+        {
+            var userAdmin = await _userManager.GetUserAsync(this.User);
+            if (userAdmin.UserName != DShopConst.ADMIN_DSHOP)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = "Access denied ";
+                return RedirectToAction("Index");
+            }
+            try
+            {
+                List<ProductModel> listProductId = await _context.Products.Where(s => s.Status != 0).ToListAsync();
+                DateTime startDate = DateTime.Now;
+                DateTime endDate = DateTime.Now.AddDays(30);
+
+                Random rand = new Random();
+                int range = (endDate - startDate).Days;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    var p = listProductId[rand.Next(listProductId.Count)];
+                    if(p.Price > 300000)
+                    {
+                        decimal minSalePrice = p.Price * 0.75m;
+                        decimal maxSalePrice = p.Price * 0.90m;
+
+                        minSalePrice = Math.Max(minSalePrice, p.OriginalPrice + 10000);
+
+
+                        if (minSalePrice < maxSalePrice)
+                        {
+                            int min = (int)Math.Ceiling(minSalePrice / 1000m);
+                            int max = (int)Math.Floor(maxSalePrice / 1000m);
+
+                            decimal salePrice = rand.Next(min, max + 1) * 1000m;
+
+                            var boolCheckExit = await _context.Sales.AnyAsync(s => s.SalePrice != 0 && s.ProductId == p.Id);
+                            if (!boolCheckExit)
+                            {
+                                var sale = new SaleModel
+                                {
+                                    SaleStartDate = startDate,
+                                    SaleEndDate = endDate,
+                                    ProductId = p.Id,
+                                    SalePrice = salePrice,
+                                    Status = 1
+                                };
+
+                                await _context.Sales.AddAsync(sale);
+                                await _context.SaveChangesAsync();
+                            }
+
+                        }
+                    }
+
                 }
 
 

@@ -8,7 +8,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
 	[Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Information)]
+    [SidebarMenu(Menu.Admin.Information, SubMenu.Information.Information)]
     public class InformationController : Controller
 	{
 		private readonly DShopContext _context;
@@ -65,7 +65,7 @@ namespace DShop2024.Areas.Admin.Controllers
 					if (informationShop.ImageUpload != null)
 					{
 
-						string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/Logo");
+						string uploadsDir = Path.Combine(_webHostEnvironment.WebRootPath, "media\\Logo");
 						string imageName = Guid.NewGuid().ToString() + "_" + informationShop.ImageUpload.FileName;
 						string filePath = Path.Combine(uploadsDir, imageName);
 

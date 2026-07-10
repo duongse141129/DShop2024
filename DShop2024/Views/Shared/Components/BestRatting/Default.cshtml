@@ -1,4 +1,5 @@
-﻿<div class="row">
+﻿@model IEnumerable<ProductViewModel>
+<div class="row">
     <div class="col-md-12">
 
         <div class="section-header d-flex justify-content-between">
@@ -18,59 +19,63 @@
 </div>
 <div class="row">
     <div class="col-md-12">
-
         <div class="rating-products-carousel swiper">
             <div class="swiper-wrapper">
 
                 @foreach (var item in Model)
                 {
-                    <div class="product-item swiper-slide">
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            <a data-product_id="@item.Id" class="btn-compare add-btn-compare">
-                                <i class="fas fa-retweet"></i>
-                            </a>
-                            <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
-                                <i class="far fa-heart"></i>
-                            </a>
-                        }
+                    <div class="product-item swiper-slide add-quantity-productid-cart">
+                        <a data-product_id="@item.Id" class="btn-compare add-btn-compare">
+                            <i class="fas fa-retweet"></i>
+                        </a>
+                        <a data-product_id="@item.Id" class="btn-wishlist add-btn-wishlist">
+                            <i class="far fa-heart"></i>
+                        </a>
                         <figure>
-                            <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="Product Title">
-                                <img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage">
+                            <a asp-area="" asp-action="Details" asp-controller="ShopProducts" asp-route-Id="@item.Id" title="@item.ProductName">
+                                <img src="~/media/products/@item.MainImage" class="img-fluid product-mainImage" alt="@item.ProductName">
                             </a>
                         </figure>
                         <h3>@item.ProductName</h3>
-                        <span class="qty">Point</span><span class="rating"> @item.AveragePoint.ToString("#.##")</span>
-                        <div class="d-flex mb-2">
+                        <div class="d-flex mb-1 mt-2">
                             <i class="fa fa-star @( item.AveragePoint >= 1 ? "text-primary " :  "")"></i>
                             <i class="fa fa-star @( item.AveragePoint >= 2 ? "text-primary " :  "")"></i>
                             <i class="fa fa-star @( item.AveragePoint >= 3 ? "text-primary " :  "")"></i>
                             <i class="fa fa-star @( item.AveragePoint >= 4 ? "text-primary " :  "")"></i>
                             <i class="fa fa-star @( item.AveragePoint >= 5 ? "text-primary " :  "")"></i>
+                            <span class="rating"> @(item.AveragePoint == 0 ? "" : item.AveragePoint.ToString("(#.##)"))</span>
                         </div>
-                        <span class="price">@item.Price.ToString("#,##0 VND")</span>
-                        <span class="qty">@item.BrandName</span><br />
-                        <span class="qty">@item.CategoryName</span>
-                        <form asp-area="" asp-action="AddQuantityToCart" asp-controller="Cart" method="post" id="form-bestRating-@item.Id">
-                        <div class="d-flex align-items-center justify-content-between">                          
-                            <input type="hidden" class="form-control input-number" name="productId" value="@item.Id">
+                        <div class="price-container">
+                            @if (item.IsOnSale)
+                            {
+                                <span class="original-price">@item.Price.ToString("#,##0")</span>
+                                <span class="badge badge-danger text-white bg-danger">@item.DiscountPercent% off</span>
+                                <span class="price text-danger">@item.SalePrice?.ToString("#,##0 VND")</span>
+
+                            }
+                            else
+                            {
+                                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                            }
+                        </div>
+                        <div class="brand-product">@item.BrandName</div>
+                        <div class="category-product">@item.CategoryName</div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="input-group product-qty">
                                 <span class="input-group-btn">
-                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </span>
-                                <input type="text"  name="quantity" class="form-control input-number quantity-input" value="1" min="1" step="1">
-                               
+                                <input type="text" class="quantity-input" value="1">
                                 <span class="input-group-btn">
-                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                    <button type="button" class="quantity-right-plus btn btn-success btn-number">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </span>
-                            </div>                 
+                            </div>
                         </div>
-                        </form>
-                        <button class="btn btn-primary btn-md add-to-cart-quantity " id="bestRating-@item.Id" data-product-id="@item.Id">
+                        <button class="btn btn-primary add-to-cart-quantity" data-product-id="@item.Id">
                             <i class="fas fa-cart-plus"></i> Add to Cart
                         </button>
                     </div>
@@ -78,8 +83,6 @@
 
             </div>
         </div>
-        <!-- / products-carousel -->
-
     </div>
 </div>
 

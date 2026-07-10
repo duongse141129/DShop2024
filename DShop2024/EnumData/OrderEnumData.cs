@@ -1,6 +1,6 @@
 ﻿namespace DShop2024.EnumData
 {
-	public class  OrderEnumData 
+	public class  OrderEnumData  
 	{
         public static int StatusOrderCount = 5;
 		public enum StatusOrder
@@ -37,16 +37,18 @@
             Refunded
         }
 
-        public enum StatusRefund
+        public enum StatusRefund 
         {
             Rejected,
             Approved,
             Refunded
         }
 
+
         public static readonly string FULLY_RETURNED = "Fully Returned";
         public static readonly string PARTIALLY_RETURNED = "Partially Returned";
         public static readonly string KEPT = "Kept";
+        public static readonly string REJECTED_RETURNED = "Return rejected";
 
         public static readonly string REASON_REFUND_RETURN = "Return items";
         public static readonly string REASON_REFUND_CANCEL = "Cancel order";

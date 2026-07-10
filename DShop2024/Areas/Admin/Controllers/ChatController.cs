@@ -14,7 +14,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Chat)]
+    [SidebarMenu(Menu.Admin.CustomerService, SubMenu.CustomerService.Chat)]
     public class ChatController : Controller
     {
         private readonly DShopContext _context;
@@ -51,9 +51,10 @@ namespace DShop2024.Areas.Admin.Controllers
                                        LatestMessage = latestMessage != null ? latestMessage.ContentMessage : string.Empty,
                                        Timestamp = latestMessage != null ? latestMessage.Timestamp.ToString("MM/dd/yyyy h:mm tt") : string.Empty,
                                        IsRead = latestMessage != null ? latestMessage.IsRead ?? false : false
-                                   }).ToListAsync();
+                                   })
+                                   .ToListAsync();
 
-            return View(customers.OrderByDescending(c => c.Timestamp));
+            return View(customers);
         }
         public async Task<IActionResult> SearchUserName(string userName)
         {

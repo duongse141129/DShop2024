@@ -15,7 +15,6 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Order)]
     public class OrderController : Controller
     {
         private readonly DShopContext _context;
@@ -31,10 +30,9 @@ namespace DShop2024.Areas.Admin.Controllers
             _mapper = mapper;
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.OrderManage)]
         public async Task<IActionResult> Index(string searchOrderCode = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
-        {
-            
-
+        {           
             var countCancelOrder = _context.Orders.Where(p => p.Status == 0).Count();
             var countNewOrder = _context.Orders.Where(p => p.Status == 1).Count();
             var countAcceptedOrder = _context.Orders.Where(p => p.Status == 2).Count();
@@ -93,7 +91,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
-
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.OrderManage)]
         public async Task<IActionResult> ViewOrder(int? Id)
         {
             
@@ -109,6 +107,7 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   .Include(c => c.UpdateBy)
                                                   .Include(c => c.PaymentMethod)
                                                   .Include(c => c.Returns)
+                                                  .ThenInclude(c => c.UpdateBy)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
             if (order == null)
             {
@@ -125,7 +124,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(orderVM);
         }
 
-
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.OrderManage)]
         public async Task<IActionResult> ViewOrderAndPartReturn(int? Id)
         {
             
@@ -143,7 +142,9 @@ namespace DShop2024.Areas.Admin.Controllers
                                                   .Include(c => c.Returns)
                                                   .FirstOrDefaultAsync(o => o.Id == Id);
 
-            var returnModel = await _context.Returns.Include(r => r.ReturnDetails).FirstOrDefaultAsync(r => r.OrderId == order.Id);
+            var returnModel = await _context.Returns.Include(r => r.ReturnDetails)
+                                                    .Include(r => r.UpdateBy)
+                                                    .FirstOrDefaultAsync(r => r.OrderId == order.Id);
             if (order == null || returnModel == null)
             {
                 return NotFound();
@@ -179,8 +180,8 @@ namespace DShop2024.Areas.Admin.Controllers
             }
 
             OrderWithOrderAndReturnDetailsVM model = new OrderWithOrderAndReturnDetailsVM { 
-                Order = order,
-                Return = returnModel,
+                Order = _mapper.Map<OrderViewModel>(order),
+                Return = _mapper.Map<ReturnViewModel>(returnModel),
                 Details = details,
                 GrandTotal = order.GrandTotal,
                 RefundAmount = returnModel.TotalRefundAmount,
@@ -203,6 +204,7 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.OrderManage)]
         public async Task<IActionResult> UpdateStatusOrder(int? orderId)
         {
             
@@ -245,6 +247,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
+
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.OrderManage)]
         public async Task<IActionResult> CancelOrder(int? orderId)
         {
             
@@ -284,6 +288,20 @@ namespace DShop2024.Areas.Admin.Controllers
                     }
                 }
 
+                if (order.PaymentStatus == 1)
+                {
+                    RefundModel refundModel = new RefundModel
+                    {
+                        Amount = order.GrandTotal,
+                        OrderCode = order.OrderCode,
+                        Reason = OrderEnumData.REASON_REFUND_CANCEL,
+                        CreateDate = DateTime.Now,
+                        Status = (int)OrderEnumData.StatusRefund.Approved
+                    };
+                    await _context.Refunds.AddAsync(refundModel);
+                    await _context.SaveChangesAsync();
+                }
+
                 var user = await _userManager.GetUserAsync(this.User);
                 order.Status = 0;
                 order.UserIdUpdate = user.Id;
@@ -303,6 +321,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Payment)]
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> ManagePaymentMethod()
         {
@@ -312,6 +331,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Payment)]
         [HttpPost]
         public async Task<IActionResult> SetStatusPaymentMethod(int idPayment, int status)
         {
@@ -330,6 +350,7 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         public async Task<IActionResult> ManageReturn(string search = "", [FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
             
@@ -346,7 +367,7 @@ namespace DShop2024.Areas.Admin.Controllers
             if (!String.IsNullOrEmpty(search))
             {
                 listReturn = listReturn.Where(c => c.Order.OrderCode == search || c.Reason.Contains(search)
-                || c.Customer.UserName.Contains(search) || c.Description.Contains(search));
+                || c.Customer.UserName.Contains(search) );
             }
             int totaReturns = await listReturn.CountAsync();
             if (pagesSize <= 0)
@@ -388,7 +409,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(manageReturnVM);
         }
 
-
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         public async Task<IActionResult> DetailFullReturn(int? Id)
         {
             
@@ -410,6 +431,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(returnVMs);
 
         }
+
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         public async Task<IActionResult> DetailPartReturn(int? Id)
         {
             
@@ -432,6 +455,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(returnVMs);
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         public async Task<IActionResult> AcceptedReturnStatus(int? Id)
         {
             
@@ -472,6 +496,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return RedirectToAction("DetailFullReturn", new { id = returnModel.Id });
         }
 
+
         private async Task ImportoOfReturnedProducts(ReturnModel returnGood)
         {
             foreach (var item in returnGood.ReturnDetails)
@@ -486,6 +511,7 @@ namespace DShop2024.Areas.Admin.Controllers
             }
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         public async Task<IActionResult> RejectReturnStatus(int? Id)
         {
             
@@ -512,6 +538,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return RedirectToAction("DetailFullReturn", new { id = returnModel.Id });
         }
 
+
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
         public async Task<IActionResult> ManageRefund(string search ="",[FromQuery(Name = "p")] int currentPage = 1, int pagesSize = 10)
         {
             
@@ -552,6 +580,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(refunds);
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
         [HttpGet]
         public async Task<IActionResult> GetPopUpRefundReturn(int? Id)
         {
@@ -572,6 +601,8 @@ namespace DShop2024.Areas.Admin.Controllers
             return PartialView("_RefundReturnPartial", updateRefund);
         }
 
+
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Return)]
         [HttpPost]
         public async Task<IActionResult> RefundReturn(RefundModel refund)
         {
@@ -634,7 +665,7 @@ namespace DShop2024.Areas.Admin.Controllers
             {
                 if (ex.InnerException.Message.Contains("duplicate"))
                 {
-                    TempData[DShopConst.TEMPDATA_ERROR] = "Duplicate transasionID " + ex.InnerException.Message;
+                    TempData[DShopConst.TEMPDATA_ERROR] = "Error: Duplicate transasionID ";
                 }
                 else
                 {
@@ -649,9 +680,10 @@ namespace DShop2024.Areas.Admin.Controllers
            
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
         public async Task<IActionResult> ViewRefund(int? Id)
         {
-            
+
             if (Id == null)
             {
                 return NotFound();
@@ -665,6 +697,23 @@ namespace DShop2024.Areas.Admin.Controllers
             return View(refund);
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
+        public async Task<IActionResult> ViewRefundByOrderCode(string orderCode)
+        {
+
+            if (String.IsNullOrEmpty(orderCode))
+            {
+                return NotFound();
+            }
+            var refund = await _context.Refunds.FirstOrDefaultAsync(o => o.OrderCode == orderCode);
+            if (refund == null)
+            {
+                return NotFound();
+            }
+            return RedirectToAction("ViewRefund", new { Id = refund.Id });
+        }
+
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
         [HttpGet]
         public async Task<IActionResult> GetPopUpRefund(int? Id)
         {
@@ -684,6 +733,7 @@ namespace DShop2024.Areas.Admin.Controllers
             return PartialView("_RefundPartial", updateRefund);
         }
 
+        [SidebarMenu(Menu.Admin.Order, SubMenu.Order.Refund)]
         [HttpPost]
         public async Task<IActionResult> RefundOder(RefundModel refund)
         {

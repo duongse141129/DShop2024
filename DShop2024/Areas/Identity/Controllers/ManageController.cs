@@ -5,7 +5,6 @@ using DShop2024.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using static DShop2024.EnumData.UserEnumData;
 
 namespace DShop2024.Areas.Identity.Controllers
 {
@@ -166,7 +165,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 var user = await GetCurrentUserAsync();
                 user.Address = $"{street}_{phuong}_{quan}_{tinh}";
                 await _userManager.UpdateAsync(user);
-                return Ok(new { success = false, Message = "Edit address successful " });
+                return Ok(new { success = true, Message = "Edit address successful " });
             }
             return Ok(new { success = false, Message = "Edit address fail " });
         }

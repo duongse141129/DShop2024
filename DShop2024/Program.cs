@@ -16,6 +16,17 @@ using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var _corsName = "_DShop";
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy(name: _corsName,
+                        builder =>
+                        {
+                            builder.WithOrigins().AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                        });
+});
+
+
 builder.Services.AddOptions();
 var mailsetting = builder.Configuration.GetSection("MailSettings");
 builder.Services.Configure<MailSettings>(mailsetting);
@@ -133,6 +144,8 @@ app.UseStaticFiles(new StaticFileOptions()
 
 app.UseRouting();
 
+app.UseCors(_corsName);
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -144,7 +157,27 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "Areas",
     pattern: "/product/{Slug?}",
-    defaults: new { controller = "ShopProducts", action = "GetDetailProductBySlug" });
+    defaults: new { 
+        controller = "ShopProducts", 
+        action = "GetDetailProductBySlug" 
+    });
+
+app.MapControllerRoute(
+    name: "Areas",
+    pattern: "brand/{slug?}",
+    defaults: new
+    {
+        controller = "ShopProducts",
+        action = "GetListProductByBrandSlug"
+    });
+app.MapControllerRoute(
+    name: "Areas",
+    pattern: "category/{slug?}",
+    defaults: new
+    {
+        controller = "ShopProducts",
+        action = "GetListProductByCategorySlug"
+    });
 
 app.MapControllerRoute(
 	name: "default",

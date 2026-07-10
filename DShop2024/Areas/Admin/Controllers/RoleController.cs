@@ -9,7 +9,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator)]
-    [SidebarMenu(Menu.Admin.Role)]
+    [SidebarMenu(Menu.Admin.UserManagement, SubMenu.UserManagement.Role)]
     public class RoleController : Controller
     {
 

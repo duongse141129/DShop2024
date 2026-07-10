@@ -1,8 +1,6 @@
-using System.Data;
-using System.Security.Claims;
-using System.Text;
 using App.Areas.Identity.Models.AccountViewModels;
 using App.Utilities;
+using DShop2024.Areas.Identity.Models.Account;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
@@ -12,6 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace DShop2024.Areas.Identity.Controllers
 {
@@ -101,10 +103,6 @@ namespace DShop2024.Areas.Identity.Controllers
                         }
                         return LocalRedirect(returnUrl);
                     }
-                    if (result.RequiresTwoFactor)
-                    {
-                        return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                    }
 
                     if (result.IsLockedOut)
                     {
@@ -186,7 +184,6 @@ namespace DShop2024.Areas.Identity.Controllers
                     {
                         await _userManager.AddToRoleAsync(user, RoleName.Customer);
 
-                        //await SendPromotionToNewCustomer(user);
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
@@ -230,7 +227,7 @@ namespace DShop2024.Areas.Identity.Controllers
                 DateExpired = DateTime.Today.AddDays(7),
                 Quantity = 1,
                 Status = 1,
-                Description = "Free shipping for new customers' first order",
+                Description = DShopConst.DESCRIPTION_NEW_CUSTOMER,
                 PromotionId = promotion.Id
             };
 
@@ -267,38 +264,72 @@ namespace DShop2024.Areas.Identity.Controllers
             return View(user);
         }
 
-
-
-        // GET: /Account/ConfirmEmailByCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmEmailByOTP(string userId, string codeConfirmEmail)
         {
-            if (userId == null || codeConfirmEmail == null)
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(codeConfirmEmail))
             {
-                return View("ErrorConfirmEmail");
+                TempData[DShopConst.TEMPDATA_ERROR] = "Please enter the verification code.";
+                return RedirectToAction("RegisterConfirmation", new { userId });
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return View("ErrorConfirmEmail");
+                TempData[DShopConst.TEMPDATA_ERROR] = "The account does not exist.";
+                return RedirectToAction("RegisterConfirmation", new { userId });
             }
 
-            var otpConfirm = Request.Cookies[DShopConst.OTP_CONFIRM_EMAIL + user.UserName];
-            if (codeConfirmEmail.Equals(otpConfirm))
+            var json = HttpContext.Session.GetString(DShopConst.OTP_CONFIRM_EMAIL);
+            if (string.IsNullOrEmpty(json))
             {
-                
-                user.EmailConfirmed = true;
-                _context.Update(user);
-                await _context.SaveChangesAsync();
-                await SendPromotionToNewCustomer(user);
-                TempData[DShopConst.TEMPDATA_SUCCESS] = "Confirm email successful";
-                return View();
+                TempData[DShopConst.TEMPDATA_ERROR] = "Verification code has expired.";
+                return RedirectToAction("RegisterConfirmation", new { userId = user.Id });
             }
-            TempData[DShopConst.TEMPDATA_ERROR] = "Code is invalid";
-            return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
+
+            var otpSession = JsonSerializer.Deserialize<OtpSession>(json);
+            if (otpSession == null
+                || otpSession.UserId != user.Id
+                || otpSession.ExpireAt < DateTime.UtcNow)
+            {
+                HttpContext.Session.Remove(DShopConst.OTP_CONFIRM_EMAIL);
+
+                TempData[DShopConst.TEMPDATA_ERROR] = "Verification code has expired.";
+                return RedirectToAction("RegisterConfirmation", new { userId });
+            }
+
+            if (otpSession.Code != codeConfirmEmail)
+            {
+                otpSession.FailedAttempts++;
+
+                if (otpSession.FailedAttempts >= 5)
+                {
+                    HttpContext.Session.Remove(DShopConst.OTP_CONFIRM_EMAIL);
+                    TempData[DShopConst.TEMPDATA_ERROR] = "You have entered the wrong code 5 times. Please request a new verification code.";
+                    return RedirectToAction("RegisterConfirmation", new { userId });
+                }
+                HttpContext.Session.SetString( DShopConst.OTP_CONFIRM_EMAIL, JsonSerializer.Serialize(otpSession));
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Code is invalid. Remaining attempts: {5 - otpSession.FailedAttempts}.";
+                return RedirectToAction("RegisterConfirmation", new { userId });
+            }
+
+            HttpContext.Session.Remove(DShopConst.OTP_CONFIRM_EMAIL);
+
+            user.EmailConfirmed = true;
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            bool isCustomer = await _userManager.IsInRoleAsync(user, RoleName.Customer);
+            if (isCustomer)
+            {
+                await SendPromotionToNewCustomer(user);
+            }
+
+            TempData[DShopConst.TEMPDATA_SUCCESS] = "Confirm email successful.";
+            return View();
         }
+
 
         // GET: /Account/ConfirmEmail
         [HttpGet]
@@ -376,10 +407,6 @@ namespace DShop2024.Areas.Identity.Controllers
 
                 _logger.LogInformation(5, "User logged in with {Name} provider.", info.LoginProvider);
                 return LocalRedirect(returnUrl);
-            }
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl });
             }
             if (result.IsLockedOut)
             {
@@ -539,15 +566,16 @@ namespace DShop2024.Areas.Identity.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if(user.LoginType == UserEnumData.LOGIN_GMAIL)
-                {
-                    return View("NoNeedPassword");
-                }
+
 
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return View("ForgotPasswordConfirmation");
+                    return RedirectToAction("ForgotPasswordConfirmation", new { email = model.Email });
+                }
+
+                if (user.LoginType == UserEnumData.LOGIN_GMAIL)
+                {
+                    return View("NoNeedPassword");
                 }
 
                 return RedirectToAction("SendOtp", "Account" ,new { email = user.Email, typeService = DShopConst.OTP_RESET_PASSWORD });
@@ -562,7 +590,7 @@ namespace DShop2024.Areas.Identity.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SendOtpConfirmEmailAgian(string? userId)
         {
-            if (userId == null)
+            if (String.IsNullOrEmpty(userId))
             {
                 return NotFound();
             }
@@ -578,14 +606,14 @@ namespace DShop2024.Areas.Identity.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SendOtpResetPaswordAgain(string? userId)
         {
-            if ( String.IsNullOrEmpty(userId))
+            if (String.IsNullOrEmpty(userId))
             {
                 return NotFound();
             }
             var user = await _context.Users.FindAsync(userId);
-            if(user == null) 
+            if (user == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
             return RedirectToAction("SendOtp", "Account", new { email = user.Email, typeService = DShopConst.OTP_RESET_PASSWORD });
         }
@@ -596,42 +624,52 @@ namespace DShop2024.Areas.Identity.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> SendOtp(string email, string typeService)
         {
-            if ( String.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(email))
             {
                 return View("NotFoundEmail");
             }
-            var user = await _userManager.FindByEmailAsync (email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 return View("NotFoundEmail");
             }
-
-            var rand = new Random();
-            int codeEmail = rand.Next(100000, 999999);
-            var cookieOptionss = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = DateTime.UtcNow.AddMinutes(10),
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-            };
-
-            var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
-            await _emailSender.SendEmailOTP(user, codeEmail.ToString(), typeService, infoShop);
-
             if (typeService == DShopConst.OTP_CONFIRM_EMAIL)
             {
-                Response.Cookies.Append(DShopConst.OTP_CONFIRM_EMAIL + user.UserName, codeEmail.ToString(), cookieOptionss);
-                return RedirectToAction("RegisterConfirmation", "Account", new { userId = user.Id });
+                bool isConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+                if (isConfirmed)
+                {
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "This email has been verified. You don’t need to confirm it again.";
+                    return RedirectToAction("Login");
+                }
             }
-            if(typeService == DShopConst.OTP_RESET_PASSWORD)
+
+            int codeEmail = Random.Shared.Next(100000, 999999);
+
+            var infoShop = await _context.InformationShops.FirstOrDefaultAsync();
+
+            await _emailSender.SendEmailOTP(user, codeEmail.ToString(), typeService, infoShop);
+
+            var otpSession = new OtpSession
             {
-                Response.Cookies.Append(DShopConst.OTP_RESET_PASSWORD + user.UserName, codeEmail.ToString(), cookieOptionss);
-                return RedirectToAction("ForgotPasswordConfirmation", "Account", new { email = user.Email });
-            }           
-         
+                UserId = user.Id,
+                Code = codeEmail.ToString(),
+                ExpireAt = DateTime.UtcNow.AddMinutes(10),
+                FailedAttempts = 0
+            };
+
+            HttpContext.Session.SetString(typeService,JsonSerializer.Serialize(otpSession));
+            if (typeService == DShopConst.OTP_CONFIRM_EMAIL)
+            {
+                return RedirectToAction("RegisterConfirmation", new { userId = user.Id });
+            }
+            if (typeService == DShopConst.OTP_RESET_PASSWORD)
+            {
+                return RedirectToAction("ForgotPasswordConfirmation", new { email = user.Email });
+            }
             return View("NotFoundEmail");
         }
+
+
 
         //
         // GET: /Account/ForgotPasswordConfirmation
@@ -650,13 +688,14 @@ namespace DShop2024.Areas.Identity.Controllers
             return View(user);
         }
 
-       
+
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPasswordConfirmation(string userId, string codeResetPasswordl)
         {
-            if (userId == null || codeResetPasswordl == null)
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(codeResetPasswordl))
             {
                 return View("ErrorConfirmEmail");
             }
@@ -666,14 +705,40 @@ namespace DShop2024.Areas.Identity.Controllers
                 return View("ErrorConfirmEmail");
             }
 
-            var otpConfirm = Request.Cookies[DShopConst.OTP_RESET_PASSWORD + user.UserName];
-            if (codeResetPasswordl.Equals(otpConfirm))
+            var json = HttpContext.Session.GetString(DShopConst.OTP_RESET_PASSWORD);
+            if (string.IsNullOrEmpty(json))
             {
-
-                return RedirectToAction("ResetPassword", "Account", new {email = user.Email});
+                TempData[DShopConst.TEMPDATA_ERROR] = "Verification code has expired.";
+                return RedirectToAction("ForgotPasswordConfirmation", new { email = user.Email });
             }
-            TempData[DShopConst.TEMPDATA_ERROR] = "Code is invalid";
-            return RedirectToAction("ForgotPasswordConfirmation", "Account", new { email = user.Email });
+
+            var otpSession = JsonSerializer.Deserialize<OtpSession>(json);
+            if (otpSession == null
+                || otpSession.UserId != user.Id
+                || otpSession.ExpireAt < DateTime.UtcNow)
+            {
+                HttpContext.Session.Remove(DShopConst.OTP_RESET_PASSWORD);
+
+                TempData[DShopConst.TEMPDATA_ERROR] = "Verification code has expired.";
+                return RedirectToAction("ForgotPasswordConfirmation", new { email = user.Email });
+            }
+
+            if (otpSession.Code != codeResetPasswordl)
+            {
+                otpSession.FailedAttempts++;
+                if (otpSession.FailedAttempts >= 5)
+                {
+                    HttpContext.Session.Remove(DShopConst.OTP_RESET_PASSWORD);
+                    TempData[DShopConst.TEMPDATA_ERROR] = "You have entered the wrong code 5 times. Please request a new verification code.";
+                    return RedirectToAction("ForgotPassword", new { email = user.Email });
+                }
+                HttpContext.Session.SetString(DShopConst.OTP_RESET_PASSWORD,JsonSerializer.Serialize(otpSession));
+                TempData[DShopConst.TEMPDATA_ERROR] =$"Code is invalid. Remaining attempts: {5 - otpSession.FailedAttempts}.";
+                return RedirectToAction("ForgotPasswordConfirmation", new { email = user.Email });
+            }
+
+            HttpContext.Session.Remove(DShopConst.OTP_RESET_PASSWORD);
+            return RedirectToAction("ResetPassword", "Account", new { email = user.Email });
         }
 
 
@@ -736,198 +801,6 @@ namespace DShop2024.Areas.Identity.Controllers
         {
             return View();
         }        
-
-        //
-        // GET: /Account/SendCode
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<ActionResult> SendCode(string returnUrl = null, bool rememberMe = false)
-        {
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-            var userFactors = await _userManager.GetValidTwoFactorProvidersAsync(user);
-            var factorOptions = userFactors.Select(purpose => new SelectListItem { Text = purpose, Value = purpose }).ToList();
-            return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
-        }
-        //
-        // POST: /Account/SendCode
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SendCode(SendCodeViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-            // Dùng mã Authenticator
-            if (model.SelectedProvider == "Authenticator")
-            {
-                return RedirectToAction(nameof(VerifyAuthenticatorCode), new { ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
-            }
-
-            // Generate the token and send it
-            var code = await _userManager.GenerateTwoFactorTokenAsync(user, model.SelectedProvider);
-            if (string.IsNullOrWhiteSpace(code))
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-
-            var message = "Your security code is: " + code;
-            if (model.SelectedProvider == "Email")
-            {
-                await _emailSender.SendEmailAsync(await _userManager.GetEmailAsync(user), "Security Code", message);
-            }
-            else if (model.SelectedProvider == "Phone")
-            {
-                await _emailSender.SendSmsAsync(await _userManager.GetPhoneNumberAsync(user), message);
-            }
-
-            return RedirectToAction(nameof(VerifyCode), new { Provider = model.SelectedProvider, ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
-        }
-        //
-        // GET: /Account/VerifyCode
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyCode(string provider, bool rememberMe, string returnUrl = null)
-        {
-            // Require that the user has already logged in via username/password or external login
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-            return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
-        }
-
-        //
-        // POST: /Account/VerifyCode
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyCode(VerifyCodeViewModel model)
-        {
-            model.ReturnUrl ??= Url.Content("~/");
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            // The following code protects for brute force attacks against the two factor codes.
-            // If a user enters incorrect codes for a specified amount of time then the user account
-            // will be locked out for a specified amount of time.
-            var result = await _signInManager.TwoFactorSignInAsync(model.Provider, model.Code, model.RememberMe, model.RememberBrowser);
-            if (result.Succeeded)
-            {
-                return LocalRedirect(model.ReturnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning(7, "User account locked out.");
-                return View("Lockout");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid code.");
-                return View(model);
-            }
-        }
-
-        //
-        // GET: /Account/VerifyAuthenticatorCode
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> VerifyAuthenticatorCode(bool rememberMe, string returnUrl = null)
-        {
-            // Require that the user has already logged in via username/password or external login
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-            return View(new VerifyAuthenticatorCodeViewModel { ReturnUrl = returnUrl, RememberMe = rememberMe });
-        }
-
-        //
-        // POST: /Account/VerifyAuthenticatorCode
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyAuthenticatorCode(VerifyAuthenticatorCodeViewModel model)
-        {
-            model.ReturnUrl ??= Url.Content("~/");
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            // The following code protects for brute force attacks against the two factor codes.
-            // If a user enters incorrect codes for a specified amount of time then the user account
-            // will be locked out for a specified amount of time.
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, model.RememberMe, model.RememberBrowser);
-            if (result.Succeeded)
-            {
-                return LocalRedirect(model.ReturnUrl);
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning(7, "User account locked out.");
-                return View("Lockout");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Wrong code.");
-                return View(model);
-            }
-        }
-        //
-        // GET: /Account/UseRecoveryCode
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> UseRecoveryCode(string returnUrl = null)
-        {
-            // Require that the user has already logged in via username/password or external login
-            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                return View(DShopConst.TEMPDATA_ERROR);
-            }
-            return View(new UseRecoveryCodeViewModel { ReturnUrl = returnUrl });
-        }
-
-        //
-        // POST: /Account/UseRecoveryCode
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UseRecoveryCode(UseRecoveryCodeViewModel model)
-        {
-            model.ReturnUrl ??= Url.Content("~/");
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(model.Code);
-            if (result.Succeeded)
-            {
-                return LocalRedirect(model.ReturnUrl);
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Wrong recovery code.");
-                return View(model);
-            }
-        }
 
         //[Route("/accessdebied.html")]
         [AllowAnonymous]

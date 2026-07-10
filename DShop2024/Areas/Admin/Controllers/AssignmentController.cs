@@ -15,7 +15,7 @@ namespace DShop2024.Areas.Admin.Controllers
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
     [Route("Admin/Assignment")]
-    [SidebarMenu(Menu.Admin.Assignment)]
+    [SidebarMenu(Menu.Admin.Assignment, SubMenu.Assignment.TaskAssignment)]
     public class AssignmentController : Controller
     {
         private readonly DShopContext _context;
@@ -158,7 +158,7 @@ namespace DShop2024.Areas.Admin.Controllers
             
             if (ModelState.IsValid)
             {
-                if(createAssignmentModel.TimeFrom > createAssignmentModel.TimeTo)
+                if(createAssignmentModel.TimeFrom >= createAssignmentModel.TimeTo)
                 {
                     return Ok(new { success = false, message = "Time To must be greater than the Time From." });
                 }
@@ -296,7 +296,7 @@ namespace DShop2024.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                if (editAssignment.TimeFrom > editAssignment.TimeTo)
+                if (editAssignment.TimeFrom >= editAssignment.TimeTo)
                 {
                     return Ok(new { success = false, message = "Time To must be greater than the Time From." });
                 }

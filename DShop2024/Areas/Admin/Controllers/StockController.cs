@@ -13,7 +13,7 @@ namespace DShop2024.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = RoleName.Administrator + "," + RoleName.Employee)]
-    [SidebarMenu(Menu.Admin.Stock)]
+    [SidebarMenu(Menu.Admin.Inventory, SubMenu.Inventory.StockIn)]
     public class StockController : Controller
 	{
 		private readonly DShopContext _context;
@@ -32,10 +32,10 @@ namespace DShop2024.Areas.Admin.Controllers
                             .Include(p => p.Product)
                             .Include(p => p.User)
                                      .OrderByDescending(o => o.DateReceive);
-            int totalOrder = await listStockIn.CountAsync();
+            int totalStock = await listStockIn.CountAsync();
             if (pagesSize <= 0)
                 pagesSize = 10;
-            int countPages = (int)Math.Ceiling((double)totalOrder / 10);
+            int countPages = (int)Math.Ceiling((double)totalStock / 10);
 
             if (currentPage > countPages)
                 currentPage = countPages;
@@ -87,78 +87,78 @@ namespace DShop2024.Areas.Admin.Controllers
             return View();
         }
 
+
         [HttpPost]
         public async Task<IActionResult> ImportFromFile(IFormFile file)
         {
-                 
-            if (file != null && file.Length > 0)
+            if (file == null || file.Length == 0)
             {
-                var uploadDirectory = $"{Directory.GetCurrentDirectory()}\\wwwroot\\importStocks";
-
-                if (!Directory.Exists(uploadDirectory))
-                {
-                    Directory.CreateDirectory(uploadDirectory);
-                }
-
-                var filePath = Path.Combine(uploadDirectory, file.FileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-         
-                using (var stream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
-                {
-                    var excelData = new List<NameAndValueVM>();
-                    using (var reader = ExcelReaderFactory.CreateReader(stream))
-                    {
-
-                        do
-                        {
-                            while (reader.Read())
-                            {
-                                try
-                                {
-                                    var rowData = new NameAndValueVM();
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-
-                                        if (i == 0)
-                                        {
-                                            rowData.label = reader.GetString(i);
-                                        }
-                                        if (i == 1)
-                                        {
-                                            rowData.value = int.Parse(reader.GetValue(i).ToString());
-                                        }
-
-                                    }
-                                    var product = await _context.Products.AnyAsync(p => p.ProductName.ToUpper().Equals(rowData.label.ToString().ToUpper()));
-                                    if (product)
-                                    {
-                                        var item = excelData.FirstOrDefault(p => p.label.ToUpper().Equals( rowData.label.ToUpper()));
-                                        if(item != null)
-                                        {
-                                            item.value += rowData.value;
-                                        }
-                                        else
-                                        {
-                                            excelData.Add(rowData);
-                                        }
-                                    }
-                                }
-                                catch (FormatException)
-                                {
-                                }
-
-                            }
-                        } while (reader.NextResult());
-                    }
-                    return View(excelData);
-                }
+                return View();
             }
-            return View();
+
+            var uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "importStocks");
+            if (!Directory.Exists(uploadDirectory))
+            {
+                Directory.CreateDirectory(uploadDirectory);
+            }
+
+            var extension = Path.GetExtension(file.FileName);
+            var fileName = $"{DateTime.Now:yyyyMMdd_HHmmssfff}_stock{extension}";
+            var filePath = Path.Combine(uploadDirectory, fileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            var productNames = (await _context.Products
+                            .Select(p => p.ProductName)
+                            .ToListAsync())
+                            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var excelData = new List<NameAndValueVM>();
+
+            using (var stream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                do
+                {
+                    if (!reader.Read())
+                        continue;
+                    while (reader.Read())
+                    {
+                        var productName = reader.GetValue(0)?.ToString()?.Trim();
+
+                        if (string.IsNullOrWhiteSpace(productName))
+                            continue;
+
+                        if (!int.TryParse(reader.GetValue(1)?.ToString(), out int quantity))
+                            continue;
+
+                        if (!productNames.Contains(productName))
+                            continue;
+
+                        var item = excelData.FirstOrDefault(x => x.label.Equals(productName, StringComparison.OrdinalIgnoreCase));
+
+                        if (item != null)
+                        {
+                            item.value += quantity;
+                        }
+                        else
+                        {
+                            excelData.Add(new NameAndValueVM
+                            {
+                                label = productName,
+                                value = quantity
+                            });
+                        }
+                    }
+
+                } while (reader.NextResult());
+            }
+            return View(excelData);
         }
+
 
         [HttpPost]
         public  async Task<IActionResult> Save( List<NameAndValueVM> items)
