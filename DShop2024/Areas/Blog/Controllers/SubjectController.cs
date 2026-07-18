@@ -92,10 +92,8 @@ namespace DShop2024.Areas.Blog.Controllers
             }
         }
 
-        [Authorize(Roles = RoleName.Administrator)]
-        public async Task<IActionResult> CreateAsync()
+        private async Task GetAllSubjects()
         {
-            
             var qr = (from c in _context.Subjects select c)
                 .Where(s => s.Status != 0)
                 .Include(c => c.ParentSubject)
@@ -115,6 +113,14 @@ namespace DShop2024.Areas.Blog.Controllers
             CreateSelectItems(subjects, items, 0);
             var selectList = new SelectList(items, "Id", "Title");
             ViewBag.ParentSubjectId = selectList;
+        }
+
+
+
+        [Authorize(Roles = RoleName.Administrator)]
+        public async Task<IActionResult> CreateAsync()
+        {
+            await GetAllSubjects();
             return View();
         }
 
@@ -123,7 +129,8 @@ namespace DShop2024.Areas.Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Title,SubjectContent,ParentSubjectId")] SubjectModel subject)
         {
-            
+            await GetAllSubjects();
+
             if (ModelState.IsValid)
             {
                 try
@@ -149,24 +156,6 @@ namespace DShop2024.Areas.Blog.Controllers
                 }
 
             }
-            var qr = (from c in _context.Subjects select c).Where(s => s.Status != 0)
-                    .Include(c => c.ParentSubject)
-                    .Include(c => c.SubjectChildren);
-
-            var Subjects = (await qr.ToListAsync()).Where(s => s.Status != 0)
-                            .Where(c => c.ParentSubject == null)
-                            .ToList();
-            Subjects.Insert(0, new SubjectModel()
-            {
-                Id = -1,
-                Title = "There isn't parent subject."
-
-            });
-
-            var items = new List<SubjectModel>();
-            CreateSelectItems(Subjects, items, 0);
-            var selectList = new SelectList(items, "Id", "Title");
-            ViewData["ParentSubjectId"] = selectList;
             return View(subject);
         }
 
@@ -185,78 +174,54 @@ namespace DShop2024.Areas.Blog.Controllers
             {
                 return NotFound();
             }
+            await GetAllSubjects();
 
-            var qr = (from c in _context.Subjects select c).Where(s => s.Status != 0)
-                .Include(c => c.ParentSubject)
-                .Include(c => c.SubjectChildren);
-
-            var subjects = (await qr.Where(s => s.Status != 0)
-                            .ToListAsync())
-                            .Where(c => c.ParentSubject == null)
-                            .ToList();
-            subjects.Insert(0, new SubjectModel()
-            {
-                Id = -1,
-                Title = "There isn't parent subject."
-
-            });
-
-            var items = new List<SubjectModel>();
-            CreateSelectItems(subjects, items, 0);
-            var selectList = new SelectList(items, "Id", "Title");
-
-            ViewBag.ParentSubjectId = selectList;
             return View(Subject);
         }
 
         [Authorize(Roles = RoleName.Administrator)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,SubjectContent,Status,ParentSubjectId")] SubjectModel subject)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,SubjectContent,Slug,Status,ParentSubjectId")] SubjectModel subject)
         {
-            
+
             if (id != subject.Id)
             {
                 return NotFound();
             }
 
+            await GetAllSubjects();
+
             bool canUpdate = true;
             if (subject.ParentSubjectId == subject.Id)
             {
+                canUpdate = false;
                 ModelState.AddModelError(string.Empty, "Must select another parent subject. Can not choose itself as the parent subject");
             }
 
-            // check list parent subject 
             if (canUpdate && subject.ParentSubjectId != null)
             {
-                var childSubs =
-                            (from c in _context.Subjects.Where(s => s.Status != 0) select c)
-                            .Include(c => c.SubjectChildren)
-                            .ToList()
-                            .Where(c => c.ParentSubjectId == subject.Id);
+                var allSubjects = await _context.Subjects
+                    .Where(s => s.Status != 0)
+                    .ToListAsync();
 
-
-                // Func check Id 
-                Func<List<SubjectModel>, bool> checkSubIds = null;
-                checkSubIds = (subs) =>
+                bool IsDescendant(int parentId, int candidateId)
                 {
-                    foreach (var sub in subs)
+                    foreach (var child in allSubjects.Where(s => s.ParentSubjectId == parentId))
                     {
-                        Console.WriteLine(sub.Title);
-                        if (sub.Id == subject.ParentSubjectId)
-                        {
-                            canUpdate = false;
-                            ModelState.AddModelError(string.Empty, "Must select another parent subject. Can not choose its child as parent subject");
+                        if (child.Id == candidateId)
                             return true;
-                        }
-                        if (sub.SubjectChildren != null)
-                            return checkSubIds(sub.SubjectChildren.ToList());
-
+                        if (IsDescendant(child.Id, candidateId))
+                            return true;
                     }
                     return false;
-                };
-                // End Func 
-                checkSubIds(childSubs.ToList());
+                }
+
+                if (IsDescendant(subject.Id, subject.ParentSubjectId.Value))
+                {
+                    canUpdate = false;
+                    ModelState.AddModelError(string.Empty, "Must select another parent subject. Can not choose its child as parent subject");
+                }
             }
 
             if (ModelState.IsValid && canUpdate)
@@ -268,7 +233,7 @@ namespace DShop2024.Areas.Blog.Controllers
 
                     var dtc = _context.Subjects.Where(s => s.Status != 0).FirstOrDefault(c => c.Id == id);
                     subject.Slug = AppUtilities.GenerateSlug(subject.Title);
-                    if (await _context.Subjects.AnyAsync(p => p.Slug == subject.Slug))
+                    if (await _context.Subjects.AnyAsync(p => p.Id != subject.Id && p.Slug == subject.Slug))
                     {
                         TempData[DShopConst.TEMPDATA_ERROR] = "This url subject already exists. ";
                         return View(subject);
@@ -277,7 +242,7 @@ namespace DShop2024.Areas.Blog.Controllers
                     _context.Entry(dtc).State = EntityState.Detached;
                     _context.Subjects.Update(subject);
                     TempData[DShopConst.TEMPDATA_SUCCESS] = "Edit subject successful ";
-                    await _context.SaveChangesAsync();                    
+                    await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -294,27 +259,14 @@ namespace DShop2024.Areas.Blog.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var qr = (from c in _context.Subjects select c).Where(s => s.Status != 0)
-                .Include(c => c.ParentSubject)
-                .Include(c => c.SubjectChildren);
 
-            var Subjects = (await qr.ToListAsync()).Where(s => s.Status != 0)
-                            .Where(c => c.ParentSubject == null)
-                            .ToList();
-            Subjects.Insert(0, new SubjectModel()
-            {
-                Id = -1,
-                Title = "There isn't parent subject."
-
-            });
-
-            var items = new List<SubjectModel>();
-            CreateSelectItems(Subjects, items, 0);
-            var selectList = new SelectList(items, "Id", "Title");
-
-            ViewData["ParentSubjectId"] = selectList;
             return View(subject);
         }
+
+
+
+
+
 
         [Authorize(Roles = RoleName.Administrator)]
         public async Task<IActionResult> Delete(int? id)
@@ -351,9 +303,6 @@ namespace DShop2024.Areas.Blog.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
-
-
 
         private bool SubjectExists(int id)
         {

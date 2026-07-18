@@ -168,9 +168,8 @@ namespace DShop2024.Areas.Admin.Controllers
 
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> SendMessage(string receiverId, string messageInput)
+        public async Task<IActionResult> SendMessage( string receiverId, string messageInput)
         {
             
             var user = await _userManager.GetUserAsync(this.User);

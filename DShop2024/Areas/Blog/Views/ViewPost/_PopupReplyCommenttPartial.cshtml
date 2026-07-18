@@ -31,28 +31,30 @@
         e.preventDefault();
         $.ajax({
             method: "POST",
-            url: "@Url.Action("ReplyComment", "ViewPost")",
+            url: "@Url.Action("ReplyComment", "ViewPost")", 
             data: $(this).serialize(),
-                success: function (result) {
-                    if (result.success) {
-                        Swal.fire(
-                                {
-                                      position: "top-end",
-                                      icon: "success",
-                                      title: result.message,
-                                      showConfirmButton: false,
-                                      timer: 500
-                                }
-                        ).then(function(){
-                                 location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                          icon: "error",
-                          title: "Oops...",
-                          text: result.message
-                        });
+            success: function (result) {
+                if (result.success) {
+                    $('#mainModal').modal('hide');
+
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "success",
+                        title: result.message,
+                        showConfirmButton: false,
+                        timer: 1000
+                    });
+
+                    if (typeof loadComments === 'function') {
+                        loadComments();
                     }
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: result.message
+                    });
+                }
             }
         });
     });

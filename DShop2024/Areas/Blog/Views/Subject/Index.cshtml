@@ -8,11 +8,15 @@
 
 <div class="card">
     <div class="card-body">
-        <a asp-action="Create" class="btn btn-primary btn-sn">
-            <span class="btn-label">
-                <i class="fa fa-plus"></i>Create subject
-            </span>
-        </a>
+        @if (User.IsInRole(RoleName.Administrator))
+        {
+            <a asp-action="Create" class="btn btn-primary btn-sn">
+                <span class="btn-label">
+                    <i class="fa fa-plus"></i>Create subject
+                </span>
+            </a>
+        }
+
 
         <div class="col-md-3 my-3">
             <form asp-action="SearchTitle" asp-controller="Subject">

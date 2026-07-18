@@ -35,17 +35,19 @@
             data: $(this).serialize(),
                 success: function (result) {
                     if (result.success) {
-                        Swal.fire(
-                                {
-                                      position: "top-end",
-                                      icon: "success",
-                                      title: result.message,
-                                      showConfirmButton: false,
-                                      timer: 500
-                                }
-                        ).then(function(){
-                                 location.reload();
+                        $('#mainModal').modal('hide');
+
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "success",
+                            title: result.message,
+                            showConfirmButton: false,
+                            timer: 1000
                         });
+
+                        if (typeof loadComments === 'function') {
+                            loadComments();
+                        }
                     } else {
                         Swal.fire({
                           icon: "error",

@@ -19,7 +19,7 @@ namespace DShop2024.Areas.Admin.Models.Refund
         public string TransactionId { get; set; }
         public string TransactionContent { get; set; }
         [Required(ErrorMessage = "The {0} field is required")]
-        public string Reason { get; set; }
+        public string Reason { get; set; } 
         public string Image { get; set; }
         public int Status { get; set; }
 

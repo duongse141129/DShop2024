@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DShop2024.EnumData;
 using DShop2024.Models;
 using DShop2024.Repository;
@@ -30,30 +31,28 @@ namespace DShop2024.Controllers
 
 
         public async Task<IActionResult> Index()
-        {
-            
-            ViewBag.laptopPocketTypes = ProductEnumData.laptopPocketTypes;
+        {           
 
-			IQueryable<ProductModel> listProduct = _context.Products.Where(p => p.Status != 0 && p.Stock > 0)
-                                                    .Include(p => p.Brand)
-                                                    .Include(p => p.Category)
-                                                    .Include(r => r.Ratings)
-                                                    .Include(r => r.Sales);
-            var products = await listProduct.OrderByDescending(p => p.CreateDate)
-                        .Take(10)
-                        .Select( g => _mapper.Map<ProductViewModel>(g))                     
-                        .ToListAsync();
+            var products = await _context.Products
+                                    .AsNoTracking()
+                                    .Where(p => p.Status != 0 && p.Stock > 0)
+                                    .OrderByDescending(p => p.CreateDate)
+                                    .Take(10)
+                                    .ProjectTo<ProductViewModel>(_mapper.ConfigurationProvider)
+                                    .ToListAsync();
+            var slider = await _context.Banners.AsNoTracking().Where(b => b.Status != 0).ToListAsync();
+            var categories = await _context.Categories.AsNoTracking().Where(b => b.Status != 0).ToListAsync();
+            var brands = await _context.Brands.AsNoTracking().Where(b => b.Status != 0).ToListAsync();
 
-            var slider = await _context.Banners.Where(b => b.Status != 0).ToListAsync();
-            ViewBag.Banners = slider;
+            HomeDataViewModel homeData = new HomeDataViewModel
+            {
+                Slider = slider,
+                Categories = categories,
+                Brands = brands,
+                NewArrivals = products
+            };  
 
-            var categories = await _context.Categories.Where(b => b.Status != 0).ToListAsync();
-            ViewBag.Categories = categories;
-
-            var brands = await _context.Brands.Where(b => b.Status != 0).ToListAsync();
-            ViewBag.Brands = brands;
-
-            return View(products);
+            return View(homeData);
         }
 
 

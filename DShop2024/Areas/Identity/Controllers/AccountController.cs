@@ -77,7 +77,7 @@ namespace DShop2024.Areas.Identity.Controllers
                     }
                     if(user.Status == 0)
                     {
-                        ModelState.AddModelError("Account was deleted ");
+                        ModelState.AddModelError("This account has been removed");
                         return View(model);
                     }
                     var result = await _signInManager.PasswordSignInAsync(model.UserNameOrEmail, model.Password, model.RememberMe, lockoutOnFailure: true);

@@ -28,16 +28,20 @@
 						@if (item.Rating.ReplyBy == null)
 						{
 							<button class="btn btn-sm btn-primary"
-									onclick="openModal('/Admin/ProductManage/GetPopUpReplyRating?Id=@item.Rating.Id')">
+									onclick="openModal('/Admin/Rating/GetPopUpReplyRating?Id=@item.Rating.Id')">
 								<i class="fa fa-reply"></i>
 								Replay
 							</button>
 						}
-						<button class="btn btn-sm btn-danger pull-right"
-								onclick="openModal('/Admin/ProductManage/RemoveRatingPopup?Id=@item.Rating.Id')">
-							<i class="fas fa-trash-alt"></i>
-							Remove
-						</button>
+						@if (User.IsInRole(RoleName.Administrator))
+						{
+							<button class="btn btn-sm btn-danger pull-right"
+									onclick="openModal('/Admin/Rating/RemoveRatingPopup?Id=@item.Rating.Id')">
+								<i class="fas fa-trash-alt"></i>
+								Remove
+							</button>
+						}
+
 					</div>
 					@if (item.Rating.ReplyBy != null)
 					{

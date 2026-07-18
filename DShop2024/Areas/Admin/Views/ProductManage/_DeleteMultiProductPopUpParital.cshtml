@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ProductModel>
+
+﻿@{
+    ViewData["Title"] = "Delete multiple products";
+    Layout = null;
+    int i = 1;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title text-primary">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form asp-action="DeleteMultiple" asp-controller="ProductManage" method="post">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Stt</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <th scope="row">@i</th>
+                        <td>
+                            <input type="hidden" name="IdProductsToDelete" value="@item.Id" />
+                            <img src="~/media/products/@item.MainImage" width="50" height="50" />
+                            @item.ProductName
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+        <div class="form-group">
+            <p class="text-black">Are you sure you want to delete all products?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <input type="submit" value="Confirm Delete" class="btn btn-danger" />
+        </div>
+    </form>
+</div>

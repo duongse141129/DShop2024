@@ -2,12 +2,12 @@
 @model IEnumerable<CustomerAndMessageViewModel>
 
 @{
-    ViewData["title"] = "List Chatting Customer ";
+    ViewData["title"] = "Customer Conversations";
 }
 <h1 class="text-primary">@ViewData["title"]</h1>
 
 <div class="row py-5">
-    <div class="col-md-4">
+    <div class="col-lg-6">
         <form asp-action="SearchUserName" asp-controller="Chat">
             <nav class="navbar navbar-header-right navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
                 <div class="input-group">
@@ -25,7 +25,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-xl-8 col-lg-10 col-md-12 col-sm-12">
         <table class="table">
             <thead>
                 <tr>

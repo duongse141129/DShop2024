@@ -1,0 +1,58 @@
+﻿
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title text-primary">Select product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body">
+        <div class="input-group">
+            <input id="searchInput" name="SearchName" type="search" class="form-control p-3" placeholder="Product name..." autocomplete="off">
+
+            <button class="input-group-text p-3">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div id="searchResultProduct" class="search-result d-none">
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    let timer;
+    $(document).off('keyup', '#searchInput');
+    $(document).on('keyup', '#searchInput', function () {
+        clearTimeout(timer);
+        let keyword = $(this).val();
+        timer = setTimeout(function () {
+            if (keyword.length < 1) {
+                $('#searchResultProduct').addClass('d-none').html('');
+                return;
+            }
+            $.get('/Admin/Sale/SearchLive', { keyword: keyword }, function (res) {
+                         $('#searchResultProduct')
+                        .removeClass('d-none')
+                        .html(res);
+             });
+        }, 300);
+    });
+
+
+    $(document).off('click', '#btnSelectProducts');
+    $(document).on('click', '#btnSelectProducts', function () {
+        $('.product-check:checked').each(function () {
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+            let image = $(this).data('image');
+            let price = $(this).data('price');
+            let originalprice = $(this).data('originalprice');
+            addProduct(id, name, image,  Number(price).toLocaleString('vi-VN') + ' VND', Number(originalprice).toLocaleString('vi-VN') + ' VND' );
+        });
+        $('#mainModal').modal('hide');
+    });
+
+</script>

@@ -47,7 +47,7 @@ builder.Services.AddDbContext<DShopContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectedDb"));
 });
 
-//builder.Services.AddDefaultIdentity<AppUserModel>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DShopContext>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -57,8 +57,6 @@ builder.Services.AddSession(options =>{
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.IsEssential = true;
 });
-
-
 
 
 //  Identity
@@ -88,7 +86,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 	options.SignIn.RequireConfirmedAccount = true;
 });
 
-
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.Zero;
+});
 
 builder.Services.AddAuthentication()
         .AddGoogle(options =>
@@ -116,19 +117,17 @@ builder.Services.AddAutoMapper(typeof(AssignmentMapper));
 
 var app = builder.Build();
 
-app.UseSession();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
-
-app.UseDeveloperExceptionPage();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -146,6 +145,8 @@ app.UseRouting();
 
 app.UseCors(_corsName);
 
+app.UseSession();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -155,7 +156,7 @@ app.MapControllerRoute(
     pattern: "{area:exists}/{controller=ProductManage}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
-    name: "Areas",
+    name: "product-detail",
     pattern: "/product/{Slug?}",
     defaults: new { 
         controller = "ShopProducts", 
@@ -163,7 +164,7 @@ app.MapControllerRoute(
     });
 
 app.MapControllerRoute(
-    name: "Areas",
+    name: "brand",
     pattern: "brand/{slug?}",
     defaults: new
     {
@@ -171,7 +172,7 @@ app.MapControllerRoute(
         action = "GetListProductByBrandSlug"
     });
 app.MapControllerRoute(
-    name: "Areas",
+    name: "category",
     pattern: "category/{slug?}",
     defaults: new
     {
@@ -183,9 +184,6 @@ app.MapControllerRoute(
 	name: "default",
 	pattern: "{controller=Home}/{action=Index}");
 
-//Seed data
-//var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DShopContext>();
-//SeedData.SeedingData(context);
 app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

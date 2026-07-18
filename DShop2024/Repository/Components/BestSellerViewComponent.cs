@@ -15,7 +15,7 @@ namespace DShop2024.Repository.Components
 		public async Task<IViewComponentResult> InvokeAsync()
 		{
             var now = DateTime.Now;
-            var bestSaleProducts = await _context.Products
+            var bestSaleProducts = await _context.Products.AsNoTracking()
                 .Where(p => p.Status != 0)
                 .Select(p => new ProductViewModel
                 {

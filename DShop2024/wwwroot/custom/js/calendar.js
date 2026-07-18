@@ -34,7 +34,7 @@ let year = today.getFullYear();
 /* =======================
    DATE RANGE STATE
 ======================= */
-/*let startDate = null; // Format: { day, month, year }*/
+
 let startDate = {
     day: activeDay,
     month: month,
@@ -62,8 +62,9 @@ loadTasks();
 /* =======================
    LOAD TASKS FROM BACKEND
 ======================= */
+
 function loadTasks() {
-    fetch("/Admin/Assignment/calendar")
+    fetch(`/Admin/Assignment/calendar?month=${month + 1}&year=${year}`)
         .then(res => res.json())
         .then(data => {
             eventsArr.length = 0;
@@ -76,12 +77,7 @@ function loadTasks() {
                 );
 
                 if (!dayBlock) {
-                    dayBlock = {
-                        day: t.day,
-                        month: t.month,
-                        year: t.year,
-                        events: []
-                    };
+                    dayBlock = { day: t.day, month: t.month, year: t.year, events: [] };
                     eventsArr.push(dayBlock);
                 }
 
@@ -99,6 +95,7 @@ function loadTasks() {
             updateEvents(activeDay);
         });
 }
+
 
 /* =======================
    CALENDAR RENDER
@@ -171,16 +168,13 @@ function addDayListeners() {
             updateEvents(activeDay);
             updateHeader(activeDay);
 
-            // 2. Shift + Click Logic for Range
+            // 2. Shift + Click 
             if (e.shiftKey) {
                 if (!startDate || (startDate && endDate)) {
-                    // Start a new range if none exists or one just finished
                     startDate = { day: clickedDay, month, year, timestamp: clickedDate };
                     endDate = null;
                 } else {
-                    // Complete the range
                     if (clickedDate < startDate.timestamp) {
-                        // Swap if the second click is earlier than the first
                         endDate = { ...startDate };
                         startDate = { day: clickedDay, month, year, timestamp: clickedDate };
                     } else {
@@ -188,7 +182,6 @@ function addDayListeners() {
                     }
                 }
             } else {
-                // Regular Click: Reset selection to a single day
                 startDate = { day: clickedDay, month, year, timestamp: clickedDate };
                 endDate = null;
             }
@@ -439,9 +432,15 @@ function setActiveDay(dateString) {
     loadTasks();
 }
 
-$('.clockpicker').clockpicker({
-    afterShow: function () {
-        $('.popover').css('z-index', 2051);
+
+
+$(function () {
+    if ($.fn.clockpicker) {
+        $('.clockpicker').clockpicker({
+            afterShow: function () {
+                $('.popover').css('z-index', 2051);
+            }
+        });
     }
 });
 

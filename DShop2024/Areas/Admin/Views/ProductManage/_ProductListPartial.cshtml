@@ -1,0 +1,149 @@
+﻿@model IEnumerable<ProductListViewModel>
+    <table class="table table-striped table-head-bg-info table-hover" id="table-product-filter">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-box"></th>
+                    <th scope="col" class="col-stt">Stt</th>
+                    <th scope="col" class="col-image">Image</th>
+                    <th scope="col" class="col-id">
+                        <a href="#" class="sort-column" data-column="Id">
+                            Id
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-productname">
+                        <a href="#" class="sort-column" data-column="ProductName">
+                            Product Name
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-originalprice">
+                        <a href="#" class="sort-column" data-column="OriginalPrice">
+                            Original Price
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-price">
+                        <a href="#" class="sort-column" data-column="Price">
+                            Price
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-stock">
+                        <a href="#" class="sort-column" data-column="Stock">
+                            Stock
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-brand">
+                        <a href="#" class="sort-column" data-column="Brand">
+                            Brand
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-category">
+                        <a href="#" class="sort-column" data-column="Category">
+                            Category
+                            <span class="sort-icon"></span>
+                        </a>
+                     </th>
+                    <th scope="col" class="col-averagepoint">
+                        <a href="#" class="sort-column" data-column="AveragePoint">
+                            Average Point
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-quantitysold">
+                        <a href="#" class="sort-column" data-column="QuantitySold">
+                            Quantity Sold
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+                    <th scope="col" class="col-wishlistcount">
+                        <a href="#" class="sort-column" data-column="WishlistCount">
+                            Wishlist Count
+                            <span class="sort-icon"></span>
+                        </a>
+                    </th>
+
+                    <th scope="col" class="col-action">Action</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 1;
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="col-box" > <input type="checkbox" name="IdProductsToDelete" value="@item.Id" /> </td>
+                        <td scope="row" class="col-stt">@i</td>
+                        <td class="col-image">
+                            <img src="~/media/products/@item.MainImage" class="rounded shadow-sm border" width="100" height="80" style="object-fit:cover;">
+                        </td>
+                        <td class="col-id">
+                            <small class="text-muted">
+                                @item.Id
+                            </small>
+                        </td>
+                        <td class="col-productname">
+                            <div class="fw-bold">@item.ProductName</div>
+                        </td>
+                        <td class="col-originalprice">@item.OriginalPrice.ToString("#,##0 VND")</td>
+                        <td class="col-price">
+                            <a class="btn-link" onclick="openModal('/Admin/ProductManage/GetPopUpChangeSale?productId=@item.Id')">
+                            @if (item.IsOnSale)
+                            {
+                                <span class="original-price" style="text-decoration: line-through;">@item.Price.ToString("#,##0")</span>
+                                <span class="badge badge-danger text-white bg-danger">@item.DiscountPercent% off</span>
+                                <div class="price text-danger">@item.SalePrice?.ToString("#,##0 VND")</div>
+                            }
+                            else
+                            {
+                                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                            }
+                            </a>
+                        </td>
+                        <td class="col-stock">
+                            @if (item.Stock == 0)
+                            {
+                                <span class="badge bg-danger fs-6 px-3 py-2">
+                                    Out of stock
+                                </span>
+                            }
+                            else if (item.Stock < 10)
+                            {
+                                <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                    @item.Stock items
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success fs-6 px-3 py-2">
+                                    @item.Stock items
+                                </span>
+                            }
+                            <br />
+                            <a asp-action="AddQuantity" asp-controller="ProductManage" asp-route-Id="@item.Id"><i class="fa fa-plus"></i> Add</a>
+                        </td>
+                        <td class="col-brand">@item.BrandName</td>
+                        <td class="col-category">@item.CategoryName</td>
+                        <td class="col-averagepoint">@item.AveragePoint.ToString("#.##")</td>
+                        <td class="col-quantitysold">@item.QuantitySold</td>
+                        <td class="col-wishlistcount">@item.WishlistCount</td>
+                        <td class="col-action">
+                            <div class="btn-group">
+                                <a class="btn btn-outline-info btn-md" asp-action="Detail"  asp-controller="ProductManage" asp-route-Id="@item.Id"><i class="fa fa-info"></i></a>
+                                <a class="btn btn-outline-warning btn-md" asp-action="Edit"  asp-controller="ProductManage" asp-route-Id="@item.Id"> <i class="fas fa-edit"></i></a>
+                                <a class="btn btn-outline-danger btn-md confirmDeletion" asp-action="Delete"  asp-controller="ProductManage" asp-route-Id="@item.Id"> <i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+
+                    </tr>
+                    i++;
+                }
+
+            </tbody>
+    </table>
+<partial name="_PagingPartial" model="@ViewBag.pagingModel" />

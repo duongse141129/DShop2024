@@ -1,6 +1,6 @@
 ﻿namespace DShop2024.Areas.Admin.Models.Order
 {
-    public class OrderAndReturnDetailVM
+    public class OrderAndReturnDetailVM 
     {
         public int ReturnDetailId { get; set; }
 

@@ -70,7 +70,7 @@
                     <div class="row align-items-center">
                         <div class="col-icon">
                             <div class="icon-big text-center icon-secondary bubble-shadow-small">
-                                <i class="fas fa-backspace"></i>
+                                <i class="fas fa-redo"></i>
                             </div>
                         </div>
                         <div class="col col-stats ms-3 ms-sm-0">
@@ -88,40 +88,58 @@
         <div class="col-md-8">
             <div class="card card-round">
                 <div class="card-header">
-                    <div class="card-head-row">
-                        <div class="card-title">Sales statistics</div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Sales Statistics</h5>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <p>Filter by date  </p>
-                                <label for="from">From</label>
-                                <input autocomplete="off" class="form-control" type="text" id="dateStart" name="dateStart">
-                                <label for="to">to</label>
-                                <input autocomplete="off" class="form-control" type="text" id="dateEnd" name="dateEnd">
-                                <br/>
-                                <button type="button" class="btn btn-info btn-filter-date">Filter</button>
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-lg-8">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="mb-3">Filter by Date</h6>
+
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-5">
+                                        <label for="dateStart" class="form-label">From</label>
+                                        <input autocomplete="off" type="text" class="form-control" id="dateStart" name="dateStart">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="dateEnd" class="form-label">To</label>
+                                        <input autocomplete="off" type="text" class="form-control" id="dateEnd" name="dateEnd">
+                                    </div>
+                                    <div class="col-md-2 d-grid">
+                                        <button type="button" class="btn btn-primary btn-filter-date">
+                                            Filter
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>Filter by month or year:</label>
-                                <select class="form-control filter-date" asp-items="ViewBag.StatisticFilterOptions">
+
+                        <div class="col-lg-4">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="mb-3">Filter by Month / Year</h6>
+                                <label class="form-label">Select</label>
+                                <select class="form-select filter-date"
+                                        asp-items="ViewBag.StatisticFilterOptions">
                                 </select>
                             </div>
                         </div>
+
                     </div>
                 </div>
                 <div class="card-body">
                    <div class="chart-container" style="min-height: 545px;">
-                        <div id="myfirstchart" style="height: 520px;"></div>
+                        <div id="myfirstchart" style="height: 625px;"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
+
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row">
-                        <div class="card-title">The quantity of products sold for brands</div>
+                        <div class="card-title">Quantity of Products Sold by Brand</div>
                     </div>
                 </div>
                 <div class="card-body pt-0">
@@ -129,16 +147,17 @@
                         <div class="col-sm-7">
                             <div id="graphBrand" style="width: 275px;"> </div>
                         </div>
-                        <div class="col-sm-5 ">
-                            <div id="brandchart" class="donutlegendbrand"></div>
+                        <div class="col-sm-5 d-flex align-items-center">
+                            <div id="brandchart" class="donutlegendbrand donut-legend"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row">
-                        <div class="card-title">The quantity of products sold for categories</div>
+                        <div class="card-title">Quantity of Products Sold by Category</div>
                     </div>
                 </div>
                 <div class="card-body pt-0">
@@ -146,12 +165,13 @@
                         <div class="col-sm-7">
                             <div id="graphCategories" style="width: 275px;"> </div>
                         </div>
-                        <div class="col-sm-5">
+                        <div class="col-sm-5 d-flex align-items-center">
                             <div id="categorychart" class="donut-legend"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
     <div class="row">
@@ -214,7 +234,18 @@
                                             </div>
                                         </th>
                                         <th class="text-end">@item.OriginalPrice.ToString("#,##0 VND")</th>
-                                        <th class="text-end">@item.Price.ToString("#,##0 VND")</th>
+                                        <th class="text-end">
+                                            @if (item.IsOnSale)
+                                            {
+                                                <span class="original-price" style="text-decoration: line-through;">@item.Price.ToString("#,##0")</span>
+                                                <span class="badge badge-danger text-white bg-danger">@item.DiscountPercent% off</span>
+                                                <div class="price text-danger">@item.SalePrice?.ToString("#,##0 VND")</div>
+                                            }
+                                            else
+                                            {
+                                                <span class="price">@item.Price.ToString("#,##0 VND")</span>
+                                            }
+                                        </th>
                                         <th class="text-end">@item.QuantitySold</th>
                                     </tr>
                                 }
@@ -397,36 +428,36 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 
     <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
-    <script src="~/lib/jqueryui/jquery-ui.js"></script>
 
     <script>
-        $(function () {
-            var dateFormat = "mm/dd/yy",
-                from = $("#dateStart")
-                    .datepicker({
-                        defaultDate: "+1w",
-                        changeMonth: true
-                    })
-                    .on("change", function () {
-                        to.datepicker("option", "minDate", getDate(this));
-                    }),
-                    to = $("#dateEnd").datepicker({
-                        defaultDate: "+1w",
-                        changeMonth: true
-                    })
-                    .on("change", function () {
-                        from.datepicker("option", "maxDate", getDate(this));
-                    });
+         $(function () {
+            const dateFormat = "mm/dd/yy";
+
+            const from = $("#dateStart").datepicker({
+                dateFormat: dateFormat,
+                changeMonth: true,
+                changeYear: true
+            }).on("change", function () {
+                to.datepicker("option", "minDate", getDate(this));
+            });
+
+            const to = $("#dateEnd").datepicker({
+                dateFormat: dateFormat,
+                changeMonth: true,
+                changeYear: true
+            }).on("change", function () {
+                from.datepicker("option", "maxDate", getDate(this));
+            });
 
             function getDate(element) {
-                var date;
                 try {
-                    date = $.datepicker.parseDate(dateFormat, element.value);
-                } catch (error) {
-                    date = null;
+                    return $.datepicker.parseDate(dateFormat, element.value);
                 }
-                return date;
+                catch {
+                    return null;
+                }
             }
+
         });
     </script>
     <script>
@@ -442,7 +473,7 @@
                 labels: ['Revenue', 'Profit', 'Orders', 'Quantity Sold'],
                 resize: true
             });
-            //filter all data chart
+
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartData", "Dashboard")",
@@ -451,7 +482,7 @@
                 }
             });
 
-            //submit filter date in chart
+
             $(".filter-date").change(function () {
                 var filterdate = $(this).val();
                 $.ajax({
@@ -465,22 +496,36 @@
             })
 
             $(".btn-filter-date").click(function () {
-                var dateStart = $("#dateStart").val();
-                var dateEnd = $("#dateEnd").val();
+            const dateStart = $("#dateStart").val();
+            const dateEnd = $("#dateEnd").val();
+
+            if (!dateStart || !dateEnd) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Please select both dates."
+                });
+                return;
+            }
                 $.ajax({
                     type: "POST",
                     url: "@Url.Action("SubmitFilterDate", "Dashboard")",
-                    data: { dateStart: dateStart, dateEnd: dateEnd },
-                    success: function (data) {
-                        if (data != null) {
-                            chart.setData(data);
-                        } else {
-                            Swal.fire("Date start must <= date end");
+                    data: {
+                        dateStart: dateStart,
+                        dateEnd: dateEnd
+                    },
+                    success: function (result) {
+
+                        if (result.success) {
+                            chart.setData(result.data);
                         }
-                        
+                        else{
+                              Swal.fire('Error', result.message, 'error');
+                        }
                     }
                 });
-            })
+            });
+
+
 
         });
 
@@ -488,7 +533,6 @@
     <script>
         $(document).ready(function () {
             var color_array = ['#03658C', '#7CA69E', '#F2594A', '#F28C4B', '#7E6F6A', '#36AFB2', '#9c6db2', '#d24a67', '#89a958', '#00739a', '#BDBDBD'];
-            var chartData = [];
             var chartB = new Morris.Donut({
                 element: 'graphBrand',
                 data: [0, 0],
@@ -498,7 +542,7 @@
                 resize: true,
                 formatter: function (x) { return x  }
             });
-            //filter all data chart
+
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartBrand", "Dashboard")",
@@ -506,9 +550,23 @@
                     chartB.setData(data);
                     var i = 0;
                     data.forEach(function (label) {
-                        var legendItem = document.createElement('span');
-                        $(legendItem).text(label.label + " " + label.value).prepend(`<i  style="background-color: ${color_array[i]} ">&nbsp;</i>`);
+
+                        var legendItem = `
+                            <div class="legend-item">
+                                <div class="legend-left">
+                                    <span class="legend-color"
+                                          style="background:${color_array[i]}"></span>
+
+                                    <span class="legend-name">${label.label}</span>
+                                </div>
+
+                                <span class="legend-value">${label.value}</span>
+                            </div>
+                        `;
+
                         $('#brandchart').append(legendItem);
+
+
                         i++;
                     });
                 }
@@ -517,7 +575,6 @@
 
         $(document).ready(function () {
             var color_array = ['Teal', 'Gray', 'Maroon', 'Navy', 'Yellow', 'Olive', 'Silver', 'Red', 'Maroon', 'Fuchsia', 'Purple', 'Aqua'];
-            var chartData = [];
             var chartC = new Morris.Donut({
                 element: 'graphCategories',
                 data: [0, 0],
@@ -527,7 +584,6 @@
                 resize: true,
                 formatter: function (x) { return x  }
             })
-            //filter all data chart
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartCategories", "Dashboard")",
@@ -535,9 +591,23 @@
                     chartC.setData(data);
                     var i = 0;
                     data.forEach(function (label) {
-                        var legendItem = document.createElement('span');
-                        $(legendItem).text(label.label + " " + label.value).prepend(`<i  style="background-color: ${color_array[i]} ">&nbsp;</i>`);
+
+                        var legendItem = `
+                            <div class="legend-item">
+                                <div class="legend-left">
+                                    <span class="legend-color"
+                                          style="background:${color_array[i]}"></span>
+
+                                    <span class="legend-name">${label.label}</span>
+                                </div>
+
+                                <span class="legend-value">${label.value}</span>
+                            </div>
+                        `;
+
                         $('#categorychart').append(legendItem);
+
+
                         i++;
                     });
                 }
@@ -563,7 +633,7 @@
                 resize: true
             });
 
-            //filter all data chart
+
             $.ajax({
                 type: "POST",
                 url: "@Url.Action("GetChartStock", "Dashboard")",
@@ -580,7 +650,7 @@
                 $('#visitor_legend').append(legendItem)
             });
 
-            //submit filter date in chart
+
             $(".filter-barchart").change(function () {
                 var filterbarchart = $(this).val();
                 $.ajax({

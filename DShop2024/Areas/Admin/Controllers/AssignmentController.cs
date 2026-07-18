@@ -35,11 +35,17 @@ namespace DShop2024.Areas.Admin.Controllers
         }
 
         [HttpGet("calendar")]
-        public async Task<IActionResult> GetCalendarTasks()
+        public async Task<IActionResult> GetCalendarTasks(int month, int year)
         {
             var user = await _userManager.GetUserAsync(this.User);
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
-            var dataAssignment = _context.Assignments.Where(s => s.Status != 0).Include(t => t.Task).OrderBy(a => a.AssignedBy).AsQueryable();
+
+            var dataAssignment = _context.Assignments
+                .Where(s => s.Status != 0)
+                .Where(a => a.AssignedDate.Month == month && a.AssignedDate.Year == year)
+                .Include(t => t.Task)
+                .OrderBy(a => a.AssignedBy)
+                .AsQueryable();
 
             if (role == RoleName.Employee)
             {
@@ -54,13 +60,14 @@ namespace DShop2024.Areas.Admin.Controllers
                 Month = t.AssignedDate.Month,
                 Year = t.AssignedDate.Year,
                 Time = $"{t.AssignedDate:hh\\:mm tt} - {t.Deadline:hh\\:mm tt}",
-                IsAllowUpdateDelete = role == RoleName.Administrator && t.Status == 1 && t.AssignedDate >= DateTime.Now ? true : false,
+                IsAllowUpdateDelete = role == RoleName.Administrator && t.Status == 1 && t.AssignedDate >= DateTime.Now,
                 Status = ((AssignmentEnumData.StatusTask)t.Status).ToString(),
             })
             .ToListAsync();
 
             return Json(data);
         }
+
 
         [HttpGet("Details/{id?}")]
         public async Task<IActionResult> Details(int? id)

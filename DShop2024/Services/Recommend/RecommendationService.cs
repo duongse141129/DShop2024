@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using DShop2024.EnumData;
 using DShop2024.Models;
-using DShop2024.Utilities;
 using DShop2024.ViewModels;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Recommendations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 
 
@@ -16,18 +19,33 @@ namespace DShop2024.Services.Recommend
     public class RecommendationService : IRecommendationService
     {
         private readonly DShopContext _context;
-        private const int CatVecSize = 16; // for Material, Category, Brand
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _cache;
+        private const string ScoringPoolCacheKey = "reco:scoring-pool";
+        private static readonly TimeSpan ScoringPoolCacheDuration = TimeSpan.FromMinutes(5);
 
-        public RecommendationService(DShopContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper)
+        public RecommendationService(DShopContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper,  IMemoryCache cache)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _mapper = mapper;
+            _cache = cache;
         }
 
 
+        private List<int> GetIdsRecentlyViewedProduct()
+        {
+            var rvproduct = _httpContextAccessor.HttpContext.Request.Cookies[DShopConst.RECENTLY_VIEWED_PRODUCTS];
+            List<int> recentlyViewedIdProducts;
+            if (rvproduct == null)
+            {
+                return new List<int>();
+            }
+            recentlyViewedIdProducts = JsonConvert.DeserializeObject<List<int>>(rvproduct);
+
+            return recentlyViewedIdProducts;
+        }
         public void AddRecentlyViewedProductAsync(int productId)
         {
             var recentlyViewedProducts = GetIdsRecentlyViewedProduct();
@@ -43,7 +61,7 @@ namespace DShop2024.Services.Recommend
             var cookieOptionss = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddMinutes(2),
+                Expires = DateTime.UtcNow.AddDays(2),
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
             };
@@ -75,58 +93,106 @@ namespace DShop2024.Services.Recommend
         }
 
 
-        public async Task<IEnumerable<ProductViewModel>> RecommendForRecentlyViewedAsync(int topN = 10, double popularityWeight = 1.3)
+
+
+        private static class RecoWeight
         {
-            var recentIds = GetIdsRecentlyViewedProduct();
-            if (recentIds.Count == 0)
-                return await _context.Products.Where(p => p.Status != 0)
-                                                .Where(r => r.Ratings.Where(rt => rt.Status != 0).Count() > 10)
-                                                .OrderByDescending(b => b.Ratings.Where(r => r.Status != 0).Average(r => r.Star))
-                                                .Include(p => p.Ratings)
-                                                .Include(p => p.Brand)
-                                                .Include(p => p.Category)
-                                                .Include(r => r.Sales)
-                                                .Take(topN)
-                                                .Select( c => _mapper.Map<ProductViewModel>(c))
-                                                .ToListAsync();
+            public const double Category = 35;
+            public const double Brand = 20;
+            public const double Price = 15;
+            public const double Capacity = 5;
+            public const double Material = 5;
+            public const double Dimension = 5;
+            public const double WaterResistance = 5;
+            public const double USBChargingPort = 5;
+            public const double LaptopPocket = 5;
 
-            var all = await _context.Products.Where(p => p.Status != 0)
-                                            .Include(p => p.Ratings)
-                                            .Include(p => p.Brand)
-                                            .Include(p => p.Category)
-                                            .Include(r => r.Sales)
-                                            .AsNoTracking()
-                                            .AsSplitQuery()
-                                            .Select(c => _mapper.Map<ProductViewModel>(c))
-                                            .ToListAsync();
 
-            // Precompute normalization bounds
-            double minPrice = all.Min(b => (double)b.Price), maxPrice = all.Max(b => (double)b.Price);
-            double minRatings = all.Min(b => b.AveragePoint), maxRatings = all.Max(b => b.AveragePoint);
-            double minCap = all.Min(b => b.Capacity), maxCap = all.Max(b => b.Capacity);
+            public const double SaleBoost = 10; 
+        }
 
-            // For dimensions, we use total volume proxy h*w*d
-            var volumes = all.Select(b => {
-                var (h, w, d) = FeatureUtils.ParseDimensions(b.Dimension);
-                return h * w * d;
-            }).ToArray();
-            double minVol = volumes.Min(), maxVol = volumes.Max();
+        private class ScoringCandidate
+        {
+            public int Id { get; set; }
+            public int CategoryId { get; set; }
+            public int BrandId { get; set; }
+            public double Price { get; set; }
+            public int Capacity { get; set; }
+            public string Material { get; set; }
+            public double? DimensionVolume { get; set; } 
+            public string Dimension { get; set; }         
+            public bool WaterResistance { get; set; }
+            public bool USBChargingPort { get; set; }
+            public decimal? LaptopPocket { get; set; }
+            public bool IsOnSale { get; set; }
+            public double AveragePoint { get; set; }
+        }
 
-            // Build feature vectors
-            var vectors = all.Select((b, i) => ToVector(b, volumes[i], minPrice, maxPrice,
-                                                        minRatings, maxRatings, minCap, maxCap,
-                                                        minVol, maxVol)).ToArray();
+        private class ViewedProfile
+        {
+            public int Id { get; set; }
+            public int CategoryId { get; set; }
+            public int BrandId { get; set; }
+            public double Price { get; set; }
+            public int Capacity { get; set; }
+            public string Material { get; set; }
+            public double? DimensionVolume { get; set; }
+            public string Dimension { get; set; }
+            public bool WaterResistance { get; set; }
+            public bool USBChargingPort { get; set; }
+            public decimal? LaptopPocket { get; set; }
+        }
 
-            // Aggregate recent vector as mean of recently viewed
-            var recentVecs = recentIds
-                .Select(id => {
-                    var idx = all.FindIndex(x => x.Id == id);
-                    return idx >= 0 ? vectors[idx] : null;
+
+        private async Task<List<ScoringCandidate>> GetScoringPoolAsync()
+        {
+            if (_cache.TryGetValue(ScoringPoolCacheKey, out List<ScoringCandidate> cached))
+                return cached;
+
+            var now = DateTime.UtcNow;
+            var pool = await _context.Products
+                .AsNoTracking()
+                .Where(p => p.Status != 0 && p.Stock > 0)
+                .Select(p => new ScoringCandidate
+                {
+                    Id = p.Id,
+                    CategoryId = p.CategoryId,
+                    BrandId = p.BrandId,
+                    Price = (double)p.Price,
+                    Capacity = p.Capacity,
+                    Material = p.Material,
+                    Dimension = p.Dimension,
+                    WaterResistance = p.WaterResistance,
+                    USBChargingPort = p.USBChargingPort,
+                    LaptopPocket = p.LaptopPocket,
+                    IsOnSale = p.Sales.Any(s =>
+                                    s.Status != 0 &&
+                                    now >= s.SaleStartDate &&
+                                    now <= s.SaleEndDate),
+                    AveragePoint = p.Ratings.Where(r => r.Status != 0).Average(r => (double?)r.Star) ?? 0,
                 })
-                .Where(v => v != null)
-                .ToArray();
+                .Where(p => p.AveragePoint > 3) 
+                .ToListAsync();
 
-            if (recentVecs.Length == 0)
+            foreach (var p in pool)
+            {
+                p.DimensionVolume = TryParseVolume(p.Dimension);
+            }
+
+            _cache.Set(ScoringPoolCacheKey, pool, ScoringPoolCacheDuration);
+            return pool;
+        }
+
+        //  Content-based(attribute-based) recommender system, built from two layers:
+        //-	Weighted multi-attribute similarity scoring
+        //-	Item-to-item retrieval
+        //There's a third layer worth naming separately
+
+
+        public async Task<List<ProductViewModel>> GetRecommendedProductsAsync(int topN = 10)
+        {
+            var viewedProducts = await GetRecentlyViewedProductsAsync();
+            if (viewedProducts.Count == 0)
                 return await _context.Products.Where(p => p.Status != 0)
                                                 .Where(r => r.Ratings.Where(rt => rt.Status != 0).Count() > 10)
                                                 .OrderByDescending(b => b.Ratings.Where(r => r.Status != 0).Average(r => r.Star))
@@ -138,112 +204,120 @@ namespace DShop2024.Services.Recommend
                                                 .Select(c => _mapper.Map<ProductViewModel>(c))
                                                 .ToListAsync();
 
-            var userProfile = MeanVector(recentVecs!);
+            var viewedIds = viewedProducts.Select(p => p.Id).ToHashSet();
 
-            // Compute similarity
-            var scores = new List<(ProductViewModel b, double score)>(all.Count);
-            foreach (var (b, i) in all.Select((b, i) => (b, i)))
+            var viewedProfiles = viewedProducts.Select(v => new ViewedProfile
             {
-                if (recentIds.Contains(b.Id)) continue; // exclude viewed items
-                double sim = CosineSimilarity(userProfile, vectors[i]);
+                Id = v.Id,
+                CategoryId = v.CategoryId,
+                BrandId = v.BrandId,
+                Price = (double)v.Price,
+                Capacity = v.Capacity,
+                Material = v.Material,
+                Dimension = v.Dimension,
+                DimensionVolume = TryParseVolume(v.Dimension),
+                WaterResistance = v.WaterResistance,
+                USBChargingPort = v.USBChargingPort,
+                LaptopPocket = v.LaptopPocket
+            }).ToList();
 
-                // Popularity blend (ratings normalized to [0,1])
-                double pop = Normalize(b.AveragePoint, minRatings, maxRatings);
-                double final = (1 - popularityWeight) * sim + popularityWeight * pop;
+            var pool = await GetScoringPoolAsync();
 
-                scores.Add((b, final));
-            }
-
-            return scores
-                .OrderByDescending(t => t.score)
+            var topIds = pool
+                .Where(c => !viewedIds.Contains(c.Id))
+                .Select(c =>
+                {
+                    double similarity = viewedProfiles.Max(v => CalculateSimilarity(c, v));
+                    double finalScore = similarity + (c.IsOnSale ? RecoWeight.SaleBoost : 0);
+                    return (Candidate: c, FinalScore: finalScore);
+                })
+                .OrderByDescending(x => x.FinalScore)
+                .ThenByDescending(x => x.Candidate.AveragePoint)
                 .Take(topN)
-                .Select(t => t.b)
+                .Select(x => x.Candidate.Id)
                 .ToList();
+
+            if (topIds.Count == 0)
+                return new List<ProductViewModel>();
+
+            var winners = await _context.Products
+                .AsNoTracking()
+                .Include(p => p.Ratings)
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Sales)
+                .AsSplitQuery()
+                .Where(p => topIds.Contains(p.Id))
+                .ToListAsync();
+
+            var mappedWinners = _mapper.Map<List<ProductViewModel>>(winners);
+
+            var rankLookup = topIds.Select((id, index) => (id, index)).ToDictionary(x => x.id, x => x.index);
+            return mappedWinners.OrderBy(p => rankLookup[p.Id]).ToList();
         }
 
-        private List<int> GetIdsRecentlyViewedProduct()
+        private double CalculateSimilarity(ScoringCandidate candidate, ViewedProfile viewed)
         {
-            var rvproduct = _httpContextAccessor.HttpContext.Request.Cookies[DShopConst.RECENTLY_VIEWED_PRODUCTS];
-            List<int> recentlyViewedIdProducts;
-            if (rvproduct == null)
-            {
-                return new List<int>();
-            }
-            recentlyViewedIdProducts = JsonConvert.DeserializeObject<List<int>>(rvproduct);
+            double score = 0;
 
-            return recentlyViewedIdProducts;
+            score += (candidate.CategoryId == viewed.CategoryId ? 1 : 0) * RecoWeight.Category;
+            score += (candidate.BrandId == viewed.BrandId ? 1 : 0) * RecoWeight.Brand;
+            score += (candidate.WaterResistance == viewed.WaterResistance ? 1 : 0) * RecoWeight.WaterResistance;
+            score += (candidate.USBChargingPort == viewed.USBChargingPort ? 1 : 0) * RecoWeight.USBChargingPort;
+
+            score += NumericSimilarity(candidate.Price, viewed.Price) * RecoWeight.Price;
+            score += NumericSimilarity(candidate.Capacity, viewed.Capacity) * RecoWeight.Capacity;
+
+            score += StringSimilarity(candidate.Material, viewed.Material) * RecoWeight.Material;
+
+            score += DimensionSimilarity(
+                candidate.DimensionVolume, candidate.Dimension,
+                viewed.DimensionVolume, viewed.Dimension) * RecoWeight.Dimension;
+
+            score += NullableNumericSimilarity(candidate.LaptopPocket, viewed.LaptopPocket) * RecoWeight.LaptopPocket;
+
+            return score;
         }
 
-        private static double[] ToVector(
-            ProductViewModel b, double volume,
-            double minPrice, double maxPrice,
-            double minRatings, double maxRatings,
-            double minCap, double maxCap,
-            double minVol, double maxVol)
+        private double NumericSimilarity(double a, double b)
         {
-            var price = Normalize((double)b.Price, minPrice, maxPrice);
-            var ratings = Normalize(b.AveragePoint, minRatings, maxRatings);
-            var cap = Normalize(b.Capacity, minCap, maxCap);
-            var vol = Normalize(volume, minVol, maxVol);
-
-            var material = FeatureUtils.OneHotHash(b.Material, CatVecSize);
-            var category = FeatureUtils.OneHotHash(b.CategoryName, CatVecSize);
-            var brand = FeatureUtils.OneHotHash(b.BrandName, CatVecSize);
-
-            var bools = new double[]
-            {
-            b.WaterResistance ? 1 : 0,
-            b.USBChargingPort ? 1 : 0,
-            b.LaptopPocket != null ? 1 : 0
-            };
-
-            return Concat(
-                new[] { price, ratings, cap, vol },
-                bools, material, category, brand
-            );
+            if (a == 0 && b == 0) return 1;
+            double max = Math.Max(Math.Abs(a), Math.Abs(b));
+            if (max == 0) return 1;
+            double diff = Math.Abs(a - b) / max;
+            return Math.Max(0, 1 - diff);
         }
 
-        private static double Normalize(double x, double min, double max)
+        private double NullableNumericSimilarity(decimal? a, decimal? b)
         {
-            if (max <= min) return 0;
-            var v = (x - min) / (max - min);
-            return double.IsFinite(v) ? Math.Clamp(v, 0, 1) : 0;
+            if (!a.HasValue && !b.HasValue) return 1;
+            if (!a.HasValue || !b.HasValue) return 0;
+            return NumericSimilarity((double)a.Value, (double)b.Value);
         }
 
-        private static double[] Concat(params double[][] arrays)
+        private double StringSimilarity(string a, string b)
         {
-            var len = arrays.Sum(a => a.Length);
-            var result = new double[len];
-            int offset = 0;
-            foreach (var a in arrays)
-            {
-                Array.Copy(a, 0, result, offset, a.Length);
-                offset += a.Length;
-            }
-            return result;
+            if (string.IsNullOrWhiteSpace(a) && string.IsNullOrWhiteSpace(b)) return 1;
+            if (string.IsNullOrWhiteSpace(a) || string.IsNullOrWhiteSpace(b)) return 0;
+            return string.Equals(a.Trim(), b.Trim(), StringComparison.OrdinalIgnoreCase) ? 1 : 0;
         }
 
-        private static double[] MeanVector(double[][] vectors)
+        private double DimensionSimilarity(double? volA, string rawA, double? volB, string rawB)
         {
-            int n = vectors[0].Length;
-            var mean = new double[n];
-            foreach (var v in vectors)
-                for (int i = 0; i < n; i++) mean[i] += v[i];
-            for (int i = 0; i < n; i++) mean[i] /= vectors.Length;
-            return mean;
+            if (volA.HasValue && volB.HasValue)
+                return NumericSimilarity(volA.Value, volB.Value);
+            return StringSimilarity(rawA, rawB);
         }
 
-        private static double CosineSimilarity(double[] a, double[] b)
+        private double? TryParseVolume(string dimension)
         {
-            double dot = 0, na = 0, nb = 0;
-            for (int i = 0; i < a.Length; i++)
-            {
-                dot += a[i] * b[i];
-                na += a[i] * a[i];
-                nb += b[i] * b[i];
-            }
-            if (na == 0 || nb == 0) return 0;
-            return dot / (Math.Sqrt(na) * Math.Sqrt(nb));
+            if (string.IsNullOrWhiteSpace(dimension)) return null;
+            var normalized = dimension.Replace(',', '.');
+            var numbers = Regex.Matches(normalized, @"\d+(\.\d+)?")
+                .Select(m => double.Parse(m.Value, CultureInfo.InvariantCulture))
+                .ToList();
+            if (numbers.Count < 2) return null;
+            return numbers.Aggregate(1.0, (acc, n) => acc * n);
         }
     }
 }

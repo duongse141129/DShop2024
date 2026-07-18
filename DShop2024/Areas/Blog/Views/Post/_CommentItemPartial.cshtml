@@ -24,11 +24,14 @@
                     <i class="fa fa-reply"></i>
                     Replay
                 </button>
+
                 @if (User.IsInRole(RoleName.Administrator))
                 {
-                    <a asp-action="DeleteComment" class="btn btn-sm btn-danger confirmDeletion dCommnet" asp-route-Id="@Model.Id">
+                    <button type="button"
+                            class="btn btn-sm btn-danger delete-comment"
+                            data-id="@Model.Id">
                         Delete
-                    </a>
+                    </button>
                 }
 
             </div>
@@ -68,32 +71,3 @@
 
 
 
-
-@* <div class="comment-box" style="border:2px solid #000; padding:20px; margin:10px 0;">
-
-    <div class="comment-header">
-        <img class="media-object" src="~/media/avatar/@Model.User.Avatar" width="100" style="height:100px" alt="">
-        <span><strong>@Model.User.UserName</strong></span>
-        <span>@Model.Timestamp.ToString("hh:mm tt")</span>
-        <span>@Model.Timestamp.ToString("MM/dd/yyyy")</span>
-        <button class="btn btn-primary btn-sm">Reply</button>
-        <button class="btn btn-danger btn-sm">Delete</button>
-    </div>
-
-    <div class="comment-content" style="margin-top:10px;">
-        @Model.CommentContent
-    </div>
-
-
-
-    <!-- CHILD COMMENTS -->
-    @if (Model.CommentChildren.Any())
-    {
-        <div style="margin-left:40px; margin-top:10px;" >
-            @foreach (var child in Model.CommentChildren)
-            {
-                @await Html.PartialAsync("_CommentItemPartial", child)
-            }
-        </div>
-    }
-</div> *@

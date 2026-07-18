@@ -1,0 +1,213 @@
+﻿@{
+    ViewData["Title"] = "Create Sale";
+}
+
+<div class="card py-5 px-5">  
+    <h1 class="text-primary">@ViewData["title"]</h1>
+
+    <div class="card-body">
+        <button class="btn btn-sm btn-primary mb-3"
+                onclick="openModal('/Admin/Sale/GetPopUpAddSale')">
+            <i class="fa fa-reply"></i>
+            Add product
+        </button>
+   
+  
+
+
+    <form id="form-addSale">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label>Sale Start Date</label>
+                    <input type="datetime-local" class="form-control" id="saleStartDate" required />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <label>Sale End Date</label>
+                    <input type="datetime-local" class="form-control" id="saleEndDate" required />
+                </div>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Original Price</th>
+                    <th>Price</th>
+                    <th>Sale Price</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody id="saleBody">
+            </tbody>
+        </table>
+
+        <button type="submit"
+                class="btn btn-lg btn-success">
+            Save Sale
+        </button>
+    </form>
+    </div>
+    <div class="mt-5">
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>
+<div class="modal fade" id="mainModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/custom/js/popup.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    <script>
+
+         function addProduct(id, name, mainimage, price, originalprice) {
+            if ($(`#saleBody tr[data-id='${id}']`).length)
+                return;
+            let row = `
+                <tr data-id="${id}">
+                    <td>
+                        <img src="/media/products/${mainimage}" width="60"/>
+                    </td>
+                    <td>${name}</td>
+                    <td>${originalprice}</td>
+                    <td>${price}</td>
+                    <td>
+                        <input type="number"
+                               class="form-control sale-price"
+                               min="1000"
+                               required>
+
+                         <small class="text-muted sale-price-convert"></small>
+                    </td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-danger btnRemove">
+                            Remove
+                        </button>
+                    </td>
+                </tr>`;
+            $('#saleBody').append(row);
+        }
+
+        $(document).on('click', '.btnRemove', function () {
+            $(this).closest('tr').remove();
+        });
+
+
+
+    </script>
+
+    <script>
+            $('#form-addSale').submit(function (e) {
+            e.preventDefault();
+            let items = [];
+
+          let isValidItems = true;
+
+            $('#saleBody tr').each(function () {
+                let rawnumber = $(this).find('td:nth-child(4)').text().trim();
+                let rawNumberOrPrice = $(this).find('td:nth-child(3)').text().trim();
+                let salePrice = parseFloat($(this).find('.sale-price').val());
+                let priceProduct = Number(rawnumber.replace(/[^0-9]/g, ''));
+                let originalPriceProduct = Number(rawNumberOrPrice.replace(/[^0-9]/g, ''));
+
+                if (salePrice >= priceProduct || salePrice <= originalPriceProduct || salePrice % 1000 !== 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        html: `
+                            Invalid sale price for <b>${$(this).find('td:nth-child(2)').text()}</b>.<br>
+                            Must be less than price<br>
+                            Must be higher than the original price<br>
+                            Must be divisible by 1000.
+                        `
+                    });
+                    isValidItems = false;
+                    return false;
+                }
+
+                items.push({
+                    ProductId: $(this).data('id'),
+                    SalePrice: salePrice
+                });
+            });
+
+            if (!isValidItems) return;
+
+
+            let model = {
+                SaleStartDate: $('#saleStartDate').val(),
+                SaleEndDate: $('#saleEndDate').val(),
+                Items: items
+            };
+
+            $.ajax({
+                url: '/Admin/Sale/Create',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(model),
+                success: function (result) {
+                     if (result.success) {
+                        Swal.fire({
+                                      position: "top-end",
+                                      icon: "success",
+                                      title: result.message,
+                                      showConfirmButton: false,
+                                      timer: 500
+                                }).then(() =>{
+                                    location.reload();
+                                });
+                    } else {
+                            Swal.fire({
+                              icon: "error",
+                              title: "Oops...",
+                              text: result.message
+                            });
+                    }
+                },
+                error: function (rs) {
+                    let response = rs.responseJSON;
+                    let errorMessage = response.message || "An error occurred.";
+
+                    if (response.products && response.products.length > 0) {
+                        errorMessage += "<ul>" + response.products.map(name => `<li>${name}</li>`).join('') + "</ul>";
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Conflict Detected',
+                        html: errorMessage
+                    });
+                }
+            });
+
+        });
+    </script>
+    <script>
+        $(document).on("input", ".sale-price", function () {
+            const value = $(this).val();
+            const text = value
+                ? new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND"
+                }).format(value)
+                : "";
+
+            $(this).closest("tr").find(".sale-price-convert").text(text);
+        });
+    </script>
+}

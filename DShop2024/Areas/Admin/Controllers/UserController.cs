@@ -125,7 +125,6 @@ namespace DShop2024.Areas.Admin.Controllers
                         return View(new CreateUserRequest());
                     }
 
-
                     var createUserResult = await _userManager.CreateAsync(user, createUserRequest.Password);
                     if (createUserResult.Succeeded)
                     {
@@ -186,6 +185,7 @@ namespace DShop2024.Areas.Admin.Controllers
                 TempData[DShopConst.TEMPDATA_ERROR] = "Delete user fail";
                 return RedirectToAction("Index");
             }
+            await _userManager.UpdateSecurityStampAsync(user);
             TempData[DShopConst.TEMPDATA_SUCCESS] = "Delete successful";
             return RedirectToAction("Index");
         }
@@ -290,6 +290,8 @@ namespace DShop2024.Areas.Admin.Controllers
                 ModelState.AddModelError(addPasswordResult);
                 return View(model);
             }
+            await _userManager.UpdateSecurityStampAsync(user);
+            
             TempData[DShopConst.TEMPDATA_SUCCESS] = $"Set password user {user.UserName} successful";
             return RedirectToAction("Index", "User");
         }

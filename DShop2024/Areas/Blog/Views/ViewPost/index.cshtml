@@ -7,7 +7,7 @@
     ViewData["Title"] = (subject != null) ? subject.Title : "Post";
     Layout = "~/Areas/Blog/Views/ViewPost/_LayoutBlog.cshtml";
 }
-                <h1>@ViewData["Title"]</h1>
+                <h1 class="text-primary">@ViewData["Title"]</h1>
 
                 @if(subject != null){
                     <p>@Html.Raw(subject.SubjectContent)</p>
@@ -23,10 +23,6 @@
                 </div>
 
          
-
-
-
-
                 @section Sidebar{
                    @await Component.InvokeAsync("DShop2024.Components.SubjectSidebar",
                             new SubjectSidebar.SubjectSidebarData{

@@ -1,0 +1,14 @@
+﻿@model PostDetailViewModel
+<h3>Comments (@Model.PostDetail.CountComments)</h3>
+
+<div class="response-area">
+	<div class="media-list">
+		@foreach (var item in Model.ListComments)
+		{
+			@await Html.PartialAsync("_ViewCommentsItemPartial", item)
+		}
+	</div>
+</div>
+<div class="ajax-pagination mt-2">
+	<partial name="_PagingPartial" model="@ViewBag.pagingmodel" />
+</div>

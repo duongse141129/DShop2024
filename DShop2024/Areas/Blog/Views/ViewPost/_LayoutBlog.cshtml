@@ -8,7 +8,7 @@
 <section class="py-5">
     <div class="container-fluid bg-light py-5">
         <div class ="row">
-                <h1>@ViewData["Title"]</h1>
+                <h1 class="text-primary">@ViewData["Title"]</h1>
                 <div class="col-md-8">
                     <div class="container mt-2">
                         <div class="post-container">
@@ -23,6 +23,16 @@
                     </div>
                 </div>
                 <div class="col-md-4">
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">Subject</div>
+                        <div class="card-body">
+                            <div class="row">
+                                @RenderSection("Sidebar", false)
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Search widget-->
                     <div class="card mb-4">
                         <form asp-action="Index" asp-area="Blog" asp-controller="ViewPost">
@@ -35,14 +45,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="card mb-4">
-                        <div class="card-header">Subject</div>
-                        <div class="card-body">
-                            <div class="row">
-                                @RenderSection("Sidebar", false)
-                            </div>
-                        </div>
-                    </div>
+
 
                 </div>     
 
@@ -58,5 +61,5 @@
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.2/dist/sweetalert2.all.min.js"></script>
-<script src="~/custom/js/slider.js"></script>
+<script src="~/custom/js/slider.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)

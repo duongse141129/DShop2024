@@ -14,7 +14,7 @@ namespace DShop2024.Repository.Components
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var recomnededProducts = await _rec.RecommendForRecentlyViewedAsync(topN: 8);
+            var recomnededProducts = await _rec.GetRecommendedProductsAsync();
             return View(recomnededProducts);
 
         }

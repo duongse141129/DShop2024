@@ -17,6 +17,7 @@ namespace DShop2024.Areas.Admin.Models.Product
         [Required(ErrorMessage = "The {0} field is required ")]
         [Range(1000, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
         [Column(TypeName = "decimal(8,2)")]
+        [VNDPriceAttribute(ErrorMessage = "The price must be a multiple of 1000.")]
         public decimal Price { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Seclect a brand")]
         public int BrandId { get; set; }
@@ -34,6 +35,8 @@ namespace DShop2024.Areas.Admin.Models.Product
         [Range(1, int.MaxValue, ErrorMessage = "Please input a number greater than {1}")]
         public int Capacity { get; set; }
         [Required, MaxLength(300, ErrorMessage = "The {0} field is required")]
+        [RegularExpression(@"^\d+(\.\d+)?\s*x\s*\d+(\.\d+)?\s*x\s*\d+(\.\d+)?$",
+            ErrorMessage = "Dimension must be in the format Length x Width x Height (e.g. 30x20x10 or 30.5x20x10.5).")]
         public string Dimension { get; set; }
 
         [Required(ErrorMessage = "The {0} field is required ")]

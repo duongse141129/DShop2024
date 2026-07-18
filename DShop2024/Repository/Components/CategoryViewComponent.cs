@@ -13,8 +13,8 @@ namespace DShop2024.Repository.Components
 		}
 		public async Task<IViewComponentResult> InvokeAsync(string uiDesignType, string selectedCategory = "")
 		{
-			var categories = await _context.Categories
-								.Where(p => p.Status != 0)
+			var categories = await _context.Categories.AsNoTracking()
+                                .Where(p => p.Status != 0)
 								.ToListAsync();
             if (uiDesignType == "Details")
             {

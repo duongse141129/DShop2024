@@ -402,20 +402,26 @@ namespace DShop2024.Controllers
             {
                 return NotFound();
             }
-            if(checkPartIsFullReturn(order, returnDetails))
+
+            var listReturn = returnDetails.Where(s => s.Status == true);
+            if (listReturn.Count() == 0)
             {
+                TempData[DShopConst.TEMPDATA_ERROR] = $"Please select the product you want to return";
+                return RedirectToAction("ReturnPartOrder", new { id = order.Id });
+            }
+
+            var qtyOrder = order.OrderDetails.Sum(od => od.Quantity);
+            var qtyReturn  = returnDetails.Where(s => s.Status == true).Sum(od => od.Quantity);
+            if(qtyReturn >= qtyOrder)
+            {
+                TempData[DShopConst.TEMPDATA_ERROR] = $"All items are being returned. Please use the full order return option.";
                 return RedirectToAction("ReturnFullOrder", new { id = order.Id });
             }
 
 
             try
             {
-                var listReturn = returnDetails.Where(s => s.Status == true);
-                if (listReturn.Count() == 0)
-                {
-                    TempData[DShopConst.TEMPDATA_ERROR] = $"Please select the product you want to return";
-                    return RedirectToAction("ReturnPartOrder", new { id = order.Id });
-                }
+
                 decimal totalPrice = 0;
                 foreach (var item in listReturn)
                 {
@@ -506,34 +512,21 @@ namespace DShop2024.Controllers
             }
         }
 
-        private bool checkPartIsFullReturn(OrderModel order , List<CreateReturnDetailRequest> returnDetails)
-        {
-            foreach (var item in returnDetails)
-            {
-                var qty= order.OrderDetails.Where(od => od.Id == item.OrderDetailId).Select(od => od.Quantity).FirstOrDefault();
-                if(item.Quantity != qty)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
 
         private async Task<decimal> GetShippingCost(string addressDelivery)
         {
-            if (string.IsNullOrEmpty(addressDelivery))
+            if (string.IsNullOrWhiteSpace(addressDelivery))
                 return DShopConst.DEFAULT_SHIPPING_COST;
 
-            var parts = addressDelivery.Split("_");
-            var province = parts.Last(); 
+            var province = addressDelivery.Split('_').Last().Trim();
 
-            var shippingCost = await _context.Shippings.Where(s => s.Province == province)
-                                                        .Select(s => (decimal?)s.Price) 
-                                                        .FirstOrDefaultAsync();
+            var shippingCost = await _context.Shippings
+                .Where(s => s.Province == province)
+                .Select(s => (decimal?)s.Price)
+                .FirstOrDefaultAsync();
+
             return shippingCost ?? DShopConst.DEFAULT_SHIPPING_COST;
         }
-
-
 
 
 

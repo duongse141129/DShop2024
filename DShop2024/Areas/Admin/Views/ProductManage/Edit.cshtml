@@ -6,9 +6,9 @@
 <h1 class="text-primary">@ViewData["title"]</h1>
 
 <div class="col-md-9">
-    <form asp-action="Edit" enctype="multipart/form-data">
+    <form asp-action="Edit" enctype="multipart/form-data" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" asp-for="Id"/>
+        <input type="hidden" asp-for="Id"/>    
         <div class="form-group">
             <label>Product Name</label>
             <input asp-for="ProductName" class="form-control" />
@@ -22,12 +22,14 @@
 
         <div class="form-group">
             <label>Original Price (VND)</label>
-            <input asp-for="OriginalPrice" class="form-control" />
+            <input asp-for="OriginalPrice" pattern="[0-9.,]+" class="form-control typing-originalPrice" />
+            <span id="originalPrice-convert"></span>
             <span asp-validation-for="OriginalPrice" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Price (VND)</label>
-            <input asp-for="Price" class="form-control" />
+            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span id="price-convert"></span>
             <span asp-validation-for="Price" class="text-danger"></span>
         </div>
 
@@ -74,7 +76,7 @@
             <input type="checkbox" asp-for="USBChargingPort" class="form-check-input form-control-lg" />
             <span asp-validation-for="USBChargingPort" class="text-danger"></span>
         </div>
-
+        <input type="hidden" asp-for="CreateDate" />
         <div class="form-group">
             <label>Category</label>
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
@@ -156,7 +158,8 @@
 
 
 @section Scripts {
-  
+    <link href="~/custom/Css/previewMultiImage.css" rel="stylesheet">
+    <script src="~/custom/js/previewMultiImage.js"></script>
     @{
         var summernote = new DShop2024.Models.Summernote("#Description");
         @await Html.PartialAsync("_SummernotePartial", summernote);
@@ -168,6 +171,22 @@
     <script>
         $("#ImageUpload").change(function () {
             readURL(this);
+        });
+    </script>
+
+    <script>
+        $(".typing-price").on("keyup", function () {
+            var currency_input = $(this).val();
+            $("#price-convert").html(
+                new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' }).format(currency_input)
+            );
+
+         });
+        $(".typing-originalPrice").on("keyup", function () {
+            var currency_input = $(this).val();
+            $("#originalPrice-convert").html(
+                new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' }).format(currency_input)
+            );
         });
     </script>
 }

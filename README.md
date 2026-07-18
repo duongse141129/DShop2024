@@ -2,6 +2,25 @@
 
 A modern full-featured e-commerce web application built with **ASP.NET Core 8** using the **MVC architecture**. This project provides a complete online shopping platform with AI-powered features, real-time communication, secure online payments, inventory management, and an administration dashboard, ...
 
+> ## 🌐 **Live Website**
+> ### **https://dshopbackpack.io.vn/**
+>
+> 📺 **Demo Video:** https://www.youtube.com/watch?v=pq-UYhON1sw
+
+## 🔑 Demo Accounts
+
+### 👑 Admin
+- **Username:** `admin`
+- **Password:** `123asd`
+
+### 👨‍💼 Employee
+- **Username:** `Kane`
+- **Password:** `123asd`
+
+### 👤 Customer
+- **Username:** `Eric`
+- **Password:** `123asd`
+
 ## 🚀 Technologies
 
 - ASP.NET Core 8

@@ -231,32 +231,23 @@
 
     }
 
-
     var initProductQty = function () {
-
-        // Use Event Delegation to handle dynamic content (AJAX)
-        $(document).on('click', '.quantity-right-plus', function (e) {
-            e.preventDefault();
-            // Find the specific input relative to the clicked button
-            var $el_product = $(this).closest('.product-qty');
-            var $input = $el_product.find('.quantity-input');
-            var quantity = parseInt($input.val()) || 1;
-
-            $input.val(quantity + 1);
+        $(document).on("click", ".quantity-right-plus", function () {
+            const $input = $(this).closest(".add-quantity-productid-cart").find(".quantity-input");
+            $input.val((parseInt($input.val()) || 1) + 1);
         });
 
-        $(document).on('click', '.quantity-left-minus', function (e) {
-            e.preventDefault();
-            var $el_product = $(this).closest('.product-qty');
-            var $input = $el_product.find('.quantity-input');
-            var quantity = parseInt($input.val()) || 1;
+        $(document).on("click", ".quantity-left-minus", function () {
+            const $input = $(this).closest(".add-quantity-productid-cart").find(".quantity-input");
+
+            let quantity = parseInt($input.val()) || 1;
 
             if (quantity > 1) {
                 $input.val(quantity - 1);
             }
         });
-
     }
+
 
   // init jarallax parallax
   var initJarallax = function() {

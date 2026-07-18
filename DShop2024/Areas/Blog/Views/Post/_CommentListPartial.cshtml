@@ -1,9 +1,11 @@
 ﻿@model PostDetailViewModel
+<h3>Comments (@Model.PostDetail.CountComments)</h3>
+
 <div class="response-area">
 	<div class="media-list">
 		@foreach (var item in Model.ListComments)
 		{
-			@await Html.PartialAsync("_ViewCommentsItemPartial", item)
+			@await Html.PartialAsync("_CommentItemPartial", item)
 		}
 	</div>
 </div>

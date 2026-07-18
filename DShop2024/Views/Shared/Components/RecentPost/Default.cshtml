@@ -1,5 +1,5 @@
 ﻿@using DShop2024.Models.Blog
-@model IEnumerable<PostModel>
+@model IEnumerable<PostViewModel>
 
 
         <div class="row">
@@ -27,7 +27,7 @@
                             <div>
                                 Subject:
                                 <strong class="text-danger">
-                                    @string.Join(", ", item.PostSubjects.Select(pc => pc.Subject.Title))
+                                    @item.Subjects
                                 </strong>
                             </div>
                             <div class="post-header">
@@ -36,7 +36,20 @@
                                 </h3>
                                 <p>@item.ShortDescription</p>
                             </div>
-                            <a class="btn btn-info" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@item.Slug">Read more →</a>
+
+                             <div class="d-flex justify-content-between align-items-center mt-3">
+                                <a class="btn btn-info blog-readmore" asp-action="Detail" asp-controller="ViewPost" asp-area="Blog" asp-route-postslug="@item.Slug">Read more →</a>
+                                <div class="blog-stats">
+                                    <span class="like">
+                                        <i class="fas fa-thumbs-up"></i>@item.CountLikes
+                                    </span>
+
+                                    <span class="comment">
+                                        <i class="far fa-comment"></i>@item.CountComments
+                                    </span>
+                                </div>
+                            </div>
+
                         </div>
                     </article>
                 </div>

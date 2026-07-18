@@ -1,20 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace DShop2024.Repository
+namespace DShop2024.Repository 
 {
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method,AllowMultiple = false, Inherited = true)]
     public class SidebarMenuAttribute : ActionFilterAttribute
     {
         private readonly Enum _menu;
-        public SidebarMenuAttribute(object menu)
+        private readonly Enum? _subMenu;
+
+        public SidebarMenuAttribute(object menu, object? subMenu = null)
         {
-            if (menu is Enum enumValue)
+            if (menu is not Enum menuEnum)
+                throw new ArgumentException("menu must be an Enum");
+
+            _menu = menuEnum;
+
+            if (subMenu != null)
             {
-                _menu = enumValue;
-            }
-            else
-            {
-                throw new ArgumentException("Value must be an Enum");
+                if (subMenu is not Enum subMenuEnum)
+                    throw new ArgumentException("subMenu must be an Enum");
+
+                _subMenu = subMenuEnum;
             }
         }
 
@@ -23,7 +31,12 @@ namespace DShop2024.Repository
             if (context.Controller is Controller controller)
             {
                 controller.ViewBag.sidebar = _menu;
+                controller.ViewBag.subMenu = _subMenu;
             }
+
+            base.OnActionExecuting(context);
         }
     }
+
 }
+

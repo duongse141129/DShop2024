@@ -535,12 +535,12 @@ h1,h2,h3,h4,h5,h6 {
 }
 .product-tabs .nav-tabs .nav-link.active, 
 .product-tabs .nav-tabs .nav-item.show .nav-link {
-  /* border: none; */
+   border: none; 
   border-bottom: 3px solid var(--accent-color);
 }
 
-/* product-grid */
-/* .product-grid {
+/* product-grid 
+ .product-grid {
   gap: 25px;
 } */
 .product-item {

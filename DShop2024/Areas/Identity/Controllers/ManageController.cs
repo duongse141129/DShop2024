@@ -66,7 +66,10 @@ namespace DShop2024.Areas.Identity.Controllers
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation(3, "User changed their password successfully.");
-                    return RedirectToAction("EditProfile", "Manage");
+
+                    await _signInManager.SignOutAsync();
+                    TempData[DShopConst.TEMPDATA_SUCCESS] = "Password changed successfully. Please log in again.";
+                    return RedirectToAction("Login", "Account");
                 }
                 ModelState.AddModelError(result);
                 return View(model);

@@ -1,0 +1,90 @@
+﻿@using DShop2024.Areas.Admin.Models.Sale
+@model EditSaleRequest
+﻿@{
+    ViewData["Title"] = "Edit sale";
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title text-primary">@ViewData["Title"]</h5>
+    <button class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<form id="formData">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="modal-body">
+        <input type="hidden" asp-for="Id" />
+        <div class="row">
+            <div class="col-sm-12">
+                From <b>@Model.SaleStartDate.ToString("HH:mm MM-dd-yyyy") to @Model.SaleEndDate.ToString("HH:mm MM-dd-yyyy") </b>
+            </div>
+        </div>
+        <div class="d-flex flex-column align-items-start">
+            ID: @Model.Product.Id
+            <a asp-area="Admin" asp-action="Detail" asp-controller="ProductManage" asp-route-id="@Model.Product.Id">
+                @Model.Product.ProductName
+            </a>
+            <img src="~/media/products/@Model.Product.MainImage" width="125" height="150" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="SalePrice" class="form-label"></label>
+            <input class="form-control typing-price-sale" asp-for="SalePrice" />
+            <div id="price-sale-convert"></div>
+            <span asp-validation-for="SalePrice" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-warning">Edit</button>
+    </div>
+</form>
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+<script>
+    $("#formData").submit(function (e) {
+        e.preventDefault();
+
+        $.validator.unobtrusive.parse("#formData");
+
+        if (!$(this).valid()) {
+            return;
+        }
+
+        $.ajax({
+            method: "POST",
+            url: "@Url.Action("Edit", "Sale")",
+            data: $(this).serialize(),
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire(
+                                {
+                                      position: "top-end",
+                                      icon: "success",
+                                      title: result.message,
+                                      showConfirmButton: false,
+                                      timer: 500
+                                }
+                        ).then(function(){
+                                 location.reload();
+                        });
+                    } else {
+                            Swal.fire({
+                              icon: "error",
+                              title: "Oops...",
+                              text: result.message
+                            });
+                    }
+            }
+        });
+    });
+</script>
+<script>
+    $(".typing-price-sale").on("keyup", function () {
+        var currency_input = $(this).val();
+        $("#price-sale-convert").html(
+            new Intl.NumberFormat('vn-VN', { style: 'currency', currency: 'VND' }).format(currency_input)
+        );
+
+     });
+</script>
